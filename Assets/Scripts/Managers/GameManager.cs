@@ -1,20 +1,22 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
+using Singleton;
+using Unity.VisualScripting;
 
-public class GameManager : MonoBehaviour
+public class GameManager : SingletonBase<GameManager>
 {
-    public static GameManager Instance; // Singleton for easy access
 
     [Header("Data Config")]
     public BuildingData[] allBuildings;
+    public Tilemap buildingTilemap;
 
     // The "Brain": Maps a specific Tile asset to a Direction
     private Dictionary<TileBase, Vector3Int> tileDirectionMap = new Dictionary<TileBase, Vector3Int>();
 
-    void Awake()
+    protected override void Awake()
     {
-        Instance = this;
+        base.Awake();
         InitializeData();
     }
 
@@ -22,7 +24,7 @@ public class GameManager : MonoBehaviour
     {
         foreach (var building in allBuildings)
         {
-            if (building.isConveyor)
+            if (building.isConveyor || building.isMiner)
             {
                 // Map the 4 rotated tiles to their corresponding directions
                 tileDirectionMap.Add(building.rotatedTiles[0], new Vector3Int(1, 0, 0));  // Right
@@ -30,6 +32,18 @@ public class GameManager : MonoBehaviour
                 tileDirectionMap.Add(building.rotatedTiles[2], new Vector3Int(-1, 0, 0)); // Left
                 tileDirectionMap.Add(building.rotatedTiles[3], new Vector3Int(0, 1, 0));  // Up
             }
+        }
+    }
+    
+    public Vector3Int GetDirectionFromRotationIndex(int index)
+    {
+        switch (index)
+        {
+            case 0: return new Vector3Int(1, 0, 0);  // Right
+            case 1: return new Vector3Int(0, -1, 0); // Down
+            case 2: return new Vector3Int(-1, 0, 0); // Left
+            case 3: return new Vector3Int(0, 1, 0);  // Up
+            default: return Vector3Int.right;
         }
     }
 
@@ -41,4 +55,5 @@ public class GameManager : MonoBehaviour
         }
         return Vector3Int.zero;
     }
+    
 }

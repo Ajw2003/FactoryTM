@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -19,19 +20,34 @@ public class PlacementManager : MonoBehaviour
         Vector3Int cell = GetMouseCell();
         
         // Rotate (R)
-        if (Input.GetKeyDown(KeyCode.R)) rotationIndex = (rotationIndex + 1) % 4;
+        if (Input.GetKeyDown(KeyCode.R)) rotationIndex = (rotationIndex + 1) % 4;// set the rotation index i.e. right,left,up,down
 
         // Preview
         previewTilemap.ClearAllTiles();
         previewTilemap.SetTile(cell, activeBuilding.rotatedTiles[rotationIndex]);
 
         // Place
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButtonDown(0))
+        {
             mainTilemap.SetTile(cell, activeBuilding.rotatedTiles[rotationIndex]);
+            if (activeBuilding.isMiner)
+            {
+                SpawnMinerLogic(cell);
+            }
+        }
+            
 
         // Delete
         if (Input.GetMouseButton(1))
+        {
             mainTilemap.SetTile(cell, null);
+
+            if (activeMiners.ContainsKey(cell))
+            {
+                Destroy(activeMiners[cell]);
+                activeMiners.Remove(cell);
+            }
+        }
     }
 
     public void ChangeSelection(BuildingData newBuilding)
@@ -44,5 +60,20 @@ public class PlacementManager : MonoBehaviour
     {
         Vector3 p = cam.ScreenToWorldPoint(Input.mousePosition);
         return mainTilemap.WorldToCell(new Vector3(p.x, p.y, 0));
+    }
+    
+    private Dictionary<Vector3Int, GameObject> activeMiners = new Dictionary<Vector3Int, GameObject>();
+
+    void SpawnMinerLogic(Vector3Int cell)
+    {
+        // Create the logic object
+        GameObject logicObj = new GameObject("Miner_Logic_" + cell);
+        logicObj.transform.position = mainTilemap.GetCellCenterWorld(cell);
+    
+        MinerLogic logic = logicObj.AddComponent<MinerLogic>();
+        logic.Setup(activeBuilding, cell, rotationIndex);
+
+        // Store it so we can delete it later if needed
+        activeMiners.Add(cell, logicObj);
     }
 }

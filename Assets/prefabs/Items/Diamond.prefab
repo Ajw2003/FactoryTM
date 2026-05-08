@@ -104,5 +104,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c36fcc7e2ff611d4095342988c438ba5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Item
-  conveyorTilemap: {fileID: 0}
-  beltSpeed: 2
+  beltTilemap: {fileID: 0}
+  speed: 2

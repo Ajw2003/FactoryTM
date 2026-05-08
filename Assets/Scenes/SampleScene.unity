@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 179491996}
   - component: {fileID: 179491995}
   m_Layer: 0
-  m_Name: Conveyers
+  m_Name: buildings
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -806,6 +806,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   allBuildings:
   - {fileID: 11400000, guid: 2340c767c3cf7b24281b4d11689714bc, type: 2}
+  - {fileID: 11400000, guid: 879ba1482606309449b799396e84e593, type: 2}
+  buildingTilemap: {fileID: 179491996}
 --- !u!4 &1060339111
 Transform:
   m_ObjectHideFlags: 0
@@ -1562,71 +1564,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2123615668}
   m_CullTransparentMesh: 1
---- !u!1001 &3305842408255158627
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 4074567141104984735, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
-      propertyPath: m_Name
-      value: Diamond
-      objectReference: {fileID: 0}
-    - target: {fileID: 4283907683334531643, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -2.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 4283907683334531643, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4283907683334531643, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4283907683334531643, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4283907683334531643, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4283907683334531643, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4283907683334531643, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4283907683334531643, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4283907683334531643, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4283907683334531643, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4867573150971495621, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
-      propertyPath: beltTilemap
-      value: 
-      objectReference: {fileID: 179491996}
-    - target: {fileID: 4867573150971495621, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
-      propertyPath: conveyorTilemap
-      value: 
-      objectReference: {fileID: 179491996}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1634,7 +1571,6 @@ SceneRoots:
   - {fileID: 519420032}
   - {fileID: 619394802}
   - {fileID: 332912059}
-  - {fileID: 3305842408255158627}
   - {fileID: 1051283288}
   - {fileID: 1974396768}
   - {fileID: 480122188}
