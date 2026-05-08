@@ -1,3 +1,4 @@
+using Buildings;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -36,8 +37,5 @@ public class MinerLogic : MonoBehaviour
 
         // 2. Instantiate the item
         GameObject newItem = Instantiate(data.itemPrefab, spawnPos, Quaternion.identity);
-        
-        // 3. Tell the item which tilemap to use
-        newItem.GetComponent<ConveyorItem>().beltTilemap = GameManager.Instance.buildingTilemap;
     }
 }
