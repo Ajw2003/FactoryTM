@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Buildings;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -29,10 +30,22 @@ public class PlacementManager : MonoBehaviour
         // Place
         if (Input.GetMouseButtonDown(0))
         {
+            if(CurrencyManager.Instance.currentCurrencyValue < activeBuilding.cost)
+                Debug.Log("cost too high");
+            
             mainTilemap.SetTile(cell, activeBuilding.rotatedTiles[rotationIndex]);
-            if (activeBuilding.isMiner)
+            switch (activeBuilding.type)
             {
-                SpawnMinerLogic(cell);
+                case (BuildingType.Chest):
+                    break;
+                case (BuildingType.Conveyor):
+                    break;
+                case(BuildingType.Miner):
+                    SpawnMinerLogic(cell);
+                    break;
+                case (BuildingType.Seller):
+                    SpawnSellerLogic(cell);
+                    break;
             }
         }
             
@@ -67,13 +80,21 @@ public class PlacementManager : MonoBehaviour
     void SpawnMinerLogic(Vector3Int cell)
     {
         // Create the logic object
-        GameObject logicObj = new GameObject("Miner_Logic_" + cell);
-        logicObj.transform.position = mainTilemap.GetCellCenterWorld(cell);
+        GameObject MinerObj = new GameObject("Miner_Logic_" + cell);
+        MinerObj.transform.position = mainTilemap.GetCellCenterWorld(cell);
     
-        MinerLogic logic = logicObj.AddComponent<MinerLogic>();
+        MinerLogic logic = MinerObj.AddComponent<MinerLogic>();
         logic.Setup(activeBuilding, cell, rotationIndex);
 
         // Store it so we can delete it later if needed
-        activeMiners.Add(cell, logicObj);
+        activeMiners.Add(cell, MinerObj);
+    }
+
+    void SpawnSellerLogic(Vector3Int cell)
+    {
+        GameObject sellerObj = new GameObject("Seller_Logic_" + cell);
+        sellerObj.transform.position = mainTilemap.GetCellCenterWorld(cell);
+        Seller seller = sellerObj.AddComponent<Seller>();
+        
     }
 }

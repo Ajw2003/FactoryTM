@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
+using Buildings;
 using Singleton;
 using Unity.VisualScripting;
 
@@ -24,7 +25,7 @@ public class GameManager : SingletonBase<GameManager>
     {
         foreach (var building in allBuildings)
         {
-            if (building.isConveyor || building.isMiner)
+            if (building.type == BuildingType.Conveyor || building.type == BuildingType.Miner)
             {
                 // Map the 4 rotated tiles to their corresponding directions
                 tileDirectionMap.Add(building.rotatedTiles[0], new Vector3Int(1, 0, 0));  // Right

@@ -18,7 +18,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 57d166ac8e34e3e4ab5f62fe2562b7b3, type: 2}
   - {fileID: 11400000, guid: b0e2ee65c43c5594ebb1dce22050365a, type: 2}
   - {fileID: 11400000, guid: 6dcb9958f2ea9e049a92305649f61386, type: 2}
-  isConveyor: 0
-  isMiner: 1
   spawnInterval: 2
   itemPrefab: {fileID: 4074567141104984735, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
+  cost: 10
+  type: 1
