@@ -11,6 +11,7 @@ public class GameManager : SingletonBase<GameManager>
     [Header("Data Config")]
     public BuildingData[] allBuildings;
     public Tilemap buildingTilemap;
+    public TileBase sellerTile;
 
     // The "Brain": Maps a specific Tile asset to a Direction
     private Dictionary<TileBase, Vector3Int> tileDirectionMap = new Dictionary<TileBase, Vector3Int>();
@@ -34,6 +35,18 @@ public class GameManager : SingletonBase<GameManager>
                 tileDirectionMap.Add(building.rotatedTiles[3], new Vector3Int(0, 1, 0));  // Up
             }
         }
+    }
+
+    public bool IsSellerTile(TileBase tile)
+    {
+        return tile == sellerTile;
+    }
+
+    public void ProccessSale(GameObject item)
+    {
+        item.TryGetComponent(out ConveyorItem citem);
+        Destroy(item.gameObject);
+        CurrencyManager.Instance.AddCurrency(citem.value);
     }
     
     public Vector3Int GetDirectionFromRotationIndex(int index)

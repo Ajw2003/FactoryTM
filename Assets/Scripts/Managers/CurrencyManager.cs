@@ -7,7 +7,7 @@ public class CurrencyManager : SingletonBase<CurrencyManager>
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        UiManager.Instance.UpdateCurrency(currentCurrencyValue);
     }
 
     // Update is called once per frame

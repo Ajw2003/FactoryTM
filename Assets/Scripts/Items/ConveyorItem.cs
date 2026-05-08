@@ -1,4 +1,5 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -12,6 +13,13 @@ public class ConveyorItem : MonoBehaviour
     {
         Vector3Int currentCell = beltTilemap.WorldToCell(transform.position);
         TileBase tile = beltTilemap.GetTile(currentCell);
+
+        if (GameManager.Instance.IsSellerTile((tile)))
+        {
+            GameManager.Instance.ProccessSale(this.gameObject);
+            return;
+        }
+        
 
         // Ask the Manager for the direction
         Vector3Int moveDir = GameManager.Instance.GetDirectionFromTile(tile);
