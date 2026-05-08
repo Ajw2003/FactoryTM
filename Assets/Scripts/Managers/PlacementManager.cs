@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Buildings;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Tilemaps;
 
 public class PlacementManager : MonoBehaviour
@@ -20,6 +21,13 @@ public class PlacementManager : MonoBehaviour
 
         Vector3Int cell = GetMouseCell();
         
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            // If it is, clear the ghost preview and stop here
+            previewTilemap.ClearAllTiles();
+            return; 
+        }
+        
         // Rotate (R)
         if (Input.GetKeyDown(KeyCode.R)) rotationIndex = (rotationIndex + 1) % 4;// set the rotation index i.e. right,left,up,down
 
@@ -30,35 +38,42 @@ public class PlacementManager : MonoBehaviour
         // Place
         if (Input.GetMouseButtonDown(0))
         {
-            if(CurrencyManager.Instance.currentCurrencyValue < activeBuilding.cost)
-                Debug.Log("cost too high");
-            
-            mainTilemap.SetTile(cell, activeBuilding.rotatedTiles[rotationIndex]);
-            switch (activeBuilding.type)
+            if (CurrencyManager.Instance.currentCurrencyValue < activeBuilding.cost)
             {
-                case (BuildingType.Chest):
-                    break;
-                case (BuildingType.Conveyor):
-                    break;
-                case(BuildingType.Miner):
-                    SpawnMinerLogic(cell);
-                    break;
-                case (BuildingType.Seller):
-                    SpawnSellerLogic(cell);
-                    break;
+                Debug.Log("cost too high");
+                return;
+            }
+            else
+            {
+                mainTilemap.SetTile(cell, activeBuilding.rotatedTiles[rotationIndex]);
+                switch (activeBuilding.type)
+                {
+                    case (BuildingType.Chest):
+                        break;
+                    case (BuildingType.Conveyor):
+                        SpawnBeltLogic(cell);
+                        break;
+                    case(BuildingType.Miner):
+                        SpawnMinerLogic(cell);
+                        break;
+                    case (BuildingType.Seller):
+                        SpawnSellerLogic(cell);
+                        break;
+                }
+                CurrencyManager.Instance.RemoveCurrency(activeBuilding.cost);
             }
         }
             
 
         // Delete
-        if (Input.GetMouseButton(1))
+        if (Input.GetMouseButtonDown(1))
         {
-            mainTilemap.SetTile(cell, null);
-
-            if (activeMiners.ContainsKey(cell))
+            if (activeBuildings.ContainsKey(cell))
             {
-                Destroy(activeMiners[cell]);
-                activeMiners.Remove(cell);
+                mainTilemap.SetTile(cell, null);
+                Destroy(activeBuildings[cell]);
+                activeBuildings.Remove(cell);
+                CurrencyManager.Instance.AddCurrency(activeBuilding.cost);
             }
         }
     }
@@ -75,7 +90,7 @@ public class PlacementManager : MonoBehaviour
         return mainTilemap.WorldToCell(new Vector3(p.x, p.y, 0));
     }
     
-    private Dictionary<Vector3Int, GameObject> activeMiners = new Dictionary<Vector3Int, GameObject>();
+    private Dictionary<Vector3Int, GameObject> activeBuildings = new Dictionary<Vector3Int, GameObject>();
 
     void SpawnMinerLogic(Vector3Int cell)
     {
@@ -87,7 +102,7 @@ public class PlacementManager : MonoBehaviour
         logic.Setup(activeBuilding, cell, rotationIndex);
 
         // Store it so we can delete it later if needed
-        activeMiners.Add(cell, MinerObj);
+        activeBuildings.Add(cell, MinerObj);
     }
 
     void SpawnSellerLogic(Vector3Int cell)
@@ -95,6 +110,13 @@ public class PlacementManager : MonoBehaviour
         GameObject sellerObj = new GameObject("Seller_Logic_" + cell);
         sellerObj.transform.position = mainTilemap.GetCellCenterWorld(cell);
         Seller seller = sellerObj.AddComponent<Seller>();
-        
+        activeBuildings.Add(cell, sellerObj);
+    }
+
+    void SpawnBeltLogic(Vector3Int cell)
+    {
+        GameObject beltObj = new GameObject("Belt_Logic_" + cell);
+        beltObj.transform.position = mainTilemap.GetCellCenterWorld(cell);
+        activeBuildings.Add(cell, beltObj);
     }
 }
