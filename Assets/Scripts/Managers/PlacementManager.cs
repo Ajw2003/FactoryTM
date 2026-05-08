@@ -3,55 +3,46 @@ using UnityEngine.Tilemaps;
 
 public class PlacementManager : MonoBehaviour
 {
-    public Tilemap conveyorTilemap;
+    public Tilemap mainTilemap;
     public Tilemap previewTilemap;
     
-    [Header("Inventory")]
-    public BuildingData activeBuilding; 
-    private int currentRotationIndex = 0; // 0-3
-    
-    private Camera mainCam;
+    private BuildingData activeBuilding;
+    private int rotationIndex = 0;
+    private Camera cam;
 
-    void Start() => mainCam = Camera.main;
+    void Start() => cam = Camera.main;
 
     void Update()
     {
-        if (activeBuilding == null) {
-            previewTilemap.ClearAllTiles();
-            return;
-        }
+        if (activeBuilding == null) return;
 
-        Vector3Int mouseCell = GetMouseCell();
+        Vector3Int cell = GetMouseCell();
+        
+        // Rotate (R)
+        if (Input.GetKeyDown(KeyCode.R)) rotationIndex = (rotationIndex + 1) % 4;
 
-        // 1. Handle Rotation (R)
-        if (Input.GetKeyDown(KeyCode.R))
-            currentRotationIndex = (currentRotationIndex + 1) % 4;
-
-        // 2. Update Ghost Preview
+        // Preview
         previewTilemap.ClearAllTiles();
-        previewTilemap.SetTile(mouseCell, activeBuilding.rotatedTiles[currentRotationIndex]);
+        previewTilemap.SetTile(cell, activeBuilding.rotatedTiles[rotationIndex]);
 
-        // 3. Place Building
+        // Place
         if (Input.GetMouseButton(0))
-            conveyorTilemap.SetTile(mouseCell, activeBuilding.rotatedTiles[currentRotationIndex]);
+            mainTilemap.SetTile(cell, activeBuilding.rotatedTiles[rotationIndex]);
 
-        // 4. Delete Building
+        // Delete
         if (Input.GetMouseButton(1))
-            conveyorTilemap.SetTile(mouseCell, null);
+            mainTilemap.SetTile(cell, null);
     }
 
-    // Call this from your UI Buttons to change what you are building
-    public void SetActiveBuilding(BuildingData newData)
+    public void ChangeSelection(BuildingData newBuilding)
     {
-        activeBuilding = newData;
-        currentRotationIndex = 0;
+        activeBuilding = newBuilding;
+        rotationIndex = 0;
     }
 
     Vector3Int GetMouseCell()
     {
-        Vector3 mouseWorldPos = mainCam.ScreenToWorldPoint(Input.mousePosition);
-        Vector3Int cell = conveyorTilemap.WorldToCell(mouseWorldPos);
-        cell.z = 0;
-        return cell;
+        Vector3 p = cam.ScreenToWorldPoint(Input.mousePosition);
+        return mainTilemap.WorldToCell(new Vector3(p.x, p.y, 0));
     }
 }
