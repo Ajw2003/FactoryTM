@@ -8,6 +8,6 @@ public class InventoryUIItemButton : MonoBehaviour
     // Drag the specific BuildingData asset into the parameter slot
     public void SelectBuilding(BuildingData data)
     {
-        placementManager.SetActiveBuilding(data);
+        placementManager.ChangeSelection(data);
     }
 }
