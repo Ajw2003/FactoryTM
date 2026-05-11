@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8eb320c0288e4fd44bf86cba11711f91, type: 3}
+  m_Name: DiamondDef
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceNodeDefinition
+  minedItemPrefab: {fileID: 4074567141104984735, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
+  miningSpeed: 1
+  resourceNodePrefab: {fileID: 1405501195396039579, guid: 242f3d6c8d5b0974d9bfc503d0270f06, type: 3}
+  spawnWeight: 1
