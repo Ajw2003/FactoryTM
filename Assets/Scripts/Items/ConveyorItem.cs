@@ -1,47 +1,64 @@
-using System;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class ConveyorItem : MonoBehaviour
 {
-    public Tilemap beltTilemap;
-    public float speed = 2f;
-    public int value;
+    private Vector3 targetPosition;
+    private Vector3Int currentCell;
+    public float moveSpeed = 2f;
+    public float value = 10f;
 
-    void Update()
+    public bool IsMoving { get; private set; }
+    private bool isInitialized = false;
+
+    public void Initialize(Vector3Int startCell)
     {
-        Vector3Int currentCell = beltTilemap.WorldToCell(transform.position);
-        TileBase tile = beltTilemap.GetTile(currentCell);
-
-        if (GameManager.Instance.IsSellerTile((tile)))
-        {
-            GameManager.Instance.ProccessSale(this.gameObject);
-            return;
-        }
-        
-
-        // Ask the Manager for the direction
-        Vector3Int moveDir = GameManager.Instance.GetDirectionFromTile(tile);
-
-        if (moveDir != Vector3Int.zero)
-        {
-            Vector3 cellCenter = beltTilemap.GetCellCenterWorld(currentCell);// get center of cell placed on
-            Vector3 targetPos = beltTilemap.GetCellCenterWorld(currentCell + moveDir);// set move direction
-
-            // Move
-            transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);// actually move
-
-            // Auto-Centering logic
-            if (moveDir.x != 0) // Nudge Y to center
-                transform.position = new Vector3(transform.position.x, Mathf.MoveTowards(transform.position.y, cellCenter.y, speed * Time.deltaTime), 0);
-            else if (moveDir.y != 0) // Nudge X to center
-                transform.position = new Vector3(Mathf.MoveTowards(transform.position.x, cellCenter.x, speed * Time.deltaTime), transform.position.y, 0);
-        }
+        currentCell = startCell;
+        ItemTracker.Instance.RegisterItem(this, currentCell);
+        isInitialized = true;
     }
 
     private void Start()
     {
-        beltTilemap = GameManager.Instance.buildingTilemap;
+        if (!isInitialized)
+        {
+            currentCell = GameManager.Instance.buildingTilemap.WorldToCell(transform.position);
+            ItemTracker.Instance.RegisterItem(this, currentCell);
+            isInitialized = true;
+        }
+    }
+
+    private void Update()
+    {
+        if (IsMoving)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
+
+            if (Vector3.Distance(transform.position, targetPosition) < 0.001f)
+            {
+                transform.position = targetPosition;
+                IsMoving = false;
+            }
+        }
+    }
+
+    public void SetTarget(Vector3Int targetCell, float speed)
+    {
+        if (IsMoving) return;
+
+        Vector3Int oldCell = currentCell;
+        currentCell = targetCell;
+        ItemTracker.Instance.UpdateItemCell(this, oldCell, currentCell);
+
+        targetPosition = GameManager.Instance.buildingTilemap.GetCellCenterWorld(targetCell);
+        moveSpeed = speed;
+        IsMoving = true;
+    }
+
+    private void OnDestroy()
+    {
+        if (ItemTracker.Instance != null && isInitialized)
+        {
+            ItemTracker.Instance.UnregisterItem(this, currentCell);
+        }
     }
 }

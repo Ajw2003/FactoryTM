@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class CurrencyManager : SingletonBase<CurrencyManager>
 {
-    public int currentCurrencyValue;
+    public float currentCurrencyValue;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -16,13 +16,13 @@ public class CurrencyManager : SingletonBase<CurrencyManager>
         
     }
 
-    public void AddCurrency(int currencyValue)
+    public void AddCurrency(float currencyValue)
     {
         currentCurrencyValue += currencyValue;
         UiManager.Instance.UpdateCurrency(currentCurrencyValue);
     }
 
-    public void RemoveCurrency(int currencyValue)
+    public void RemoveCurrency(float currencyValue)
     {
         currentCurrencyValue -= currencyValue;
         UiManager.Instance.UpdateCurrency(currentCurrencyValue);
