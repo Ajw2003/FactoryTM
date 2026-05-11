@@ -6,7 +6,7 @@ public class UiManager : SingletonBase<UiManager>
 {
    public TMP_Text currentCurrency;
 
-   public void UpdateCurrency(int value)
+   public void UpdateCurrency(float value)
    {
       currentCurrency.text = value.ToString();
    }

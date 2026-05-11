@@ -2,30 +2,27 @@ using Buildings;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class MinerLogic : MonoBehaviour
+public class MinerLogic : BuildingLogic
 {
-    private BuildingData data;
-    private Vector3Int myCell;
     private Vector3Int exportDirection;
     private float timer;
 
-    public void Setup(BuildingData minerData, Vector3Int cell, int rotationIndex)
+    public void Setup(Buildings.BuildingData minerData, Vector3Int cell, int rotationIndex)
     {
-        data = minerData;
-        myCell = cell;
-        timer = data.spawnInterval;
+        base.Setup(minerData, cell);
+        timer = data.proccessingSpeed;
 
         // Use the same rotation logic as the conveyors!
         exportDirection = GameManager.Instance.GetDirectionFromRotationIndex(rotationIndex);
     }
 
-    void Update()
+    public override void PerformAction()
     {
         timer -= Time.deltaTime;
         if (timer <= 0)
         {
             SpawnItem();
-            timer = data.spawnInterval;
+            timer = data.proccessingSpeed;
         }
     }
 
@@ -37,5 +34,10 @@ public class MinerLogic : MonoBehaviour
 
         // 2. Instantiate the item
         GameObject newItem = Instantiate(data.itemPrefab, spawnPos, Quaternion.identity);
+        ConveyorItem itemComp = newItem.GetComponent<ConveyorItem>();
+        if (itemComp != null)
+        {
+            itemComp.Initialize(targetCell);
+        }
     }
 }
