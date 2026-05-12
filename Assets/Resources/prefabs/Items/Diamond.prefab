@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4867573150971495621}
   - component: {fileID: 5872557316613315578}
   m_Layer: 0
-  m_Name: Copper
+  m_Name: Diamond
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -79,12 +79,12 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1672937583
+  m_SortingLayer: 1
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
-  m_Color: {r: 1, g: 0.4247497, b: 0, a: 1}
+  m_Color: {r: 0, g: 0.86363745, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -105,8 +105,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c36fcc7e2ff611d4095342988c438ba5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Item
-  beltTilemap: {fileID: 0}
-  speed: 2
+  moveSpeed: 2
   value: 1
 --- !u!61 &5872557316613315578
 BoxCollider2D:

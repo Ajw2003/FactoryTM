@@ -19,7 +19,8 @@ namespace Buildings
         Chest,
         Miner,
         Seller,
-        Conveyor
+        Conveyor,
+        Furnace
     }
 }
 
