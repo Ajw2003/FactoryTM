@@ -67,6 +67,9 @@ public class PlacementManager : MonoBehaviour
                 case (BuildingType.Seller):
                     SpawnSellerLogic(cell);
                     break;
+                case (BuildingType.Furnace):
+                    SpawnFurnaceLogic(cell);   
+                    break;
             }
             CurrencyManager.Instance.RemoveCurrency(activeBuilding.cost);
         }
@@ -117,6 +120,15 @@ public class PlacementManager : MonoBehaviour
 
         // Store it so we can delete it later if needed
         activeBuildings.Add(cell, MinerObj);
+    }
+
+    void SpawnFurnaceLogic(Vector3Int cell)
+    {
+        GameObject FurnaceObj = new GameObject("Furnace_Logic_" + cell);
+        FurnaceObj.transform.position = mainTilemap.GetCellCenterWorld(cell);
+        Furnace furnace = FurnaceObj.AddComponent<Furnace>();
+        furnace.Setup(activeBuilding, cell);
+        activeBuildings.Add(cell, FurnaceObj);
     }
 
     void SpawnSellerLogic(Vector3Int cell)

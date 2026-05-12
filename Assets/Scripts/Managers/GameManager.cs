@@ -3,7 +3,7 @@ using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 using Buildings;
 using Singleton;
-using Unity.VisualScripting; // This might not be needed anymore, check later
+// using Unity.VisualScripting; // This might not be needed anymore, check later
 
 public class GameManager : SingletonBase<GameManager>
 {
@@ -20,6 +20,9 @@ public class GameManager : SingletonBase<GameManager>
     [Range(0f, 1f)]
     public float patchSpawnChance = 0.05f; // Chance for a patch to start at a given cell
 
+    // This list will store the ConveyorItem components of the plate prefabs
+    public List<ConveyorItem> Plates; 
+
     // The "Brain": Maps a specific Tile asset to a Direction
     private Dictionary<TileBase, Vector3Int> tileDirectionMap = new Dictionary<TileBase, Vector3Int>();
 
@@ -32,6 +35,42 @@ public class GameManager : SingletonBase<GameManager>
     void Start()
     {
         SpawnResourceNodes();
+        
+        // --- NEW LOGIC FOR POPULATING PLATES LIST ---
+        Plates = new List<ConveyorItem>();
+        if (AssetScanner.Instance != null)
+        {
+            // Load all ConveyorItems from the "prefabs/Items" Resources folder
+            List<ConveyorItem> allConveyorItems = AssetScanner.Instance.GetAllConveyorItemsInResources("prefabs/Items");
+
+            // Filter for items that end with "Plate"
+            foreach (ConveyorItem item in allConveyorItems)
+            {
+                if (item != null && item.gameObject != null && item.gameObject.name.EndsWith("Plate"))
+                {
+                    Plates.Add(item);
+                }
+            }
+        }
+        else
+        {
+            Debug.LogError("AssetScanner.Instance is null. Cannot populate Plates list.");
+        }
+        // --- END NEW LOGIC ---
+
+        // Add a debug log to show what's in the Plates list after initialization
+        Debug.Log($"GameManager: Plates list initialized with {Plates.Count} items.");
+        foreach (var plateItem in Plates)
+        {
+            if (plateItem != null && plateItem.gameObject != null)
+            {
+                Debug.Log($"GameManager: Plate in list: {plateItem.gameObject.name}");
+            }
+            else
+            {
+                Debug.LogWarning("GameManager: Null or invalid plate item found in Plates list.");
+            }
+        }
     }
 
     void InitializeData()
@@ -59,6 +98,63 @@ public class GameManager : SingletonBase<GameManager>
         item.TryGetComponent(out ConveyorItem citem);
         Destroy(item.gameObject);
         CurrencyManager.Instance.AddCurrency(citem.value);
+    }
+    
+    public static string GetPrefix(string originalID)
+    {
+        // Remove "(Clone)" suffix if present
+        if (originalID.EndsWith("(Clone)"))
+        {
+            originalID = originalID.Substring(0, originalID.Length - "(Clone)".Length);
+        }
+
+        // Find the first underscore to get the base prefix
+        int underscoreIndex = originalID.IndexOf('_');
+        if (underscoreIndex != -1)
+        {
+            return originalID.Substring(0, underscoreIndex); // "Iron_Ore" becomes "Iron"
+        }
+        return originalID; // If no underscore, the whole name is the prefix
+    }
+    
+    // Refactored to use the pre-loaded Plates list
+    public static GameObject FindPlatePrefabWithPrefix(string prefix)
+    {
+        Debug.Log($"GameManager: Searching for plate prefab with prefix: '{prefix}'");
+
+        if (Instance == null || Instance.Plates == null)
+        {
+            Debug.LogError("GameManager or its Plates list is not initialized.");
+            return null;
+        }
+
+        if (Instance.Plates.Count == 0)
+        {
+            Debug.LogWarning("GameManager: Plates list is empty. No plate prefabs to search.");
+            return null;
+        }
+
+        foreach (ConveyorItem plateConveyorItem in Instance.Plates)
+        {
+            if (plateConveyorItem == null || plateConveyorItem.gameObject == null)
+            {
+                Debug.LogWarning("GameManager: Found null or invalid plate item in Plates list during search.");
+                continue;
+            }
+
+            string plateName = plateConveyorItem.gameObject.name;
+            bool startsWithPrefix = plateName.StartsWith(prefix);
+            bool endsWithPlate = plateName.EndsWith("Plate");
+
+            Debug.Log($"GameManager: Checking plate '{plateName}' (Starts with '{prefix}': {startsWithPrefix}, Ends with 'Plate': {endsWithPlate})");
+
+            if (startsWithPrefix && endsWithPlate)
+            {
+                return plateConveyorItem.gameObject;
+            }
+        }
+        Debug.Log($"GameManager: No plate prefab found for prefix '{prefix}'.");
+        return null;
     }
     
     public Vector3Int GetDirectionFromRotationIndex(int index)
