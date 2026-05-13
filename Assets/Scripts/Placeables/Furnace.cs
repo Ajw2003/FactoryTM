@@ -18,20 +18,20 @@ public class Furnace : BuildingLogic
         Debug.Log($"Furnace Setup at {myCell}: Initial exportDirection set to {exportDirection}");
     }
 
+    private ResourceType lastProcessedResourceType = (ResourceType)(-1);
+    private HashSet<ConveyorItem> itemsInProcess = new HashSet<ConveyorItem>();
+
     public override void PerformAction()
     {
-        
         List<ConveyorItem> items = ItemTracker.Instance.GetItemsInCell(myCell);
         if (items != null)
         {
             for (int i = items.Count - 1; i >= 0; i--)
             {
-                StartCoroutine(ProccessItem(items[i]));
-                
-                timer -= Time.deltaTime;
-                if (timer <= 0)
+                ConveyorItem item = items[i];
+                if (!itemsInProcess.Contains(item))
                 {
-                    timer = currentCookingSpeed; // Reset timer with the node's speed
+                    StartCoroutine(ProccessItem(item));
                 }
             }
         }
@@ -39,29 +39,43 @@ public class Furnace : BuildingLogic
     
     public IEnumerator ProccessItem(ConveyorItem item)
     {
+        itemsInProcess.Add(item);
         yield return new WaitForSeconds(currentCookingSpeed);
+        
         if (item == null)
         {
+            itemsInProcess.Remove(null);
             yield break;
         }
-        if ( item.resourceType != platePrefab.resourceType && platePrefab != null )
+
+        // Only find the plate prefab if it's null or the resource type changed
+        if (platePrefab == null || item.resourceType != lastProcessedResourceType)
         {
-            string originalItemName = item.name;
-            string prefix = GameManager.GetPrefix(originalItemName);
+            string prefix = GameManager.GetPrefix(item.name);
 
-            Debug.Log($"Furnace: Processing item '{originalItemName}'. Extracted prefix: '{prefix}'");
+            Debug.Log($"Furnace: Finding new plate prefab for '{item.name}' (prefix: '{prefix}')");
 
-            platePrefab = GameManager.FindPlatePrefabWithPrefix(prefix);
-            if (platePrefab is null) yield break;
-            Debug.Log($"Furnace: Found plate prefab for prefix '{prefix}': {(platePrefab != null ? platePrefab.name : "NULL")}"); 
+            ConveyorItem prefabGo = GameManager.FindPlatePrefabWithPrefix(prefix);
+            if (prefabGo != null)
+            {
+                platePrefab = prefabGo.GetComponent<ConveyorItem>();
+                lastProcessedResourceType = item.resourceType;
+            }
+            else
+            {
+                Debug.LogWarning($"Furnace: Could not find plate prefab for prefix '{prefix}'");
+                itemsInProcess.Remove(item);
+                yield break;
+            }
+        }
+
+        if (platePrefab != null)
+        {
             CookItem(platePrefab);
             Destroy(item.gameObject);
         }
-        else
-        {
-            CookItem(platePrefab);
-            Destroy(item.gameObject); 
-        }
+        
+        itemsInProcess.Remove(item);
     }
 
     void CookItem(ConveyorItem CookedItemToRecive)
@@ -74,11 +88,9 @@ public class Furnace : BuildingLogic
         currentItemPrefab = CookedItemToRecive;
 
         // Log values before calculation
-        Debug.Log($"Furnace CookItem at {myCell}: Current exportDirection: {exportDirection}");
 
         // 1. Calculate the neighbor cell in front of the furnace
         Vector3Int targetCell = myCell + exportDirection;
-        Debug.Log($"Furnace CookItem at {myCell}: Calculated targetCell: {targetCell}");
 
         Vector3 spawnPos = GameManager.Instance.buildingTilemap.GetCellCenterWorld(targetCell);
 
