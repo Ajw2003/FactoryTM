@@ -118,7 +118,7 @@ public class GameManager : SingletonBase<GameManager>
     }
     
     // Refactored to use the pre-loaded Plates list
-    public static GameObject FindPlatePrefabWithPrefix(string prefix)
+    public static ConveyorItem FindPlatePrefabWithPrefix(string prefix)
     {
         Debug.Log($"GameManager: Searching for plate prefab with prefix: '{prefix}'");
 
@@ -150,7 +150,7 @@ public class GameManager : SingletonBase<GameManager>
 
             if (startsWithPrefix && endsWithPlate)
             {
-                return plateConveyorItem.gameObject;
+                return plateConveyorItem;
             }
         }
         Debug.Log($"GameManager: No plate prefab found for prefix '{prefix}'.");

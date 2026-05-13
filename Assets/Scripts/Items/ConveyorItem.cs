@@ -1,11 +1,22 @@
 using UnityEngine;
 
+public enum ResourceType
+{
+    Copper,
+    Ston,
+    Iron,
+    Diamond,
+    Coal
+    
+}
+
 public class ConveyorItem : MonoBehaviour
 {
     private Vector3 targetPosition;
     private Vector3Int currentCell;
     public float moveSpeed = 2f;
     public float value = 10f;
+    public ResourceType resourceType;
 
     public bool IsMoving { get; private set; }
     private bool isInitialized = false;
