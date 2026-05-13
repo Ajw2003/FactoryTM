@@ -1,0 +1,139 @@
+using UnityEngine;
+using System.Collections.Generic;
+using Singleton;
+
+public class ZoneManager : SingletonBase<ZoneManager>
+{
+    [Header("Settings")]
+    public Vector2Int zoneSizeInTiles = new Vector2Int(20, 10);
+    public float initialUnlockCost = 100f;
+    public float costIncreasePerZone = 50f;
+
+    [Header("References")]
+    public Camera mainCamera;
+
+    private HashSet<Vector2Int> unlockedZones = new HashSet<Vector2Int>();
+    private Vector2Int currentZone = Vector2Int.zero;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        unlockedZones.Add(Vector2Int.zero);
+    }
+
+    void Start()
+    {
+        if (mainCamera == null) mainCamera = Camera.main;
+
+        if (zoneSizeInTiles.x <= 0 || zoneSizeInTiles.y <= 0)
+        {
+            if (mainCamera.orthographic)
+            {
+                float height = 2f * mainCamera.orthographicSize;
+                float width = height * mainCamera.aspect;
+                zoneSizeInTiles = new Vector2Int(Mathf.RoundToInt(width), Mathf.RoundToInt(height));
+            }
+            else
+            {
+                // Fallback default
+                zoneSizeInTiles = new Vector2Int(20, 10);
+            }
+        }
+        
+        UpdateCameraPosition(false);
+    }
+
+    public bool IsZoneUnlocked(Vector2Int zoneCoords)
+    {
+        return unlockedZones.Contains(zoneCoords);
+    }
+
+    public bool IsTileInsideUnlockedZone(Vector3Int cell)
+    {
+        Vector2Int zoneCoords = GetZoneCoordsFromTile(cell);
+        return unlockedZones.Contains(zoneCoords);
+    }
+
+    public Vector2Int GetZoneCoordsFromTile(Vector3Int cell)
+    {
+        int x = Mathf.FloorToInt((float)cell.x / zoneSizeInTiles.x);
+        int y = Mathf.FloorToInt((float)cell.y / zoneSizeInTiles.y);
+        return new Vector2Int(x, y);
+    }
+
+    public void Navigate(Vector2Int direction)
+    {
+        Vector2Int targetZone = currentZone + direction;
+        
+        if (unlockedZones.Contains(targetZone))
+        {
+            currentZone = targetZone;
+            UpdateCameraPosition(true);
+        }
+        else
+        {
+            float cost = GetUnlockCost();
+            if (CurrencyManager.Instance.currentCurrencyValue >= cost)
+            {
+                CurrencyManager.Instance.RemoveCurrency(cost);
+                unlockedZones.Add(targetZone);
+                currentZone = targetZone;
+                UpdateCameraPosition(true);
+            }
+            else
+            {
+                Debug.Log("Not enough currency to unlock zone! Cost: " + cost);
+            }
+        }
+    }
+
+    public float GetUnlockCost()
+    {
+        // Simple cost scaling: base + (unlocked_count - 1) * increase
+        return initialUnlockCost + (unlockedZones.Count - 1) * costIncreasePerZone;
+    }
+
+    public Vector2Int GetCurrentZone() => currentZone;
+
+    private void UpdateCameraPosition(bool smooth)
+    {
+        // Center of the zone in world units. 
+        // Assuming 1 unit = 1 tile, and center of tile (0,0) is at (0.5, 0.5)? 
+        // Tilemap usually has (0,0) as the bottom-left of the tile at 0,0.
+        // So zone (0,0) covers tiles [0, zoneSize.x) and [0, zoneSize.y).
+        // Center is (zoneSize.x / 2, zoneSize.y / 2).
+        
+        Vector3 targetPos = new Vector3(
+            (currentZone.x * zoneSizeInTiles.x) + (zoneSizeInTiles.x / 2f),
+            (currentZone.y * zoneSizeInTiles.y) + (zoneSizeInTiles.y / 2f),
+            mainCamera.transform.position.z
+        );
+
+        if (smooth)
+        {
+            // For now just teleport, or we can use a Coroutine for smooth panning.
+            // Let's implement a simple smooth pan if possible.
+            StopAllCoroutines();
+            StartCoroutine(SmoothPan(targetPos));
+        }
+        else
+        {
+            mainCamera.transform.position = targetPos;
+        }
+    }
+
+    private System.Collections.IEnumerator SmoothPan(Vector3 targetPos)
+    {
+        float duration = 0.5f;
+        float elapsed = 0;
+        Vector3 startPos = mainCamera.transform.position;
+
+        while (elapsed < duration)
+        {
+            mainCamera.transform.position = Vector3.Lerp(startPos, targetPos, elapsed / duration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        mainCamera.transform.position = targetPos;
+    }
+}

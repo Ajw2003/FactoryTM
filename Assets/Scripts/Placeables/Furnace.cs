@@ -6,14 +6,13 @@ public class Furnace : BuildingLogic
 {
     private Vector3Int exportDirection;
     private float timer;
-    private GameObject currentItemPrefab;
-    private GameObject platePrefab;
+    private ConveyorItem currentItemPrefab;
+    private ConveyorItem platePrefab;
     private float currentCookingSpeed;
     
     public void Setup(Buildings.BuildingData furnace, Vector3Int cell, int rotationIndex, float speed)
     {
         base.Setup(furnace, cell);
-        
         exportDirection = GameManager.Instance.GetDirectionFromRotationIndex(rotationIndex);
         currentCookingSpeed = speed;
         Debug.Log($"Furnace Setup at {myCell}: Initial exportDirection set to {exportDirection}");
@@ -27,7 +26,7 @@ public class Furnace : BuildingLogic
         {
             for (int i = items.Count - 1; i >= 0; i--)
             {
-                StartCoroutine(ProccessItem(items[i].gameObject));
+                StartCoroutine(ProccessItem(items[i]));
                 
                 timer -= Time.deltaTime;
                 if (timer <= 0)
@@ -38,14 +37,14 @@ public class Furnace : BuildingLogic
         }
     }
     
-    public IEnumerator ProccessItem(GameObject item)
+    public IEnumerator ProccessItem(ConveyorItem item)
     {
         yield return new WaitForSeconds(currentCookingSpeed);
         if (item == null)
         {
             yield break;
         }
-        if (item != currentItemPrefab)
+        if ( item.resourceType != platePrefab.resourceType && platePrefab != null )
         {
             string originalItemName = item.name;
             string prefix = GameManager.GetPrefix(originalItemName);
@@ -65,7 +64,7 @@ public class Furnace : BuildingLogic
         }
     }
 
-    void CookItem(GameObject CookedItemToRecive)
+    void CookItem(ConveyorItem CookedItemToRecive)
     {
         if (CookedItemToRecive == null)
         {
@@ -84,7 +83,7 @@ public class Furnace : BuildingLogic
         Vector3 spawnPos = GameManager.Instance.buildingTilemap.GetCellCenterWorld(targetCell);
 
         // 2. Instantiate the item
-        GameObject newItem = Instantiate(currentItemPrefab, spawnPos, Quaternion.identity);
+        GameObject newItem = Instantiate(currentItemPrefab.gameObject, spawnPos, Quaternion.identity);
         ConveyorItem itemComp = newItem.GetComponent<ConveyorItem>();
         if (itemComp != null)
         {

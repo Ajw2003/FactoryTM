@@ -33,11 +33,20 @@ public class PlacementManager : MonoBehaviour
 
         // Preview
         previewTilemap.ClearAllTiles();
-        previewTilemap.SetTile(cell, activeBuilding.rotatedTiles[rotationIndex]);
+        if (ZoneManager.Instance.IsTileInsideUnlockedZone(cell))
+        {
+            previewTilemap.SetTile(cell, activeBuilding.rotatedTiles[rotationIndex]);
+        }
 
         // Place
         if (Input.GetMouseButtonDown(0))
         {
+            if (!ZoneManager.Instance.IsTileInsideUnlockedZone(cell))
+            {
+                Debug.Log("Cannot place outside unlocked zone!");
+                return;
+            }
+
             if (CurrencyManager.Instance.currentCurrencyValue < activeBuilding.cost)
             {
                 Debug.Log("cost too high");
