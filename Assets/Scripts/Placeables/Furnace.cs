@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,11 +10,13 @@ public class Furnace : BuildingLogic
     private GameObject platePrefab;
     private float currentCookingSpeed;
     
-    public void Setup(Buildings.BuildingData furnace, Vector3Int cell, int rotationIndex)
+    public void Setup(Buildings.BuildingData furnace, Vector3Int cell, int rotationIndex, float speed)
     {
         base.Setup(furnace, cell);
         
         exportDirection = GameManager.Instance.GetDirectionFromRotationIndex(rotationIndex);
+        currentCookingSpeed = speed;
+        Debug.Log($"Furnace Setup at {myCell}: Initial exportDirection set to {exportDirection}");
     }
 
     public override void PerformAction()
@@ -24,34 +27,33 @@ public class Furnace : BuildingLogic
         {
             for (int i = items.Count - 1; i >= 0; i--)
             {
-                ProccessItem(items[i].gameObject);
+                StartCoroutine(ProccessItem(items[i].gameObject));
                 
                 timer -= Time.deltaTime;
                 if (timer <= 0)
                 {
-            
                     timer = currentCookingSpeed; // Reset timer with the node's speed
                 }
             }
         }
     }
     
-    public void ProccessItem(GameObject item)
+    public IEnumerator ProccessItem(GameObject item)
     {
-        if(item == null) return;
-        item.TryGetComponent(out ConveyorItem citem);
+        yield return new WaitForSeconds(currentCookingSpeed);
+        if (item == null)
+        {
+            yield break;
+        }
         if (item != currentItemPrefab)
         {
-            // Debug.Log("ahhh"); // Removed redundant log
-        
             string originalItemName = item.name;
-            // Use GameManager.GetPrefix to handle "(Clone)" and other suffixes
             string prefix = GameManager.GetPrefix(originalItemName);
 
             Debug.Log($"Furnace: Processing item '{originalItemName}'. Extracted prefix: '{prefix}'");
 
-            // 2. Use the prefix scan function to find the corresponding Plate prefab
             platePrefab = GameManager.FindPlatePrefabWithPrefix(prefix);
+            if (platePrefab is null) yield break;
             Debug.Log($"Furnace: Found plate prefab for prefix '{prefix}': {(platePrefab != null ? platePrefab.name : "NULL")}"); 
             CookItem(platePrefab);
             Destroy(item.gameObject);
@@ -61,18 +63,24 @@ public class Furnace : BuildingLogic
             CookItem(platePrefab);
             Destroy(item.gameObject); 
         }
-        
-       
-        
-        
     }
 
-    void CookItem(GameObject itemToCook)
+    void CookItem(GameObject CookedItemToRecive)
     {
-        if(itemToCook == null) return;
-        currentItemPrefab = itemToCook;
-        //1. calculate direction
+        if (CookedItemToRecive == null)
+        {
+            Debug.LogError($"Furnace at {myCell} has no item to cook!"); // Changed from Miner to Furnace
+            return;
+        }
+        currentItemPrefab = CookedItemToRecive;
+
+        // Log values before calculation
+        Debug.Log($"Furnace CookItem at {myCell}: Current exportDirection: {exportDirection}");
+
+        // 1. Calculate the neighbor cell in front of the furnace
         Vector3Int targetCell = myCell + exportDirection;
+        Debug.Log($"Furnace CookItem at {myCell}: Calculated targetCell: {targetCell}");
+
         Vector3 spawnPos = GameManager.Instance.buildingTilemap.GetCellCenterWorld(targetCell);
 
         // 2. Instantiate the item

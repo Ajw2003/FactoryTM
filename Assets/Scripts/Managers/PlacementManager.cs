@@ -127,7 +127,7 @@ public class PlacementManager : MonoBehaviour
         GameObject FurnaceObj = new GameObject("Furnace_Logic_" + cell);
         FurnaceObj.transform.position = mainTilemap.GetCellCenterWorld(cell);
         Furnace furnace = FurnaceObj.AddComponent<Furnace>();
-        furnace.Setup(activeBuilding, cell);
+        furnace.Setup(activeBuilding, cell, rotationIndex, activeBuilding.proccessingSpeed);
         activeBuildings.Add(cell, FurnaceObj);
     }
 

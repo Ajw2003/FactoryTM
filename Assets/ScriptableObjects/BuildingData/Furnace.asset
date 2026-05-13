@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Buildings.BuildingData
   buildingName: Furnace
   rotatedTiles:
-  - {fileID: 11400000, guid: 6b5abc2fac7398443a7f807d06b990bb, type: 2}
+  - {fileID: 11400000, guid: 15e12beb3bc9e7f48b20c0ec8c71ab7c, type: 2}
   - {fileID: 11400000, guid: 6b5abc2fac7398443a7f807d06b990bb, type: 2}
   - {fileID: 11400000, guid: 92d8bd52ff4f26c47bea74ae6c6a61b6, type: 2}
   - {fileID: 11400000, guid: 7061e073f1e22104ab7a20ad5ae601a0, type: 2}
-  proccessingSpeed: 2
+  proccessingSpeed: 3
   itemPrefab: {fileID: 0}
   cost: 10
   type: 4
