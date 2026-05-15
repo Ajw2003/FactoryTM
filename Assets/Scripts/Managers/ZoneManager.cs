@@ -96,24 +96,20 @@ public class ZoneManager : SingletonBase<ZoneManager>
 
     public Vector2Int GetCurrentZone() => currentZone;
 
+    [Header("Camera Control")]
+    public AnimationCurve panCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    public float panDuration = 0.5f;
+
     private void UpdateCameraPosition(bool smooth)
     {
-        // Center of the zone in world units. 
-        // Assuming 1 unit = 1 tile, and center of tile (0,0) is at (0.5, 0.5)? 
-        // Tilemap usually has (0,0) as the bottom-left of the tile at 0,0.
-        // So zone (0,0) covers tiles [0, zoneSize.x) and [0, zoneSize.y).
-        // Center is (zoneSize.x / 2, zoneSize.y / 2).
+        // Calculate the world position of the center of the target zone
+        float centerX = (currentZone.x * zoneSizeInTiles.x) + (zoneSizeInTiles.x / 2f);
+        float centerY = (currentZone.y * zoneSizeInTiles.y) + (zoneSizeInTiles.y / 2f);
         
-        Vector3 targetPos = new Vector3(
-            (currentZone.x * zoneSizeInTiles.x) + (zoneSizeInTiles.x / 2f),
-            (currentZone.y * zoneSizeInTiles.y) + (zoneSizeInTiles.y / 2f),
-            mainCamera.transform.position.z
-        );
+        Vector3 targetPos = new Vector3(centerX, centerY, mainCamera.transform.position.z);
 
         if (smooth)
         {
-            // For now just teleport, or we can use a Coroutine for smooth panning.
-            // Let's implement a simple smooth pan if possible.
             StopAllCoroutines();
             StartCoroutine(SmoothPan(targetPos));
         }
@@ -125,13 +121,16 @@ public class ZoneManager : SingletonBase<ZoneManager>
 
     private System.Collections.IEnumerator SmoothPan(Vector3 targetPos)
     {
-        float duration = 0.5f;
         float elapsed = 0;
         Vector3 startPos = mainCamera.transform.position;
 
-        while (elapsed < duration)
+        while (elapsed < panDuration)
         {
-            mainCamera.transform.position = Vector3.Lerp(startPos, targetPos, elapsed / duration);
+            float t = elapsed / panDuration;
+            // Use the curve for better acceleration/deceleration
+            float easedT = panCurve.Evaluate(t);
+            
+            mainCamera.transform.position = Vector3.Lerp(startPos, targetPos, easedT);
             elapsed += Time.deltaTime;
             yield return null;
         }
