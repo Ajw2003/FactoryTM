@@ -6,7 +6,10 @@ public enum ResourceType
     Ston,
     Iron,
     Diamond,
-    Coal
+    Coal,
+    Titanium,
+    Uranium,
+    Quartz
     
 }
 

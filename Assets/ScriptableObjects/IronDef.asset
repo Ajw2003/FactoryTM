@@ -15,4 +15,4 @@ MonoBehaviour:
   minedItemPrefab: {fileID: 4074567141104984735, guid: 422828d1736f7a448883c3863bcd8ae4, type: 3}
   miningSpeed: 1
   resourceNodePrefab: {fileID: 7168288065874615922, guid: a3232a6ec8fd9b14cae816ded1785821, type: 3}
-  spawnWeight: 1
+  spawnWeight: 0.5
