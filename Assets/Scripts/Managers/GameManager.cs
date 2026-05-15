@@ -73,7 +73,7 @@ public class GameManager : SingletonBase<GameManager>
         }
     }
 
-    void InitializeData()
+    void InitializeData()//bad code fix later
     {
         foreach (var building in allBuildings)
         {
@@ -88,7 +88,7 @@ public class GameManager : SingletonBase<GameManager>
         }
     }
 
-    public bool IsSellerTile(TileBase tile)
+    public bool IsSellerTile(TileBase tile)//bad code fix later
     {
         return tile == sellerTile;
     }
@@ -187,7 +187,7 @@ public class GameManager : SingletonBase<GameManager>
         }
 
         // Calculate total spawn weight
-        int totalWeight = 0;
+        float totalWeight = 0;
         foreach (var def in resourceNodeDefinitions)
         {
             totalWeight += def.spawnWeight;
@@ -226,10 +226,10 @@ public class GameManager : SingletonBase<GameManager>
         }
     }
 
-    private ResourceNodeDefinition GetRandomResourceNodeDefinition(int totalWeight)
+    private ResourceNodeDefinition GetRandomResourceNodeDefinition(float totalWeight)
     {
-        int randomWeight = Random.Range(0, totalWeight);
-        int currentWeight = 0;
+        float randomWeight = Random.Range(0, totalWeight);
+        float currentWeight = 0;
 
         foreach (var def in resourceNodeDefinitions)
         {
