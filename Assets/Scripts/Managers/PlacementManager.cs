@@ -129,6 +129,12 @@ public class PlacementManager : MonoBehaviour
 
         // Store it so we can delete it later if needed
         activeBuildings.Add(cell, MinerObj);
+        
+        // Assign to worker
+        if (NpcManager.Instance != null)
+        {
+            NpcManager.Instance.AssignBuildingToWorker(logic);
+        }
     }
 
     void SpawnFurnaceLogic(Vector3Int cell)
@@ -138,6 +144,11 @@ public class PlacementManager : MonoBehaviour
         Furnace furnace = FurnaceObj.AddComponent<Furnace>();
         furnace.Setup(activeBuilding, cell, rotationIndex, activeBuilding.proccessingSpeed);
         activeBuildings.Add(cell, FurnaceObj);
+
+        if (NpcManager.Instance != null)
+        {
+            NpcManager.Instance.AssignBuildingToWorker(furnace);
+        }
     }
 
     void SpawnSellerLogic(Vector3Int cell)
@@ -147,6 +158,11 @@ public class PlacementManager : MonoBehaviour
         Seller seller = sellerObj.AddComponent<Seller>();
         seller.Setup(activeBuilding, cell);
         activeBuildings.Add(cell, sellerObj);
+
+        if (NpcManager.Instance != null)
+        {
+            NpcManager.Instance.AssignBuildingToWorker(seller);
+        }
     }
 
     void SpawnBeltLogic(Vector3Int cell)

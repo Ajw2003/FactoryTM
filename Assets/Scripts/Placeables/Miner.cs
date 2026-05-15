@@ -39,9 +39,9 @@ public class MinerLogic : BuildingLogic
 
     public override void PerformAction()
     {
-        if (!enabled) return; // Ensure miner is enabled
+        if (!enabled || !IsBeingWorked) return; // Ensure miner is enabled and worked by NPC
 
-        timer -= Time.deltaTime;
+        timer -= Time.deltaTime * EfficiencyMultiplier;
         if (timer <= 0)
         {
             SpawnItem();

@@ -10,6 +10,8 @@ public class Seller : BuildingLogic
 
     public override void PerformAction()
     {
+        if (!IsBeingWorked) return;
+
         List<ConveyorItem> items = ItemTracker.Instance.GetItemsInCell(myCell);
         if (items != null)
         {

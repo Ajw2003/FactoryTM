@@ -23,6 +23,8 @@ public class Furnace : BuildingLogic
 
     public override void PerformAction()
     {
+        if (!IsBeingWorked) return;
+
         List<ConveyorItem> items = ItemTracker.Instance.GetItemsInCell(myCell);
         if (items != null)
         {
@@ -40,14 +42,23 @@ public class Furnace : BuildingLogic
     public IEnumerator ProccessItem(ConveyorItem item)
     {
         itemsInProcess.Add(item);
-        yield return new WaitForSeconds(currentCookingSpeed);
         
-        if (item == null)
+        float progress = 0;
+        while (progress < currentCookingSpeed)
         {
-            itemsInProcess.Remove(null);
-            yield break;
-        }
+            if (IsBeingWorked)
+            {
+                progress += Time.deltaTime * EfficiencyMultiplier;
+            }
+            yield return null;
 
+            if (item == null)
+            {
+                itemsInProcess.Remove(null);
+                yield break;
+            }
+        }
+        
         // Only find the plate prefab if it's null or the resource type changed
         if (platePrefab == null || item.resourceType != lastProcessedResourceType)
         {

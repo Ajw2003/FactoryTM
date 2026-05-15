@@ -6,6 +6,8 @@ public class BuildingManager : SingletonBase<BuildingManager>
 {
     private List<BuildingLogic> buildings = new List<BuildingLogic>();
 
+    public List<BuildingLogic> GetAllBuildings() => buildings;
+
     public void RegisterBuilding(BuildingLogic building)
     {
         buildings.Add(building);
