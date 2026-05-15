@@ -25,11 +25,14 @@ public class ZoneUiManager : MonoBehaviour
         southButton?.onClick.AddListener(() => ZoneManager.Instance.Navigate(Vector2Int.down));
         eastButton?.onClick.AddListener(() => ZoneManager.Instance.Navigate(Vector2Int.right));
         westButton?.onClick.AddListener(() => ZoneManager.Instance.Navigate(Vector2Int.left));
-    }
+        
+        northButton?.onClick.AddListener(UpdateButtons);
+        southButton?.onClick.AddListener(UpdateButtons);
+        eastButton?.onClick.AddListener(UpdateButtons);
+        westButton?.onClick.AddListener(UpdateButtons);
 
-    void Update()
-    {
         UpdateButtons();
+
     }
 
     void UpdateButtons()
@@ -37,7 +40,7 @@ public class ZoneUiManager : MonoBehaviour
         if (ZoneManager.Instance == null) return;
 
         Vector2Int current = ZoneManager.Instance.GetCurrentZone();
-        float cost = ZoneManager.Instance.GetUnlockCost();
+        float cost = ZoneManager.Instance.GetUnlockCost() * CurrencyManager.Instance.exchangeRate;
 
         UpdateButton(northText, current + Vector2Int.up, "North", cost);
         UpdateButton(southText, current + Vector2Int.down, "South", cost);

@@ -40,6 +40,7 @@ public class ZoneManager : SingletonBase<ZoneManager>
             }
         }
         
+        
         UpdateCameraPosition(false);
     }
 
