@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8eb320c0288e4fd44bf86cba11711f91, type: 3}
   m_Name: TitaniumDef
   m_EditorClassIdentifier: Assembly-CSharp::ResourceNodeDefinition
-  minedItemPrefab: {fileID: 4074567141104984735, guid: 18709b06b2962f64895a95734fb7ebf9, type: 3}
+  minedItemPrefab: {fileID: 4074567141104984735, guid: 732d443bdf7106f428eacb6a29080dbb, type: 3}
   miningSpeed: 1
   resourceNodePrefab: {fileID: 7168288065874615922, guid: 54c30910302a9554cb084e677553d03f, type: 3}
   spawnWeight: 0.1
