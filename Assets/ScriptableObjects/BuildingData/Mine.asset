@@ -13,12 +13,14 @@ MonoBehaviour:
   m_Name: Mine
   m_EditorClassIdentifier: Assembly-CSharp::BuildingData
   buildingName: Miner
+  description: Mines ore and must be placed on ore patch, has input on 3 sides and
+    output on 1
   rotatedTiles:
   - {fileID: 11400000, guid: 5734e72901f6ebc40be9d5eeb637a9f5, type: 2}
   - {fileID: 11400000, guid: 57d166ac8e34e3e4ab5f62fe2562b7b3, type: 2}
   - {fileID: 11400000, guid: b0e2ee65c43c5594ebb1dce22050365a, type: 2}
   - {fileID: 11400000, guid: 6dcb9958f2ea9e049a92305649f61386, type: 2}
-  spawnInterval: 2
+  proccessingSpeed: 2
   itemPrefab: {fileID: 4074567141104984735, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
   cost: 10
   type: 1

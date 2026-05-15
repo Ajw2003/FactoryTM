@@ -7,6 +7,8 @@ namespace Buildings
     public class BuildingData : ScriptableObject
     {
         public string buildingName;
+        [TextArea(3, 10)]
+        public string description;
         public TileBase[] rotatedTiles; // 0:Right, 1:Down, 2:Left, 3:Up
         public float proccessingSpeed = 2.0f;
         public GameObject itemPrefab; // The "Resource" it creates
