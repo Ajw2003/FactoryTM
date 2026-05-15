@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: Seller
   m_EditorClassIdentifier: Assembly-CSharp::Buildings.BuildingData
   buildingName: Seller
+  description: Sells items and can have input from all 4 sides
   rotatedTiles:
   - {fileID: 11400000, guid: 630da3bd71b705b419eba5725d2c268e, type: 2}
-  spawnInterval: 2
+  proccessingSpeed: 2
   itemPrefab: {fileID: 0}
   cost: 5
   type: 2
