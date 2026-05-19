@@ -1,57 +1,68 @@
-using System;
+using System.Collections;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    
     private Vector3 targetPosition;
-    private Vector3 currentPos;
     private Vector3Int currentCell;
     [SerializeField] private float moveSpeed = 5f;
-
-    // Update is called once per frame
+    private bool isMoving = false;
 
     private void Start()
     {
-        currentCell = GameManager.Instance.buildingTilemap.WorldToCell(transform.position);
-        transform.position = GameManager.Instance.buildingTilemap.GetCellCenterWorld(currentCell);
-        targetPosition = this.transform.position;
+        if (GameManager.Instance != null && GameManager.Instance.buildingTilemap != null)
+        {
+            currentCell = GameManager.Instance.buildingTilemap.WorldToCell(transform.position);
+            transform.position = GameManager.Instance.buildingTilemap.GetCellCenterWorld(currentCell);
+        }
+        targetPosition = transform.position;
     }
 
-    void Update()
+    private void Update()
     {
-        Vector3Int inputDirection = Vector3Int.zero;
+        if (isMoving) return;
 
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) inputDirection = Vector3Int.up;
-        else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) inputDirection = Vector3Int.down;
-        else if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) inputDirection = Vector3Int.left;
-        else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) inputDirection = Vector3Int.right;
+        Vector3Int inputDirection = Vector3Int.zero;//set input to zero
+        
+        //get input and convert to direction in grid space +-1 in x or y coords
+
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) inputDirection.y += 1;
+        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) inputDirection.y -= 1;
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) inputDirection.x -= 1;
+        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) inputDirection.x += 1;
 
         if (inputDirection != Vector3Int.zero)
         {
-            Vector3Int nextCell = currentCell + inputDirection;
-            SetTarget(nextCell, moveSpeed);
+            Vector3Int nextCell = currentCell + inputDirection;//set the cell to move towards to your current cell plus the input direction
+            StartCoroutine(MoveRoutine(nextCell));// start moving
         }
-
-        currentPos = transform.position;
-        currentCell = GameManager.Instance.buildingTilemap.WorldToCell(currentPos);
-        //set target to tile next to player in the direction of key press i.e. wasd up,down,lef,right
-        //move from current cell to next cell based on input, get current cell +- 1 in direction presses
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
-
-        if (Vector3.Distance(transform.position, targetPosition) < 0.001f)
-        {
-            transform.position = targetPosition;
-        }
-        
     }
-    
-    public void SetTarget(Vector3Int targetCell, float speed)
+
+    private IEnumerator MoveRoutine(Vector3Int targetCell)
     {
+        isMoving = true;
+        currentCell = targetCell;//change current cell to target
+        
+        if (GameManager.Instance != null && GameManager.Instance.buildingTilemap != null)
+        {
+            targetPosition = GameManager.Instance.buildingTilemap.GetCellCenterWorld(targetCell);// get position of target cell on the tile map
+        }
 
-        Vector3Int oldCell = currentCell;
-        currentCell = targetCell;
+        while (Vector3.Distance(transform.position, targetPosition) > 0.001f)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);// move towards the target cell
+            yield return null;
+        }
 
-        targetPosition = GameManager.Instance.buildingTilemap.GetCellCenterWorld(targetCell);
+        transform.position = targetPosition;// finalize and directly set position.
+        isMoving = false;
+    }
+
+    public void SetTarget(Vector3Int targetCell)
+    {
+        if (!isMoving)
+        {
+            StartCoroutine(MoveRoutine(targetCell));
+        }
     }
 }
