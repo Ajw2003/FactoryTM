@@ -48,7 +48,7 @@ public class PlacementManager : MonoBehaviour
                 return;
             }
 
-            if (CurrencyManager.Instance.currentCurrencyValue < activeBuilding.cost)
+            if (CurrencyManager.Instance.currentCurrencyValue < activeBuilding.cost * CurrencyManager.Instance.exchangeRate)
             {
                 Debug.Log("cost too high");
                 return;
