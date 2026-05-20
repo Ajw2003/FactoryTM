@@ -73,7 +73,7 @@ public class ZoneManager : SingletonBase<ZoneManager>
         else
         {
             float cost = GetUnlockCost();
-            if (CurrencyManager.Instance.currentCurrencyValue >= cost)
+            if (CurrencyManager.Instance.currentCurrencyValue >= cost * CurrencyManager.Instance.exchangeRate)
             {
                 CurrencyManager.Instance.RemoveCurrency(cost);
                 unlockedZones.Add(targetZone);
