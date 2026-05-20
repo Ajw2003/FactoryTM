@@ -6,10 +6,7 @@ public class GridManager : SingletonBase<GridManager>
 {
     public Vector2Int center = new Vector2Int(0, 0);
 
-    public Vector2 gridPosition;
-
     public Vector2 tileSize =new (1,1);
-    public Vector2Int gridPositionInt;
     public Vector2Int gridSize;
 
     public Vector2 CellToWorldConversion(Vector2Int cellPosition)
