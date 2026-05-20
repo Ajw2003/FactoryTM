@@ -3,18 +3,19 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    private Vector3 targetPosition;
-    private Vector3Int currentCell;
+    private Vector2 targetPosition;
+    private Vector2Int currentCell;
     [SerializeField] private float moveSpeed = 5f;
     private bool isMoving = false;
+    private Coroutine currentCoroutine;
 
     private void Start()
     {
-        if (GameManager.Instance != null && GameManager.Instance.buildingTilemap != null)
-        {
-            currentCell = GameManager.Instance.buildingTilemap.WorldToCell(transform.position);
-            transform.position = GameManager.Instance.buildingTilemap.GetCellCenterWorld(currentCell);
-        }
+        var center = GridManager.Instance.center;
+        GridManager.Instance.WorldToCellConversion(center);
+        currentCell = GridManager.Instance.gridPositionInt;
+        GridManager.Instance.CellToWorldConversion(currentCell);
+        transform.position = GridManager.Instance.gridPosition;
         targetPosition = transform.position;
     }
 
@@ -22,7 +23,7 @@ public class PlayerController : MonoBehaviour
     {
         if (isMoving) return;
 
-        Vector3Int inputDirection = Vector3Int.zero;//set input to zero
+        Vector2Int inputDirection = Vector2Int.zero;//set input to zero
         
         //get input and convert to direction in grid space +-1 in x or y coords
 
@@ -31,38 +32,35 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) inputDirection.x -= 1;
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) inputDirection.x += 1;
 
-        if (inputDirection != Vector3Int.zero)
+        if (inputDirection != Vector2Int.zero)
         {
-            Vector3Int nextCell = currentCell + inputDirection;//set the cell to move towards to your current cell plus the input direction
-            StartCoroutine(MoveRoutine(nextCell));// start moving
+            Vector2Int nextCell = currentCell + inputDirection;//set the cell to move towards to your current cell plus the input direction
+            currentCoroutine = StartCoroutine(MoveRoutine(nextCell));// start moving
         }
     }
 
-    private IEnumerator MoveRoutine(Vector3Int targetCell)
+    private IEnumerator MoveRoutine(Vector2Int targetCell)
     {
         isMoving = true;
         currentCell = targetCell;//change current cell to target
         
         if (GameManager.Instance != null && GameManager.Instance.buildingTilemap != null)
         {
-            targetPosition = GameManager.Instance.buildingTilemap.GetCellCenterWorld(targetCell);// get position of target cell on the tile map
+             GridManager.Instance.CellToWorldConversion(currentCell);
+             targetPosition = GridManager.Instance.gridPosition;
         }
 
-        while (Vector3.Distance(transform.position, targetPosition) > 0.001f)
+        while (Vector2.Distance(transform.position, targetPosition) > 0.001f)
         {
-            transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);// move towards the target cell
+            transform.position = Vector2.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);// move towards the target cell
             yield return null;
         }
 
         transform.position = targetPosition;// finalize and directly set position.
         isMoving = false;
-    }
-
-    public void SetTarget(Vector3Int targetCell)
-    {
-        if (!isMoving)
+        if (currentCoroutine != null)
         {
-            StartCoroutine(MoveRoutine(targetCell));
+            StopCoroutine(currentCoroutine);
         }
     }
 }
