@@ -24,7 +24,7 @@ public class GameManager : SingletonBase<GameManager>
     public List<ConveyorItem> Plates; 
 
     // The "Brain": Maps a specific Tile asset to a Direction
-    private Dictionary<TileBase, Vector3Int> tileDirectionMap = new Dictionary<TileBase, Vector3Int>();
+    private Dictionary<TileBase, Vector2Int> tileDirectionMap = new Dictionary<TileBase, Vector2Int>();
 
     protected override void Awake()
     {
@@ -80,10 +80,10 @@ public class GameManager : SingletonBase<GameManager>
             if (building.type == BuildingType.Conveyor || building.type == BuildingType.Miner)
             {
                 // Map the 4 rotated tiles to their corresponding directions
-                tileDirectionMap.Add(building.rotatedTiles[0], new Vector3Int(1, 0, 0));  // Right
-                tileDirectionMap.Add(building.rotatedTiles[1], new Vector3Int(0, -1, 0)); // Down
-                tileDirectionMap.Add(building.rotatedTiles[2], new Vector3Int(-1, 0, 0)); // Left
-                tileDirectionMap.Add(building.rotatedTiles[3], new Vector3Int(0, 1, 0));  // Up
+                tileDirectionMap.Add(building.rotatedTiles[0], new Vector2Int(1, 0));  // Right
+                tileDirectionMap.Add(building.rotatedTiles[1], new Vector2Int(0, -1)); // Down
+                tileDirectionMap.Add(building.rotatedTiles[2], new Vector2Int(-1, 0)); // Left
+                tileDirectionMap.Add(building.rotatedTiles[3], new Vector2Int(0, 1));  // Up
             }
         }
     }
@@ -157,25 +157,25 @@ public class GameManager : SingletonBase<GameManager>
         return null;
     }
     
-    public Vector3Int GetDirectionFromRotationIndex(int index)
+    public Vector2Int GetDirectionFromRotationIndex(int index)
     {
         switch (index)
         {
-            case 0: return new Vector3Int(1, 0, 0);  // Right
-            case 1: return new Vector3Int(0, -1, 0); // Down
-            case 2: return new Vector3Int(-1, 0, 0); // Left
-            case 3: return new Vector3Int(0, 1, 0);  // Up
-            default: return Vector3Int.right;
+            case 0: return new Vector2Int(1, 0);  // Right
+            case 1: return new Vector2Int(0, -1); // Down
+            case 2: return new Vector2Int(-1, 0); // Left
+            case 3: return new Vector2Int(0, 1);  // Up
+            default: return Vector2Int.right;
         }
     }
 
-    public Vector3Int GetDirectionFromTile(TileBase tile)
+    public Vector2Int GetDirectionFromTile(TileBase tile)
     {
         if (tile != null && tileDirectionMap.ContainsKey(tile))
         {
             return tileDirectionMap[tile];
         }
-        return Vector3Int.zero;
+        return Vector2Int.zero;
     }
 
     private void SpawnResourceNodes()
@@ -195,13 +195,13 @@ public class GameManager : SingletonBase<GameManager>
 
         // Iterate through the tilemap bounds
         BoundsInt bounds = buildingTilemap.cellBounds;
-        HashSet<Vector3Int> occupiedCells = new HashSet<Vector3Int>(); // Keep track of cells where nodes are spawned
+        HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>(); // Keep track of cells where nodes are spawned
 
         for (int x = bounds.xMin; x < bounds.xMax; x++)
         {
             for (int y = bounds.yMin; y < bounds.yMax; y++)
             {
-                Vector3Int cell = new Vector3Int(x, y, 0);
+                Vector2Int cell = new Vector2Int(x, y);
 
                 // Skip if already occupied or if random chance fails
                 if (occupiedCells.Contains(cell) || Random.value > patchSpawnChance)
@@ -242,9 +242,9 @@ public class GameManager : SingletonBase<GameManager>
         return null; // Should not happen if totalWeight is calculated correctly and definitions exist
     }
 
-    private void SpawnPatch(Vector3Int startCell, int patchSize, ResourceNodeDefinition definition, HashSet<Vector3Int> occupiedCells)
+    private void SpawnPatch(Vector2Int startCell, int patchSize, ResourceNodeDefinition definition, HashSet<Vector2Int> occupiedCells)
     {
-        Queue<Vector3Int> cellsToProcess = new Queue<Vector3Int>();
+        Queue<Vector2Int> cellsToProcess = new Queue<Vector2Int>();
         cellsToProcess.Enqueue(startCell);
         occupiedCells.Add(startCell); // Mark the starting cell as occupied
 
@@ -252,24 +252,25 @@ public class GameManager : SingletonBase<GameManager>
 
         while (cellsToProcess.Count > 0 && spawnedCount < patchSize)
         {
-            Vector3Int currentCell = cellsToProcess.Dequeue();
+            Vector2Int currentCell = cellsToProcess.Dequeue();
 
             // Spawn the node at currentCell
             SpawnSingleResourceNode(currentCell, definition);
             spawnedCount++;
 
             // Add neighbors to the queue if they are within bounds and not occupied
-            Vector3Int[] neighbors = new Vector3Int[]
+            Vector2Int[] neighbors = new Vector2Int[]
             {
-                currentCell + Vector3Int.right,
-                currentCell + Vector3Int.left,
-                currentCell + Vector3Int.up,
-                currentCell + Vector3Int.down
+                currentCell + Vector2Int.right,
+                currentCell + Vector2Int.left,
+                currentCell + Vector2Int.up,
+                currentCell + Vector2Int.down
             };
 
-            foreach (Vector3Int neighbor in neighbors)
+            foreach (Vector2Int neighbor in neighbors)
             {
-                if (buildingTilemap.HasTile(neighbor) || occupiedCells.Contains(neighbor)) // Check if tilemap has a tile (meaning it's a valid place) and not already occupied
+                Vector3Int tempNeighbor = new Vector3Int(neighbor.x, neighbor.y, 0);
+                if (buildingTilemap.HasTile(tempNeighbor) || occupiedCells.Contains(neighbor)) // Check if tilemap has a tile (meaning it's a valid place) and not already occupied
                 {
                     continue;
                 }
@@ -287,10 +288,10 @@ public class GameManager : SingletonBase<GameManager>
         }
     }
 
-    private void SpawnSingleResourceNode(Vector3Int cell, ResourceNodeDefinition definition)
+    private void SpawnSingleResourceNode(Vector2Int cell, ResourceNodeDefinition definition)
     {
         // Get world position for instantiation
-        Vector3 worldPos = buildingTilemap.GetCellCenterWorld(cell);
+        Vector2 worldPos = GridManager.Instance.CellToWorldConversion(cell);
 
         // Instantiate the resource node prefab
         GameObject nodeGO = Instantiate(definition.resourceNodePrefab, worldPos, Quaternion.identity);

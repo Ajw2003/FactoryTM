@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class ItemTracker : SingletonBase<ItemTracker>
 {
-    private Dictionary<Vector3Int, List<ConveyorItem>> itemsByCell = new Dictionary<Vector3Int, List<ConveyorItem>>();
+    private Dictionary<Vector2Int, List<ConveyorItem>> itemsByCell = new Dictionary<Vector2Int, List<ConveyorItem>>();
 
-    public void RegisterItem(ConveyorItem item, Vector3Int cell)
+    public void RegisterItem(ConveyorItem item, Vector2Int cell)
     {
         if (!itemsByCell.ContainsKey(cell))
         {
@@ -19,7 +19,7 @@ public class ItemTracker : SingletonBase<ItemTracker>
         }
     }
 
-    public void UnregisterItem(ConveyorItem item, Vector3Int cell)
+    public void UnregisterItem(ConveyorItem item, Vector2Int cell)
     {
         if (itemsByCell.ContainsKey(cell))
         {
@@ -31,14 +31,14 @@ public class ItemTracker : SingletonBase<ItemTracker>
         }
     }
 
-    public void UpdateItemCell(ConveyorItem item, Vector3Int oldCell, Vector3Int newCell)
+    public void UpdateItemCell(ConveyorItem item, Vector2Int oldCell, Vector2Int newCell)
     {
         if (oldCell == newCell) return;
         UnregisterItem(item, oldCell);
         RegisterItem(item, newCell);
     }
 
-    public List<ConveyorItem> GetItemsInCell(Vector3Int cell)
+    public List<ConveyorItem> GetItemsInCell(Vector2Int cell)
     {
         if (itemsByCell.TryGetValue(cell, out List<ConveyorItem> items))
         {

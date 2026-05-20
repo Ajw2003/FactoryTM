@@ -12,10 +12,8 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         var center = GridManager.Instance.center;
-        GridManager.Instance.WorldToCellConversion(center);
-        currentCell = GridManager.Instance.gridPositionInt;
-        GridManager.Instance.CellToWorldConversion(currentCell);
-        transform.position = GridManager.Instance.gridPosition;
+        currentCell = GridManager.Instance.WorldToCellConversion(center);
+        transform.position = GridManager.Instance.CellToWorldConversion(currentCell);
         targetPosition = transform.position;
     }
 
@@ -46,8 +44,7 @@ public class PlayerController : MonoBehaviour
         
         if (GameManager.Instance != null && GameManager.Instance.buildingTilemap != null)
         {
-             GridManager.Instance.CellToWorldConversion(currentCell);
-             targetPosition = GridManager.Instance.gridPosition;
+            targetPosition = GridManager.Instance.CellToWorldConversion(currentCell);
         }
 
         while (Vector2.Distance(transform.position, targetPosition) > 0.001f)

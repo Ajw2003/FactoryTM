@@ -5,7 +5,7 @@ public class ResourceManager : MonoBehaviour
 {
     public static ResourceManager Instance { get; private set; }
 
-    private Dictionary<Vector3Int, ResourceNode> resourceNodes = new Dictionary<Vector3Int, ResourceNode>();
+    private Dictionary<Vector2Int, ResourceNode> resourceNodes = new Dictionary<Vector2Int, ResourceNode>();
 
     private void Awake()
     {
@@ -19,7 +19,7 @@ public class ResourceManager : MonoBehaviour
         }
     }
 
-    public void RegisterNode(Vector3Int cell, ResourceNode node)
+    public void RegisterNode(Vector2Int cell, ResourceNode node)
     {
         if (!resourceNodes.ContainsKey(cell))
         {
@@ -32,13 +32,13 @@ public class ResourceManager : MonoBehaviour
         }
     }
 
-    public ResourceNode GetNodeAtPosition(Vector3Int cell)
+    public ResourceNode GetNodeAtPosition(Vector2Int cell)
     {
         resourceNodes.TryGetValue(cell, out ResourceNode node);
         return node;
     }
 
-    public void DeregisterNode(Vector3Int cell)
+    public void DeregisterNode(Vector2Int cell)
     {
         if (resourceNodes.ContainsKey(cell))
         {

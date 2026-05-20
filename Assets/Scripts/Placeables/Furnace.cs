@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class Furnace : BuildingLogic
 {
-    private Vector3Int exportDirection;
+    private Vector2Int exportDirection;
     private float timer;
     private ConveyorItem currentItemPrefab;
     private ConveyorItem platePrefab;
     private float currentCookingSpeed;
     
-    public void Setup(Buildings.BuildingData furnace, Vector3Int cell, int rotationIndex, float speed)
+    public void Setup(Buildings.BuildingData furnace, Vector2Int cell, int rotationIndex, float speed)
     {
         base.Setup(furnace, cell);
         exportDirection = GameManager.Instance.GetDirectionFromRotationIndex(rotationIndex);
@@ -90,9 +90,10 @@ public class Furnace : BuildingLogic
         // Log values before calculation
 
         // 1. Calculate the neighbor cell in front of the furnace
-        Vector3Int targetCell = myCell + exportDirection;
+        Vector2Int targetCell = myCell + exportDirection;
 
-        Vector3 spawnPos = GameManager.Instance.buildingTilemap.GetCellCenterWorld(targetCell);
+        Vector2 spawnPos = GridManager.Instance.CellToWorldConversion(targetCell);
+        
 
         // 2. Instantiate the item
         GameObject newItem = Instantiate(currentItemPrefab.gameObject, spawnPos, Quaternion.identity);
