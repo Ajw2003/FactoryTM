@@ -36,10 +36,8 @@ public class ConveyorItem : MonoBehaviour
         if (!isInitialized)
         {
             var center = GridManager.Instance.center;
-            GridManager.Instance.WorldToCellConversion(center);
-            currentCell = GridManager.Instance.gridPositionInt;
-            GridManager.Instance.CellToWorldConversion(currentCell);
-            transform.position = GridManager.Instance.gridPosition;
+            currentCell = GridManager.Instance.WorldToCellConversion(center);
+            transform.position = GridManager.Instance.CellToWorldConversion(currentCell);
             targetPosition = transform.position;
             ItemTracker.Instance.RegisterItem(this, currentCell);
             isInitialized = true;
@@ -68,8 +66,7 @@ public class ConveyorItem : MonoBehaviour
         currentCell = targetCell;
         ItemTracker.Instance.UpdateItemCell(this, oldCell, currentCell);
 
-        GridManager.Instance.CellToWorldConversion(currentCell);
-        targetPosition = GridManager.Instance.gridPosition;
+        targetPosition = GridManager.Instance.CellToWorldConversion(currentCell);
         moveSpeed = speed;
         IsMoving = true;
     }
