@@ -41,7 +41,7 @@ public class ZoneManager : SingletonBase<ZoneManager>
         }
         
         
-        UpdateCameraPosition(false);
+        // UpdateCameraPosition(false);
     }
 
     public bool IsZoneUnlocked(Vector2Int zoneCoords)

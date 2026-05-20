@@ -47,5 +47,8 @@ TagManager:
   - name: ores
     uniqueID: 2622029713
     locked: 0
+  - name: Player
+    uniqueID: 1813148273
+    locked: 0
   m_RenderingLayers:
   - Default
