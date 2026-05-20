@@ -3,9 +3,9 @@ using UnityEngine;
 public abstract class BuildingLogic : MonoBehaviour
 {
     public Buildings.BuildingData data;
-    protected Vector3Int myCell;
+    protected Vector2Int myCell;
 
-    public virtual void Setup(Buildings.BuildingData buildingData, Vector3Int cell)
+    public virtual void Setup(Buildings.BuildingData buildingData, Vector2Int cell)
     {
         data = buildingData;
         myCell = cell;

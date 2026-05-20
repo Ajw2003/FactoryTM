@@ -15,8 +15,8 @@ public enum ResourceType
 
 public class ConveyorItem : MonoBehaviour
 {
-    private Vector3 targetPosition;
-    private Vector3Int currentCell;
+    private Vector2 targetPosition;
+    private Vector2Int currentCell;
     public float moveSpeed = 2f;
     public float value = 10f;
     public ResourceType resourceType;
@@ -24,7 +24,7 @@ public class ConveyorItem : MonoBehaviour
     public bool IsMoving { get; private set; }
     private bool isInitialized = false;
 
-    public void Initialize(Vector3Int startCell)
+    public void Initialize(Vector2Int startCell)
     {
         currentCell = startCell;
         ItemTracker.Instance.RegisterItem(this, currentCell);
@@ -35,7 +35,12 @@ public class ConveyorItem : MonoBehaviour
     {
         if (!isInitialized)
         {
-            currentCell = GameManager.Instance.buildingTilemap.WorldToCell(transform.position);
+            var center = GridManager.Instance.center;
+            GridManager.Instance.WorldToCellConversion(center);
+            currentCell = GridManager.Instance.gridPositionInt;
+            GridManager.Instance.CellToWorldConversion(currentCell);
+            transform.position = GridManager.Instance.gridPosition;
+            targetPosition = transform.position;
             ItemTracker.Instance.RegisterItem(this, currentCell);
             isInitialized = true;
         }
@@ -45,9 +50,9 @@ public class ConveyorItem : MonoBehaviour
     {
         if (IsMoving)
         {
-            transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
+            transform.position = Vector2.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
 
-            if (Vector3.Distance(transform.position, targetPosition) < 0.001f)
+            if (Vector2.Distance(transform.position, targetPosition) < 0.001f)
             {
                 transform.position = targetPosition;
                 IsMoving = false;
@@ -55,15 +60,16 @@ public class ConveyorItem : MonoBehaviour
         }
     }
 
-    public void SetTarget(Vector3Int targetCell, float speed)
+    public void SetTarget(Vector2Int targetCell, float speed)
     {
         if (IsMoving) return;
 
-        Vector3Int oldCell = currentCell;
+        Vector2Int oldCell = currentCell;
         currentCell = targetCell;
         ItemTracker.Instance.UpdateItemCell(this, oldCell, currentCell);
 
-        targetPosition = GameManager.Instance.buildingTilemap.GetCellCenterWorld(targetCell);
+        GridManager.Instance.CellToWorldConversion(currentCell);
+        targetPosition = GridManager.Instance.gridPosition;
         moveSpeed = speed;
         IsMoving = true;
     }

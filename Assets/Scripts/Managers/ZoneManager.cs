@@ -5,7 +5,7 @@ using Singleton;
 public class ZoneManager : SingletonBase<ZoneManager>
 {
     [Header("Settings")]
-    public Vector2Int zoneSizeInTiles = new Vector2Int(20, 10);
+    public Vector2Int zoneSizeInTiles = new Vector2Int(40, 20);
     public float initialUnlockCost = 100f;
     public float costIncreasePerZone = 50f;
 
@@ -40,8 +40,7 @@ public class ZoneManager : SingletonBase<ZoneManager>
             }
         }
         
-        
-        // UpdateCameraPosition(false);
+        UpdateCameraPosition(false);
     }
 
     public bool IsZoneUnlocked(Vector2Int zoneCoords)

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Seller : BuildingLogic
 {
-    public override void Setup(Buildings.BuildingData buildingData, Vector3Int cell)
+    public override void Setup(Buildings.BuildingData buildingData, Vector2Int cell)
     {
         base.Setup(buildingData, cell);
     }

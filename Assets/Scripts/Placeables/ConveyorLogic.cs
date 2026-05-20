@@ -3,10 +3,10 @@ using UnityEngine;
 
 public class ConveyorLogic : BuildingLogic
 {
-    private Vector3Int direction;
+    private Vector2Int direction;
     private float moveSpeed = 2f;
 
-    public void Setup(Buildings.BuildingData buildingData, Vector3Int cell, Vector3Int dir, float speed)
+    public void Setup(Buildings.BuildingData buildingData, Vector2Int cell, Vector2Int dir, float speed)
     {
         base.Setup(buildingData, cell);
         direction = dir;

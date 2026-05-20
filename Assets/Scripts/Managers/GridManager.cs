@@ -12,17 +12,17 @@ public class GridManager : SingletonBase<GridManager>
     public Vector2Int gridPositionInt;
     public Vector2Int gridSize;
 
-    public void CellToWorldConversion(Vector2Int cellPosition)
+    public Vector2 CellToWorldConversion(Vector2Int cellPosition)
     {
-        gridPosition = new Vector2(
+        return new Vector2(
             (cellPosition.x * tileSize.x) + (tileSize.x / 2f),
             (cellPosition.y * tileSize.y) + (tileSize.y / 2f)
         );// multiply by tile size then add to tile size/2 to get corner of Tile
     }
     
-    public void WorldToCellConversion(Vector2 worldPosition)
+    public Vector2Int WorldToCellConversion(Vector2 worldPosition)
     {
-        gridPositionInt = new Vector2Int(
+        return new Vector2Int(
             Mathf.FloorToInt(worldPosition.x / tileSize.x), 
             Mathf.FloorToInt(worldPosition.y / tileSize.y)
         );//convert vector2 to vector2Int and use floortoInt to prevent negative numbers erroring

@@ -4,13 +4,13 @@ using UnityEngine.Tilemaps;
 
 public class MinerLogic : BuildingLogic
 {
-    private Vector3Int exportDirection;
+    private Vector2Int exportDirection;
     private float timer;
     private ResourceNode assignedResourceNode;
     private GameObject currentMinedItemPrefab;
     private float currentMiningSpeed;
 
-    public void Setup(Buildings.BuildingData minerData, Vector3Int cell, int rotationIndex)
+    public void Setup(Buildings.BuildingData minerData, Vector2Int cell, int rotationIndex)
     {
         base.Setup(minerData, cell);
         
@@ -58,8 +58,8 @@ public class MinerLogic : BuildingLogic
         }
 
         // 1. Calculate the neighbor cell in front of the miner
-        Vector3Int targetCell = myCell + exportDirection;
-        Vector3 spawnPos = GameManager.Instance.buildingTilemap.GetCellCenterWorld(targetCell);
+        Vector2Int targetCell = myCell + exportDirection;
+        Vector2 spawnPos = GridManager.Instance.CellToWorldConversion(targetCell);
 
         // 2. Instantiate the item
         GameObject newItem = Instantiate(currentMinedItemPrefab, spawnPos, Quaternion.identity);

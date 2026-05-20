@@ -19,7 +19,8 @@ public class PlacementManager : MonoBehaviour
     {
         if (activeBuilding == null) return;
 
-        Vector3Int cell = GetMouseCell();
+        Vector2Int cell = GetMouseCell();
+        Vector3Int vector3Cell = new Vector3Int(cell.x, cell.y, 0);
         
         if (EventSystem.current.IsPointerOverGameObject())
         {
@@ -33,15 +34,15 @@ public class PlacementManager : MonoBehaviour
 
         // Preview
         previewTilemap.ClearAllTiles();
-        if (ZoneManager.Instance.IsTileInsideUnlockedZone(cell))
+        if (ZoneManager.Instance.IsTileInsideUnlockedZone(vector3Cell))
         {
-            previewTilemap.SetTile(cell, activeBuilding.rotatedTiles[rotationIndex]);
+            previewTilemap.SetTile(vector3Cell, activeBuilding.rotatedTiles[rotationIndex]);
         }
 
         // Place
         if (Input.GetMouseButtonDown(0))
         {
-            if (!ZoneManager.Instance.IsTileInsideUnlockedZone(cell))
+            if (!ZoneManager.Instance.IsTileInsideUnlockedZone(vector3Cell))
             {
                 Debug.Log("Cannot place outside unlocked zone!");
                 return;
@@ -62,7 +63,7 @@ public class PlacementManager : MonoBehaviour
                 return;
             }
 
-            mainTilemap.SetTile(cell, activeBuilding.rotatedTiles[rotationIndex]);
+            mainTilemap.SetTile(vector3Cell, activeBuilding.rotatedTiles[rotationIndex]);
             switch (activeBuilding.type)
             {
                 case (BuildingType.Chest):
@@ -97,7 +98,8 @@ public class PlacementManager : MonoBehaviour
                     CurrencyManager.Instance.AddCurrency(logic.data.cost);
                 }
 
-                mainTilemap.SetTile(cell, null);
+                int temp = 0;
+                mainTilemap.SetTile((vector3Cell), null);
                 Destroy(buildingObj);
                 activeBuildings.Remove(cell);
             }
@@ -110,20 +112,19 @@ public class PlacementManager : MonoBehaviour
         rotationIndex = 0;
     }
 
-    Vector3Int GetMouseCell()
+    Vector2Int GetMouseCell()
     {
-        Vector3 p = cam.ScreenToWorldPoint(Input.mousePosition);
-        return mainTilemap.WorldToCell(new Vector3(p.x, p.y, 0));
+        Vector2 p = cam.ScreenToWorldPoint(Input.mousePosition);
+        return GridManager.Instance.WorldToCellConversion(new Vector2(p.x, p.y));
     }
     
-    private Dictionary<Vector3Int, GameObject> activeBuildings = new Dictionary<Vector3Int, GameObject>();
+    private Dictionary<Vector2Int, GameObject> activeBuildings = new Dictionary<Vector2Int, GameObject>();
 
-    void SpawnMinerLogic(Vector3Int cell)
+    void SpawnMinerLogic(Vector2Int cell)
     {
         // Create the logic object
         GameObject MinerObj = new GameObject("Miner_Logic_" + cell);
-        MinerObj.transform.position = mainTilemap.GetCellCenterWorld(cell);
-    
+        MinerObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
         MinerLogic logic = MinerObj.AddComponent<MinerLogic>();
         logic.Setup(activeBuilding, cell, rotationIndex);
 
@@ -131,31 +132,31 @@ public class PlacementManager : MonoBehaviour
         activeBuildings.Add(cell, MinerObj);
     }
 
-    void SpawnFurnaceLogic(Vector3Int cell)
+    void SpawnFurnaceLogic(Vector2Int cell)
     {
         GameObject FurnaceObj = new GameObject("Furnace_Logic_" + cell);
-        FurnaceObj.transform.position = mainTilemap.GetCellCenterWorld(cell);
+        FurnaceObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
         Furnace furnace = FurnaceObj.AddComponent<Furnace>();
         furnace.Setup(activeBuilding, cell, rotationIndex, activeBuilding.proccessingSpeed);
         activeBuildings.Add(cell, FurnaceObj);
     }
 
-    void SpawnSellerLogic(Vector3Int cell)
+    void SpawnSellerLogic(Vector2Int cell)
     {
         GameObject sellerObj = new GameObject("Seller_Logic_" + cell);
-        sellerObj.transform.position = mainTilemap.GetCellCenterWorld(cell);
+        sellerObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
         Seller seller = sellerObj.AddComponent<Seller>();
         seller.Setup(activeBuilding, cell);
         activeBuildings.Add(cell, sellerObj);
     }
 
-    void SpawnBeltLogic(Vector3Int cell)
+    void SpawnBeltLogic(Vector2Int cell)
     {
         GameObject beltObj = new GameObject("Belt_Logic_" + cell);
-        beltObj.transform.position = mainTilemap.GetCellCenterWorld(cell);
+        beltObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
         
         ConveyorLogic logic = beltObj.AddComponent<ConveyorLogic>();
-        Vector3Int dir = GameManager.Instance.GetDirectionFromRotationIndex(rotationIndex);
+        Vector2Int dir = GameManager.Instance.GetDirectionFromRotationIndex(rotationIndex);
         logic.Setup(activeBuilding, cell, dir, activeBuilding.proccessingSpeed); // Pass data
         
         activeBuildings.Add(cell, beltObj);
