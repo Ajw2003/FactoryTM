@@ -9,11 +9,12 @@ public class MinerLogic : BuildingLogic
     private ResourceNode assignedResourceNode;
     private GameObject currentMinedItemPrefab;
     private float currentMiningSpeed;
+    private bool finiteOres;
 
     public void Setup(Buildings.BuildingData minerData, Vector2Int cell, int rotationIndex)
     {
         base.Setup(minerData, cell);
-        
+        finiteOres = GameManager.Instance.finiteOres;
         // Attempt to find a ResourceNode at the miner's position
         if (ResourceManager.Instance != null)
         {
@@ -51,7 +52,7 @@ public class MinerLogic : BuildingLogic
 
     void SpawnItem()
     {
-        if (currentMinedItemPrefab == null)
+        if (currentMinedItemPrefab == null || finiteOres && assignedResourceNode.oreCount <= 0)
         {
             Debug.LogError($"Miner at {myCell} has no item prefab to mine!");
             return;
@@ -67,6 +68,11 @@ public class MinerLogic : BuildingLogic
         if (itemComp != null)
         {
             itemComp.Initialize(targetCell);
+        }
+
+        if (finiteOres)
+        {
+            assignedResourceNode.oreCount--;
         }
     }
 }

@@ -12,6 +12,7 @@ public class GameManager : SingletonBase<GameManager>
     public BuildingData[] allBuildings;
     public Tilemap buildingTilemap;
     public TileBase sellerTile;
+    public bool finiteOres;
 
     [Header("Resource Node Spawning")]
     public ResourceNodeDefinition[] resourceNodeDefinitions;
@@ -88,11 +89,6 @@ public class GameManager : SingletonBase<GameManager>
         }
     }
 
-    public bool IsSellerTile(TileBase tile)//bad code fix later
-    {
-        return tile == sellerTile;
-    }
-
     public void ProccessSale(GameObject item)
     {
         item.TryGetComponent(out ConveyorItem citem);
@@ -167,15 +163,6 @@ public class GameManager : SingletonBase<GameManager>
             case 3: return new Vector2Int(0, 1);  // Up
             default: return Vector2Int.right;
         }
-    }
-
-    public Vector2Int GetDirectionFromTile(TileBase tile)
-    {
-        if (tile != null && tileDirectionMap.ContainsKey(tile))
-        {
-            return tileDirectionMap[tile];
-        }
-        return Vector2Int.zero;
     }
 
     private void SpawnResourceNodes()
