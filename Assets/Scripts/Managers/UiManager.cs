@@ -9,7 +9,10 @@ public class UiManager : SingletonBase<UiManager>
    [Header("Tooltip")]
    public GameObject tooltipPanel;
    public TMP_Text tooltipText;
+   public GameObject StorePanel;
    private RectTransform tooltipRect;
+   bool flip = true;
+   
 
    protected override void Awake()
    {
@@ -26,6 +29,13 @@ public class UiManager : SingletonBase<UiManager>
       if (tooltipPanel != null && tooltipPanel.activeSelf)
       {
          UpdateTooltipPosition();
+      }
+      
+      if (Input.GetKeyDown(KeyCode.E))
+      {
+         
+         flip = !flip;
+         StorePanel.SetActive(flip);
       }
    }
 
