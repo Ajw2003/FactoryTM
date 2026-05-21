@@ -25,7 +25,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3968345495500856008}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.93933, y: 9.42963, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -51,6 +51,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 14c1a306f9f36df4cb1e596341da8563, type: 2}
   buildingTilemap: {fileID: 0}
   sellerTile: {fileID: 11400000, guid: 630da3bd71b705b419eba5725d2c268e, type: 2}
+  finiteOres: 0
   resourceNodeDefinitions:
   - {fileID: 11400000, guid: bbd572b718c4a6a4a95c63819a3ebe1f, type: 2}
   - {fileID: 11400000, guid: ae521b1c7e606904a8b5063fd6c6d036, type: 2}
@@ -60,7 +61,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 48a46f629699bf54199df29d9ac0e32a, type: 2}
   - {fileID: 11400000, guid: 8c08c1a195c6aac46839c9d7f3ffcb71, type: 2}
   - {fileID: 11400000, guid: 3e660a0d1b238a14f8e2371e6decaebb, type: 2}
-  minPatchSize: 1
-  maxPatchSize: 13
-  patchSpawnChance: 0.009
+  minPatchSize: 12
+  maxPatchSize: 26
+  patchSpawnChance: 0.001
   Plates: []

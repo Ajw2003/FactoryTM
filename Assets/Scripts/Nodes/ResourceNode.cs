@@ -4,6 +4,7 @@ public class ResourceNode : MonoBehaviour
 {
     public GameObject minedItemPrefab;
     public float miningSpeed = 1f; // Items per second
+    public int oreCount;
     public Vector2Int myCell { get; private set; }
 
     public void Setup(Vector2Int cell)

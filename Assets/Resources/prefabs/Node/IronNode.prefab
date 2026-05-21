@@ -106,3 +106,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ResourceNode
   minedItemPrefab: {fileID: 4074567141104984735, guid: 422828d1736f7a448883c3863bcd8ae4, type: 3}
   miningSpeed: 0.5
+  oreCount: 100
+  isFinite: 1

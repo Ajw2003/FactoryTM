@@ -7,4 +7,5 @@ public class ResourceNodeDefinition : ScriptableObject
     public float miningSpeed = 1f;
     public GameObject resourceNodePrefab; // The prefab that has the ResourceNode component
     public float spawnWeight = 1; // For weighted random selection
+    public int oreCount = 1000;
 }
