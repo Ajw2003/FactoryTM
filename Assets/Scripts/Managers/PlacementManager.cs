@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using Buildings;
+using Singleton;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Tilemaps;
 
-public class PlacementManager : MonoBehaviour
+public class PlacementManager : SingletonBase<PlacementManager>
 {
     public Tilemap mainTilemap;
     public Tilemap previewTilemap;
@@ -13,7 +14,13 @@ public class PlacementManager : MonoBehaviour
     private int rotationIndex = 0;
     private Camera cam;
 
-    void Start() => cam = Camera.main;
+    public float maxPlacementDistance = 5f;
+    private Transform playerTransform;
+
+    void Start()
+    {
+        cam = Camera.main;
+    }
 
     void Update()
     {
@@ -21,6 +28,7 @@ public class PlacementManager : MonoBehaviour
 
         Vector2Int cell = GetMouseCell();
         Vector3Int vector3Cell = new Vector3Int(cell.x, cell.y, 0);
+        Vector3 worldPos = GridManager.Instance.CellToWorldConversion(cell);
         
         if (EventSystem.current.IsPointerOverGameObject())
         {
@@ -28,13 +36,24 @@ public class PlacementManager : MonoBehaviour
             previewTilemap.ClearAllTiles();
             return; 
         }
+
+        // Task 2: Placement Distance Check
+        bool isWithinDistance = true;
+        if (PlayerController.Instance != null)
+        {
+            float distance = Vector2.Distance(PlayerController.Instance.transform.position, worldPos);
+            if (distance > maxPlacementDistance)
+            {
+                isWithinDistance = false;
+            }
+        }
         
         // Rotate (R)
         if (Input.GetKeyDown(KeyCode.R)) rotationIndex = (rotationIndex + 1) % 4;// set the rotation index i.e. right,left,up,down
 
         // Preview
         previewTilemap.ClearAllTiles();
-        if (ZoneManager.Instance.IsTileInsideUnlockedZone(vector3Cell))
+        if (ZoneManager.Instance.IsTileInsideUnlockedZone(vector3Cell) && isWithinDistance)
         {
             previewTilemap.SetTile(vector3Cell, activeBuilding.rotatedTiles[rotationIndex]);
         }
@@ -42,23 +61,28 @@ public class PlacementManager : MonoBehaviour
         // Place
         if (Input.GetMouseButtonDown(0))
         {
+            if (!isWithinDistance)
+            {
+                Debug.Log("Too far to place!");
+                return;
+            }
+
             if (!ZoneManager.Instance.IsTileInsideUnlockedZone(vector3Cell))
             {
                 Debug.Log("Cannot place outside unlocked zone!");
                 return;
             }
 
-            if (CurrencyManager.Instance.currentCurrencyValue < activeBuilding.cost * CurrencyManager.Instance.exchangeRate)
+            // Task 1: Check Inventory instead of Currency
+            if (!InventoryManager.Instance.HasBuilding(activeBuilding))
             {
-                Debug.Log("cost too high");
+                Debug.Log("Don't have " + activeBuilding.buildingName + " in inventory!");
                 return;
             }
             
             // Check if cell is occupied
             if (activeBuildings.ContainsKey(cell))
             {
-                // Optionally: Auto-delete the old one? Or just return?
-                // For now, let's just return to prevent overlapping.
                 Debug.Log("Cell occupied!");
                 return;
             }
@@ -81,7 +105,8 @@ public class PlacementManager : MonoBehaviour
                     SpawnFurnaceLogic(cell);   
                     break;
             }
-            CurrencyManager.Instance.RemoveCurrency(activeBuilding.cost);
+            // Task 1: Consume from Inventory
+            InventoryManager.Instance.RemoveBuilding(activeBuilding);
         }
             
 
@@ -95,10 +120,10 @@ public class PlacementManager : MonoBehaviour
                 
                 if (logic != null && logic.data != null)
                 {
-                    CurrencyManager.Instance.AddCurrency(logic.data.cost);
+                    // Task 1: Return to Inventory instead of refunding currency
+                    InventoryManager.Instance.AddBuilding(logic.data);
                 }
 
-                int temp = 0;
                 mainTilemap.SetTile((vector3Cell), null);
                 Destroy(buildingObj);
                 activeBuildings.Remove(cell);
@@ -110,6 +135,12 @@ public class PlacementManager : MonoBehaviour
     {
         activeBuilding = newBuilding;
         rotationIndex = 0;
+        
+        // Clear preview if we deselected
+        if (activeBuilding == null)
+        {
+            previewTilemap.ClearAllTiles();
+        }
     }
 
     Vector2Int GetMouseCell()

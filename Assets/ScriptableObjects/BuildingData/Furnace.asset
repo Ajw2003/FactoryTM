@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Furnace
   m_EditorClassIdentifier: Assembly-CSharp::Buildings.BuildingData
   buildingName: Furnace
+  icon: {fileID: 21300000, guid: 894323377aa9bb44bad37a1c1f03f42c, type: 3}
   description: Cooks ore into plates and outputs towards arrow, has input on 3 sides
     and output on 1
   rotatedTiles:

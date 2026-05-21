@@ -61,31 +61,40 @@ public class ZoneManager : SingletonBase<ZoneManager>
         return new Vector2Int(x, y);
     }
 
-    public void Navigate(Vector2Int direction)
+    public void SetCurrentZone(Vector2Int targetZone)
     {
-        Vector2Int targetZone = currentZone + direction;
-        
+        if (targetZone == currentZone) return;
+
+        // Only allow navigating to UNLOCKED zones via movement
         if (unlockedZones.Contains(targetZone))
         {
             currentZone = targetZone;
             UpdateCameraPosition(true);
         }
-        else
-        {
-            float cost = GetUnlockCost();
-            if (CurrencyManager.Instance.currentCurrencyValue >= cost * CurrencyManager.Instance.exchangeRate)
-            {
-                CurrencyManager.Instance.RemoveCurrency(cost);
-                unlockedZones.Add(targetZone);
-                currentZone = targetZone;
-                UpdateCameraPosition(true);
-            }
-            else
-            {
-                Debug.Log("Not enough currency to unlock zone! Cost: " + cost);
-            }
-        }
     }
+
+    public bool TryUnlockZone(Vector2Int targetZone)
+    {
+        if (unlockedZones.Contains(targetZone)) return true;
+
+        float cost = GetUnlockCost();
+        if (CurrencyManager.Instance.currentCurrencyValue >= cost * CurrencyManager.Instance.exchangeRate)
+        {
+            CurrencyManager.Instance.RemoveCurrency(cost);
+            unlockedZones.Add(targetZone);
+            Debug.Log("Zone Unlocked: " + targetZone);
+            return true;
+        }
+        
+        Debug.Log("Not enough currency to unlock zone! Cost: " + cost);
+        return false;
+    }
+
+    // Methods for UI Buttons to call directly
+    public void UnlockNorth() => TryUnlockZone(currentZone + Vector2Int.up);
+    public void UnlockSouth() => TryUnlockZone(currentZone + Vector2Int.down);
+    public void UnlockEast() => TryUnlockZone(currentZone + Vector2Int.right);
+    public void UnlockWest() => TryUnlockZone(currentZone + Vector2Int.left);
 
     public float GetUnlockCost()
     {

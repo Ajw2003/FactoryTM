@@ -1,13 +1,19 @@
 using System.Collections;
+using Singleton;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : SingletonBase<PlayerController>
 {
     private Vector2 targetPosition;
     private Vector2Int currentCell;
     [SerializeField] private float moveSpeed = 5f;
     private bool isMoving = false;
     private Coroutine currentCoroutine;
+
+    protected override void Awake()
+    {
+        base.Awake();
+    }
 
     private void Start()
     {
@@ -32,8 +38,30 @@ public class PlayerController : MonoBehaviour
 
         if (inputDirection != Vector2Int.zero)
         {
-            Vector2Int nextCell = currentCell + inputDirection;//set the cell to move towards to your current cell plus the input direction
-            currentCoroutine = StartCoroutine(MoveRoutine(nextCell));// start moving
+            Vector2Int nextCell = currentCell + inputDirection;
+            Vector3Int nextCellV3 = new Vector3Int(nextCell.x, nextCell.y, 0);
+            
+            Vector2Int nextZone = ZoneManager.Instance.GetZoneCoordsFromTile(nextCellV3);
+            Vector2Int currentZone = ZoneManager.Instance.GetCurrentZone();
+
+            if (nextZone != currentZone)
+            {
+                // ONLY allow movement if the zone is already unlocked
+                if (ZoneManager.Instance.IsZoneUnlocked(nextZone))
+                {
+                    ZoneManager.Instance.SetCurrentZone(nextZone);
+                    currentCoroutine = StartCoroutine(MoveRoutine(nextCell));
+                }
+                else
+                {
+                    Debug.Log("Zone is locked! Unlock it via the menu first.");
+                }
+            }
+            else
+            {
+                // Moving within the current zone is always allowed
+                currentCoroutine = StartCoroutine(MoveRoutine(nextCell));
+            }
         }
     }
 

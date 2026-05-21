@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Mine
   m_EditorClassIdentifier: Assembly-CSharp::BuildingData
   buildingName: Miner
+  icon: {fileID: -2789822334230586943, guid: 13ab4d01397525547b0555480de4266f, type: 3}
   description: Mines ore and must be placed on ore patch, has input on 3 sides and
     output on 1
   rotatedTiles:

@@ -9,26 +9,77 @@ public class InventoryUIItemButton : MonoBehaviour, IPointerEnterHandler, IPoint
     public TMP_Text priceText;
     public PlacementManager placementManager;
 
-    private void Start()
+    public TMP_Text countText;
+
+    private void OnEnable()
     {
-        if (buildingData != null && priceText != null)
+        if (InventoryManager.Instance != null)
         {
-            var ajustedPrice = buildingData.cost * CurrencyManager.Instance.exchangeRate;
-            priceText.text = "$" + ajustedPrice;
+            InventoryManager.Instance.onInventoryChange += RefreshUI;
         }
     }
 
-    // Attach this to a Button's OnClick event in the Inspector
-    // Drag the specific BuildingData asset into the parameter slot
-    public void SelectBuilding(BuildingData data)
+    private void OnDisable()
     {
-        if (data != null)
+        if (InventoryManager.Instance != null)
         {
-            placementManager.ChangeSelection(data);
+            InventoryManager.Instance.onInventoryChange -= RefreshUI;
         }
-        else if (buildingData != null)
+    }
+
+    private void Start()
+    {
+        RefreshUI();
+    }
+
+    public void RefreshUI()
+    {
+        if (buildingData != null)
         {
-            placementManager.ChangeSelection(buildingData);
+            if (priceText != null)
+            {
+                var adjustedPrice = buildingData.cost * CurrencyManager.Instance.exchangeRate;
+                priceText.text = "$" + adjustedPrice;
+            }
+
+            if (countText != null)
+            {
+                InventoryManager.InventoryItem item = InventoryManager.Instance.items.Find(i => i.data == buildingData);
+                countText.text = item != null ? item.count.ToString() : "0";
+            }
+        }
+    }
+
+    // This is now purely for the STORE
+    public void PurchaseBuilding()
+    {
+        if (buildingData == null) return;
+
+        float cost = buildingData.cost * CurrencyManager.Instance.exchangeRate;
+        if (CurrencyManager.Instance.currentCurrencyValue >= cost)
+        {
+            CurrencyManager.Instance.RemoveCurrency(buildingData.cost);
+            InventoryManager.Instance.AddBuilding(buildingData, 1);
+            
+            // Auto-assign to first empty hotbar slot if it's the first time buying
+            bool alreadyInHotbar = false;
+            int emptySlot = -1;
+            for (int i = 0; i < HotbarManager.Instance.slotCount; i++)
+            {
+                if (HotbarManager.Instance.Slots[i] == buildingData) alreadyInHotbar = true;
+                if (emptySlot == -1 && HotbarManager.Instance.Slots[i] == null) emptySlot = i;
+            }
+
+            if (!alreadyInHotbar && emptySlot != -1)
+            {
+                HotbarManager.Instance.AssignToSlot(emptySlot, buildingData);
+            }
+
+            RefreshUI();
+        }
+        else
+        {
+            Debug.Log("Not enough currency to buy " + buildingData.buildingName);
         }
     }
 
