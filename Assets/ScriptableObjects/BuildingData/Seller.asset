@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Seller
   m_EditorClassIdentifier: Assembly-CSharp::Buildings.BuildingData
   buildingName: Seller
+  icon: {fileID: 21300000, guid: 7d601899bd3f5594c9274d06d3d96d0d, type: 3}
   description: Sells items and can have input from all 4 sides
   rotatedTiles:
   - {fileID: 11400000, guid: 630da3bd71b705b419eba5725d2c268e, type: 2}
