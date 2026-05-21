@@ -91,10 +91,10 @@ public class ZoneManager : SingletonBase<ZoneManager>
     }
 
     // Methods for UI Buttons to call directly
-    public void UnlockNorth() => TryUnlockZone(currentZone + Vector2Int.up);
-    public void UnlockSouth() => TryUnlockZone(currentZone + Vector2Int.down);
-    public void UnlockEast() => TryUnlockZone(currentZone + Vector2Int.right);
-    public void UnlockWest() => TryUnlockZone(currentZone + Vector2Int.left);
+    public bool UnlockNorth() => TryUnlockZone(currentZone + Vector2Int.up);
+    public bool UnlockSouth() => TryUnlockZone(currentZone + Vector2Int.down);
+    public bool UnlockEast() => TryUnlockZone(currentZone + Vector2Int.right);
+    public bool UnlockWest() => TryUnlockZone(currentZone + Vector2Int.left);
 
     public float GetUnlockCost()
     {

@@ -11,16 +11,26 @@ public class ZoneUiManager : MonoBehaviour
 
     void Start()
     {
-        northButton?.onClick.AddListener(() => ZoneManager.Instance.UnlockNorth());
-        southButton?.onClick.AddListener(() => ZoneManager.Instance.UnlockSouth());
-        eastButton?.onClick.AddListener(() => ZoneManager.Instance.UnlockEast());
-        westButton?.onClick.AddListener(() => ZoneManager.Instance.UnlockWest());
+        // Attach dynamic feedback and click logic to the zone buttons
+        SetupZoneButton(northButton, UiZoneButton.Direction.North);
+        SetupZoneButton(southButton, UiZoneButton.Direction.South);
+        SetupZoneButton(eastButton, UiZoneButton.Direction.East);
+        SetupZoneButton(westButton, UiZoneButton.Direction.West);
         
         // Removed dynamic text updates as per request
         SetStaticText(northButton, "Unlock North");
         SetStaticText(southButton, "Unlock South");
         SetStaticText(eastButton, "Unlock East");
         SetStaticText(westButton, "Unlock West");
+    }
+
+    void SetupZoneButton(Button button, UiZoneButton.Direction dir)
+    {
+        if (button != null)
+        {
+            UiZoneButton zb = button.gameObject.AddComponent<UiZoneButton>();
+            zb.direction = dir;
+        }
     }
 
     void SetStaticText(Button button, string text)
