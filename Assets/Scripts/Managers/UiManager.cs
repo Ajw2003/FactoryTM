@@ -10,9 +10,9 @@ public class UiManager : SingletonBase<UiManager>
    public GameObject tooltipPanel;
    public TMP_Text tooltipText;
    public GameObject StorePanel;
+   public GameObject HotbarPanel; // New reference
    private RectTransform tooltipRect;
-   bool flip = true;
-   
+   bool flip = false; // Start closed
 
    protected override void Awake()
    {
@@ -22,6 +22,10 @@ public class UiManager : SingletonBase<UiManager>
          tooltipRect = tooltipPanel.GetComponent<RectTransform>();
          tooltipPanel.SetActive(false);
       }
+      
+      // Ensure initial state
+      if (StorePanel != null) StorePanel.SetActive(flip);
+      if (HotbarPanel != null) HotbarPanel.SetActive(!flip);
    }
 
    private void Update()
@@ -33,9 +37,9 @@ public class UiManager : SingletonBase<UiManager>
       
       if (Input.GetKeyDown(KeyCode.E))
       {
-         
          flip = !flip;
-         StorePanel.SetActive(flip);
+         if (StorePanel != null) StorePanel.SetActive(flip);
+         if (HotbarPanel != null) HotbarPanel.SetActive(!flip); // Close Hotbar when Store is open
       }
    }
 
