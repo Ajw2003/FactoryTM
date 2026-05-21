@@ -13,13 +13,25 @@ public class UiItemButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     public TMP_Text countText;
 
     private Vector3 originalScale;
+    private Color originalColor = Color.white;
     private Coroutine feedbackCoroutine;
+
+    private void Awake()
+    {
+        originalScale = transform.localScale;
+        Image img = GetComponent<Image>();
+        if (img != null) originalColor = img.color;
+    }
 
     private void OnEnable()
     {
         if (InventoryManager.Instance != null)
         {
             InventoryManager.Instance.onInventoryChange += RefreshUI;
+        }
+        if (CurrencyManager.Instance != null)
+        {
+            CurrencyManager.Instance.onCurrencyChange += RefreshUI;
         }
     }
 
@@ -29,11 +41,14 @@ public class UiItemButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         {
             InventoryManager.Instance.onInventoryChange -= RefreshUI;
         }
+        if (CurrencyManager.Instance != null)
+        {
+            CurrencyManager.Instance.onCurrencyChange -= RefreshUI;
+        }
     }
 
     private void Start()
     {
-        originalScale = transform.localScale;
         RefreshUI();
     }
 
@@ -52,7 +67,40 @@ public class UiItemButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
                 InventoryManager.InventoryItem item = InventoryManager.Instance.items.Find(i => i.data == buildingData);
                 countText.text = item != null ? item.count.ToString() : "0";
             }
+
+            UpdateAffordabilityColor();
         }
+    }
+
+    private void UpdateAffordabilityColor()
+    {
+        Image img = GetComponent<Image>();
+        if (img == null || buildingData == null || CurrencyManager.Instance == null) return;
+
+        Color targetColor = GetTargetColor();
+        if (feedbackCoroutine == null)
+        {
+            img.color = targetColor;
+        }
+    }
+
+    private Color GetTargetColor()
+    {
+        if (buildingData == null || CurrencyManager.Instance == null) return originalColor;
+        float cost = buildingData.cost * CurrencyManager.Instance.exchangeRate;
+        bool canAfford = CurrencyManager.Instance.currentCurrencyValue >= cost;
+        return canAfford ? originalColor : new Color(1f, 0.45f, 0.45f, 1f); // soft vibrant red tint for unaffordable
+    }
+
+    private void StopActiveCoroutine()
+    {
+        if (feedbackCoroutine != null)
+        {
+            StopCoroutine(feedbackCoroutine);
+            feedbackCoroutine = null;
+        }
+        transform.localScale = originalScale;
+        transform.localRotation = Quaternion.identity;
     }
 
     // This is now purely for the STORE
@@ -83,7 +131,7 @@ public class UiItemButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             RefreshUI();
 
             // Visual feedback for successful purchase
-            if (feedbackCoroutine != null) StopCoroutine(feedbackCoroutine);
+            StopActiveCoroutine();
             feedbackCoroutine = StartCoroutine(PunchScaleAndColor());
             SpawnFloatingText("+1", new Color(0.2f, 0.9f, 0.2f, 1f));
         }
@@ -91,7 +139,7 @@ public class UiItemButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         {
             Debug.Log("Not enough currency to buy " + buildingData.buildingName);
             // Visual feedback for failed purchase (insufficient funds)
-            if (feedbackCoroutine != null) StopCoroutine(feedbackCoroutine);
+            StopActiveCoroutine();
             feedbackCoroutine = StartCoroutine(ShakeAndRedFlash());
         }
     }
@@ -155,7 +203,7 @@ public class UiItemButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         float elapsed = 0f;
         
         Image img = GetComponent<Image>();
-        Color originalColor = img != null ? img.color : Color.white;
+        Color startColor = img != null ? img.color : originalColor;
         Color flashColor = new Color(0.7f, 1f, 0.7f, 1f); // soft mint green highlight
         
         while (elapsed < duration)
@@ -177,17 +225,19 @@ public class UiItemButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             // Color flash interpolation
             if (img != null)
             {
+                Color endColor = GetTargetColor();
                 if (t < 0.3f)
-                    img.color = Color.Lerp(originalColor, flashColor, t / 0.3f);
+                    img.color = Color.Lerp(startColor, flashColor, t / 0.3f);
                 else
-                    img.color = Color.Lerp(flashColor, originalColor, (t - 0.3f) / 0.7f);
+                    img.color = Color.Lerp(flashColor, endColor, (t - 0.3f) / 0.7f);
             }
             
             yield return null;
         }
         
         transform.localScale = originalScale;
-        if (img != null) img.color = originalColor;
+        if (img != null) img.color = GetTargetColor();
+        feedbackCoroutine = null;
     }
 
     private System.Collections.IEnumerator ShakeAndRedFlash()
@@ -196,8 +246,8 @@ public class UiItemButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         float elapsed = 0f;
         
         Image img = GetComponent<Image>();
-        Color originalColor = img != null ? img.color : Color.white;
-        Color failColor = new Color(1f, 0.6f, 0.6f, 1f); // soft light red/coral
+        Color startColor = img != null ? img.color : originalColor;
+        Color failColor = new Color(1f, 0.3f, 0.3f, 1f); // vibrant red flash
         
         while (elapsed < duration)
         {
@@ -211,17 +261,19 @@ public class UiItemButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             // Color flash
             if (img != null)
             {
+                Color endColor = GetTargetColor();
                 if (t < 0.2f)
-                    img.color = Color.Lerp(originalColor, failColor, t / 0.2f);
+                    img.color = Color.Lerp(startColor, failColor, t / 0.2f);
                 else
-                    img.color = Color.Lerp(failColor, originalColor, (t - 0.2f) / 0.8f);
+                    img.color = Color.Lerp(failColor, endColor, (t - 0.2f) / 0.8f);
             }
             
             yield return null;
         }
         
         transform.localRotation = Quaternion.identity;
-        if (img != null) img.color = originalColor;
+        if (img != null) img.color = GetTargetColor();
+        feedbackCoroutine = null;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
