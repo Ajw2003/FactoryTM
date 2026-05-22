@@ -33,5 +33,12 @@ public class GridManager : SingletonBase<GridManager>
         var sizex = GameManager.Instance.buildingTilemap.size.x;
         var sizey = GameManager.Instance.buildingTilemap.size.y;
         gridSize = new Vector2Int(sizex, sizey);
+
+        // Dynamically center on the center of the starting zone (0, 0) if ZoneManager is present
+        if (ZoneManager.Instance != null)
+        {
+            Vector2Int zoneSize = ZoneManager.Instance.zoneSizeInTiles;
+            center = new Vector2Int(zoneSize.x / 2, zoneSize.y / 2);
+        }
     }
 }

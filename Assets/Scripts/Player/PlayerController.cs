@@ -17,8 +17,21 @@ public class PlayerController : SingletonBase<PlayerController>
 
     private void Start()
     {
-        var center = GridManager.Instance.center;
-        currentCell = GridManager.Instance.WorldToCellConversion(center);
+        Vector2 spawnPos = Vector2.zero;
+        if (ZoneManager.Instance != null && ZoneManager.Instance.mainCamera != null)
+        {
+            spawnPos = ZoneManager.Instance.mainCamera.transform.position;
+        }
+        else if (Camera.main != null)
+        {
+            spawnPos = Camera.main.transform.position;
+        }
+        else if (GridManager.Instance != null)
+        {
+            spawnPos = GridManager.Instance.center;
+        }
+
+        currentCell = GridManager.Instance.WorldToCellConversion(spawnPos);
         transform.position = GridManager.Instance.CellToWorldConversion(currentCell);
         targetPosition = transform.position;
     }

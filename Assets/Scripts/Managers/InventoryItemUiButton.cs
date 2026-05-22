@@ -2,9 +2,8 @@ using Buildings;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 
-public class UiItemButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class UiItemButton : MonoBehaviour
 {
     public BuildingData buildingData;
     public TMP_Text priceText;
@@ -274,18 +273,5 @@ public class UiItemButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         transform.localRotation = Quaternion.identity;
         if (img != null) img.color = GetTargetColor();
         feedbackCoroutine = null;
-    }
-
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        if (buildingData != null && !string.IsNullOrEmpty(buildingData.description))
-        {
-            UiManager.Instance.ShowTooltip(buildingData.description);
-        }
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        UiManager.Instance.HideTooltip();
     }
 }
