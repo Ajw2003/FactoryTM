@@ -146,6 +146,7 @@ GameObject:
   - component: {fileID: 376557036}
   - component: {fileID: 376557038}
   - component: {fileID: 376557037}
+  - component: {fileID: 376557040}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -188,7 +189,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 10
+  orthographic size: 8.4375
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -271,6 +272,30 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1340543982}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &376557040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 376557035}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c88f5cead0c0b2a4eb05b5900433f8d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.2D.Runtime::UnityEngine.Rendering.Universal.PixelPerfectCamera
+  m_ComponentVersion: 1
+  m_AssetsPPU: 32
+  m_RefResolutionX: 960
+  m_RefResolutionY: 540
+  m_CropFrame: 0
+  m_GridSnapping: 0
+  m_FilterMode: 0
+  m_UpscaleRT: 0
+  m_PixelSnapping: 0
+  m_CropFrameX: 0
+  m_CropFrameY: 0
+  m_StretchFill: 0
 --- !u!4 &507881064 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6031304800165257802, guid: ab6bf33c51d90fa4bb6d7be624833602, type: 3}
@@ -401,6 +426,34 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 1772957233708479465, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
+      propertyPath: m_fontSize
+      value: 44
+      objectReference: {fileID: 0}
+    - target: {fileID: 1772957233708479465, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
+      propertyPath: m_margin.w
+      value: -11.3195305
+      objectReference: {fileID: 0}
+    - target: {fileID: 1772957233708479465, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 44
+      objectReference: {fileID: 0}
+    - target: {fileID: 6479440762042531696, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6479440762042531696, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6479440762042531696, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6479440762042531696, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -44
+      objectReference: {fileID: 0}
     - target: {fileID: 7360210087785447645, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -489,6 +542,18 @@ PrefabInstance:
       propertyPath: placementManager
       value: 
       objectReference: {fileID: 597463809}
+    - target: {fileID: 9184700865328710971, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9184700865328710971, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9184700865328710971, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1410
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -934,6 +999,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: HotbarManager
       objectReference: {fileID: 0}
+    - target: {fileID: 4105205993159947160, guid: 82530a9632d7ed54886f4ae9a8bbafb2, type: 3}
+      propertyPath: slotCount
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1346,6 +1415,10 @@ PrefabInstance:
       propertyPath: mainCamera
       value: 
       objectReference: {fileID: 376557036}
+    - target: {fileID: 596444704922865151, guid: ea4e366a7e7d72b41bbc41d8aa5939ac, type: 3}
+      propertyPath: panDuration
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 1062398598004397836, guid: ea4e366a7e7d72b41bbc41d8aa5939ac, type: 3}
       propertyPath: m_Name
       value: ZoneManager
