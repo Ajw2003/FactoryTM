@@ -15,6 +15,11 @@ public class ZoneManager : SingletonBase<ZoneManager>
     private HashSet<Vector2Int> unlockedZones = new HashSet<Vector2Int>();
     private Vector2Int currentZone = Vector2Int.zero;
 
+    public delegate void OnZoneUnlock();
+    public event OnZoneUnlock onZoneUnlock;
+
+    public int UnlockedZonesCount => unlockedZones.Count;
+
     protected override void Awake()
     {
         base.Awake();
@@ -83,6 +88,7 @@ public class ZoneManager : SingletonBase<ZoneManager>
             CurrencyManager.Instance.RemoveCurrency(cost);
             unlockedZones.Add(targetZone);
             Debug.Log("Zone Unlocked: " + targetZone);
+            onZoneUnlock?.Invoke();
             return true;
         }
         

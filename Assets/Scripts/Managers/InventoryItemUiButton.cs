@@ -32,6 +32,10 @@ public class UiItemButton : MonoBehaviour
         {
             CurrencyManager.Instance.onCurrencyChange += RefreshUI;
         }
+        if (ZoneManager.Instance != null)
+        {
+            ZoneManager.Instance.onZoneUnlock += RefreshUI;
+        }
     }
 
     private void OnDisable()
@@ -44,6 +48,10 @@ public class UiItemButton : MonoBehaviour
         {
             CurrencyManager.Instance.onCurrencyChange -= RefreshUI;
         }
+        if (ZoneManager.Instance != null)
+        {
+            ZoneManager.Instance.onZoneUnlock -= RefreshUI;
+        }
     }
 
     private void Start()
@@ -55,16 +63,34 @@ public class UiItemButton : MonoBehaviour
     {
         if (buildingData != null)
         {
+            bool isUnlocked = buildingData.IsUnlocked();
+
             if (priceText != null)
             {
-                var adjustedPrice = buildingData.cost * CurrencyManager.Instance.exchangeRate;
-                priceText.text = "$" + adjustedPrice;
+                if (isUnlocked)
+                {
+                    var adjustedPrice = buildingData.cost * CurrencyManager.Instance.exchangeRate;
+                    priceText.text = "$" + adjustedPrice;
+                }
+                else
+                {
+                    string reqs = buildingData.GetUnlockRequirementsText();
+                    string firstReq = reqs.Contains("\n") ? reqs.Split('\n')[0] : reqs;
+                    priceText.text = "LOCKED\n(" + firstReq + ")";
+                }
             }
 
             if (countText != null)
             {
-                InventoryManager.InventoryItem item = InventoryManager.Instance.items.Find(i => i.data == buildingData);
-                countText.text = item != null ? item.count.ToString() : "0";
+                if (isUnlocked)
+                {
+                    InventoryManager.InventoryItem item = InventoryManager.Instance.items.Find(i => i.data == buildingData);
+                    countText.text = item != null ? item.count.ToString() : "0";
+                }
+                else
+                {
+                    countText.text = "";
+                }
             }
 
             UpdateAffordabilityColor();
@@ -75,6 +101,12 @@ public class UiItemButton : MonoBehaviour
     {
         Image img = GetComponent<Image>();
         if (img == null || buildingData == null || CurrencyManager.Instance == null) return;
+
+        if (!buildingData.IsUnlocked())
+        {
+            img.color = new Color(0.25f, 0.25f, 0.25f, 0.6f);
+            return;
+        }
 
         Color targetColor = GetTargetColor();
         if (feedbackCoroutine == null)
@@ -106,6 +138,14 @@ public class UiItemButton : MonoBehaviour
     public void PurchaseBuilding()
     {
         if (buildingData == null) return;
+
+        if (!buildingData.IsUnlocked())
+        {
+            Debug.Log(buildingData.buildingName + " is locked!");
+            StopActiveCoroutine();
+            feedbackCoroutine = StartCoroutine(ShakeAndRedFlash());
+            return;
+        }
 
         float cost = buildingData.cost * CurrencyManager.Instance.exchangeRate;
         if (CurrencyManager.Instance.currentCurrencyValue >= cost)
