@@ -2,8 +2,9 @@ using Buildings;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class HotbarSlotUI : MonoBehaviour
+public class HotbarSlotUI : MonoBehaviour, IPointerClickHandler
 {
     public Image iconImage;
     public TMP_Text countText;
@@ -20,6 +21,19 @@ public class HotbarSlotUI : MonoBehaviour
     private void Awake()
     {
         originalScale = transform.localScale;
+    }
+
+    public void SetSlotIndex(int index)
+    {
+        slotIndex = index;
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (HotbarManager.Instance != null)
+        {
+            HotbarManager.Instance.SelectSlot(slotIndex);
+        }
     }
 
     public void UpdateSlot(BuildingData data, bool isSelected)

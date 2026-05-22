@@ -17,11 +17,12 @@ MonoBehaviour:
   description: Mines ore and must be placed on ore patch, has input on 3 sides and
     output on 1
   rotatedTiles:
-  - {fileID: 11400000, guid: 5734e72901f6ebc40be9d5eeb637a9f5, type: 2}
-  - {fileID: 11400000, guid: 57d166ac8e34e3e4ab5f62fe2562b7b3, type: 2}
-  - {fileID: 11400000, guid: b0e2ee65c43c5594ebb1dce22050365a, type: 2}
-  - {fileID: 11400000, guid: 6dcb9958f2ea9e049a92305649f61386, type: 2}
+  - {fileID: 11400000, guid: c733c83259c712446989513f5046b76a, type: 2}
+  - {fileID: 11400000, guid: 6e64391efd319d5489b8716c9299a202, type: 2}
+  - {fileID: 11400000, guid: 62f992754ed98f84097a13408f14d469, type: 2}
+  - {fileID: 11400000, guid: e1dfe3a20d102f84e8eefd5dc1946a82, type: 2}
   proccessingSpeed: 2
   itemPrefab: {fileID: 4074567141104984735, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
   cost: 10
   type: 1
+  unlockConditions: []

@@ -27,6 +27,7 @@ public class HotbarUI : MonoBehaviour
         {
             GameObject go = Instantiate(slotPrefab, slotContainer);
             slots[i] = go.GetComponent<HotbarSlotUI>();
+            slots[i].SetSlotIndex(i);
         }
         UpdateUI();
     }
