@@ -17,11 +17,12 @@ MonoBehaviour:
   description: Transports Items in direction of arrow, has input on 3 sides and output
     on 1
   rotatedTiles:
-  - {fileID: 11400000, guid: c00c26acda7ced84fae6789dd933e39c, type: 2}
-  - {fileID: 11400000, guid: 3270a9b94af0a984ab2c5bd521a530a6, type: 2}
-  - {fileID: 11400000, guid: 39e6b8629f6be2b488fe0e6479812e1b, type: 2}
-  - {fileID: 11400000, guid: d17662800783b5742b052a714e363069, type: 2}
+  - {fileID: 11400000, guid: b63630aefcd2cb4419610efd8e015268, type: 2}
+  - {fileID: 11400000, guid: 9fec515c79c33464aa1e422aa5f64adf, type: 2}
+  - {fileID: 11400000, guid: 460cf8c504d625041a0c6ef960f162a6, type: 2}
+  - {fileID: 11400000, guid: b7664cde197f7da40bdcd86fce36d9e3, type: 2}
   proccessingSpeed: 2
   itemPrefab: {fileID: 0}
   cost: 1
   type: 3
+  unlockConditions: []
