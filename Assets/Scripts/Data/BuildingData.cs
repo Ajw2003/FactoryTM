@@ -1,8 +1,67 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 namespace Buildings
 {
+    [System.Serializable]
+    public class BuildingUnlockCondition
+    {
+        public enum ConditionType
+        {
+            None,
+            CurrencyReached,
+            TotalZonesUnlocked,
+            BuildingOwnedCount,
+            BuildingPlacedCount
+        }
+
+        public ConditionType type;
+        public float targetValue;
+        public BuildingData requiredBuilding;
+        [TextArea(2, 5)]
+        public string conditionDescription;
+
+        public bool IsMet()
+        {
+            switch (type)
+            {
+                case ConditionType.CurrencyReached:
+                    if (CurrencyManager.Instance != null)
+                    {
+                        return CurrencyManager.Instance.currentCurrencyValue >= targetValue;
+                    }
+                    return false;
+
+                case ConditionType.TotalZonesUnlocked:
+                    if (ZoneManager.Instance != null)
+                    {
+                        return ZoneManager.Instance.UnlockedZonesCount >= targetValue;
+                    }
+                    return false;
+
+                case ConditionType.BuildingOwnedCount:
+                    if (InventoryManager.Instance != null && requiredBuilding != null)
+                    {
+                        InventoryManager.InventoryItem item = InventoryManager.Instance.items.Find(i => i.data == requiredBuilding);
+                        int count = item != null ? item.count : 0;
+                        return count >= targetValue;
+                    }
+                    return false;
+
+                case ConditionType.BuildingPlacedCount:
+                    if (BuildingManager.Instance != null && requiredBuilding != null)
+                    {
+                        return BuildingManager.Instance.GetBuildingCount(requiredBuilding) >= targetValue;
+                    }
+                    return false;
+
+                default:
+                    return true;
+            }
+        }
+    }
+
     [CreateAssetMenu(fileName = "New Building", menuName = "Construction/Building")]
     public class BuildingData : ScriptableObject
     {
@@ -15,6 +74,68 @@ namespace Buildings
         public GameObject itemPrefab; // The "Resource" it creates
         public int cost;
         public BuildingType type;
+
+        [Header("Unlock Requirements")]
+        public List<BuildingUnlockCondition> unlockConditions = new List<BuildingUnlockCondition>();
+
+        public bool IsUnlocked()
+        {
+            if (unlockConditions == null || unlockConditions.Count == 0)
+            {
+                return true;
+            }
+
+            foreach (var condition in unlockConditions)
+            {
+                if (!condition.IsMet())
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public string GetUnlockRequirementsText()
+        {
+            if (unlockConditions == null || unlockConditions.Count == 0)
+            {
+                return "";
+            }
+
+            List<string> requirements = new List<string>();
+            foreach (var condition in unlockConditions)
+            {
+                if (!condition.IsMet())
+                {
+                    if (!string.IsNullOrEmpty(condition.conditionDescription))
+                    {
+                        requirements.Add(condition.conditionDescription);
+                    }
+                    else
+                    {
+                        requirements.Add(GetDefaultDescription(condition));
+                    }
+                }
+            }
+            return string.Join("\n", requirements);
+        }
+
+        private string GetDefaultDescription(BuildingUnlockCondition condition)
+        {
+            switch (condition.type)
+            {
+                case BuildingUnlockCondition.ConditionType.CurrencyReached:
+                    return $"Reach ${condition.targetValue}";
+                case BuildingUnlockCondition.ConditionType.TotalZonesUnlocked:
+                    return $"Unlock {condition.targetValue} zones";
+                case BuildingUnlockCondition.ConditionType.BuildingOwnedCount:
+                    return $"Own {condition.targetValue}x {condition.requiredBuilding.buildingName}";
+                case BuildingUnlockCondition.ConditionType.BuildingPlacedCount:
+                    return $"Place {condition.targetValue}x {condition.requiredBuilding.buildingName}";
+                default:
+                    return "Locked";
+            }
+        }
     }
 
     public enum BuildingType

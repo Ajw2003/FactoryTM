@@ -16,6 +16,19 @@ public class BuildingManager : SingletonBase<BuildingManager>
         buildings.Remove(building);
     }
 
+    public int GetBuildingCount(Buildings.BuildingData data)
+    {
+        int count = 0;
+        for (int i = 0; i < buildings.Count; i++)
+        {
+            if (buildings[i] != null && buildings[i].data == data)
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
     private void Update()
     {
         for (int i = 0; i < buildings.Count; i++)
