@@ -1,0 +1,462 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using DG.Tweening;
+using System.Collections.Generic;
+using System.Collections;
+using UnityEngine.EventSystems;
+
+public class StoreUiScript : MonoBehaviour
+{
+    private CanvasGroup canvasGroup;
+    private RectTransform rectTransform;
+    
+    // UI elements we'll create/find programmatically
+    private Image bgImage;
+    private Image scanlineOverlay;
+    private Image vignetteOverlay;
+    
+    // Right terminal panel log text
+    private TMP_Text terminalLogText;
+    private ScrollRect terminalScroll;
+    private List<string> activeLogs = new List<string>();
+    private bool isTypingLog = false;
+    private string logBuffer = "";
+    
+    // Blinking cursor
+    private float cursorTimer = 0f;
+    private bool cursorVisible = true;
+    private string cursorChar = "█"; // Retro terminal cursor block
+    
+    private List<Button> storeButtons = new List<Button>();
+    private Dictionary<Button, Vector3> buttonOriginalScales = new Dictionary<Button, Vector3>();
+    private Dictionary<Button, TMP_Text> buttonTexts = new Dictionary<Button, TMP_Text>();
+    private Dictionary<Button, string> buttonOriginalTexts = new Dictionary<Button, string>();
+    
+    private void Awake()
+    {
+        rectTransform = GetComponent<RectTransform>();
+        canvasGroup = GetComponent<CanvasGroup>();
+        if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        
+        SetupTerminalAesthetics();
+    }
+    
+    private void Start()
+    {
+        // Add click listeners to store buttons for terminal feedback
+        FindAndHookButtons();
+    }
+    
+    private void Update()
+    {
+        // Blinking terminal cursor
+        cursorTimer += Time.unscaledDeltaTime;
+        if (cursorTimer >= 0.4f)
+        {
+            cursorTimer = 0f;
+            cursorVisible = !cursorVisible;
+            UpdateLogDisplay();
+        }
+    }
+    
+    private void SetupTerminalAesthetics()
+    {
+        // 1. Force the StorePanel to cover the entire screen
+        rectTransform.anchorMin = Vector2.zero;
+        rectTransform.anchorMax = Vector2.one;
+        rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        rectTransform.offsetMin = Vector2.zero;
+        rectTransform.offsetMax = Vector2.zero;
+        
+        // 2. Add full screen solid background to obfuscate game scene
+        GameObject bgGo = new GameObject("Terminal_Background", typeof(RectTransform), typeof(Image));
+        bgGo.transform.SetParent(transform, false);
+        bgGo.transform.SetAsFirstSibling();
+        
+        RectTransform bgRt = bgGo.GetComponent<RectTransform>();
+        bgRt.anchorMin = Vector2.zero;
+        bgRt.anchorMax = Vector2.one;
+        bgRt.offsetMin = Vector2.zero;
+        bgRt.offsetMax = Vector2.zero;
+        
+        bgImage = bgGo.GetComponent<Image>();
+        // Pure dark retro CRT black-green tint
+        bgImage.color = new Color(0.02f, 0.04f, 0.02f, 1f);
+        
+        // Create an inner grid line effect
+        GameObject gridGo = new GameObject("Terminal_GridLines", typeof(RectTransform), typeof(Image));
+        gridGo.transform.SetParent(transform, false);
+        gridGo.transform.SetSiblingIndex(1);
+        RectTransform gridRt = gridGo.GetComponent<RectTransform>();
+        gridRt.anchorMin = Vector2.zero;
+        gridRt.anchorMax = Vector2.one;
+        gridRt.offsetMin = new Vector2(20f, 20f);
+        gridRt.offsetMax = new Vector2(-20f, -20f);
+        Image gridImg = gridGo.GetComponent<Image>();
+        gridImg.color = new Color(0.1f, 0.25f, 0.1f, 0.05f); // Subtle grid opacity
+        
+        // 3. Create Scanline overlay
+        GameObject scanlineGo = new GameObject("Terminal_Scanlines", typeof(RectTransform), typeof(Image));
+        scanlineGo.transform.SetParent(transform, false);
+        scanlineGo.transform.SetSiblingIndex(2);
+        
+        RectTransform scanlineRt = scanlineGo.GetComponent<RectTransform>();
+        scanlineRt.anchorMin = new Vector2(0f, 0f);
+        scanlineRt.anchorMax = new Vector2(1f, 0.02f); // Thin horizontal band
+        scanlineRt.anchoredPosition = Vector2.zero;
+        
+        scanlineOverlay = scanlineGo.GetComponent<Image>();
+        scanlineOverlay.color = new Color(0.1f, 0.8f, 0.1f, 0.07f);
+        
+        // Tween the scanline down the screen continuously
+        scanlineRt.anchorMin = new Vector2(0f, 1f);
+        scanlineRt.anchorMax = new Vector2(1f, 1.02f);
+        scanlineRt.DOAnchorMin(new Vector2(0f, -0.05f), 4.5f).SetEase(Ease.Linear).SetLoops(-1, LoopType.Restart).SetUpdate(true);
+        scanlineRt.DOAnchorMax(new Vector2(1f, -0.03f), 4.5f).SetEase(Ease.Linear).SetLoops(-1, LoopType.Restart).SetUpdate(true);
+        
+        // 4. Vignette overlay for retro CRT curvature shadow
+        GameObject vignetteGo = new GameObject("Terminal_Vignette", typeof(RectTransform), typeof(Image));
+        vignetteGo.transform.SetParent(transform, false);
+        vignetteGo.transform.SetSiblingIndex(3);
+        RectTransform vigRt = vignetteGo.GetComponent<RectTransform>();
+        vigRt.anchorMin = Vector2.zero;
+        vigRt.anchorMax = Vector2.one;
+        vigRt.offsetMin = Vector2.zero;
+        vigRt.offsetMax = Vector2.zero;
+        vignetteOverlay = vignetteGo.GetComponent<Image>();
+        vignetteOverlay.raycastTarget = false;
+        
+        // Let's draw a programmatic radial black gradient for the CRT glass look
+        Texture2D vignetteTex = new Texture2D(128, 128);
+        for (int y = 0; y < 128; y++)
+        {
+            for (int x = 0; x < 128; x++)
+            {
+                float dx = (x - 64f) / 64f;
+                float dy = (y - 64f) / 64f;
+                float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                float alpha = Mathf.SmoothStep(0f, 0.75f, dist);
+                vignetteTex.SetPixel(x, y, new Color(0f, 0.03f, 0f, alpha));
+            }
+        }
+        vignetteTex.Apply();
+        vignetteOverlay.sprite = Sprite.Create(vignetteTex, new Rect(0, 0, 128, 128), new Vector2(0.5f, 0.5f));
+        
+        // 5. Layout existing UI elements on the LEFT
+        // Find existing buttons and reposition them in a terminal grid layout
+        LayoutItemGrid();
+        
+        // 6. Create Right Console/Terminal log output
+        CreateTerminalConsole();
+    }
+    
+    private void LayoutItemGrid()
+    {
+        // We find all direct or nested children of StorePanel that are buttons, excluding our generated objects
+        Button[] buttons = GetComponentsInChildren<Button>(true);
+        float startY = 300f;
+        float spacingY = -110f;
+        int index = 0;
+        
+        foreach (Button btn in buttons)
+        {
+            storeButtons.Add(btn);
+            RectTransform btnRt = btn.GetComponent<RectTransform>();
+            
+            // Re-style buttons to look like terminal terminals
+            Image btnImg = btn.GetComponent<Image>();
+            if (btnImg != null)
+            {
+                btnImg.color = new Color(0.05f, 0.15f, 0.05f, 0.85f);
+                Outline outline = btn.gameObject.GetComponent<Outline>();
+                if (outline == null) outline = btn.gameObject.AddComponent<Outline>();
+                outline.effectColor = new Color(0.1f, 0.8f, 0.1f, 0.5f);
+                outline.effectDistance = new Vector2(2f, 2f);
+            }
+            
+            // Align to left side of screen
+            btnRt.anchorMin = new Vector2(0.1f, 0.5f);
+            btnRt.anchorMax = new Vector2(0.45f, 0.5f);
+            btnRt.pivot = new Vector2(0.5f, 0.5f);
+            btnRt.anchoredPosition = new Vector2(0f, startY + (index * spacingY));
+            btnRt.sizeDelta = new Vector2(btnRt.sizeDelta.x, 90f);
+            
+            TMP_Text txt = btn.GetComponentInChildren<TMP_Text>();
+            if (txt != null)
+            {
+                txt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
+                buttonTexts[btn] = txt;
+                buttonOriginalTexts[btn] = txt.text;
+            }
+            
+            buttonOriginalScales[btn] = btn.transform.localScale;
+            
+            // Hook up pointer animations
+            AddHoverAnimations(btn);
+            
+            index++;
+        }
+    }
+    
+    private void CreateTerminalConsole()
+    {
+        // Create panel for the console log
+        GameObject consolePanel = new GameObject("Terminal_Console_Panel", typeof(RectTransform), typeof(Image));
+        consolePanel.transform.SetParent(transform, false);
+        consolePanel.transform.SetSiblingIndex(4);
+        
+        RectTransform consoleRt = consolePanel.GetComponent<RectTransform>();
+        consoleRt.anchorMin = new Vector2(0.55f, 0.15f);
+        consoleRt.anchorMax = new Vector2(0.96f, 0.81f);
+        consoleRt.offsetMin = Vector2.zero;
+        consoleRt.offsetMax = Vector2.zero;
+        
+        Image consoleImg = consolePanel.GetComponent<Image>();
+        consoleImg.color = new Color(0.01f, 0.05f, 0.01f, 0.9f);
+        Outline outline = consolePanel.AddComponent<Outline>();
+        outline.effectColor = new Color(0.1f, 0.8f, 0.1f, 0.7f);
+        outline.effectDistance = new Vector2(2f, -2f);
+        
+        // Header bar
+        GameObject headerGo = new GameObject("Console_Header", typeof(RectTransform), typeof(Image));
+        headerGo.transform.SetParent(consolePanel.transform, false);
+        RectTransform headerRt = headerGo.GetComponent<RectTransform>();
+        headerRt.anchorMin = new Vector2(0f, 0.93f);
+        headerRt.anchorMax = new Vector2(1f, 1f);
+        headerRt.offsetMin = Vector2.zero;
+        headerRt.offsetMax = Vector2.zero;
+        Image headerImg = headerGo.GetComponent<Image>();
+        headerImg.color = new Color(0.1f, 0.3f, 0.1f, 0.6f);
+        
+        GameObject headerTextGo = new GameObject("Header_Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+        headerTextGo.transform.SetParent(headerGo.transform, false);
+        RectTransform htRt = headerTextGo.GetComponent<RectTransform>();
+        htRt.anchorMin = Vector2.zero;
+        htRt.anchorMax = Vector2.one;
+        htRt.offsetMin = new Vector2(10f, 0f);
+        htRt.offsetMax = Vector2.zero;
+        TextMeshProUGUI htTxt = headerTextGo.GetComponent<TextMeshProUGUI>();
+        htTxt.text = "SYS_MONITOR // DECK_04";
+        htTxt.color = new Color(0.2f, 1f, 0.2f, 1f);
+        htTxt.fontSize = 20;
+        htTxt.fontStyle = FontStyles.Bold;
+        htTxt.alignment = TextAlignmentOptions.Left;
+        
+        // Scroll view for the text
+        GameObject scrollGo = new GameObject("Console_Scroll", typeof(RectTransform), typeof(ScrollRect));
+        scrollGo.transform.SetParent(consolePanel.transform, false);
+        RectTransform scrollRt = scrollGo.GetComponent<RectTransform>();
+        scrollRt.anchorMin = new Vector2(0f, 0f);
+        scrollRt.anchorMax = new Vector2(1f, 0.92f);
+        scrollRt.offsetMin = new Vector2(15f, 15f);
+        scrollRt.offsetMax = new Vector2(-15f, -5f);
+        
+        terminalScroll = scrollGo.GetComponent<ScrollRect>();
+        terminalScroll.horizontal = false;
+        terminalScroll.vertical = true;
+        terminalScroll.movementType = ScrollRect.MovementType.Clamped;
+        
+        // Scroll content
+        GameObject contentGo = new GameObject("Console_Content", typeof(RectTransform), typeof(TextMeshProUGUI));
+        contentGo.transform.SetParent(scrollGo.transform, false);
+        RectTransform contentRt = contentGo.GetComponent<RectTransform>();
+        contentRt.anchorMin = new Vector2(0f, 0f);
+        contentRt.anchorMax = new Vector2(1f, 1f);
+        contentRt.offsetMin = Vector2.zero;
+        contentRt.offsetMax = Vector2.zero;
+        
+        terminalLogText = contentGo.GetComponent<TextMeshProUGUI>();
+        terminalLogText.color = new Color(0.2f, 1f, 0.2f, 1f);
+        terminalLogText.fontSize = 18;
+        terminalLogText.alignment = TextAlignmentOptions.BottomLeft;
+        terminalLogText.textWrappingMode = TextWrappingModes.Normal;
+        terminalLogText.text = "";
+        
+        terminalScroll.content = contentRt;
+    }
+    
+    private void AddHoverAnimations(Button btn)
+    {
+        EventTrigger trigger = btn.gameObject.GetComponent<EventTrigger>();
+        if (trigger == null) trigger = btn.gameObject.AddComponent<EventTrigger>();
+        
+        // Pointer Enter
+        EventTrigger.Entry entryEnter = new EventTrigger.Entry();
+        entryEnter.eventID = EventTriggerType.PointerEnter;
+        entryEnter.callback.AddListener((data) => {
+            btn.transform.DOScale(buttonOriginalScales[btn] * 1.05f, 0.15f).SetUpdate(true);
+            Image btnImg = btn.GetComponent<Image>();
+            if (btnImg != null) btnImg.DOColor(new Color(0.1f, 0.35f, 0.1f, 0.95f), 0.15f).SetUpdate(true);
+            
+            // Add brackets text styling e.g. "> ITEM NAME <"
+            if (buttonTexts.ContainsKey(btn))
+            {
+                buttonTexts[btn].text = "> " + buttonOriginalTexts[btn] + " <";
+                buttonTexts[btn].color = new Color(0.5f, 1f, 0.5f, 1f);
+            }
+        });
+        trigger.triggers.Add(entryEnter);
+        
+        // Pointer Exit
+        EventTrigger.Entry entryExit = new EventTrigger.Entry();
+        entryExit.eventID = EventTriggerType.PointerExit;
+        entryExit.callback.AddListener((data) => {
+            btn.transform.DOScale(buttonOriginalScales[btn], 0.15f).SetUpdate(true);
+            Image btnImg = btn.GetComponent<Image>();
+            if (btnImg != null) btnImg.DOColor(new Color(0.05f, 0.15f, 0.05f, 0.85f), 0.15f).SetUpdate(true);
+            
+            if (buttonTexts.ContainsKey(btn))
+            {
+                buttonTexts[btn].text = buttonOriginalTexts[btn];
+                buttonTexts[btn].color = new Color(0.2f, 0.9f, 0.2f, 1f);
+            }
+        });
+        trigger.triggers.Add(entryExit);
+    }
+    
+    private void FindAndHookButtons()
+    {
+        foreach (Button btn in storeButtons)
+        {
+            btn.onClick.AddListener(() => {
+                // Shake and color flash buttons on purchase trigger
+                btn.transform.DOComplete();
+                btn.transform.DOPunchScale(new Vector3(0.08f, -0.08f, 0.08f), 0.25f, 10, 1f).SetUpdate(true);
+                
+                string itemName = buttonOriginalTexts[btn];
+                LogCommand("EXECUTE_BUY: " + itemName.ToUpper());
+            });
+        }
+    }
+    
+    public void OpenStore()
+    {
+        // Kill existing transitions
+        rectTransform.DOComplete();
+        canvasGroup.DOComplete();
+        
+        // 1. Initial State: scale to a thin central line
+        rectTransform.localScale = new Vector3(1f, 0.002f, 1f);
+        canvasGroup.alpha = 0f;
+        gameObject.SetActive(true);
+        
+        // 2. Play boot animation sequence
+        Sequence bootSequence = DOTween.Sequence();
+        bootSequence.Append(canvasGroup.DOFade(1f, 0.12f))
+                    .Append(rectTransform.DOScaleY(1f, 0.35f).SetEase(Ease.OutExpo))
+                    .AppendCallback(() => {
+                        // Trigger screen glitch/flicker effect
+                        PlayFlickerGlitch();
+                        // Trigger terminal boot-up printout logs
+                        StartCoroutine(PlayBootLogs());
+                    });
+        
+        bootSequence.SetUpdate(true);
+    }
+    
+    public void CloseStore()
+    {
+        rectTransform.DOComplete();
+        canvasGroup.DOComplete();
+        
+        // Play collapse/shut down sequence
+        Sequence shutdownSequence = DOTween.Sequence();
+        shutdownSequence.Append(rectTransform.DOScaleY(0.003f, 0.25f).SetEase(Ease.InExpo))
+                        .Append(canvasGroup.DOFade(0f, 0.1f))
+                        .AppendCallback(() => {
+                            gameObject.SetActive(false);
+                        });
+        
+        shutdownSequence.SetUpdate(true);
+    }
+    
+    private void PlayFlickerGlitch()
+    {
+        // Simulates CRT flicker
+        Sequence flicker = DOTween.Sequence();
+        flicker.Append(canvasGroup.DOFade(0.7f, 0.04f))
+               .Append(canvasGroup.DOFade(1f, 0.03f))
+               .Append(canvasGroup.DOFade(0.85f, 0.05f))
+               .Append(canvasGroup.DOFade(1f, 0.04f))
+               .SetLoops(2)
+               .SetUpdate(true);
+    }
+    
+    private System.Collections.IEnumerator PlayBootLogs()
+    {
+        activeLogs.Clear();
+        terminalLogText.text = "";
+        
+        yield return new WaitForSecondsRealtime(0.08f);
+        yield return StartCoroutine(TypeLogLine("FACTORY INDUSTRIAL INT. DECK 04 v4.81"));
+        yield return new WaitForSecondsRealtime(0.12f);
+        yield return StartCoroutine(TypeLogLine("CONNECTING LOGS SYSTEM..."));
+        yield return new WaitForSecondsRealtime(0.15f);
+        yield return StartCoroutine(TypeLogLine("LOCAL NETWORK PROTOCOLS LOADED."));
+        yield return new WaitForSecondsRealtime(0.08f);
+        yield return StartCoroutine(TypeLogLine("GRID INTERRUPT: OK."));
+        yield return new WaitForSecondsRealtime(0.1f);
+        yield return StartCoroutine(TypeLogLine("SYS READY. TYPE COMMAND OR CLICK MODULES."));
+        yield return new WaitForSecondsRealtime(0.05f);
+        yield return StartCoroutine(TypeLogLine("========================================"));
+    }
+    
+    private System.Collections.IEnumerator TypeLogLine(string line)
+    {
+        isTypingLog = true;
+        logBuffer = line;
+        
+        string baseText = string.Join("\n", activeLogs);
+        if (activeLogs.Count > 0) baseText += "\n";
+        
+        float typeSpeed = 0.02f;
+        int charactersCount = line.Length;
+        
+        for (int i = 0; i <= charactersCount; i++)
+        {
+            string currentLineText = line.Substring(0, i);
+            terminalLogText.text = baseText + currentLineText + (cursorVisible ? cursorChar : "");
+            
+            // Auto scroll to bottom
+            Canvas.ForceUpdateCanvases();
+            if (terminalScroll != null) terminalScroll.verticalNormalizedPosition = 0f;
+            
+            yield return new WaitForSecondsRealtime(typeSpeed);
+        }
+        
+        activeLogs.Add(line);
+        // Keep logs compact
+        if (activeLogs.Count > 25) activeLogs.RemoveAt(0);
+        
+        isTypingLog = false;
+        UpdateLogDisplay();
+    }
+    
+    public void LogCommand(string cmd)
+    {
+        StartCoroutine(LogCommandRoutine(cmd));
+    }
+    
+    private System.Collections.IEnumerator LogCommandRoutine(string cmd)
+    {
+        yield return StartCoroutine(TypeLogLine("> " + cmd));
+        yield return new WaitForSecondsRealtime(0.05f);
+        
+        // Random factory status message response
+        string response = "COMMAND_OK. EXECUTING TRANSACTION...";
+        yield return StartCoroutine(TypeLogLine("SYS: " + response));
+    }
+    
+    private void UpdateLogDisplay()
+    {
+        if (isTypingLog) return;
+        
+        string baseText = string.Join("\n", activeLogs);
+        terminalLogText.text = baseText + (cursorVisible ? "\n" + cursorChar : "\n");
+        
+        // Keep scroll at bottom
+        Canvas.ForceUpdateCanvases();
+        if (terminalScroll != null) terminalScroll.verticalNormalizedPosition = 0f;
+    }
+}

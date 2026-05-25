@@ -26,7 +26,21 @@ public class UiManager : SingletonBase<UiManager>
       if (Input.GetKeyDown(KeyCode.E))
       {
          flip = !flip;
-         if (StorePanel != null) StorePanel.SetActive(flip);
+         if (StorePanel != null)
+         {
+            StoreUiScript storeUi = StorePanel.GetComponent<StoreUiScript>();
+            if (storeUi != null)
+            {
+               if (flip)
+                  storeUi.OpenStore();
+               else
+                  storeUi.CloseStore();
+            }
+            else
+            {
+               StorePanel.SetActive(flip);
+            }
+         }
       }
    }
 
