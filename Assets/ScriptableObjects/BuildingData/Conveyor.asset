@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Conveyor
   m_EditorClassIdentifier: Assembly-CSharp::BuildingData
   buildingName: Conveyor
-  icon: {fileID: 21300000, guid: d5101ff029be78543923c9025cdcd476, type: 3}
+  icon: {fileID: 264159828, guid: 2b6e8d5c843058f498ccb89bd47f1e90, type: 3}
   description: Transports Items in direction of arrow, has input on 3 sides and output
     on 1
   rotatedTiles:
