@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class CurrencyManager : SingletonBase<CurrencyManager>
 {
-    public float currentCurrencyValue;
-    public float exchangeRate;
+    public float currentCurrencyValue = 40000;
+    public float exchangeRate = 200;
 
     public delegate void OnCurrencyChange();
     public event OnCurrencyChange onCurrencyChange;

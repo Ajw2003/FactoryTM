@@ -78,10 +78,21 @@ namespace Buildings
         [Header("Unlock Requirements")]
         public List<BuildingUnlockCondition> unlockConditions = new List<BuildingUnlockCondition>();
 
+        [System.NonSerialized]
+        private bool _isUnlockedCached = false;
+
+        private void OnEnable()
+        {
+            _isUnlockedCached = false;
+        }
+
         public bool IsUnlocked()
         {
+            if (_isUnlockedCached) return true;
+
             if (unlockConditions == null || unlockConditions.Count == 0)
             {
+                _isUnlockedCached = true;
                 return true;
             }
 
@@ -92,12 +103,14 @@ namespace Buildings
                     return false;
                 }
             }
+
+            _isUnlockedCached = true;
             return true;
         }
 
         public string GetUnlockRequirementsText()
         {
-            if (unlockConditions == null || unlockConditions.Count == 0)
+            if (IsUnlocked() || unlockConditions == null || unlockConditions.Count == 0)
             {
                 return "";
             }
