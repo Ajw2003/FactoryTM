@@ -13,13 +13,16 @@ namespace Singleton
               // If the instance is not already set, create a new instance
               if (_instance == null)               
               {                    
-                               
-                  var singletonObject = new GameObject(typeof(T).Name);                    
-                               
-                  _instance = singletonObject.AddComponent<T>();                   
-                               
-                  DontDestroyOnLoad(singletonObject); // Make sure the singleton instance persists across scene loads   
+                  _instance = FindFirstObjectByType<T>();
                   
+                  if (_instance == null)
+                  {
+                      var singletonObject = new GameObject(typeof(T).Name);                    
+                               
+                      _instance = singletonObject.AddComponent<T>();                   
+                               
+                      DontDestroyOnLoad(singletonObject); // Make sure the singleton instance persists across scene loads 
+                  }
               }               
               return _instance; // return the instance
           }
@@ -27,31 +30,25 @@ namespace Singleton
         // Protected METHODS: -----------------------------------------------------------------------                
         protected virtual void Awake()        
         {            
-            
-            if (_instance == null)            
-            {                
-                _instance = this as T;                
-                if (transform.parent != null) // If the object has a parent, detach it to prevent it from being destroyed
-                {
-                    transform.SetParent(null);
-                }                
-                DontDestroyOnLoad(gameObject); // Ensure the instance isn't destryoyed when loading a new scene     
-            }            
-            else            
+            // If an instance already exists AND it is not this specific object, destroy this one
+            if (_instance != null && _instance != this)            
             {              
-                Destroy(gameObject); // If another instance already exists, destroy this one            
+                Destroy(gameObject); 
+                return; // Prevent any further execution in Awake for the destroyed object
             }           
-        }                
-        
-        // Clear the instance when the object is destroyed
-        protected virtual void OnDestroy()       
-        {
-            if (_instance == this)
+
+            // Otherwise, this is the official instance
+            _instance = this as T;                
+            
+            // If the object has a parent, detach it to prevent it from being destroyed with its parent
+            if (transform.parent != null) 
             {
-                _instance = null;            
-            }        
-        }    
-        
+                transform.SetParent(null);
+            }                
+            
+            // Ensure the instance isn't destroyed when loading a new scene     
+            DontDestroyOnLoad(gameObject); 
+        }       
   }
   
 }
