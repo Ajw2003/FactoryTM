@@ -24,6 +24,10 @@ public class UiZoneButton : MonoBehaviour
         {
             CurrencyManager.Instance.onCurrencyChange += RefreshUI;
         }
+        if (ZoneManager.Instance != null)
+        {
+            ZoneManager.Instance.onZoneUnlock += RefreshUI;
+        }
     }
 
     private void OnDisable()
@@ -31,6 +35,10 @@ public class UiZoneButton : MonoBehaviour
         if (CurrencyManager.Instance != null)
         {
             CurrencyManager.Instance.onCurrencyChange -= RefreshUI;
+        }
+        if (ZoneManager.Instance != null)
+        {
+            ZoneManager.Instance.onZoneUnlock -= RefreshUI;
         }
     }
 
@@ -50,6 +58,17 @@ public class UiZoneButton : MonoBehaviour
     public void RefreshUI()
     {
         UpdateAffordabilityColor();
+        UpdateText();
+    }
+
+    private void UpdateText()
+    {
+        var textComp = GetComponentInChildren<TMP_Text>();
+        if (textComp == null || ZoneManager.Instance == null) return;
+
+        string dirStr = "EXPAND " + direction.ToString().ToUpper();
+        float cost = ZoneManager.Instance.GetUnlockCost() * (CurrencyManager.Instance != null ? CurrencyManager.Instance.exchangeRate : 1f);
+        textComp.text = dirStr + "\n$" + cost.ToString("F0");
     }
 
     private void UpdateAffordabilityColor()

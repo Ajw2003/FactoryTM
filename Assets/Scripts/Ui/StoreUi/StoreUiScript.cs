@@ -33,6 +33,14 @@ public class StoreUiScript : MonoBehaviour
     private Dictionary<Button, TMP_Text> buttonTexts = new Dictionary<Button, TMP_Text>();
     private Dictionary<Button, string> buttonOriginalTexts = new Dictionary<Button, string>();
     
+    // Pagination fields
+    [SerializeField]private int maxItemsPerPage = 3;
+    private int currentPageIndex = 0;
+    private int totalPages = 1;
+    private Button prevPageBtn;
+    private Button nextPageBtn;
+    private TMP_Text pageIndicatorText;
+    
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
@@ -40,6 +48,8 @@ public class StoreUiScript : MonoBehaviour
         if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
         
         SetupTerminalAesthetics();
+        CreatePaginationControls();
+        RenderPage();
     }
     
     private void Start()
@@ -155,9 +165,6 @@ public class StoreUiScript : MonoBehaviour
     {
         // We find all direct or nested children of StorePanel that are buttons, excluding our generated objects
         Button[] buttons = GetComponentsInChildren<Button>(true);
-        float startY = 300f;
-        float spacingY = -110f;
-        int index = 0;
         
         foreach (Button btn in buttons)
         {
@@ -175,11 +182,10 @@ public class StoreUiScript : MonoBehaviour
                 outline.effectDistance = new Vector2(2f, 2f);
             }
             
-            // Align to left side of screen
+            // Align setup (position is determined by RenderPage)
             btnRt.anchorMin = new Vector2(0.1f, 0.5f);
             btnRt.anchorMax = new Vector2(0.45f, 0.5f);
             btnRt.pivot = new Vector2(0.5f, 0.5f);
-            btnRt.anchoredPosition = new Vector2(0f, startY + (index * spacingY));
             btnRt.sizeDelta = new Vector2(btnRt.sizeDelta.x, 90f);
             
             TMP_Text txt = btn.GetComponentInChildren<TMP_Text>();
@@ -194,8 +200,6 @@ public class StoreUiScript : MonoBehaviour
             
             // Hook up pointer animations
             AddHoverAnimations(btn);
-            
-            index++;
         }
     }
     
@@ -289,10 +293,13 @@ public class StoreUiScript : MonoBehaviour
             Image btnImg = btn.GetComponent<Image>();
             if (btnImg != null) btnImg.DOColor(new Color(0.1f, 0.35f, 0.1f, 0.95f), 0.15f).SetUpdate(true);
             
-            // Add brackets text styling e.g. "> ITEM NAME <"
             if (buttonTexts.ContainsKey(btn))
             {
-                buttonTexts[btn].text = "> " + buttonOriginalTexts[btn] + " <";
+                string currentText = buttonTexts[btn].text;
+                if (!currentText.StartsWith("> "))
+                {
+                    buttonTexts[btn].text = "> " + currentText + " <";
+                }
                 buttonTexts[btn].color = new Color(0.5f, 1f, 0.5f, 1f);
             }
         });
@@ -308,7 +315,11 @@ public class StoreUiScript : MonoBehaviour
             
             if (buttonTexts.ContainsKey(btn))
             {
-                buttonTexts[btn].text = buttonOriginalTexts[btn];
+                string currentText = buttonTexts[btn].text;
+                if (currentText.StartsWith("> ") && currentText.EndsWith(" <"))
+                {
+                    buttonTexts[btn].text = currentText.Substring(2, currentText.Length - 4);
+                }
                 buttonTexts[btn].color = new Color(0.2f, 0.9f, 0.2f, 1f);
             }
         });
@@ -453,10 +464,199 @@ public class StoreUiScript : MonoBehaviour
         if (isTypingLog) return;
         
         string baseText = string.Join("\n", activeLogs);
-        terminalLogText.text = baseText + (cursorVisible ? "\n" + cursorChar : "\n");
+        terminalLogText.text = baseText + (cursorVisible ? cursorChar : "");
         
         // Keep scroll at bottom
         Canvas.ForceUpdateCanvases();
         if (terminalScroll != null) terminalScroll.verticalNormalizedPosition = 0f;
+    }
+    
+    private void CreatePaginationControls()
+    {
+        totalPages = Mathf.CeilToInt((float)storeButtons.Count / maxItemsPerPage);
+        if (totalPages <= 1) return; // No pagination needed if 1 page or fewer
+
+        // Container panel for pagination buttons
+        GameObject pagPanel = new GameObject("Pagination_Panel", typeof(RectTransform));
+        pagPanel.transform.SetParent(transform, false);
+        RectTransform pagRt = pagPanel.GetComponent<RectTransform>();
+        
+        // Position it at the bottom left area
+        pagRt.anchorMin = new Vector2(0.1f, 0.1f);
+        pagRt.anchorMax = new Vector2(0.45f, 0.2f);
+        pagRt.offsetMin = Vector2.zero;
+        pagRt.offsetMax = Vector2.zero;
+
+        // 1. Prev Button
+        GameObject prevGo = new GameObject("Prev_Page_Button", typeof(RectTransform), typeof(Image), typeof(Button));
+        prevGo.transform.SetParent(pagPanel.transform, false);
+        prevPageBtn = prevGo.GetComponent<Button>();
+        RectTransform prevRt = prevGo.GetComponent<RectTransform>();
+        prevRt.anchorMin = new Vector2(0f, 0f);
+        prevRt.anchorMax = new Vector2(0.3f, 1f);
+        prevRt.offsetMin = Vector2.zero;
+        prevRt.offsetMax = Vector2.zero;
+        
+        Image prevImg = prevGo.GetComponent<Image>();
+        prevImg.color = new Color(0.05f, 0.15f, 0.05f, 0.85f);
+        Outline prevOutline = prevGo.AddComponent<Outline>();
+        prevOutline.effectColor = new Color(0.1f, 0.8f, 0.1f, 0.5f);
+        
+        GameObject prevTextGo = new GameObject("Prev_Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+        prevTextGo.transform.SetParent(prevGo.transform, false);
+        RectTransform ptRt = prevTextGo.GetComponent<RectTransform>();
+        ptRt.anchorMin = Vector2.zero;
+        ptRt.anchorMax = Vector2.one;
+        ptRt.offsetMin = Vector2.zero;
+        ptRt.offsetMax = Vector2.zero;
+        TextMeshProUGUI ptTxt = prevTextGo.GetComponent<TextMeshProUGUI>();
+        ptTxt.text = "<<";
+        ptTxt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
+        ptTxt.alignment = TextAlignmentOptions.Center;
+        ptTxt.fontSize = 20;
+        
+        prevPageBtn.onClick.AddListener(() => {
+            if (currentPageIndex > 0)
+            {
+                currentPageIndex--;
+                PlayPageTransition();
+            }
+        });
+
+        // 2. Next Button
+        GameObject nextGo = new GameObject("Next_Page_Button", typeof(RectTransform), typeof(Image), typeof(Button));
+        nextGo.transform.SetParent(pagPanel.transform, false);
+        nextPageBtn = nextGo.GetComponent<Button>();
+        RectTransform nextRt = nextGo.GetComponent<RectTransform>();
+        nextRt.anchorMin = new Vector2(0.7f, 0f);
+        nextRt.anchorMax = new Vector2(1f, 1f);
+        nextRt.offsetMin = Vector2.zero;
+        nextRt.offsetMax = Vector2.zero;
+        
+        Image nextImg = nextGo.GetComponent<Image>();
+        nextImg.color = new Color(0.05f, 0.15f, 0.05f, 0.85f);
+        Outline nextOutline = nextGo.AddComponent<Outline>();
+        nextOutline.effectColor = new Color(0.1f, 0.8f, 0.1f, 0.5f);
+        
+        GameObject nextTextGo = new GameObject("Next_Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+        nextTextGo.transform.SetParent(nextGo.transform, false);
+        RectTransform ntRt = nextTextGo.GetComponent<RectTransform>();
+        ntRt.anchorMin = Vector2.zero;
+        ntRt.anchorMax = Vector2.one;
+        ntRt.offsetMin = Vector2.zero;
+        ntRt.offsetMax = Vector2.zero;
+        TextMeshProUGUI ntTxt = nextTextGo.GetComponent<TextMeshProUGUI>();
+        ntTxt.text = ">>";
+        ntTxt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
+        ntTxt.alignment = TextAlignmentOptions.Center;
+        ntTxt.fontSize = 20;
+        
+        nextPageBtn.onClick.AddListener(() => {
+            if (currentPageIndex < totalPages - 1)
+            {
+                currentPageIndex++;
+                PlayPageTransition();
+            }
+        });
+
+        // 3. Page Indicator Text
+        GameObject indGo = new GameObject("Page_Indicator_Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+        indGo.transform.SetParent(pagPanel.transform, false);
+        RectTransform indRt = indGo.GetComponent<RectTransform>();
+        indRt.anchorMin = new Vector2(0.3f, 0f);
+        indRt.anchorMax = new Vector2(0.7f, 1f);
+        indRt.offsetMin = Vector2.zero;
+        indRt.offsetMax = Vector2.zero;
+        
+        pageIndicatorText = indGo.GetComponent<TextMeshProUGUI>();
+        pageIndicatorText.color = new Color(0.2f, 0.9f, 0.2f, 1f);
+        pageIndicatorText.alignment = TextAlignmentOptions.Center;
+        pageIndicatorText.fontSize = 18;
+        pageIndicatorText.fontStyle = FontStyles.Bold;
+
+        // Add hover triggers to pagination buttons too
+        AddHoverToNavButton(prevPageBtn, ptTxt, "<<");
+        AddHoverToNavButton(nextPageBtn, ntTxt, ">>");
+    }
+
+    private void AddHoverToNavButton(Button btn, TextMeshProUGUI txt, string origText)
+    {
+        EventTrigger trigger = btn.gameObject.GetComponent<EventTrigger>();
+        if (trigger == null) trigger = btn.gameObject.AddComponent<EventTrigger>();
+        
+        EventTrigger.Entry entryEnter = new EventTrigger.Entry();
+        entryEnter.eventID = EventTriggerType.PointerEnter;
+        entryEnter.callback.AddListener((data) => {
+            if (btn.interactable)
+            {
+                btn.transform.DOScale(1.05f, 0.15f).SetUpdate(true);
+                Image btnImg = btn.GetComponent<Image>();
+                if (btnImg != null) btnImg.DOColor(new Color(0.1f, 0.35f, 0.1f, 0.95f), 0.15f).SetUpdate(true);
+                txt.text = "> " + origText + " <";
+                txt.color = new Color(0.5f, 1f, 0.5f, 1f);
+            }
+        });
+        trigger.triggers.Add(entryEnter);
+        
+        EventTrigger.Entry entryExit = new EventTrigger.Entry();
+        entryExit.eventID = EventTriggerType.PointerExit;
+        entryExit.callback.AddListener((data) => {
+            btn.transform.DOScale(1f, 0.15f).SetUpdate(true);
+            Image btnImg = btn.GetComponent<Image>();
+            if (btnImg != null) btnImg.DOColor(new Color(0.05f, 0.15f, 0.05f, 0.85f), 0.15f).SetUpdate(true);
+            txt.text = origText;
+            txt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
+        });
+        trigger.triggers.Add(entryExit);
+    }
+
+    private void PlayPageTransition()
+    {
+        LogCommand("NAVIGATED TO PAGE " + (currentPageIndex + 1));
+        RenderPage();
+    }
+
+    private void RenderPage()
+    {
+        // 1. Hide all buttons first
+        foreach (var btn in storeButtons)
+        {
+            btn.gameObject.SetActive(false);
+        }
+
+        // 2. Reposition and show active page buttons
+        int startIndex = currentPageIndex * maxItemsPerPage;
+        float startY = 300f;
+        float spacingY = -110f;
+
+        for (int i = 0; i < maxItemsPerPage; i++)
+        {
+            int btnIndex = startIndex + i;
+            if (btnIndex < storeButtons.Count)
+            {
+                Button btn = storeButtons[btnIndex];
+                btn.gameObject.SetActive(true);
+                RectTransform btnRt = btn.GetComponent<RectTransform>();
+                
+                btnRt.anchoredPosition = new Vector2(0f, startY + (i * spacingY));
+            }
+        }
+
+        // 3. Update Nav Button states
+        if (prevPageBtn != null)
+        {
+            prevPageBtn.interactable = (currentPageIndex > 0);
+            prevPageBtn.GetComponent<Image>().color = prevPageBtn.interactable ? new Color(0.05f, 0.15f, 0.05f, 0.85f) : new Color(0.02f, 0.05f, 0.02f, 0.5f);
+        }
+        if (nextPageBtn != null)
+        {
+            nextPageBtn.interactable = (currentPageIndex < totalPages - 1);
+            nextPageBtn.GetComponent<Image>().color = nextPageBtn.interactable ? new Color(0.05f, 0.15f, 0.05f, 0.85f) : new Color(0.02f, 0.05f, 0.02f, 0.5f);
+        }
+
+        if (pageIndicatorText != null)
+        {
+            pageIndicatorText.text = $"PAGE {currentPageIndex + 1:D2} / {totalPages:D2}";
+        }
     }
 }
