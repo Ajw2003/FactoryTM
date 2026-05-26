@@ -8,6 +8,10 @@ using Singleton;
 public class GameManager : SingletonBase<GameManager>
 {
 
+    
+    [Header("Global Variables")]
+    public Camera mainCamera;
+    
     [Header("Data Config")]
     public BuildingData[] allBuildings;
     public Tilemap buildingTilemap;
@@ -30,6 +34,7 @@ public class GameManager : SingletonBase<GameManager>
     protected override void Awake()
     {
         base.Awake();
+        mainCamera = Camera.main;
         InitializeData();
     }
 
