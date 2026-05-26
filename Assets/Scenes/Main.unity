@@ -321,6 +321,11 @@ Tilemap:
   m_CorrespondingSourceObject: {fileID: 7806826013664649950, guid: ca5e13833f7a333468d7b6fcb8a3caea, type: 3}
   m_PrefabInstance: {fileID: 6905356009003817901}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &933512964 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 621520523354542303, guid: 7f949cc0e86c45e4a87788a6f08247e9, type: 3}
+  m_PrefabInstance: {fileID: 1665716447}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &968549671
 GameObject:
   m_ObjectHideFlags: 0
@@ -665,13 +670,29 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 621520523354542303, guid: 7f949cc0e86c45e4a87788a6f08247e9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1665716451}
   m_SourcePrefab: {fileID: 100100000, guid: 7f949cc0e86c45e4a87788a6f08247e9, type: 3}
 --- !u!4 &1665716448 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 640982355165767079, guid: 7f949cc0e86c45e4a87788a6f08247e9, type: 3}
   m_PrefabInstance: {fileID: 1665716447}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1665716451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 933512964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fb9d729b71bd594187fdafd4dd46d38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BaseWeapon
+  Stats: {fileID: 11400000, guid: 7ad749f1fde03fa48985326c9ffe0d1a, type: 2}
 --- !u!4 &1739733006 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8609428892281561364, guid: 788834090f052aa45b0f478726676145, type: 3}
