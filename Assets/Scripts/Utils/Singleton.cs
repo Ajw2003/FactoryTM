@@ -1,21 +1,21 @@
 using UnityEngine;
 
 namespace Singleton
-{ // Generic Singleton base class to ensure a single instance of a MonoBehaviour-derived class
-  public class SingletonBase<T> : MonoBehaviour where T : MonoBehaviour    
+{ // Generic Singleton base class to ensure a single instance of a MonoBehaviour-derived class 
+  public class SingletonBase<T> : MonoBehaviour where T : MonoBehaviour    //the syntax for creating a new a singleton is Classname : Singleton<Classname> 
   {        
   // Static reference to the singleton instance
-      private static T _instance;        // Property to access the singleton instance
-      public static T Instance        
+      private static T _instance;       
+      public static T Instance // Property to access the singleton instance 
       {            
           get            
           {                
-              // If the instance is not already set, create a new instance
+              // If the instance is not already set
               if (_instance == null)               
               {                    
-                  _instance = FindFirstObjectByType<T>();
+                  _instance = FindFirstObjectByType<T>();// try finding an existing singleton of the same type
                   
-                  if (_instance == null)
+                  if (_instance == null)//if singleton of same type does not exist create new instance
                   {
                       var singletonObject = new GameObject(typeof(T).Name);                    
                                
@@ -37,8 +37,8 @@ namespace Singleton
                 return; // Prevent any further execution in Awake for the destroyed object
             }           
 
-            // Otherwise, this is the official instance
-            _instance = this as T;                
+            // Otherwise, set this as the private reference to the instance
+            _instance = this as T;              
             
             // If the object has a parent, detach it to prevent it from being destroyed with its parent
             if (transform.parent != null) 

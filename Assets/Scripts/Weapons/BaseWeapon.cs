@@ -16,8 +16,6 @@ public class BaseWeapon : MonoBehaviour
     private int burstSize;
     
     private GameObject bulletPrefab;
-    
-    private Transform target;
 
     private WeaponType weaponType;
     
@@ -26,6 +24,8 @@ public class BaseWeapon : MonoBehaviour
     private Camera cam;
     
     public WeaponStats Stats;
+    
+    public Transform firePoint;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -43,7 +43,7 @@ public class BaseWeapon : MonoBehaviour
             bulletRange = Stats.bulletRange;
             bulletPrefab = Stats.bulletPrefab;
             weaponType = Stats.weaponType;
-            fireSound = Stats.bulletSound;
+            //fireSound = Stats.bulletSound;
             burstSize = Stats.burstSize;
         }
     }
@@ -88,9 +88,13 @@ public class BaseWeapon : MonoBehaviour
 
     private void SpawnBullet()
     {
-        Vector2 firePoint = cam.ScreenToWorldPoint(Input.mousePosition);
-        target.position = firePoint;
-        GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
-        bullet.transform.position = Vector2.MoveTowards(transform.position, target.position, bulletSpeed * Time.deltaTime);// move towards the target cell
+        Vector2 target = cam.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position;
+        GameObject bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity);
+        
+        if (bullet.TryGetComponent<BaseProjectile>(out var projectile))
+        {
+            projectile.Initialize(target, bulletSpeed);
+        }
     }
 }
