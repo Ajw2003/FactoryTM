@@ -10,17 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fb2a6c53af3e42344ac618ef44fbe5d3, type: 3}
-  m_Name: BaseWeaponStats
+  m_Name: Burst
   m_EditorClassIdentifier: Assembly-CSharp::WeaponStats
   fireRate: 1
   bulletSize: 1
   bulletSpread: 1
   bulletSpeed: 100
   bulletDamage: 1
-  magazineSize: 1
+  magazineSize: 30
   bulletsFired: 1
   bulletRange: 1
-  burstSize: 1
+  burstSize: 3
+  reloadSpeed: 2
   bulletPrefab: {fileID: 2593228396439306384, guid: 2b7b7e16093c7cd418fb297d584faf33, type: 3}
   bulletSound: {fileID: 0}
-  weaponType: 0
+  weaponType: 2
