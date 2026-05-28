@@ -13,6 +13,8 @@ public class PlayerController : SingletonBase<PlayerController>
     protected override void Awake()
     {
         base.Awake();
+        if (GameManager.Instance != null) GameManager.Instance.player = this;
+        if (!GetComponent<Health>()) gameObject.AddComponent<Health>();
     }
 
     private void Start()

@@ -11,6 +11,7 @@ public class GameManager : SingletonBase<GameManager>
     
     [Header("Global Variables")]
     public Camera mainCamera;
+    public PlayerController player;
     
     [Header("Data Config")]
     public BuildingData[] allBuildings;

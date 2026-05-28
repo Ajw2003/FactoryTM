@@ -21,16 +21,65 @@ public class CartelMember : MonoBehaviour
     [SerializeField] private float speed;
 
     [SerializeField] private float turnSpeed;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [SerializeField] private float detectionRange = 10f;
+    [SerializeField] private float attackRange = 7f;
+    [SerializeField] private BaseWeapon weapon;
+
+    private Transform playerTransform;
+    private Health health;
+
     void Start()
     {
         Setup();
+        health = GetComponent<Health>();
+        if (health == null) health = gameObject.AddComponent<Health>();
+        
+        health.onDeath.AddListener(OnDeath);
+        
+        if (weapon != null)
+        {
+            weapon.isPlayerControlled = false;
+        }
     }
 
-    // Update is called once per frame
     void Update()
     {
+        if (GameManager.Instance.player == null) return;
         
+        playerTransform = GameManager.Instance.player.transform;
+        float distanceToPlayer = Vector2.Distance(transform.position, playerTransform.position);
+
+        if (distanceToPlayer <= detectionRange)
+        {
+            MoveToPlayer();
+            
+            if (distanceToPlayer <= attackRange)
+            {
+                AttackPlayer();
+            }
+        }
+    }
+
+    private void MoveToPlayer()
+    {
+        if (agent != null && agent.isActiveAndEnabled)
+        {
+            agent.SetDestination(playerTransform.position);
+        }
+    }
+
+    private void AttackPlayer()
+    {
+        if (weapon != null)
+        {
+            weapon.Shoot(playerTransform.position);
+        }
+    }
+
+    private void OnDeath()
+    {
+        Debug.Log($"Cartel Member {Rank} died!");
+        Destroy(gameObject);
     }
 
     public void Setup()

@@ -29,8 +29,12 @@ public class BaseWeapon : MonoBehaviour
     public WeaponStats Stats;
     public Transform firePoint;
     
+    public bool isPlayerControlled = true;
+    private GameObject owner;
+
     void Start()
     {
+        owner = transform.root.gameObject;
         cam = GameManager.Instance.mainCamera;
         ammoUI = FindFirstObjectByType<AmmoUI>();
 
@@ -64,7 +68,7 @@ public class BaseWeapon : MonoBehaviour
 
     private void Update()
     {
-        if (isReloading) return;
+        if (!isPlayerControlled || isReloading) return;
 
         // Manual reload
         if (Input.GetKeyDown(KeyCode.R) && roundsLeft < magazineSize)
@@ -81,64 +85,57 @@ public class BaseWeapon : MonoBehaviour
 
         bool canFire = Time.time >= nextTimeToFire;
 
-        switch (weaponType)
+        if (canFire)
         {
-            case WeaponType.Automatic :
-                if (Input.GetMouseButton(2) && canFire)
-                {
-                    Shoot();
-                }
-                break;
-            case WeaponType.Burst:
-                if (Input.GetMouseButton(2) && canFire)
-                {
-                    Shoot();
-                }
-                break;
-            case WeaponType.Explosive:
-                if (Input.GetMouseButton(2) && canFire)
-                {
-                    Shoot();
-                }
-                break;
-            default:
-                if (Input.GetMouseButtonDown(2))
-                {
-                    Shoot();
-                }
-                break;
+            Vector2 target = cam.ScreenToWorldPoint(Input.mousePosition);
+            switch (weaponType)
+            {
+                case WeaponType.Automatic:
+                    if (Input.GetMouseButton(0)) Shoot(target);
+                    break;
+                case WeaponType.Burst:
+                    if (Input.GetMouseButton(0)) Shoot(target);
+                    break;
+                case WeaponType.Explosive:
+                    if (Input.GetMouseButton(0)) Shoot(target);
+                    break;
+                default:
+                    if (Input.GetMouseButtonDown(0)) Shoot(target);
+                    break;
+            }
         }
     }
 
-    private void Shoot()
+    public void Shoot(Vector2 target)
     {
+        if (isReloading || roundsLeft <= 0 || Time.time < nextTimeToFire) return;
+        
         nextTimeToFire = Time.time + 1f / fireRate;
 
         if (weaponType == WeaponType.Burst)
         {
-            StartCoroutine(BurstFire());
+            StartCoroutine(BurstFire(target));
         }
         else
         {
-            SpawnBullet();
+            SpawnBullet(target);
         }
     }
 
-    private IEnumerator BurstFire()
+    private IEnumerator BurstFire(Vector2 target)
     {
         for (int i = 0; i < burstSize; i++)
         {
             if (roundsLeft <= 0) break;
-            SpawnBullet();
+            SpawnBullet(target);
             yield return new WaitForSeconds(0.1f); // Small delay between burst rounds
         }
     }
 
-    private void SpawnBullet()
+    private void SpawnBullet(Vector2 target)
     {
         if (roundsLeft <= 0) return;
 
-        Vector2 target = cam.ScreenToWorldPoint(Input.mousePosition);
         Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position;
         GameObject bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity);
         
@@ -147,7 +144,7 @@ public class BaseWeapon : MonoBehaviour
         
         if (bullet.TryGetComponent<BaseProjectile>(out var projectile))
         {
-            projectile.Initialize(target, bulletSpeed);
+            projectile.Initialize(target, bulletSpeed, bulletDamage, owner);
         }
     }
 
