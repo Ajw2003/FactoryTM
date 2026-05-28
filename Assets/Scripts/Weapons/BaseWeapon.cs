@@ -24,6 +24,7 @@ public class BaseWeapon : MonoBehaviour
     private WeaponType weaponType;
     private AudioClip fireSound;
     private Camera cam;
+    private AmmoUI ammoUI;
     
     public WeaponStats Stats;
     public Transform firePoint;
@@ -31,6 +32,8 @@ public class BaseWeapon : MonoBehaviour
     void Start()
     {
         cam = GameManager.Instance.mainCamera;
+        ammoUI = FindFirstObjectByType<AmmoUI>();
+
         if (Stats != null)
         {
             fireRate = Stats.fireRate;
@@ -46,6 +49,16 @@ public class BaseWeapon : MonoBehaviour
             burstSize = Stats.burstSize;
             roundsLeft = magazineSize;
             reloadSpeed = Stats.reloadSpeed;
+        }
+
+        UpdateAmmoUI();
+    }
+
+    private void UpdateAmmoUI()
+    {
+        if (ammoUI != null)
+        {
+            ammoUI.UpdateAmmo(roundsLeft, magazineSize);
         }
     }
 
@@ -130,6 +143,7 @@ public class BaseWeapon : MonoBehaviour
         GameObject bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity);
         
         roundsLeft--;
+        UpdateAmmoUI();
         
         if (bullet.TryGetComponent<BaseProjectile>(out var projectile))
         {
@@ -140,12 +154,15 @@ public class BaseWeapon : MonoBehaviour
     private IEnumerator Reload()
     {
         isReloading = true;
+        if (ammoUI != null) ammoUI.SetReloading(true);
         Debug.Log("Reloading...");
         
         yield return new WaitForSeconds(reloadSpeed);
         
         roundsLeft = magazineSize;
         isReloading = false;
+        if (ammoUI != null) ammoUI.SetReloading(false);
+        UpdateAmmoUI();
         Debug.Log("Reload Complete");
     }
 }
