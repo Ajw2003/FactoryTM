@@ -119,8 +119,8 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!4 &113458898 stripped
-Transform:
+--- !u!224 &113458898 stripped
+RectTransform:
   m_CorrespondingSourceObject: {fileID: 6163263037587004971, guid: 6f978039bef582949afa70fa367e2c2d, type: 3}
   m_PrefabInstance: {fileID: 3601822814659889471}
   m_PrefabAsset: {fileID: 0}
@@ -585,6 +585,10 @@ PrefabInstance:
     - target: {fileID: 7360210087785447645, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7529937140840692818, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7872605865293335002, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
       propertyPath: m_Sprite

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class BaseWeapon : MonoBehaviour
@@ -14,20 +15,19 @@ public class BaseWeapon : MonoBehaviour
     private int bulletsFired;
     private int bulletRange;
     private int burstSize;
+    private float nextTimeToFire = 0f;
+    private bool isReloading = false;
+    private int roundsLeft;
+    private int reloadSpeed;
     
     private GameObject bulletPrefab;
-
     private WeaponType weaponType;
-    
     private AudioClip fireSound;
-
     private Camera cam;
     
     public WeaponStats Stats;
-    
     public Transform firePoint;
     
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         cam = GameManager.Instance.mainCamera;
@@ -43,58 +43,109 @@ public class BaseWeapon : MonoBehaviour
             bulletRange = Stats.bulletRange;
             bulletPrefab = Stats.bulletPrefab;
             weaponType = Stats.weaponType;
-            //fireSound = Stats.bulletSound;
             burstSize = Stats.burstSize;
+            roundsLeft = magazineSize;
+            reloadSpeed = Stats.reloadSpeed;
         }
     }
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(2))
+        if (isReloading) return;
+
+        // Manual reload
+        if (Input.GetKeyDown(KeyCode.R) && roundsLeft < magazineSize)
         {
-            Shoot();
+            StartCoroutine(Reload());
+            return;
+        }
+
+        if (roundsLeft <= 0)
+        {
+            StartCoroutine(Reload());
+            return;
+        }
+
+        bool canFire = Time.time >= nextTimeToFire;
+
+        switch (weaponType)
+        {
+            case WeaponType.Automatic :
+                if (Input.GetMouseButton(2) && canFire)
+                {
+                    Shoot();
+                }
+                break;
+            case WeaponType.Burst:
+                if (Input.GetMouseButton(2) && canFire)
+                {
+                    Shoot();
+                }
+                break;
+            case WeaponType.Explosive:
+                if (Input.GetMouseButton(2) && canFire)
+                {
+                    Shoot();
+                }
+                break;
+            default:
+                if (Input.GetMouseButtonDown(2))
+                {
+                    Shoot();
+                }
+                break;
         }
     }
 
     private void Shoot()
     {
-        switch (weaponType)
+        nextTimeToFire = Time.time + 1f / fireRate;
+
+        if (weaponType == WeaponType.Burst)
         {
-            case WeaponType.Automatic :
-                for (int i = 0; i < magazineSize; i++)
-                {
-                    SpawnBullet();
-                }
-                break;
-            case WeaponType.Burst :
-                for (int i = 0; i < burstSize; i++)
-                {
-                    SpawnBullet();
-                }
-                break;
-            case WeaponType.Explosive :
-                //explosive code with sphere cast for aoe damage
-                {
-                    SpawnBullet();
-                }
-                break;
-            case WeaponType.SemiAutomatic:
-                {
-                    SpawnBullet();
-                }
-                break;
+            StartCoroutine(BurstFire());
+        }
+        else
+        {
+            SpawnBullet();
+        }
+    }
+
+    private IEnumerator BurstFire()
+    {
+        for (int i = 0; i < burstSize; i++)
+        {
+            if (roundsLeft <= 0) break;
+            SpawnBullet();
+            yield return new WaitForSeconds(0.1f); // Small delay between burst rounds
         }
     }
 
     private void SpawnBullet()
     {
+        if (roundsLeft <= 0) return;
+
         Vector2 target = cam.ScreenToWorldPoint(Input.mousePosition);
         Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position;
         GameObject bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity);
+        
+        roundsLeft--;
         
         if (bullet.TryGetComponent<BaseProjectile>(out var projectile))
         {
             projectile.Initialize(target, bulletSpeed);
         }
+    }
+
+    private IEnumerator Reload()
+    {
+        isReloading = true;
+        Debug.Log("Reloading...");
+        
+        yield return new WaitForSeconds(reloadSpeed);
+        
+        roundsLeft = magazineSize;
+        isReloading = false;
+        Debug.Log("Reload Complete");
     }
 }

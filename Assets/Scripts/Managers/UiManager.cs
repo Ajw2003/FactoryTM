@@ -1,3 +1,4 @@
+using System;
 using Singleton;
 using TMPro;
 using UnityEngine;
@@ -13,11 +14,8 @@ public class UiManager : SingletonBase<UiManager>
    private Coroutine currencyLerpCoroutine;
    private Coroutine currencyPulseCoroutine;
 
-   protected override void Awake()
+   private void Start()
    {
-      base.Awake();
-      
-      // Ensure initial state
       if (StorePanel != null) StorePanel.SetActive(flip);
    }
 

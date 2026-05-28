@@ -14,6 +14,7 @@ public class WeaponStats : ScriptableObject
     public int bulletsFired;
     public int bulletRange;
     public int burstSize;
+    public int reloadSpeed;
     
     public GameObject bulletPrefab;
     
