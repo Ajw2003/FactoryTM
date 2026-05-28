@@ -693,6 +693,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BaseWeapon
   Stats: {fileID: 11400000, guid: 7ad749f1fde03fa48985326c9ffe0d1a, type: 2}
+  firePoint: {fileID: 0}
 --- !u!4 &1739733006 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8609428892281561364, guid: 788834090f052aa45b0f478726676145, type: 3}
