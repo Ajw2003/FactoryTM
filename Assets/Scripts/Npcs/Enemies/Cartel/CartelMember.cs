@@ -11,7 +11,7 @@ public enum MemberType
     kingpin
 }
 
-public class CartelMember : MonoBehaviour
+public class CartelMember : BaseEntity
 {
 
     public MemberType Rank { get; private set; }
@@ -24,7 +24,7 @@ public class CartelMember : MonoBehaviour
     [SerializeField] private BaseWeapon weapon;
 
     private Transform playerTransform;
-    private Health health;
+    public Health health;
 
     void Start()
     {
@@ -102,5 +102,21 @@ public class CartelMember : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    // Fast circle collision check
+    
+    private void OnEnable()
+    {
+        if (CollisionManager.Instance == null) return;
+        CollisionManager.Instance.RegisterEnemy(this);
+    }
+
+    // Automatically remove from the manager when deactivated
+    private void OnDisable()
+    {
+        if (CollisionManager.Instance == null) return;
+        else
+            CollisionManager.Instance.DeregisterEnemy(this);
     }
 }

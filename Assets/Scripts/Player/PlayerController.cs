@@ -1,20 +1,24 @@
 using System.Collections;
 using Singleton;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class PlayerController : SingletonBase<PlayerController>
+public class PlayerController : BaseEntity
 {
     private Vector2 targetPosition;
     private Vector2Int currentCell;
     [SerializeField] private float moveSpeed = 5f;
     private bool isMoving = false;
     private Coroutine currentCoroutine;
+    public Health health;
 
-    protected override void Awake()
+    protected  void Awake()
     {
-        base.Awake();
         if (GameManager.Instance != null) GameManager.Instance.player = this;
-        if (!GetComponent<Health>()) gameObject.AddComponent<Health>();
+        health = GetComponent<Health>();
+        if (health == null) health = gameObject.AddComponent<Health>();
+        
+        health.onDeath.AddListener(OnDeath);
     }
 
     private void Start()
@@ -78,6 +82,11 @@ public class PlayerController : SingletonBase<PlayerController>
                 currentCoroutine = StartCoroutine(MoveRoutine(nextCell));
             }
         }
+    }
+    
+    private void OnDeath()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     private IEnumerator MoveRoutine(Vector2Int targetCell)

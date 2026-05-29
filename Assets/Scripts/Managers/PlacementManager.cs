@@ -16,10 +16,12 @@ public class PlacementManager : SingletonBase<PlacementManager>
 
     public float maxPlacementDistance = 5f;
     private Transform playerTransform;
+    private PlayerController playerController;
 
     void Start()
     {
         cam = Camera.main;
+        playerController = GameManager.Instance.player;
     }
 
     void Update()
@@ -39,9 +41,9 @@ public class PlacementManager : SingletonBase<PlacementManager>
 
         // Task 2: Placement Distance Check
         bool isWithinDistance = true;
-        if (PlayerController.Instance != null)
+        if (playerController != null)
         {
-            float distance = Vector2.Distance(PlayerController.Instance.transform.position, worldPos);
+            float distance = Vector2.Distance(playerController.transform.position, worldPos);
             if (distance > maxPlacementDistance)
             {
                 isWithinDistance = false;
