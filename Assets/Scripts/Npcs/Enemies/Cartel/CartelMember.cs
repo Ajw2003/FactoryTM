@@ -15,8 +15,6 @@ public class CartelMember : MonoBehaviour
 {
 
     public MemberType Rank { get; private set; }
-    
-    [SerializeField] private NavMeshAgent agent;
 
     [SerializeField] private float speed;
 
@@ -62,9 +60,9 @@ public class CartelMember : MonoBehaviour
 
     private void MoveToPlayer()
     {
-        if (agent != null && agent.isActiveAndEnabled)
+        if (playerTransform != null)
         {
-            agent.SetDestination(playerTransform.position);
+            transform.position = Vector2.MoveTowards(transform.position, playerTransform.position, speed * Time.deltaTime);
         }
     }
 
