@@ -5,35 +5,34 @@ using UnityEngine;
 public class BaseWeapon : MonoBehaviour
 {
     
-    private float fireRate;
-    private float bulletSize;
-    private float bulletSpread;
-    private float bulletSpeed;
+    protected float fireRate;
+    protected float bulletSize;
+    protected float bulletSpread;
+    protected float bulletSpeed;
     
-    private int bulletDamage;
-    private int magazineSize;
-    private int bulletsFired;
-    private int bulletRange;
-    private int burstSize;
-    private float nextTimeToFire = 0f;
-    private bool isReloading = false;
-    private int roundsLeft;
-    private int reloadSpeed;
+    protected int bulletDamage;
+    protected int magazineSize;
+    protected int bulletsFired;
+    protected int bulletRange;
+    protected int burstSize;
+    protected float nextTimeToFire = 0f;
+    protected bool isReloading = false;
+    protected int roundsLeft;
+    protected int reloadSpeed;
     
-    private GameObject bulletPrefab;
-    private WeaponType weaponType;
-    private AudioClip fireSound;
-    private Camera cam;
-    private AmmoUI ammoUI;
+    protected GameObject bulletPrefab;
+    protected WeaponType weaponType;
+    protected AudioClip fireSound;
+    
+    protected Vector2 target;
+
+    protected bool canFire = true;
     
     public WeaponStats Stats;
     public Transform firePoint;
     
-    void Start()
+    protected virtual void Start()
     {
-        cam = GameManager.Instance.mainCamera;
-        ammoUI = FindFirstObjectByType<AmmoUI>();
-
         if (Stats != null)
         {
             fireRate = Stats.fireRate;
@@ -51,80 +50,65 @@ public class BaseWeapon : MonoBehaviour
             reloadSpeed = Stats.reloadSpeed;
         }
 
-        UpdateAmmoUI();
+        
     }
 
-    private void UpdateAmmoUI()
+    protected virtual void Update()
     {
-        if (ammoUI != null)
+        nextTimeToFire = fireRate;
+        if (nextTimeToFire > 0) ;
         {
-            ammoUI.UpdateAmmo(roundsLeft, magazineSize);
+            nextTimeToFire -= Time.deltaTime;
+        }
+
+        if (nextTimeToFire <= 0)
+        {
+            nextTimeToFire = fireRate;
+            canFire = true;
         }
     }
 
-    private void Update()
+    protected virtual void Shoot()
     {
         if (isReloading) return;
 
-        // Manual reload
-        if (Input.GetKeyDown(KeyCode.R) && roundsLeft < magazineSize)
-        {
-            StartCoroutine(Reload());
-            return;
-        }
-
         if (roundsLeft <= 0)
         {
+            canFire = false;
             StartCoroutine(Reload());
             return;
         }
-
-        bool canFire = Time.time >= nextTimeToFire;
-
         switch (weaponType)
         {
             case WeaponType.Automatic :
-                if (Input.GetMouseButton(2) && canFire)
+                if (canFire)
                 {
-                    Shoot();
+                    SpawnBullet();
+                    canFire = false;
                 }
                 break;
             case WeaponType.Burst:
-                if (Input.GetMouseButton(2) && canFire)
+                if (canFire)
                 {
-                    Shoot();
+                    StartCoroutine(BurstFire());
                 }
                 break;
             case WeaponType.Explosive:
-                if (Input.GetMouseButton(2) && canFire)
+                if ( canFire)
                 {
-                    Shoot();
+                    SpawnBullet();
                 }
                 break;
             default:
-                if (Input.GetMouseButtonDown(2))
+                if (canFire)
                 {
-                    Shoot();
+                    SpawnBullet();
                 }
                 break;
         }
     }
 
-    private void Shoot()
-    {
-        nextTimeToFire = Time.time + 1f / fireRate;
-
-        if (weaponType == WeaponType.Burst)
-        {
-            StartCoroutine(BurstFire());
-        }
-        else
-        {
-            SpawnBullet();
-        }
-    }
-
-    private IEnumerator BurstFire()
+    protected virtual IEnumerator BurstFire()
     {
         for (int i = 0; i < burstSize; i++)
         {
@@ -134,16 +118,14 @@ public class BaseWeapon : MonoBehaviour
         }
     }
 
-    private void SpawnBullet()
+    protected virtual void SpawnBullet()
     {
         if (roundsLeft <= 0) return;
-
-        Vector2 target = cam.ScreenToWorldPoint(Input.mousePosition);
+        
         Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position;
         GameObject bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity);
         
         roundsLeft--;
-        UpdateAmmoUI();
         
         if (bullet.TryGetComponent<BaseProjectile>(out var projectile))
         {
@@ -151,18 +133,14 @@ public class BaseWeapon : MonoBehaviour
         }
     }
 
-    private IEnumerator Reload()
+    protected virtual IEnumerator Reload()
     {
         isReloading = true;
-        if (ammoUI != null) ammoUI.SetReloading(true);
-        Debug.Log("Reloading...");
         
         yield return new WaitForSeconds(reloadSpeed);
         
         roundsLeft = magazineSize;
         isReloading = false;
-        if (ammoUI != null) ammoUI.SetReloading(false);
-        UpdateAmmoUI();
-        Debug.Log("Reload Complete");
+        canFire = true;
     }
 }

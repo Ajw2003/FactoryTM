@@ -2,18 +2,13 @@ using System.Collections;
 using Singleton;
 using UnityEngine;
 
-public class PlayerController : SingletonBase<PlayerController>
+public class PlayerController : MonoBehaviour
 {
     private Vector2 targetPosition;
     private Vector2Int currentCell;
     [SerializeField] private float moveSpeed = 5f;
     private bool isMoving = false;
     private Coroutine currentCoroutine;
-
-    protected override void Awake()
-    {
-        base.Awake();
-    }
 
     private void Start()
     {

@@ -7,8 +7,6 @@ using Singleton;
 
 public class GameManager : SingletonBase<GameManager>
 {
-
-    
     [Header("Global Variables")]
     public Camera mainCamera;
     
@@ -27,6 +25,7 @@ public class GameManager : SingletonBase<GameManager>
 
     // This list will store the ConveyorItem components of the plate prefabs
     public List<ConveyorItem> Plates; 
+    public PlayerController playerController;
 
     // The "Brain": Maps a specific Tile asset to a Direction
     private Dictionary<TileBase, Vector2Int> tileDirectionMap = new Dictionary<TileBase, Vector2Int>();
@@ -34,6 +33,7 @@ public class GameManager : SingletonBase<GameManager>
     protected override void Awake()
     {
         base.Awake();
+        playerController = FindFirstObjectByType<PlayerController>();
         mainCamera = Camera.main;
         InitializeData();
     }
