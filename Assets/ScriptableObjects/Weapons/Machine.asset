@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb2a6c53af3e42344ac618ef44fbe5d3, type: 3}
   m_Name: Machine
   m_EditorClassIdentifier: Assembly-CSharp::WeaponStats
-  fireRate: 1
+  fireRate: 0.05
   bulletSize: 1
   bulletSpread: 1
   bulletSpeed: 100

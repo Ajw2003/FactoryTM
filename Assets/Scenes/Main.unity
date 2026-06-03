@@ -478,6 +478,10 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 264159828, guid: 2b6e8d5c843058f498ccb89bd47f1e90, type: 3}
+    - target: {fileID: 5597350895665741065, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 220
+      objectReference: {fileID: 0}
     - target: {fileID: 5609848150815696788, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
       propertyPath: m_LocalRotation.x
       value: -0
