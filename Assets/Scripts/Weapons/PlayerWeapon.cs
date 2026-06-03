@@ -32,7 +32,7 @@ public class PlayerWeapon : BaseWeapon
         
         target = cam.ScreenToWorldPoint(Input.mousePosition);
         // Manual reload
-        if (Input.GetKeyDown(KeyCode.R) && roundsLeft < magazineSize)
+        if (Input.GetKeyDown(KeyCode.R))
         {
             StartCoroutine(Reload());
         }
@@ -42,6 +42,7 @@ public class PlayerWeapon : BaseWeapon
             if (Input.GetMouseButton(2))
             {
                 Shoot();
+                UpdateAmmoUI();
             }
         }
         else
@@ -49,6 +50,7 @@ public class PlayerWeapon : BaseWeapon
             if (Input.GetMouseButtonDown(2))
             {
                 Shoot();
+                UpdateAmmoUI();
             }
         }
     }
@@ -57,9 +59,10 @@ public class PlayerWeapon : BaseWeapon
     {
         var enumerator = base.Reload();
         if (ammoUI != null) ammoUI.SetReloading(true);
+        yield return base.Reload();
         if (ammoUI != null) ammoUI.SetReloading(false);
         UpdateAmmoUI();
         StopCoroutine(enumerator);
-        yield break;
+        yield return null;
     }
 }

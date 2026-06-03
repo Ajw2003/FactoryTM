@@ -48,6 +48,7 @@ public class BaseWeapon : MonoBehaviour
             burstSize = Stats.burstSize;
             roundsLeft = magazineSize;
             reloadSpeed = Stats.reloadSpeed;
+            nextTimeToFire = fireRate;
         }
 
         
@@ -55,22 +56,13 @@ public class BaseWeapon : MonoBehaviour
 
     protected virtual void Update()
     {
-        nextTimeToFire = fireRate;
-        if (nextTimeToFire > 0) ;
-        {
-            nextTimeToFire -= Time.deltaTime;
-        }
-
-        if (nextTimeToFire <= 0)
-        {
-            nextTimeToFire = fireRate;
-            canFire = true;
-        }
+        
     }
 
     protected virtual void Shoot()
     {
         if (isReloading) return;
+        if (isReloading || Time.time < nextTimeToFire) return;
 
         if (roundsLeft <= 0)
         {
@@ -78,13 +70,13 @@ public class BaseWeapon : MonoBehaviour
             StartCoroutine(Reload());
             return;
         }
+        nextTimeToFire = Time.time + fireRate;
         switch (weaponType)
         {
             case WeaponType.Automatic :
                 if (canFire)
                 {
                     SpawnBullet();
-                    canFire = false;
                 }
                 break;
             case WeaponType.Burst:
@@ -135,6 +127,7 @@ public class BaseWeapon : MonoBehaviour
 
     protected virtual IEnumerator Reload()
     {
+        Debug.Log("Reloading");
         isReloading = true;
         
         yield return new WaitForSeconds(reloadSpeed);
