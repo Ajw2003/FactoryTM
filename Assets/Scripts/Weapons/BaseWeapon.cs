@@ -24,7 +24,7 @@ public class BaseWeapon : MonoBehaviour
     protected WeaponType weaponType;
     protected AudioClip fireSound;
     
-    protected Vector2 target;
+    public Vector2 target;
 
     protected bool canFire = true;
     
@@ -59,7 +59,7 @@ public class BaseWeapon : MonoBehaviour
         
     }
 
-    protected virtual void Shoot()
+    public virtual void Shoot()
     {
         if (isReloading) return;
         if (isReloading || Time.time < nextTimeToFire) return;

@@ -29,7 +29,7 @@ public class PlayerWeapon : BaseWeapon
     {
         base.Update();
        
-        
+            
         target = cam.ScreenToWorldPoint(Input.mousePosition);
         // Manual reload
         if (Input.GetKeyDown(KeyCode.R))
