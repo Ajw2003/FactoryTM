@@ -31,8 +31,8 @@ public class CartelMember : MonoBehaviour, IHealth
 
     private bool attacking;
     
-    public float Health { get; set; }
-    public float MaxHealth = 10;
+    public int Health { get; set; }
+    public int MaxHealth = 10;
     
         
     
@@ -120,7 +120,7 @@ public class CartelMember : MonoBehaviour, IHealth
     }
 
     
-    public void TakeDamage(float amount)
+    public void TakeDamage(int amount)
     {
         Health -= amount;
         if (Health <= 0)

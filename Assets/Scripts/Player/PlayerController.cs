@@ -12,12 +12,13 @@ public class PlayerController : MonoBehaviour, IHealth
     
     public float width = 1.0f;
     public float height = 1.0f;
+    public int maxHealth = 10;
+    public int Health { get; set; }
+
     
     public static PlayerController Instance { get; private set; }
 
-    public float MaxHealth = 10;
-    public float Health { get; set; }
-    
+   
     
     void Awake()
     {
@@ -33,7 +34,8 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private void Start()
     {
-        Health = MaxHealth;
+        Health = maxHealth;
+        UiManager.Instance.UpdateHp(Health, maxHealth);
         Vector2 spawnPos = Vector2.zero;
         if (ZoneManager.Instance != null && ZoneManager.Instance.mainCamera != null)
         {
@@ -127,9 +129,10 @@ public class PlayerController : MonoBehaviour, IHealth
     }
 
 
-    public void TakeDamage(float amount)
+    public void TakeDamage(int amount)
     {
         Health -= amount;
+        UiManager.Instance.UpdateHp(Health, maxHealth);
         if (Health <= 0)
         {
             Die();
