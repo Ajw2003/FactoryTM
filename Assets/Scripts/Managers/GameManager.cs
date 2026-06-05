@@ -30,6 +30,7 @@ public class GameManager : SingletonBase<GameManager>
     // The "Brain": Maps a specific Tile asset to a Direction
     private Dictionary<TileBase, Vector2Int> tileDirectionMap = new Dictionary<TileBase, Vector2Int>();
 
+    public List<CartelMember> ActiveEnemies = new List<CartelMember>();
     protected override void Awake()
     {
         base.Awake();

@@ -12,7 +12,7 @@ public enum MemberType
     kingpin
 }
 
-public class CartelMember : MonoBehaviour
+public class CartelMember : MonoBehaviour, IHealth
 {
 
     public MemberType Rank { get; private set; }
@@ -30,6 +30,15 @@ public class CartelMember : MonoBehaviour
     [SerializeField] private float attackSpeed;
 
     private bool attacking;
+    
+    public float Health { get; set; }
+    public float MaxHealth = 10;
+    
+        
+    
+
+    public float width = 1.0f;
+    public float height = 1.0f;
 
     private Coroutine attackRoutine;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -38,6 +47,7 @@ public class CartelMember : MonoBehaviour
         Setup();
         target = GameManager.Instance.playerController.gameObject;
         weapon = GetComponent<EnemyWeapon>();
+        Health = MaxHealth;
     }
 
     // Update is called once per frame
@@ -87,5 +97,40 @@ public class CartelMember : MonoBehaviour
             default:
                 break;
         }
+    }
+
+
+    // Add to the list when spawned
+    void OnEnable()
+    {
+        GameManager.Instance.ActiveEnemies.Add(this);
+    }
+
+    // Remove from the list when destroyed
+    void OnDisable()
+    {
+        GameManager.Instance.ActiveEnemies.Remove(this);
+    }
+
+    public Rectangle2D GetBoundingBox()
+    {
+        float angleRadians = transform.eulerAngles.z * Mathf.Deg2Rad;
+        return TwoDCollision.CreateFromRotated(
+            transform.position.x, transform.position.y, width, height, angleRadians);
+    }
+
+    
+    public void TakeDamage(float amount)
+    {
+        Health -= amount;
+        if (Health <= 0)
+        {
+            Die();
+        }
+    }
+
+    public void Die()
+    {
+        Destroy(this.gameObject);
     }
 }
