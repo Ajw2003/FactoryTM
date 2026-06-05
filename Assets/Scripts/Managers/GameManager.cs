@@ -1,8 +1,12 @@
+using System;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 using Buildings;
 using Singleton;
+using UnityEngine.Rendering.Universal;
+using Random = UnityEngine.Random;
+
 // using Unity.VisualScripting; // This might not be needed anymore, check later
 
 public class GameManager : SingletonBase<GameManager>
@@ -78,6 +82,11 @@ public class GameManager : SingletonBase<GameManager>
                 Debug.LogWarning("GameManager: Null or invalid plate item found in Plates list.");
             }
         }
+    }
+
+    private void Update()
+    {
+        Zoom();
     }
 
     void InitializeData()//bad code fix later
@@ -279,6 +288,19 @@ public class GameManager : SingletonBase<GameManager>
                 cellsToProcess.Enqueue(neighbor);
             }
         }
+    }
+
+    private void Zoom()
+    {
+        if (Input.mouseScrollDelta.y != 0)
+        {
+            mainCamera.GetComponent<PixelPerfectCamera>().assetsPPU += (int)Input.mouseScrollDelta.y;
+        }
+        else if (Input.mouseScrollDelta.x != 0)
+        {
+            mainCamera.GetComponent<PixelPerfectCamera>().assetsPPU -= (int)Input.mouseScrollDelta.x;
+        }
+        //add a clamp for min and max zoom
     }
 
     private void SpawnSingleResourceNode(Vector2Int cell, ResourceNodeDefinition definition)

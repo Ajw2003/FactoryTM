@@ -13,6 +13,15 @@ public class UiManager : SingletonBase<UiManager>
    private float lastCurrencyValue = -1f;
    private Coroutine currencyLerpCoroutine;
    private Coroutine currencyPulseCoroutine;
+   
+   [SerializeField] private TMP_Text healthText;
+   public void UpdateHp(int current, int max)
+   {
+      if (healthText != null)
+      {
+         healthText.text = $"{current} / {max}";
+      }
+   }
 
    private void Start()
    {
