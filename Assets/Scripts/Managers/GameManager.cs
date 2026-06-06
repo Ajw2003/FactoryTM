@@ -205,8 +205,8 @@ public class GameManager : SingletonBase<GameManager>
             {
                 Vector2Int cell = new Vector2Int(x, y);
 
-                // Skip if already occupied or if random chance fails
-                if (occupiedCells.Contains(cell) || Random.value > patchSpawnChance)
+                // Skip if already occupied, if no tile is present, or if random chance fails
+                if (occupiedCells.Contains(cell) || !buildingTilemap.HasTile(new Vector3Int(x, y, 0)) || Random.value > patchSpawnChance)
                 {
                     continue;
                 }
@@ -272,7 +272,7 @@ public class GameManager : SingletonBase<GameManager>
             foreach (Vector2Int neighbor in neighbors)
             {
                 Vector3Int tempNeighbor = new Vector3Int(neighbor.x, neighbor.y, 0);
-                if (buildingTilemap.HasTile(tempNeighbor) || occupiedCells.Contains(neighbor)) // Check if tilemap has a tile (meaning it's a valid place) and not already occupied
+                if (!buildingTilemap.HasTile(tempNeighbor) || occupiedCells.Contains(neighbor)) // Check if tilemap has a tile (meaning it's a valid place) and not already occupied
                 {
                     continue;
                 }
