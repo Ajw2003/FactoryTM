@@ -115,12 +115,20 @@ public class UiItemButton : MonoBehaviour
         }
     }
 
-    private Color GetTargetColor()
+    public Color GetTargetColor()
     {
         if (buildingData == null || CurrencyManager.Instance == null) return originalColor;
+        
+        if (!buildingData.IsUnlocked())
+        {
+            return new Color(0.25f, 0.25f, 0.25f, 0.6f);
+        }
+
         float cost = buildingData.cost * CurrencyManager.Instance.exchangeRate;
         bool canAfford = CurrencyManager.Instance.currentCurrencyValue >= cost;
-        return canAfford ? originalColor : new Color(1f, 0.45f, 0.45f, 1f); // soft vibrant red tint for unaffordable
+        
+        // Terminal style: Green for afford, Red for can't afford
+        return canAfford ? new Color(0.1f, 0.8f, 0.1f, 0.85f) : new Color(0.8f, 0.1f, 0.1f, 0.85f);
     }
 
     private void StopActiveCoroutine()

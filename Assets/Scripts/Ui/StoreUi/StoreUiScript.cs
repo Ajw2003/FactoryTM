@@ -21,7 +21,10 @@ public class StoreUiScript : MonoBehaviour
     private ScrollRect terminalScroll;
     private List<string> activeLogs = new List<string>();
     private bool isTypingLog = false;
-    private string logBuffer = "";
+    
+    // Message Queue for Terminal
+    private Queue<string> logQueue = new Queue<string>();
+    private bool isProcessingQueue = false;
     
     // Blinking cursor
     private float cursorTimer = 0f;
@@ -171,11 +174,15 @@ public class StoreUiScript : MonoBehaviour
             storeButtons.Add(btn);
             RectTransform btnRt = btn.GetComponent<RectTransform>();
             
+            UiItemButton itemBtn = btn.GetComponent<UiItemButton>();
+
             // Re-style buttons to look like terminal terminals
             Image btnImg = btn.GetComponent<Image>();
             if (btnImg != null)
             {
-                btnImg.color = new Color(0.05f, 0.15f, 0.05f, 0.85f);
+                // Use affordability color if available
+                btnImg.color = (itemBtn != null) ? itemBtn.GetTargetColor() : new Color(0.05f, 0.15f, 0.05f, 0.85f);
+                
                 Outline outline = btn.gameObject.GetComponent<Outline>();
                 if (outline == null) outline = btn.gameObject.AddComponent<Outline>();
                 outline.effectColor = new Color(0.1f, 0.8f, 0.1f, 0.5f);
@@ -285,13 +292,21 @@ public class StoreUiScript : MonoBehaviour
         EventTrigger trigger = btn.gameObject.GetComponent<EventTrigger>();
         if (trigger == null) trigger = btn.gameObject.AddComponent<EventTrigger>();
         
+        UiItemButton itemBtn = btn.GetComponent<UiItemButton>();
+
         // Pointer Enter
         EventTrigger.Entry entryEnter = new EventTrigger.Entry();
         entryEnter.eventID = EventTriggerType.PointerEnter;
         entryEnter.callback.AddListener((data) => {
             btn.transform.DOScale(buttonOriginalScales[btn] * 1.05f, 0.15f).SetUpdate(true);
             Image btnImg = btn.GetComponent<Image>();
-            if (btnImg != null) btnImg.DOColor(new Color(0.1f, 0.35f, 0.1f, 0.95f), 0.15f).SetUpdate(true);
+            if (btnImg != null)
+            {
+                Color baseColor = (itemBtn != null) ? itemBtn.GetTargetColor() : new Color(0.05f, 0.15f, 0.05f, 0.85f);
+                // Brighten the base color slightly for hover
+                Color hoverColor = Color.Lerp(baseColor, Color.white, 0.15f);
+                btnImg.DOColor(hoverColor, 0.15f).SetUpdate(true);
+            }
             
             if (buttonTexts.ContainsKey(btn))
             {
@@ -311,7 +326,11 @@ public class StoreUiScript : MonoBehaviour
         entryExit.callback.AddListener((data) => {
             btn.transform.DOScale(buttonOriginalScales[btn], 0.15f).SetUpdate(true);
             Image btnImg = btn.GetComponent<Image>();
-            if (btnImg != null) btnImg.DOColor(new Color(0.05f, 0.15f, 0.05f, 0.85f), 0.15f).SetUpdate(true);
+            if (btnImg != null)
+            {
+                Color baseColor = (itemBtn != null) ? itemBtn.GetTargetColor() : new Color(0.05f, 0.15f, 0.05f, 0.85f);
+                btnImg.DOColor(baseColor, 0.15f).SetUpdate(true);
+            }
             
             if (buttonTexts.ContainsKey(btn))
             {
@@ -416,12 +435,11 @@ public class StoreUiScript : MonoBehaviour
     private System.Collections.IEnumerator TypeLogLine(string line)
     {
         isTypingLog = true;
-        logBuffer = line;
         
         string baseText = string.Join("\n", activeLogs);
         if (activeLogs.Count > 0) baseText += "\n";
         
-        float typeSpeed = 0.02f;
+        float typeSpeed = 0.015f;
         int charactersCount = line.Length;
         
         for (int i = 0; i <= charactersCount; i++)
@@ -446,17 +464,34 @@ public class StoreUiScript : MonoBehaviour
     
     public void LogCommand(string cmd)
     {
-        StartCoroutine(LogCommandRoutine(cmd));
+        logQueue.Enqueue(cmd);
+        if (!isProcessingQueue)
+        {
+            StartCoroutine(ProcessLogQueue());
+        }
     }
-    
-    private System.Collections.IEnumerator LogCommandRoutine(string cmd)
+
+    private System.Collections.IEnumerator ProcessLogQueue()
     {
-        yield return StartCoroutine(TypeLogLine("> " + cmd));
-        yield return new WaitForSecondsRealtime(0.05f);
-        
-        // Random factory status message response
-        string response = "COMMAND_OK. EXECUTING TRANSACTION...";
-        yield return StartCoroutine(TypeLogLine("SYS: " + response));
+        isProcessingQueue = true;
+        while (logQueue.Count > 0)
+        {
+            string msg = logQueue.Dequeue();
+            
+            // If it's a purchase command, add a prefix and a suffix response
+            if (msg.StartsWith("EXECUTE_BUY:"))
+            {
+                yield return StartCoroutine(TypeLogLine("> " + msg));
+                yield return new WaitForSecondsRealtime(0.05f);
+                yield return StartCoroutine(TypeLogLine("SYS: COMMAND_OK. EXECUTING TRANSACTION..."));
+            }
+            else
+            {
+                yield return StartCoroutine(TypeLogLine(msg));
+            }
+            yield return new WaitForSecondsRealtime(0.02f);
+        }
+        isProcessingQueue = false;
     }
     
     private void UpdateLogDisplay()
