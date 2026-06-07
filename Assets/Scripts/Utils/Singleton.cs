@@ -20,13 +20,14 @@ namespace Singleton
                       var singletonObject = new GameObject(typeof(T).Name);                    
                                
                       _instance = singletonObject.AddComponent<T>();                   
-                               
-                      DontDestroyOnLoad(singletonObject); // Make sure the singleton instance persists across scene loads 
                   }
               }               
               return _instance; // return the instance
           }
       }    
+
+        [SerializeField] protected bool persistBetweenScenes = true;
+
         // Protected METHODS: -----------------------------------------------------------------------                
         protected virtual void Awake()        
         {            
@@ -47,7 +48,8 @@ namespace Singleton
             }                
             
             // Ensure the instance isn't destroyed when loading a new scene     
-            DontDestroyOnLoad(gameObject); 
+            if (persistBetweenScenes)
+                DontDestroyOnLoad(gameObject); 
         }       
   }
   

@@ -2,25 +2,80 @@ using System;
 using Singleton;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class UiManager : SingletonBase<UiManager>
 {
    public TMP_Text currentCurrency;
    
    public GameObject StorePanel;
+   public GameObject GameOverPanel;
    bool flip = false; // Start closed
+   private bool isGameOver = false;
 
    private float lastCurrencyValue = -1f;
    private Coroutine currencyLerpCoroutine;
    private Coroutine currencyPulseCoroutine;
+   
+   [SerializeField] private TMP_Text healthText;
+
+   protected override void Awake()
+   {
+      persistBetweenScenes = false;
+      base.Awake();
+
+      if (StorePanel == null) StorePanel = GameObject.Find("StorePanel");
+      if (GameOverPanel == null) GameOverPanel = GameObject.Find("GameOverPanel");
+
+      if (healthText == null)
+      {
+         GameObject go = GameObject.Find("HealthText");
+         if (go != null) healthText = go.GetComponent<TMP_Text>();
+      }
+
+      if (currentCurrency == null)
+      {
+         GameObject go = GameObject.Find("CurrencyText");
+         if (go != null) currentCurrency = go.GetComponent<TMP_Text>();
+      }
+   }
+
+   public void UpdateHp(int current, int max)
+   {
+      if (healthText != null)
+      {
+         healthText.text = $"{current} / {max}";
+      }
+   }
+
+   public void ShowGameOver()
+   {
+      if (GameOverPanel != null)
+      {
+         isGameOver = true;
+         GameOverPanel.SetActive(true);
+         Time.timeScale = 0f;
+      }
+   }
+
+   public void RestartGame()
+   {
+      isGameOver = false;
+      Time.timeScale = 1f;
+      SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+   }
 
    private void Start()
    {
       if (StorePanel != null) StorePanel.SetActive(flip);
+      if (GameOverPanel != null) GameOverPanel.SetActive(false);
+      isGameOver = false;
    }
 
    private void Update()
    {
+      if (isGameOver) return;
+
       if (Input.GetKeyDown(KeyCode.E))
       {
          flip = !flip;

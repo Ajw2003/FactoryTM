@@ -14,6 +14,12 @@ public class InventoryManager : SingletonBase<InventoryManager>
 
     public List<InventoryItem> items = new List<InventoryItem>();
 
+    protected override void Awake()
+    {
+        persistBetweenScenes = false;
+        base.Awake();
+    }
+
     public void AddBuilding(BuildingData data, int count = 1)
     {
         InventoryItem item = items.Find(i => i.data == data);

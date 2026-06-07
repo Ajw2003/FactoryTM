@@ -2,16 +2,40 @@ using System.Collections;
 using Singleton;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IHealth
 {
     private Vector2 targetPosition;
     private Vector2Int currentCell;
     [SerializeField] private float moveSpeed = 5f;
     private bool isMoving = false;
     private Coroutine currentCoroutine;
+    
+    public float width = 1.0f;
+    public float height = 1.0f;
+    public int maxHealth = 10;
+    public int Health { get; set; }
+
+    
+    public static PlayerController Instance { get; private set; }
+
+   
+    
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            Instance = this;
+        }
+    }
 
     private void Start()
     {
+        Health = maxHealth;
+        UiManager.Instance.UpdateHp(Health, maxHealth);
         Vector2 spawnPos = Vector2.zero;
         if (ZoneManager.Instance != null && ZoneManager.Instance.mainCamera != null)
         {
@@ -95,5 +119,31 @@ public class PlayerController : MonoBehaviour
         {
             StopCoroutine(currentCoroutine);
         }
+    }
+    
+    public Rectangle2D GetBoundingBox()
+    {
+        float angleRadians = transform.eulerAngles.z * Mathf.Deg2Rad;
+        return TwoDCollision.CreateFromRotated(
+            transform.position.x, transform.position.y, width, height, angleRadians);
+    }
+
+
+    public void TakeDamage(int amount)
+    {
+        if (Health <= 0) return;
+
+        Health -= amount;
+        UiManager.Instance.UpdateHp(Health, maxHealth);
+        if (Health <= 0)
+        {
+            Die();
+        }
+    }
+
+    public void Die()
+    {
+        Debug.Log("die");
+        UiManager.Instance.ShowGameOver();
     }
 }

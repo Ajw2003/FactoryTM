@@ -11,6 +11,7 @@ public class HotbarManager : SingletonBase<HotbarManager>
 
     protected override void Awake()
     {
+        persistBetweenScenes = false;
         base.Awake();
         hotbarSlots = new BuildingData[slotCount];
     }
