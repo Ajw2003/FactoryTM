@@ -15,7 +15,7 @@ MonoBehaviour:
   fireRate: 0.05
   bulletSize: 1
   bulletSpread: 1
-  bulletSpeed: 100
+  bulletSpeed: 25
   bulletDamage: 1
   magazineSize: 30
   bulletsFired: 1

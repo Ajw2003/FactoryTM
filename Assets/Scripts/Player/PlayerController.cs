@@ -131,6 +131,8 @@ public class PlayerController : MonoBehaviour, IHealth
 
     public void TakeDamage(int amount)
     {
+        if (Health <= 0) return;
+
         Health -= amount;
         UiManager.Instance.UpdateHp(Health, maxHealth);
         if (Health <= 0)
@@ -142,5 +144,6 @@ public class PlayerController : MonoBehaviour, IHealth
     public void Die()
     {
         Debug.Log("die");
+        UiManager.Instance.ShowGameOver();
     }
 }

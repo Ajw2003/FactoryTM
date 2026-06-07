@@ -16,6 +16,12 @@ namespace Code.Scripts.EventSystems
         private readonly List<EventSubscription> _pendingRemovals = new();
         private bool _isPublishing;
 
+        protected override void Awake()
+        {
+            persistBetweenScenes = false;
+            base.Awake();
+        }
+
         private class EventSubscription // base class for event subscriptions
         {
             public WeakReference TargetReference { get; set; }

@@ -37,9 +37,26 @@ public class GameManager : SingletonBase<GameManager>
     public List<CartelMember> ActiveEnemies = new List<CartelMember>();
     protected override void Awake()
     {
+        persistBetweenScenes = false;
         base.Awake();
         playerController = FindFirstObjectByType<PlayerController>();
         mainCamera = Camera.main;
+
+        if (buildingTilemap == null)
+        {
+            GameObject gridObj = GameObject.Find("Grid");
+            if (gridObj != null)
+            {
+                Transform t = gridObj.transform.Find("BuildingTilemap");
+                if (t != null) buildingTilemap = t.GetComponent<Tilemap>();
+            }
+            
+            if (buildingTilemap == null)
+            {
+                buildingTilemap = GameObject.FindFirstObjectByType<Tilemap>(); // Fallback
+            }
+        }
+
         InitializeData();
     }
 

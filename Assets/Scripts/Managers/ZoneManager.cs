@@ -22,6 +22,7 @@ public class ZoneManager : SingletonBase<ZoneManager>
 
     protected override void Awake()
     {
+        persistBetweenScenes = false;
         base.Awake();
         unlockedZones.Add(Vector2Int.zero);
     }

@@ -9,6 +9,12 @@ public class GridManager : SingletonBase<GridManager>
     public Vector2 tileSize =new (1,1);
     public Vector2Int gridSize;
 
+    protected override void Awake()
+    {
+        persistBetweenScenes = false;
+        base.Awake();
+    }
+
     public Vector2 CellToWorldConversion(Vector2Int cellPosition)
     {
         return new Vector2(

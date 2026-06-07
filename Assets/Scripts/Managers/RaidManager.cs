@@ -44,9 +44,16 @@ public class RaidManager : SingletonBase<RaidManager>
 
     private Coroutine raidCoroutine;
 
+    protected override void Awake()
+    {
+        persistBetweenScenes = false;
+        base.Awake();
+    }
+
     /// <summary>
     /// Starts a raid with default settings.
     /// </summary>
+    [Button("Start Default Raid")]
     public void StartDefaultRaid()
     {
         StartRaid(defaultSettings);
@@ -174,6 +181,7 @@ public class RaidManager : SingletonBase<RaidManager>
         return center + offset;
     }
 
+    [Button("Stop Raid")]
     public void StopRaid()
     {
         if (raidCoroutine != null)

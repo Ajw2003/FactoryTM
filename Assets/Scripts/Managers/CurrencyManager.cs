@@ -9,6 +9,12 @@ public class CurrencyManager : SingletonBase<CurrencyManager>
     public delegate void OnCurrencyChange();
     public event OnCurrencyChange onCurrencyChange;
 
+    protected override void Awake()
+    {
+        persistBetweenScenes = false;
+        base.Awake();
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {

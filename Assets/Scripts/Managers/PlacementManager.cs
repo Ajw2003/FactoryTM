@@ -18,6 +18,30 @@ public class PlacementManager : SingletonBase<PlacementManager>
     private Transform playerTransform;
     private PlayerController playerController;
 
+    protected override void Awake()
+    {
+        persistBetweenScenes = false;
+        base.Awake();
+
+        if (mainTilemap == null || previewTilemap == null)
+        {
+            GameObject gridObj = GameObject.Find("Grid");
+            if (gridObj != null)
+            {
+                if (mainTilemap == null)
+                {
+                    Transform t = gridObj.transform.Find("BuildingTilemap");
+                    if (t != null) mainTilemap = t.GetComponent<Tilemap>();
+                }
+                if (previewTilemap == null)
+                {
+                    Transform t = gridObj.transform.Find("PreviewTilemap");
+                    if (t != null) previewTilemap = t.GetComponent<Tilemap>();
+                }
+            }
+        }
+    }
+
     void Start()
     {
         cam = Camera.main;
