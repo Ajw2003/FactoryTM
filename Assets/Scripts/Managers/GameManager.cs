@@ -40,7 +40,7 @@ public class GameManager : SingletonBase<GameManager>
         persistBetweenScenes = false;
         base.Awake();
         playerController = FindFirstObjectByType<PlayerController>();
-        mainCamera = Camera.main;
+        mainCamera = FindFirstObjectByType<Camera>();
 
         if (buildingTilemap == null)
         {
@@ -106,17 +106,35 @@ public class GameManager : SingletonBase<GameManager>
         Zoom();
     }
 
-    void InitializeData()//bad code fix later
+    void InitializeData()
     {
+        if (allBuildings == null)
+        {
+            Debug.LogWarning("GameManager: allBuildings is null! Make sure it is assigned in the inspector.");
+            return;
+        }
+
         foreach (var building in allBuildings)
         {
+            if (building == null) continue;
+
             if (building.type == BuildingType.Conveyor || building.type == BuildingType.Miner)
             {
+                if (building.rotatedTiles == null || building.rotatedTiles.Length < 4)
+                {
+                    Debug.LogWarning($"GameManager: Building '{building.buildingName}' does not have 4 rotated tiles!");
+                    continue;
+                }
+
                 // Map the 4 rotated tiles to their corresponding directions
-                tileDirectionMap.Add(building.rotatedTiles[0], new Vector2Int(1, 0));  // Right
-                tileDirectionMap.Add(building.rotatedTiles[1], new Vector2Int(0, -1)); // Down
-                tileDirectionMap.Add(building.rotatedTiles[2], new Vector2Int(-1, 0)); // Left
-                tileDirectionMap.Add(building.rotatedTiles[3], new Vector2Int(0, 1));  // Up
+                if (!tileDirectionMap.ContainsKey(building.rotatedTiles[0]))
+                    tileDirectionMap.Add(building.rotatedTiles[0], new Vector2Int(1, 0));  // Right
+                if (!tileDirectionMap.ContainsKey(building.rotatedTiles[1]))
+                    tileDirectionMap.Add(building.rotatedTiles[1], new Vector2Int(0, -1)); // Down
+                if (!tileDirectionMap.ContainsKey(building.rotatedTiles[2]))
+                    tileDirectionMap.Add(building.rotatedTiles[2], new Vector2Int(-1, 0)); // Left
+                if (!tileDirectionMap.ContainsKey(building.rotatedTiles[3]))
+                    tileDirectionMap.Add(building.rotatedTiles[3], new Vector2Int(0, 1));  // Up
             }
         }
     }
@@ -199,6 +217,12 @@ public class GameManager : SingletonBase<GameManager>
 
     private void SpawnResourceNodes()
     {
+        if (buildingTilemap == null)
+        {
+            Debug.LogWarning("GameManager: buildingTilemap is null! Cannot spawn resource nodes.");
+            return;
+        }
+
         if (resourceNodeDefinitions == null || resourceNodeDefinitions.Length == 0)
         {
             Debug.LogWarning("No ResourceNodeDefinitions assigned in GameManager. Cannot spawn nodes.");

@@ -29,6 +29,8 @@ public class PlayerWeapon : BaseWeapon
     {
         base.Update();
        
+        if (cam == null) cam = Camera.main;
+        if (cam == null) return;
             
         target = cam.ScreenToWorldPoint(Input.mousePosition);
         // Manual reload

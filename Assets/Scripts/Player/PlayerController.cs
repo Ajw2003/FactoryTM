@@ -86,7 +86,7 @@ public class PlayerController : MonoBehaviour, IHealth
                 }
                 else
                 {
-                    Debug.Log("Zone is locked! Unlock it via the menu first.");
+                    //add code here for visual when trying to access locked zone
                 }
             }
             else

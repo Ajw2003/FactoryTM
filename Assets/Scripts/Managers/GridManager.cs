@@ -35,10 +35,17 @@ public class GridManager : SingletonBase<GridManager>
 
     public void Start()
     {
-        tileSize = GameManager.Instance.buildingTilemap.cellSize;
-        var sizex = GameManager.Instance.buildingTilemap.size.x;
-        var sizey = GameManager.Instance.buildingTilemap.size.y;
-        gridSize = new Vector2Int(sizex, sizey);
+        if (GameManager.Instance != null && GameManager.Instance.buildingTilemap != null)
+        {
+            tileSize = GameManager.Instance.buildingTilemap.cellSize;
+            var sizex = GameManager.Instance.buildingTilemap.size.x;
+            var sizey = GameManager.Instance.buildingTilemap.size.y;
+            gridSize = new Vector2Int(sizex, sizey);
+        }
+        else
+        {
+            Debug.LogWarning("GridManager: GameManager or buildingTilemap is null in Start.");
+        }
 
         // Dynamically center on the center of the starting zone (0, 0) if ZoneManager is present
         if (ZoneManager.Instance != null)

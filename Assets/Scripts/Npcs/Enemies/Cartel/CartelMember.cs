@@ -45,7 +45,10 @@ public class CartelMember : MonoBehaviour, IHealth
     void Start()
     {
         Setup();
-        target = GameManager.Instance.playerController.gameObject;
+        if (GameManager.Instance != null && GameManager.Instance.playerController != null)
+        {
+            target = GameManager.Instance.playerController.gameObject;
+        }
         weapon = GetComponent<EnemyWeapon>();
         Health = MaxHealth;
     }
@@ -53,6 +56,16 @@ public class CartelMember : MonoBehaviour, IHealth
     // Update is called once per frame
     void Update()
     {
+        if (target == null)
+        {
+            if (GameManager.Instance != null && GameManager.Instance.playerController != null)
+            {
+                target = GameManager.Instance.playerController.gameObject;
+            }
+        }
+
+        if (target == null) return;
+
         if (Vector3.Distance(transform.position, target.transform.position) <= sightRange)
         {
             transform.position = Vector3.MoveTowards(transform.position, target.transform.position, speed * Time.deltaTime);
