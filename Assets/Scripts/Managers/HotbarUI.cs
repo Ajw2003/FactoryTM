@@ -9,6 +9,17 @@ public class HotbarUI : MonoBehaviour
     
     private HotbarSlotUI[] slots;
 
+    private void Awake()
+    {
+        if (slotContainer == null) slotContainer = transform.Find("SlotContainer");
+        if (slotContainer == null) slotContainer = transform; // Fallback to self
+
+        if (slotPrefab == null)
+        {
+            slotPrefab = Resources.Load<GameObject>("prefabs/Ui/HotbarSlot");
+        }
+    }
+
     private void Start()
     {
         InitializeHotbar();

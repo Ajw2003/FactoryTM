@@ -6,6 +6,12 @@ public class BuildingManager : SingletonBase<BuildingManager>
 {
     private List<BuildingLogic> buildings = new List<BuildingLogic>();
 
+    protected override void Awake()
+    {
+        persistBetweenScenes = false;
+        base.Awake();
+    }
+
     public void RegisterBuilding(BuildingLogic building)
     {
         buildings.Add(building);

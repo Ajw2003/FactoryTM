@@ -6,6 +6,12 @@ public class ItemTracker : SingletonBase<ItemTracker>
 {
     private Dictionary<Vector2Int, List<ConveyorItem>> itemsByCell = new Dictionary<Vector2Int, List<ConveyorItem>>();
 
+    protected override void Awake()
+    {
+        persistBetweenScenes = false;
+        base.Awake();
+    }
+
     public void RegisterItem(ConveyorItem item, Vector2Int cell)
     {
         if (!itemsByCell.ContainsKey(cell))

@@ -11,6 +11,11 @@ public class ZoneUiManager : MonoBehaviour
 
     void Start()
     {
+        if (northButton == null) northButton = transform.Find("NorthButton")?.GetComponent<Button>();
+        if (southButton == null) southButton = transform.Find("SouthButton")?.GetComponent<Button>();
+        if (eastButton == null) eastButton = transform.Find("EastButton")?.GetComponent<Button>();
+        if (westButton == null) westButton = transform.Find("WestButton")?.GetComponent<Button>();
+
         // Attach dynamic feedback and click logic to the zone buttons
         SetupZoneButton(northButton, UiZoneButton.Direction.North);
         SetupZoneButton(southButton, UiZoneButton.Direction.South);
