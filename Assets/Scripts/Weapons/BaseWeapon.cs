@@ -121,7 +121,7 @@ public class BaseWeapon : MonoBehaviour
         
         if (bullet.TryGetComponent<BaseProjectile>(out var projectile))
         {
-            projectile.Initialize(target, bulletSpeed);
+            projectile.Initialize(target, bulletSpeed, bulletDamage);
         }
     }
 

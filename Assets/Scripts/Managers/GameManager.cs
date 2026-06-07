@@ -1,8 +1,12 @@
+using System;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 using Buildings;
 using Singleton;
+using UnityEngine.Rendering.Universal;
+using Random = UnityEngine.Random;
+
 // using Unity.VisualScripting; // This might not be needed anymore, check later
 
 public class GameManager : SingletonBase<GameManager>
@@ -30,6 +34,7 @@ public class GameManager : SingletonBase<GameManager>
     // The "Brain": Maps a specific Tile asset to a Direction
     private Dictionary<TileBase, Vector2Int> tileDirectionMap = new Dictionary<TileBase, Vector2Int>();
 
+    public List<CartelMember> ActiveEnemies = new List<CartelMember>();
     protected override void Awake()
     {
         persistBetweenScenes = false;
@@ -94,6 +99,11 @@ public class GameManager : SingletonBase<GameManager>
                 Debug.LogWarning("GameManager: Null or invalid plate item found in Plates list.");
             }
         }
+    }
+
+    private void Update()
+    {
+        Zoom();
     }
 
     void InitializeData()//bad code fix later
@@ -212,8 +222,8 @@ public class GameManager : SingletonBase<GameManager>
             {
                 Vector2Int cell = new Vector2Int(x, y);
 
-                // Skip if already occupied or if random chance fails
-                if (occupiedCells.Contains(cell) || Random.value > patchSpawnChance)
+                // Skip if already occupied, if no tile is present, or if random chance fails
+                if (occupiedCells.Contains(cell) || !buildingTilemap.HasTile(new Vector3Int(x, y, 0)) || Random.value > patchSpawnChance)
                 {
                     continue;
                 }
@@ -279,7 +289,7 @@ public class GameManager : SingletonBase<GameManager>
             foreach (Vector2Int neighbor in neighbors)
             {
                 Vector3Int tempNeighbor = new Vector3Int(neighbor.x, neighbor.y, 0);
-                if (buildingTilemap.HasTile(tempNeighbor) || occupiedCells.Contains(neighbor)) // Check if tilemap has a tile (meaning it's a valid place) and not already occupied
+                if (!buildingTilemap.HasTile(tempNeighbor) || occupiedCells.Contains(neighbor)) // Check if tilemap has a tile (meaning it's a valid place) and not already occupied
                 {
                     continue;
                 }
@@ -295,6 +305,19 @@ public class GameManager : SingletonBase<GameManager>
                 cellsToProcess.Enqueue(neighbor);
             }
         }
+    }
+
+    private void Zoom()
+    {
+        if (Input.mouseScrollDelta.y != 0)
+        {
+            mainCamera.GetComponent<PixelPerfectCamera>().assetsPPU += (int)Input.mouseScrollDelta.y;
+        }
+        else if (Input.mouseScrollDelta.x != 0)
+        {
+            mainCamera.GetComponent<PixelPerfectCamera>().assetsPPU -= (int)Input.mouseScrollDelta.x;
+        }
+        //add a clamp for min and max zoom
     }
 
     private void SpawnSingleResourceNode(Vector2Int cell, ResourceNodeDefinition definition)
