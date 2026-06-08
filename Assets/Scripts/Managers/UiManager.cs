@@ -67,6 +67,7 @@ public class UiManager : SingletonBase<UiManager>
 
    private void Start()
    {
+      Time.timeScale = 1f;
       if (StorePanel != null) StorePanel.SetActive(flip);
       if (GameOverPanel != null) GameOverPanel.SetActive(false);
       isGameOver = false;

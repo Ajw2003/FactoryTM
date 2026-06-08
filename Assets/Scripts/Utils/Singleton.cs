@@ -6,10 +6,19 @@ namespace Singleton
   {        
   // Static reference to the singleton instance
       private static T _instance;       
+      private static bool _isQuitting = false;
+
+      public static bool HasInstance => _instance != null;
+
       public static T Instance // Property to access the singleton instance 
       {            
           get            
           {                
+              if (_isQuitting)
+              {
+                  return null;
+              }
+
               // If the instance is not already set
               if (_instance == null)               
               {                    
@@ -51,6 +60,19 @@ namespace Singleton
             if (persistBetweenScenes)
                 DontDestroyOnLoad(gameObject); 
         }       
+
+        protected virtual void OnDestroy()
+        {
+            if (_instance == this)
+            {
+                _instance = null;
+            }
+        }
+
+        protected virtual void OnApplicationQuit()
+        {
+            _isQuitting = true;
+        }
   }
   
 }

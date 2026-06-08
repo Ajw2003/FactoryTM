@@ -191,4 +191,12 @@ public class PlayerController : MonoBehaviour, IHealth
         Debug.Log("die");
         UiManager.Instance.ShowGameOver();
     }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+    }
 }
