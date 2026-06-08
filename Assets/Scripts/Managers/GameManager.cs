@@ -58,6 +58,11 @@ public class GameManager : SingletonBase<GameManager>
         }
 
         InitializeData();
+
+        // Initialize Roguelike/DayNight cycle and Upgrade systems
+        _ = DayNightManager.Instance;
+        _ = UpgradeManager.Instance;
+        _ = UpgradeUi.Instance;
     }
 
     void Start()

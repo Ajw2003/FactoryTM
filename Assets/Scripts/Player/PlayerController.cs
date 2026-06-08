@@ -15,6 +15,8 @@ public class PlayerController : MonoBehaviour, IHealth
     public int maxHealth = 10;
     public int Health { get; set; }
 
+    public float damageReductionFactor = 0f;
+    public int healthPacksCount = 0;
     
     public static PlayerController Instance { get; private set; }
 
@@ -58,6 +60,12 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private void Update()
     {
+        // Use health pack with Tab key
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            UseHealthPack();
+        }
+
         if (isMoving) return;
 
         Vector2Int inputDirection = Vector2Int.zero;//set input to zero
@@ -150,11 +158,14 @@ public class PlayerController : MonoBehaviour, IHealth
     {
         if (Health <= 0) return;
 
-        Health -= amount;
+        // Apply armor damage reduction (e.g. 0.2f = 20% less damage)
+        int reduced = Mathf.Max(1, Mathf.RoundToInt(amount * (1f - damageReductionFactor)));
+
+        Health -= reduced;
         UiManager.Instance.UpdateHp(Health, maxHealth);
 
         // Spawn floating damage text in red
-        SpawnDamageNumber(amount, Color.red, transform.position);
+        SpawnDamageNumber(reduced, Color.red, transform.position);
 
         // Visual flash feedback
         StartCoroutine(FlashRed());
@@ -163,6 +174,22 @@ public class PlayerController : MonoBehaviour, IHealth
         {
             Die();
         }
+    }
+
+    /// <summary>Consume one health pack to restore half of max health.</summary>
+    public void UseHealthPack()
+    {
+        if (healthPacksCount <= 0) return;
+        if (Health >= maxHealth) return;
+
+        healthPacksCount--;
+        int healAmount = Mathf.CeilToInt(maxHealth * 0.5f);
+        Health = Mathf.Min(maxHealth, Health + healAmount);
+        UiManager.Instance.UpdateHp(Health, maxHealth);
+
+        // Green heal number
+        SpawnDamageNumber(healAmount, new Color(0.2f, 1f, 0.2f, 1f), transform.position);
+        Debug.Log($"Used health pack. Restored {healAmount} HP. Packs remaining: {healthPacksCount}");
     }
 
     private void SpawnDamageNumber(int amount, Color color, Vector3 position)
