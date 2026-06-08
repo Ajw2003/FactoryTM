@@ -101,11 +101,6 @@ public class GameManager : SingletonBase<GameManager>
         }
     }
 
-    private void Update()
-    {
-        Zoom();
-    }
-
     void InitializeData()
     {
         if (allBuildings == null)
