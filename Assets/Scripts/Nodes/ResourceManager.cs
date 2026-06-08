@@ -45,4 +45,12 @@ public class ResourceManager : MonoBehaviour
             resourceNodes.Remove(cell);
         }
     }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+    }
 }
