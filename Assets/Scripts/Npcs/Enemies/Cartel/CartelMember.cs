@@ -136,9 +136,37 @@ public class CartelMember : MonoBehaviour, IHealth
     public void TakeDamage(int amount)
     {
         Health -= amount;
+
+        // Spawn floating damage text in bright yellow-orange
+        SpawnDamageNumber(amount, new Color(1f, 0.6f, 0f, 1f), transform.position);
+
+        // Visual flash feedback
+        StartCoroutine(FlashRed());
+
         if (Health <= 0)
         {
             Die();
+        }
+    }
+
+    private void SpawnDamageNumber(int amount, Color color, Vector3 position)
+    {
+        GameObject textObj = new GameObject("DamageNumber");
+        FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
+        floatText.Initialize(amount.ToString(), color, position + new Vector3(0, 0.5f, 0));
+    }
+
+    private IEnumerator FlashRed()
+    {
+        SpriteRenderer sprite = GetComponent<SpriteRenderer>();
+        if (sprite == null) sprite = GetComponentInChildren<SpriteRenderer>();
+
+        if (sprite != null)
+        {
+            Color originalColor = sprite.color;
+            sprite.color = new Color(1f, 0.3f, 0.3f, 1f);
+            yield return new WaitForSeconds(0.12f);
+            sprite.color = originalColor;
         }
     }
 

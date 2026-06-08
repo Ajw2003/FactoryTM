@@ -152,9 +152,37 @@ public class PlayerController : MonoBehaviour, IHealth
 
         Health -= amount;
         UiManager.Instance.UpdateHp(Health, maxHealth);
+
+        // Spawn floating damage text in red
+        SpawnDamageNumber(amount, Color.red, transform.position);
+
+        // Visual flash feedback
+        StartCoroutine(FlashRed());
+
         if (Health <= 0)
         {
             Die();
+        }
+    }
+
+    private void SpawnDamageNumber(int amount, Color color, Vector3 position)
+    {
+        GameObject textObj = new GameObject("DamageNumber");
+        FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
+        floatText.Initialize(amount.ToString(), color, position + new Vector3(0, 0.5f, 0));
+    }
+
+    private IEnumerator FlashRed()
+    {
+        SpriteRenderer sprite = GetComponent<SpriteRenderer>();
+        if (sprite == null) sprite = GetComponentInChildren<SpriteRenderer>();
+
+        if (sprite != null)
+        {
+            Color originalColor = sprite.color;
+            sprite.color = new Color(1f, 0.3f, 0.3f, 1f);
+            yield return new WaitForSeconds(0.12f);
+            sprite.color = originalColor;
         }
     }
 
