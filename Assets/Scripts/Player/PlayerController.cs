@@ -36,22 +36,23 @@ public class PlayerController : MonoBehaviour, IHealth
     {
         Health = maxHealth;
         UiManager.Instance.UpdateHp(Health, maxHealth);
-        Vector2 spawnPos = Vector2.zero;
-        if (ZoneManager.Instance != null && ZoneManager.Instance.mainCamera != null)
+        
+        Vector2Int spawnCell = Vector2Int.zero;
+        if (ZoneManager.Instance != null)
         {
-            spawnPos = ZoneManager.Instance.mainCamera.transform.position;
-        }
-        else if (Camera.main != null)
-        {
-            spawnPos = Camera.main.transform.position;
+            Vector2Int zoneSize = ZoneManager.Instance.zoneSizeInTiles;
+            spawnCell = new Vector2Int(zoneSize.x / 2, zoneSize.y / 2);
         }
         else if (GridManager.Instance != null)
         {
-            spawnPos = GridManager.Instance.center;
+            spawnCell = GridManager.Instance.center;
         }
 
-        currentCell = GridManager.Instance.WorldToCellConversion(spawnPos);
-        transform.position = GridManager.Instance.CellToWorldConversion(currentCell);
+        currentCell = spawnCell;
+        if (GridManager.Instance != null)
+        {
+            transform.position = GridManager.Instance.CellToWorldConversion(currentCell);
+        }
         targetPosition = transform.position;
     }
 
@@ -91,8 +92,24 @@ public class PlayerController : MonoBehaviour, IHealth
             }
             else
             {
-                // Moving within the current zone is always allowed
-                currentCoroutine = StartCoroutine(MoveRoutine(nextCell));
+                // Moving within the current zone is allowed if it is within the camera's viewport
+                bool isVisible = true;
+                Camera mainCam = ZoneManager.Instance != null && ZoneManager.Instance.mainCamera != null ? ZoneManager.Instance.mainCamera : Camera.main;
+                if (mainCam != null && GridManager.Instance != null)
+                {
+                    Vector2 targetWorldPos = GridManager.Instance.CellToWorldConversion(nextCell);
+                    Vector3 viewportPos = mainCam.WorldToViewportPoint(targetWorldPos);
+                    // Check if target is inside the viewport with a small buffer
+                    if (viewportPos.x < 0.02f || viewportPos.x > 0.98f || viewportPos.y < 0.04f || viewportPos.y > 0.96f)
+                    {
+                        isVisible = false;
+                    }
+                }
+
+                if (isVisible)
+                {
+                    currentCoroutine = StartCoroutine(MoveRoutine(nextCell));
+                }
             }
         }
     }
