@@ -171,7 +171,7 @@ public class UpgradeUi : SingletonBase<UpgradeUi>
         TextMeshProUGUI descTxt = descGo.GetComponent<TextMeshProUGUI>();
         descTxt.text = def.description;
         descTxt.fontSize = 14;
-        descTxt.alignment = TextAlignmentOptions.TopCenter;
+        descTxt.alignment = TextAlignmentOptions.TopFlush;
         descTxt.color = new Color(0.2f, 0.8f, 0.2f, 0.8f);
 
         // Selection Action

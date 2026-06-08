@@ -41,7 +41,7 @@ public class HotbarManager : SingletonBase<HotbarManager>
         }
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         if (InventoryManager.Instance != null)
         {
