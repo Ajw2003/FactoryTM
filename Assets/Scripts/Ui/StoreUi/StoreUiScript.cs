@@ -168,8 +168,6 @@ public class StoreUiScript : MonoBehaviour
         // Rebuild pagination
         totalPages = Mathf.Max(1, Mathf.CeilToInt((float)storeButtons.Count / maxItemsPerPage));
         RenderPage();
-
-        LogCommand($"STORE_UPDATED: {def.upgradeName.ToUpper()} AVAILABLE FOR PURCHASE");
     }
     
     private void Update()
