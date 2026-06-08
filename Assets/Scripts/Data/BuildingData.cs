@@ -108,6 +108,12 @@ namespace Buildings
             return true;
         }
 
+        /// <summary>Force-mark this building as unlocked (called when researched via an UpgradeDefinition).</summary>
+        public void ForceUnlock()
+        {
+            _isUnlockedCached = true;
+        }
+
         public string GetUnlockRequirementsText()
         {
             if (IsUnlocked() || unlockConditions == null || unlockConditions.Count == 0)

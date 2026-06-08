@@ -35,6 +35,9 @@ public class StoreUiScript : MonoBehaviour
     private Dictionary<Button, Vector3> buttonOriginalScales = new Dictionary<Button, Vector3>();
     private Dictionary<Button, TMP_Text> buttonTexts = new Dictionary<Button, TMP_Text>();
     private Dictionary<Button, string> buttonOriginalTexts = new Dictionary<Button, string>();
+
+    // Dynamically created upgrade shop buttons (from UpgradeManager)
+    private List<GameObject> dynamicUpgradeButtons = new List<GameObject>();
     
     // Pagination fields
     [SerializeField]private int maxItemsPerPage = 3;
@@ -59,6 +62,114 @@ public class StoreUiScript : MonoBehaviour
     {
         // Add click listeners to store buttons for terminal feedback
         FindAndHookButtons();
+
+        // Subscribe to upgrade unlock events to dynamically add shop entries
+        if (UpgradeManager.HasInstance)
+        {
+            UpgradeManager.Instance.onUpgradesChanged += OnUpgradesChanged;
+            // Spawn any already-researched upgrades in case we loaded mid-run
+            foreach (var upg in UpgradeManager.Instance.activeUpgradesInShop)
+            {
+                SpawnUpgradeShopButton(upg);
+            }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (UpgradeManager.HasInstance)
+        {
+            UpgradeManager.Instance.onUpgradesChanged -= OnUpgradesChanged;
+        }
+    }
+
+    private void OnUpgradesChanged()
+    {
+        // Find the most recently added upgrade and spawn its button
+        if (!UpgradeManager.HasInstance) return;
+        var shop = UpgradeManager.Instance.activeUpgradesInShop;
+        if (shop.Count == 0) return;
+
+        var latest = shop[shop.Count - 1];
+        // Avoid duplicates: only spawn if we don't already have a button for it
+        bool alreadySpawned = dynamicUpgradeButtons.Find(go => go != null && go.name == "UpgradeShopBtn_" + latest.upgradeId) != null;
+        if (!alreadySpawned)
+        {
+            SpawnUpgradeShopButton(latest);
+        }
+    }
+
+    private void SpawnUpgradeShopButton(UpgradeDefinition def)
+    {
+        // Create button GameObject
+        GameObject btnGo = new GameObject("UpgradeShopBtn_" + def.upgradeId,
+            typeof(RectTransform), typeof(Image), typeof(Button), typeof(UpgradeShopItem));
+        btnGo.transform.SetParent(transform, false);
+
+        RectTransform rt = btnGo.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.1f, 0.5f);
+        rt.anchorMax = new Vector2(0.45f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(rt.sizeDelta.x, 90f);
+
+        Image img = btnGo.GetComponent<Image>();
+        img.color = new Color(0.05f, 0.15f, 0.05f, 0.85f);
+        Outline outline = btnGo.AddComponent<Outline>();
+        outline.effectColor = new Color(0.1f, 0.8f, 0.1f, 0.5f);
+        outline.effectDistance = new Vector2(2f, 2f);
+
+        // Name label
+        GameObject nameGo = new GameObject("NameText", typeof(RectTransform), typeof(TextMeshProUGUI));
+        nameGo.transform.SetParent(btnGo.transform, false);
+        RectTransform nameRt = nameGo.GetComponent<RectTransform>();
+        nameRt.anchorMin = new Vector2(0f, 0.55f);
+        nameRt.anchorMax = Vector2.one;
+        nameRt.offsetMin = new Vector2(8f, 0f);
+        nameRt.offsetMax = Vector2.zero;
+        TextMeshProUGUI nameTxt = nameGo.GetComponent<TextMeshProUGUI>();
+        nameTxt.fontSize = 16;
+        nameTxt.fontStyle = FontStyles.Bold;
+        nameTxt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
+        nameTxt.alignment = TextAlignmentOptions.MidlineLeft;
+
+        // Price label
+        GameObject priceGo = new GameObject("PriceText", typeof(RectTransform), typeof(TextMeshProUGUI));
+        priceGo.transform.SetParent(btnGo.transform, false);
+        RectTransform priceRt = priceGo.GetComponent<RectTransform>();
+        priceRt.anchorMin = Vector2.zero;
+        priceRt.anchorMax = new Vector2(1f, 0.45f);
+        priceRt.offsetMin = new Vector2(8f, 0f);
+        priceRt.offsetMax = Vector2.zero;
+        TextMeshProUGUI priceTxt = priceGo.GetComponent<TextMeshProUGUI>();
+        priceTxt.fontSize = 13;
+        priceTxt.color = new Color(0.2f, 0.8f, 0.2f, 0.85f);
+        priceTxt.alignment = TextAlignmentOptions.MidlineLeft;
+
+        // Setup the UpgradeShopItem component
+        UpgradeShopItem shopItem = btnGo.GetComponent<UpgradeShopItem>();
+        shopItem.Setup(def);
+
+        // Wire purchase button
+        Button btn = btnGo.GetComponent<Button>();
+        btn.onClick.AddListener(() => {
+            shopItem.PurchaseUpgrade();
+            LogCommand("EXECUTE_BUY: " + def.upgradeName.ToUpper());
+        });
+
+        // Track it and add to the paged list
+        dynamicUpgradeButtons.Add(btnGo);
+        storeButtons.Add(btn);
+        buttonOriginalScales[btn] = btnGo.transform.localScale;
+        buttonTexts[btn] = nameTxt;
+        buttonOriginalTexts[btn] = def.upgradeName;
+
+        AddHoverAnimations(btn);
+
+        // Rebuild pagination
+        totalPages = Mathf.Max(1, Mathf.CeilToInt((float)storeButtons.Count / maxItemsPerPage));
+        RenderPage();
+
+        LogCommand($"STORE_UPDATED: {def.upgradeName.ToUpper()} AVAILABLE FOR PURCHASE");
     }
     
     private void Update()

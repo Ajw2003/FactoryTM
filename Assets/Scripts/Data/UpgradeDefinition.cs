@@ -1,0 +1,36 @@
+using UnityEngine;
+using Buildings;
+
+public enum UpgradeType
+{
+    Building,
+    Weapon,
+    Armor,
+    HealthPack
+}
+
+[CreateAssetMenu(fileName = "UpgradeDefinition", menuName = "Scriptable Objects/UpgradeDefinition")]
+public class UpgradeDefinition : ScriptableObject
+{
+    [Header("General Settings")]
+    public string upgradeId;
+    public string upgradeName;
+    [TextArea(3, 10)]
+    public string description;
+    public Sprite icon;
+    public UpgradeType type;
+    public float costInShop = 50f;
+
+    [Header("Building Upgrade Settings")]
+    public BuildingData buildingToUnlock;
+
+    [Header("Weapon Upgrade Settings")]
+    public WeaponStats weaponToUnlock;
+
+    [Header("Armor / Health Boost Settings")]
+    public float armorPercentBoost = 0f; // E.g., 0.15f for 15% damage reduction
+    public int maxHealthBoost = 0;
+
+    [Header("Status (Runtime Only)")]
+    public bool isResearched = false;
+}
