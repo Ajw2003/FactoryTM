@@ -41,7 +41,7 @@ public class UpgradeShopItem : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (UpgradeManager.HasInstance)
+        if (UpgradeManager.Instance != null)
         {
             UpgradeManager.Instance.onUpgradesChanged -= RefreshUI;
         }

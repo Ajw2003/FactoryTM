@@ -55,7 +55,7 @@ public class DayNightManager : SingletonBase<DayNightManager>
             if (timeRemaining > 0)
             {
                 timeRemaining -= Time.deltaTime;
-                UpdateTimerText($"DAY {currentDay} // SUNSET IN {Mathf.CeilToInt(timeRemaining)}s");
+                UpdateTimerText($"DAY {currentDay} // SUNSET IN {Mathf.CeilToInt(timeRemaining)}");
             }
             else
             {
@@ -156,11 +156,11 @@ public class DayNightManager : SingletonBase<DayNightManager>
             rt.anchorMin = new Vector2(0.5f, 1f);
             rt.anchorMax = new Vector2(0.5f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
-            rt.anchoredPosition = new Vector2(0f, -20f);
+            rt.anchoredPosition = new Vector2(0f, -60f);
             rt.sizeDelta = new Vector2(400f, 50f);
 
             timerText = timerGo.GetComponent<TextMeshProUGUI>();
-            timerText.fontSize = 22;
+            timerText.fontSize = 36;
             timerText.fontStyle = FontStyles.Bold;
             timerText.alignment = TextAlignmentOptions.Center;
             timerText.color = new Color(0.2f, 0.9f, 0.2f, 1f); // Retro terminal green

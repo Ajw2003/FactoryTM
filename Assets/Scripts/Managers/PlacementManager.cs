@@ -30,8 +30,7 @@ public class PlacementManager : SingletonBase<PlacementManager>
             {
                 if (mainTilemap == null)
                 {
-                    Transform t = gridObj.transform.Find("BuildingTilemap");
-                    if (t != null) mainTilemap = t.GetComponent<Tilemap>();
+                    mainTilemap = GameManager.Instance.BuildingTileMap ;
                 }
                 if (previewTilemap == null)
                 {
@@ -44,6 +43,7 @@ public class PlacementManager : SingletonBase<PlacementManager>
 
     void Start()
     {
+        mainTilemap = GameManager.Instance.BuildingTileMap;
         cam = Camera.main;
         playerController = GameManager.Instance.playerController;
     }

@@ -127,7 +127,7 @@ public class PlayerController : MonoBehaviour, IHealth
         isMoving = true;
         currentCell = targetCell;//change current cell to target
         
-        if (GameManager.Instance != null && GameManager.Instance.buildingTilemap != null)
+        if (GameManager.Instance != null && GameManager.Instance.MainTileMap != null)
         {
             targetPosition = GridManager.Instance.CellToWorldConversion(currentCell);
         }
