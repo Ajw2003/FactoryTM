@@ -21,6 +21,8 @@ public class WeaponStats : ScriptableObject
     public AudioClip bulletSound;
 
     public WeaponType weaponType;
+
+    public int cost;
 }
 
 public enum WeaponType

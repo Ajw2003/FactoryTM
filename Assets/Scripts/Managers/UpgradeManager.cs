@@ -60,7 +60,7 @@ public class UpgradeManager : SingletonBase<UpgradeManager>
             def.description = $"Research technology to enable building {b.buildingName}. Available to build via docked store.";
             def.type = UpgradeType.Building;
             def.buildingToUnlock = b;
-            def.costInShop = 100f;
+            def.costInShop = b.cost;
             allUpgrades.Add(def);
         }
 
@@ -74,7 +74,7 @@ public class UpgradeManager : SingletonBase<UpgradeManager>
             def.description = $"Deploy the {w.name} weapon system. Swaps your primary weapon.";
             def.type = UpgradeType.Weapon;
             def.weaponToUnlock = w;
-            def.costInShop = 150f;
+            def.costInShop = w.cost;
             allUpgrades.Add(def);
         }
 
@@ -172,12 +172,9 @@ public class UpgradeManager : SingletonBase<UpgradeManager>
                 // Apply permanent armor / health boost immediately on research
                 if (PlayerController.Instance != null)
                 {
-                    PlayerController.Instance.damageReductionFactor = Mathf.Clamp01(
-                        PlayerController.Instance.damageReductionFactor + upgrade.armorPercentBoost);
-                    PlayerController.Instance.maxHealth += upgrade.maxHealthBoost;
-                    PlayerController.Instance.Health = Mathf.Min(
-                        PlayerController.Instance.maxHealth,
-                        PlayerController.Instance.Health + upgrade.maxHealthBoost);
+                    PlayerController.Instance.damageReductionFactor = Mathf.Clamp01(PlayerController.Instance.damageReductionFactor + upgrade.armorPercentBoost);
+                    PlayerController.Instance.maxHealth += upgrade.maxHealthBoost; 
+                    PlayerController.Instance.Health = Mathf.Min(PlayerController.Instance.maxHealth, PlayerController.Instance.Health + upgrade.maxHealthBoost);
                     UiManager.Instance.UpdateHp(PlayerController.Instance.Health, PlayerController.Instance.maxHealth);
                     Debug.Log($"Applied armor boost: +{upgrade.armorPercentBoost*100}% reduction, +{upgrade.maxHealthBoost} max HP");
                 }

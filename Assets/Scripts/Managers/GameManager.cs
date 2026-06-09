@@ -16,7 +16,8 @@ public class GameManager : SingletonBase<GameManager>
     
     [Header("Data Config")]
     public BuildingData[] allBuildings;
-    public Tilemap buildingTilemap;
+    public Tilemap MainTileMap;
+    public Tilemap BuildingTileMap;
     public TileBase sellerTile;
     public bool finiteOres;
 
@@ -35,6 +36,7 @@ public class GameManager : SingletonBase<GameManager>
     private Dictionary<TileBase, Vector2Int> tileDirectionMap = new Dictionary<TileBase, Vector2Int>();
 
     public List<CartelMember> ActiveEnemies = new List<CartelMember>();
+
     protected override void Awake()
     {
         persistBetweenScenes = false;
@@ -42,22 +44,28 @@ public class GameManager : SingletonBase<GameManager>
         playerController = FindFirstObjectByType<PlayerController>();
         mainCamera = FindFirstObjectByType<Camera>();
 
-        if (buildingTilemap == null)
+        if (MainTileMap == null)
         {
             GameObject gridObj = GameObject.Find("Grid");
             if (gridObj != null)
             {
-                Transform t = gridObj.transform.Find("BuildingTilemap");
-                if (t != null) buildingTilemap = t.GetComponent<Tilemap>();
+                Transform t = gridObj.transform.Find("MainTilemap");
+                if (t != null) MainTileMap = t.GetComponent<Tilemap>();
             }
-            
-            if (buildingTilemap == null)
+
+            if (MainTileMap == null)
             {
-                buildingTilemap = GameObject.FindFirstObjectByType<Tilemap>(); // Fallback
+                MainTileMap = GameObject.FindFirstObjectByType<Tilemap>(); // Fallback
             }
         }
 
-        InitializeData();
+        if (BuildingTileMap == null)
+        {
+            GameObject buildingmap = GameObject.Find("BuildingTilemap");
+            BuildingTileMap = buildingmap.GetComponent<Tilemap>();
+        }
+
+    InitializeData();
 
         // Initialize Roguelike/DayNight cycle and Upgrade systems
         _ = DayNightManager.Instance;
@@ -217,9 +225,9 @@ public class GameManager : SingletonBase<GameManager>
 
     private void SpawnResourceNodes()
     {
-        if (buildingTilemap == null)
+        if (MainTileMap == null)
         {
-            Debug.LogWarning("GameManager: buildingTilemap is null! Cannot spawn resource nodes.");
+            Debug.LogWarning("GameManager: MainTileMap is null! Cannot spawn resource nodes.");
             return;
         }
 
@@ -237,7 +245,7 @@ public class GameManager : SingletonBase<GameManager>
         }
 
         // Iterate through the tilemap bounds
-        BoundsInt bounds = buildingTilemap.cellBounds;
+        BoundsInt bounds = MainTileMap.cellBounds;
         HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>(); // Keep track of cells where nodes are spawned
 
         for (int x = bounds.xMin; x < bounds.xMax; x++)
@@ -247,7 +255,7 @@ public class GameManager : SingletonBase<GameManager>
                 Vector2Int cell = new Vector2Int(x, y);
 
                 // Skip if already occupied, if no tile is present, or if random chance fails
-                if (occupiedCells.Contains(cell) || !buildingTilemap.HasTile(new Vector3Int(x, y, 0)) || Random.value > patchSpawnChance)
+                if (occupiedCells.Contains(cell) || !MainTileMap.HasTile(new Vector3Int(x, y, 0)) || Random.value > patchSpawnChance)
                 {
                     continue;
                 }
@@ -313,7 +321,7 @@ public class GameManager : SingletonBase<GameManager>
             foreach (Vector2Int neighbor in neighbors)
             {
                 Vector3Int tempNeighbor = new Vector3Int(neighbor.x, neighbor.y, 0);
-                if (!buildingTilemap.HasTile(tempNeighbor) || occupiedCells.Contains(neighbor)) // Check if tilemap has a tile (meaning it's a valid place) and not already occupied
+                if (!MainTileMap.HasTile(tempNeighbor) || occupiedCells.Contains(neighbor)) // Check if tilemap has a tile (meaning it's a valid place) and not already occupied
                 {
                     continue;
                 }
