@@ -23,6 +23,12 @@ public class PlayerController : MonoBehaviour, IHealth
     public float damageReductionFactor = 0f;
     public int healthPacksCount = 0;
     public int ammoReserve = 90;
+
+    [Header("Stamina Settings")]
+    public float maxStamina = 100f;
+    public float currentStamina;
+    public float staminaRegenRate = 20f;
+    public float staminaCostPerDodge = 30f;
     
     public static PlayerController Instance { get; private set; }
 
@@ -45,6 +51,9 @@ public class PlayerController : MonoBehaviour, IHealth
         Health = maxHealth;
         UiManager.Instance.UpdateHp(Health, maxHealth);
         
+        currentStamina = maxStamina;
+        UiManager.Instance.UpdateStamina(currentStamina, maxStamina);
+
         Vector2Int spawnCell = Vector2Int.zero;
         if (ZoneManager.Instance != null)
         {
@@ -72,6 +81,13 @@ public class PlayerController : MonoBehaviour, IHealth
             UseHealthPack();
         }
 
+        // Regenerate stamina
+        if (currentStamina < maxStamina)
+        {
+            currentStamina = Mathf.Min(maxStamina, currentStamina + staminaRegenRate * Time.deltaTime);
+            UiManager.Instance.UpdateStamina(currentStamina, maxStamina);
+        }
+
         Vector2Int inputDirection = Vector2Int.zero;
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) inputDirection.y += 1;
         if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) inputDirection.y -= 1;
@@ -84,7 +100,7 @@ public class PlayerController : MonoBehaviour, IHealth
         }
 
         // Dodge Roll with Space - can interrupt normal movement
-        if (canDodgeRoll && !isDodging && Input.GetKeyDown(KeyCode.Space))
+        if (canDodgeRoll && !isDodging && Input.GetKeyDown(KeyCode.Space) && currentStamina >= staminaCostPerDodge)
         {
             if (currentCoroutine != null) StopCoroutine(currentCoroutine);
             Vector2Int dodgeDir = inputDirection != Vector2Int.zero ? inputDirection : lastMoveDirection;
@@ -167,6 +183,9 @@ public class PlayerController : MonoBehaviour, IHealth
     {
         isMoving = true;
         isDodging = true;
+        
+        currentStamina -= staminaCostPerDodge;
+        UiManager.Instance.UpdateStamina(currentStamina, maxStamina);
         
         // Dodge 2 tiles
         Vector2Int targetCell = currentCell + (direction * (int)dodgeDistance);
