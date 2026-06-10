@@ -24,9 +24,5 @@ public class PlayerCaughtState : PlayerState
         {
             IsEnabled = false
         });
-        EventManager.Instance?.Publish(new PlayerEscapeInputEvent
-        {
-            IsEnabled = true
-        });
     }
 }

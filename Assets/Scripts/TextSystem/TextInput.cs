@@ -33,7 +33,6 @@ public class TextInput : MonoBehaviour
             });
             TextIndex.Instance?.StopAllCoroutines();
             TextIndex.Instance?.StartTextVisible();
-            EventManager.Instance?.Publish(new CorrectEvent());
         }
         else
         {
