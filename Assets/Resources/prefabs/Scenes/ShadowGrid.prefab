@@ -57,7 +57,7 @@ GameObject:
   - component: {fileID: 7669532208081701131}
   - component: {fileID: 226753154619184033}
   m_Layer: 0
-  m_Name: Preview
+  m_Name: PreviewTileMap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

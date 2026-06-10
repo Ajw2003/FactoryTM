@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5d6845470c0222479261c8036be90c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoneManager
+  persistBetweenScenes: 1
   zoneSizeInTiles: {x: 36, y: 20}
   initialUnlockCost: 100
   costIncreasePerZone: 50
@@ -72,4 +73,4 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  panDuration: 0.5
+  panDuration: 0.75

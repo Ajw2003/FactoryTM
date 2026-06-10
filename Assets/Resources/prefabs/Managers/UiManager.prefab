@@ -48,5 +48,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 421e52223262e854fa0d815df01f0839, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UiManager
+  persistBetweenScenes: 1
   currentCurrency: {fileID: 0}
   StorePanel: {fileID: 0}
+  GameOverPanel: {fileID: 0}
+  healthText: {fileID: 0}
