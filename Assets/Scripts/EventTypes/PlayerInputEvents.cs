@@ -20,4 +20,28 @@ namespace Code.Scripts.Interfaces.EventTypes
     public class PlayerHealEvent : IEvent
     {
     }
+
+    public class PlayerOpenStoreEvent : IEvent
+    {
+    }
+
+    public class PlayerPlaceEvent : IEvent
+    {
+    }
+
+    public class PlayerRemoveEvent : IEvent
+    {
+    }
+
+    public class PlayerRotateEvent : IEvent
+    {
+    }
+
+    public class PlayerNextItemEvent : IEvent
+    {
+    }
+
+    public class PlayerPreviousItemEvent : IEvent
+    {
+    }
 }

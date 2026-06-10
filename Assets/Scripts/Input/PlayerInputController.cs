@@ -42,16 +42,26 @@ public class PlayerInputController : MonoBehaviour
             case true:
                 _playerInputs.Player.Move.performed += OnMovePerformed;
                 _playerInputs.Player.Move.canceled += OnMovePerformed;
-                _playerInputs.Player.OpenStore.performed += OnInteractPerformed;
                 _playerInputs.Player.Dodge.performed += OnDodgePerformed;
                 _playerInputs.Player.Heal.performed += OnHealPerformed;
+                _playerInputs.Player.OpenStore.started += OnOpenStorePerformed;
+                _playerInputs.Player.Place.performed += OnPlacePerformed;
+                _playerInputs.Player.Remove.performed += OnRemovePerformed;
+                _playerInputs.Player.Rotate.performed += OnRotatePerformed;
+                _playerInputs.Player.Next.performed += OnNextPerformed;
+                _playerInputs.Player.Previous.performed += OnPreviousPerformed;
                 break;
             case false:
                 _playerInputs.Player.Move.performed -= OnMovePerformed;
                 _playerInputs.Player.Move.canceled -= OnMovePerformed;
-                _playerInputs.Player.OpenStore.performed -= OnInteractPerformed;
                 _playerInputs.Player.Dodge.performed -= OnDodgePerformed;
                 _playerInputs.Player.Heal.performed -= OnHealPerformed;
+                _playerInputs.Player.OpenStore.started -= OnOpenStorePerformed;
+                _playerInputs.Player.Place.performed -= OnPlacePerformed;
+                _playerInputs.Player.Remove.performed -= OnRemovePerformed;
+                _playerInputs.Player.Rotate.performed -= OnRotatePerformed;
+                _playerInputs.Player.Next.performed -= OnNextPerformed;
+                _playerInputs.Player.Previous.performed -= OnPreviousPerformed;
                 break;
         }
     }
@@ -60,32 +70,58 @@ public class PlayerInputController : MonoBehaviour
     {
         switch (isEnabled)
         {
-            case true:
-                _playerInputs.Player.OpenStore.performed += OnInventoryPerformed;
-                break;
-            case false:
-                _playerInputs.Player.OpenStore.performed -= OnInventoryPerformed;
-                break;
+            // case true:
+            //     _playerInputs.Player.Inventory.performed += OnInventoryPerformed;
+            //     break;
+            // case false:
+            //     _playerInputs.Player.Inventory.performed -= OnInventoryPerformed;
+            //     break;
         }
     }
 
     #region ActionHandling
-    
-// Event Handler Methods
+
+    // Event Handler Methods
 
     void OnInventoryPerformed(InputAction.CallbackContext val)
     {
         // For now, keep as is or publish event if needed
         // _playerStateMachine.OpenInventory(); 
     }
+
+    void OnOpenStorePerformed(InputAction.CallbackContext val)
+    {
+        EventManager.Instance?.Publish(new PlayerOpenStoreEvent());
+    }
     void OnMovePerformed(InputAction.CallbackContext val)
     {
         EventManager.Instance?.Publish(new PlayerMoveEvent(val.ReadValue<Vector2>()));
     }
 
-    void OnInteractPerformed(InputAction.CallbackContext val)
+    void OnPlacePerformed(InputAction.CallbackContext val)
     {
-        EventManager.Instance?.Publish(new PlayerInteractEvent());
+        EventManager.Instance?.Publish(new PlayerPlaceEvent());
+        EventManager.Instance?.Publish(new PlayerInteractEvent()); // Legacy/Fallback
+    }
+
+    void OnRemovePerformed(InputAction.CallbackContext val)
+    {
+        EventManager.Instance?.Publish(new PlayerRemoveEvent());
+    }
+
+    void OnRotatePerformed(InputAction.CallbackContext val)
+    {
+        EventManager.Instance?.Publish(new PlayerRotateEvent());
+    }
+
+    void OnNextPerformed(InputAction.CallbackContext val)
+    {
+        EventManager.Instance?.Publish(new PlayerNextItemEvent());
+    }
+
+    void OnPreviousPerformed(InputAction.CallbackContext val)
+    {
+        EventManager.Instance?.Publish(new PlayerPreviousItemEvent());
     }
 
     void OnDodgePerformed(InputAction.CallbackContext val)
