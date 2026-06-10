@@ -34,6 +34,8 @@ public class PlayerController : MonoBehaviour, IHealth
     public float staminaCostPerDodge = 30f;
     
     public static PlayerController Instance { get; private set; }
+    public StateMachine.PlayerStateMachine StateMachine { get; private set; }
+    public Vector2 RawInputDirection => rawInputDirection;
 
    
     
@@ -47,6 +49,8 @@ public class PlayerController : MonoBehaviour, IHealth
         {
             Instance = this;
         }
+
+        StateMachine = new StateMachine.PlayerStateMachine(this);
     }
 
     private void Start()
@@ -79,6 +83,9 @@ public class PlayerController : MonoBehaviour, IHealth
         EventManager.Instance?.Subscribe(this, (PlayerMoveEvent e) => OnMoveInput(e.MoveInput));
         EventManager.Instance?.Subscribe(this, (PlayerDodgeEvent e) => OnDodgeInput());
         EventManager.Instance?.Subscribe(this, (PlayerHealEvent e) => OnHealInput());
+        EventManager.Instance?.Subscribe(this, (PlayerOpenStoreEvent e) => OnOpenStoreInput());
+
+        StateMachine.Initialize(StateMachine.idleState);
     }
 
     private void OnMoveInput(Vector2 input)
@@ -90,11 +97,7 @@ public class PlayerController : MonoBehaviour, IHealth
     {
         if (canDodgeRoll && !isDodging && currentStamina >= staminaCostPerDodge)
         {
-            if (currentCoroutine != null) StopCoroutine(currentCoroutine);
-            
-            Vector2Int inputDirection = GetDiscreteInputDirection();
-            Vector2Int dodgeDir = inputDirection != Vector2Int.zero ? inputDirection : lastMoveDirection;
-            currentCoroutine = StartCoroutine(DodgeRoutine(dodgeDir));
+            StateMachine.TransitionTo(StateMachine.dodgeState);
         }
     }
 
@@ -103,7 +106,19 @@ public class PlayerController : MonoBehaviour, IHealth
         UseHealthPack();
     }
 
-    private Vector2Int GetDiscreteInputDirection()
+    private void OnOpenStoreInput()
+    {
+        if (StateMachine.CurrentState == StateMachine.idleState || StateMachine.CurrentState == StateMachine.walkState)
+        {
+            StateMachine.TransitionTo(StateMachine.storeState);
+        }
+        else if (StateMachine.CurrentState == StateMachine.storeState)
+        {
+            StateMachine.TransitionTo(StateMachine.idleState);
+        }
+    }
+
+    public Vector2Int GetDiscreteInputDirection()
     {
         Vector2Int inputDirection = Vector2Int.zero;
         if (rawInputDirection.y > 0.5f) inputDirection.y = 1;
@@ -124,59 +139,32 @@ public class PlayerController : MonoBehaviour, IHealth
             UiManager.Instance.UpdateStamina(currentStamina, maxStamina);
         }
 
-        Vector2Int inputDirection = GetDiscreteInputDirection();
-
-        if (inputDirection != Vector2Int.zero)
-        {
-            lastMoveDirection = inputDirection;
-        }
-
-        if (isMoving || isDodging) return;
-
-        if (inputDirection != Vector2Int.zero)
-        {
-            Vector2Int nextCell = currentCell + inputDirection;
-            Vector3Int nextCellV3 = new Vector3Int(nextCell.x, nextCell.y, 0);
-            
-            Vector2Int nextZone = ZoneManager.Instance.GetZoneCoordsFromTile(nextCellV3);
-            Vector2Int currentZone = ZoneManager.Instance.GetCurrentZone();
-
-            if (nextZone != currentZone)
-            {
-                // ONLY allow movement if the zone is already unlocked
-                if (ZoneManager.Instance.IsZoneUnlocked(nextZone))
-                {
-                    ZoneManager.Instance.SetCurrentZone(nextZone);
-                    currentCoroutine = StartCoroutine(MoveRoutine(nextCell));
-                }
-                else
-                {
-                    //add code here for visual when trying to access locked zone
-                }
-            }
-            else
-            {
-                // Moving within the current zone is allowed if it is within the camera's viewport
-                bool isVisible = true;
-                Camera mainCam = ZoneManager.Instance != null && ZoneManager.Instance.mainCamera != null ? ZoneManager.Instance.mainCamera : Camera.main;
-                if (mainCam != null && GridManager.Instance != null)
-                {
-                    Vector2 targetWorldPos = GridManager.Instance.CellToWorldConversion(nextCell);
-                    Vector3 viewportPos = mainCam.WorldToViewportPoint(targetWorldPos);
-                    // Check if target is inside the viewport with a small buffer
-                    if (viewportPos.x < 0.02f || viewportPos.x > 0.98f || viewportPos.y < 0.04f || viewportPos.y > 0.96f)
-                    {
-                        isVisible = false;
-                    }
-                }
-
-                if (isVisible)
-                {
-                    currentCoroutine = StartCoroutine(MoveRoutine(nextCell));
-                }
-            }
-        }
+        StateMachine.Update();
     }
+
+    public void SetLastMoveDirection(Vector2Int direction)
+    {
+        if (direction != Vector2Int.zero)
+            lastMoveDirection = direction;
+    }
+
+    public Vector2Int GetLastMoveDirection() => lastMoveDirection;
+
+    public bool IsMoving() => isMoving;
+    public bool IsDodging() => isDodging;
+
+    public void StartMove(Vector2Int nextCell)
+    {
+        if (currentCoroutine != null) StopCoroutine(currentCoroutine);
+        currentCoroutine = StartCoroutine(MoveRoutine(nextCell));
+    }
+
+    public void StartDodge(Vector2Int direction)
+    {
+        if (currentCoroutine != null) StopCoroutine(currentCoroutine);
+        currentCoroutine = StartCoroutine(DodgeRoutine(direction));
+    }
+
 
     private IEnumerator MoveRoutine(Vector2Int targetCell)
     {
@@ -256,7 +244,7 @@ public class PlayerController : MonoBehaviour, IHealth
 
     public void TakeDamage(int amount)
     {
-        if (Health <= 0 || isDodging) return;
+        if (Health <= 0 || isDodging || StateMachine.CurrentState == StateMachine.deadState) return;
 
         // Apply armor damage reduction (e.g. 0.2f = 20% less damage)
         int reduced = Mathf.Max(1, Mathf.RoundToInt(amount * (1f - damageReductionFactor)));
@@ -279,7 +267,7 @@ public class PlayerController : MonoBehaviour, IHealth
     /// <summary>Consume one health pack to restore half of max health.</summary>
     public void UseHealthPack()
     {
-        if (healthPacksCount <= 0) return;
+        if (healthPacksCount <= 0 || StateMachine.CurrentState == StateMachine.deadState) return;
         if (Health >= maxHealth) return;
 
         healthPacksCount--;
@@ -316,6 +304,7 @@ public class PlayerController : MonoBehaviour, IHealth
     public void Die()
     {
         Debug.Log("die");
+        StateMachine.TransitionTo(StateMachine.deadState);
         UiManager.Instance.ShowGameOver();
     }
 

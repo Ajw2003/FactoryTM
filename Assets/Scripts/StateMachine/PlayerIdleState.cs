@@ -1,3 +1,6 @@
+using Code.Scripts.EventSystems;
+using UnityEngine;
+
 namespace StateMachine
 {
     public class PlayerIdleState : IState
@@ -10,22 +13,28 @@ namespace StateMachine
         }
         public void Enter()
         {
-            //move into idle state, this enables movement, building and shooting input and is the transition state from every other state
+            // Enable movement and inventory inputs
+            EventManager.Instance?.Publish(new MovementInputEvent { IsEnabled = true });
+            EventManager.Instance?.Publish(new InventoryInputEvent { IsEnabled = true });
         }
         
         public void Exit()
         {
-        
         }
 
         public void FixedUpdate()
         {
-        
         }
 
         public void Update()
         {
-        
+            Vector2Int inputDirection = player.GetDiscreteInputDirection();
+
+            if (inputDirection != Vector2Int.zero)
+            {
+                player.SetLastMoveDirection(inputDirection);
+                player.StateMachine.TransitionTo(player.StateMachine.walkState);
+            }
         }
     }
 }

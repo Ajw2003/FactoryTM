@@ -1,3 +1,5 @@
+using Code.Scripts.EventSystems;
+
 namespace StateMachine
 {
     public class PlayerDeadState : IState
@@ -10,27 +12,21 @@ namespace StateMachine
         }
         public void Enter()
         {
-            //disable all input except pause menu
+            // Disable all inputs
+            EventManager.Instance?.Publish(new MovementInputEvent { IsEnabled = false });
+            EventManager.Instance?.Publish(new InventoryInputEvent { IsEnabled = false });
         }
 
-        void IState.Update()
+        public void Update()
         {
-            Update();
         }
 
         public void Exit()
         {
-            throw new System.NotImplementedException();
         }
 
         public void FixedUpdate()
         {
-            throw new System.NotImplementedException();
-        }
-
-        void Update()
-        {
-        
         }
     }
 }

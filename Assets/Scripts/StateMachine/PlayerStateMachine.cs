@@ -13,6 +13,7 @@ namespace StateMachine
         public PlayerIdleState idleState;
         public PlayerDeadState deadState;
         public PlayerStoreState storeState;
+        public PlayerDodgeState dodgeState;
 
 
         // event to notify other objects of the state change
@@ -27,6 +28,7 @@ namespace StateMachine
             this.deadState = new PlayerDeadState(player);
             this.idleState = new PlayerIdleState(player);
             this.storeState = new PlayerStoreState(player);
+            this.dodgeState = new PlayerDodgeState(player);
         }
 
 

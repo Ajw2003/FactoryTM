@@ -125,24 +125,36 @@ public class UiManager : SingletonBase<UiManager>
             staminaContainer.SetActive(true);
          }
       }
+   }
 
-      if (Input.GetKeyDown(KeyCode.E))
+   public void OpenStore()
+   {
+      if (StorePanel != null)
       {
-         flip = !flip;
-         if (StorePanel != null)
+         StoreUiScript storeUi = StorePanel.GetComponent<StoreUiScript>();
+         if (storeUi != null)
          {
-            StoreUiScript storeUi = StorePanel.GetComponent<StoreUiScript>();
-            if (storeUi != null)
-            {
-               if (flip)
-                  storeUi.OpenStore();
-               else
-                  storeUi.CloseStore();
-            }
-            else
-            {
-               StorePanel.SetActive(flip);
-            }
+            storeUi.OpenStore();
+         }
+         else
+         {
+            StorePanel.SetActive(true);
+         }
+      }
+   }
+
+   public void CloseStore()
+   {
+      if (StorePanel != null)
+      {
+         StoreUiScript storeUi = StorePanel.GetComponent<StoreUiScript>();
+         if (storeUi != null)
+         {
+            storeUi.CloseStore();
+         }
+         else
+         {
+            StorePanel.SetActive(false);
          }
       }
    }

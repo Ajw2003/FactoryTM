@@ -1,3 +1,6 @@
+using Code.Scripts.EventSystems;
+using UnityEngine;
+
 namespace StateMachine
 {
     public class PlayerDodgeState : IState
@@ -11,16 +14,26 @@ namespace StateMachine
         }
         public void Enter()
         {
-            //I frames and not take damage while in state 
+            // Disable inputs during dodge
+            EventManager.Instance?.Publish(new MovementInputEvent { IsEnabled = false });
+            EventManager.Instance?.Publish(new InventoryInputEvent { IsEnabled = false });
+
+            Vector2Int inputDirection = player.GetDiscreteInputDirection();
+            Vector2Int dodgeDir = inputDirection != Vector2Int.zero ? inputDirection : player.GetLastMoveDirection();
+            
+            player.StartDodge(dodgeDir);
         }
 
         public void Update()
         {
+            if (!player.IsDodging())
+            {
+                player.StateMachine.TransitionTo(player.StateMachine.idleState);
+            }
         }
 
         public void Exit()
         {
-            //when dodge finishes immediately exit and disable invulnerability state
         }
 
         public void FixedUpdate()

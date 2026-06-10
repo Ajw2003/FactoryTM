@@ -1,3 +1,5 @@
+using Code.Scripts.EventSystems;
+
 namespace StateMachine
 {
     public class PlayerStoreState : IState
@@ -11,22 +13,24 @@ namespace StateMachine
         }
         public void Enter()
         {
-            //move into idle state and disable movement, shooting and building only allow ui input
+            // Disable movement but allow UI/Inventory input
+            EventManager.Instance?.Publish(new MovementInputEvent { IsEnabled = false });
+            EventManager.Instance?.Publish(new InventoryInputEvent { IsEnabled = true });
+
+            UiManager.Instance?.OpenStore();
         }
 
         public void Update()
         {
-        
         }
 
         public void Exit()
         {
-        
+            UiManager.Instance?.CloseStore();
         }
 
         public void FixedUpdate()
         {
-        
         }
     }
 }
