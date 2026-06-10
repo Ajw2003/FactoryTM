@@ -72,12 +72,7 @@ public class PlayerController : MonoBehaviour, IHealth
             UseHealthPack();
         }
 
-        if (isMoving) return;
-
-        Vector2Int inputDirection = Vector2Int.zero;//set input to zero
-        
-        //get input and convert to direction in grid space +-1 in x or y coords
-
+        Vector2Int inputDirection = Vector2Int.zero;
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) inputDirection.y += 1;
         if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) inputDirection.y -= 1;
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) inputDirection.x -= 1;
@@ -88,13 +83,16 @@ public class PlayerController : MonoBehaviour, IHealth
             lastMoveDirection = inputDirection;
         }
 
-        // Dodge Roll with Space
-        if (canDodgeRoll && Input.GetKeyDown(KeyCode.Space))
+        // Dodge Roll with Space - can interrupt normal movement
+        if (canDodgeRoll && !isDodging && Input.GetKeyDown(KeyCode.Space))
         {
+            if (currentCoroutine != null) StopCoroutine(currentCoroutine);
             Vector2Int dodgeDir = inputDirection != Vector2Int.zero ? inputDirection : lastMoveDirection;
             currentCoroutine = StartCoroutine(DodgeRoutine(dodgeDir));
             return;
         }
+
+        if (isMoving) return;
 
         if (inputDirection != Vector2Int.zero)
         {
