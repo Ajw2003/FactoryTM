@@ -54,7 +54,7 @@ public class UpgradeShopItem : MonoBehaviour
         if (nameLabel != null)
             nameLabel.text = GetDisplayName();
         if (priceLabel != null)
-            priceLabel.text = "$" + (definition.costInShop * (CurrencyManager.HasInstance ? CurrencyManager.Instance.exchangeRate : 1f));
+            priceLabel.text = "$" + definition.costInShop;
 
         UpdateAffordabilityColor();
     }
@@ -77,28 +77,24 @@ public class UpgradeShopItem : MonoBehaviour
     private void UpdateAffordabilityColor()
     {
         if (bgImage == null || !CurrencyManager.HasInstance) return;
-        float cost = definition.costInShop * CurrencyManager.Instance.exchangeRate;
-        bool canAfford = CurrencyManager.Instance.currentCurrencyValue >= cost;
-        bgImage.color = canAfford
-            ? new Color(0.1f, 0.8f, 0.1f, 0.85f)
-            : new Color(0.8f, 0.1f, 0.1f, 0.85f);
+        bgImage.color = GetTargetColor();
     }
 
     public Color GetTargetColor()
     {
         if (!CurrencyManager.HasInstance || definition == null) return new Color(0.05f, 0.15f, 0.05f, 0.85f);
-        float cost = definition.costInShop * CurrencyManager.Instance.exchangeRate;
+        float cost = definition.costInShop;
         bool canAfford = CurrencyManager.Instance.currentCurrencyValue >= cost;
         return canAfford
-            ? new Color(0.1f, 0.8f, 0.1f, 0.85f)
-            : new Color(0.8f, 0.1f, 0.1f, 0.85f);
+            ? new Color(0.05f, 0.15f, 0.05f, 0.85f)
+            : new Color(0.15f, 0.05f, 0.05f, 0.85f);
     }
 
     public void PurchaseUpgrade()
     {
         if (definition == null) return;
 
-        float cost = definition.costInShop * (CurrencyManager.HasInstance ? CurrencyManager.Instance.exchangeRate : 1f);
+        float cost = definition.costInShop;
 
         if (!CurrencyManager.HasInstance || CurrencyManager.Instance.currentCurrencyValue < cost)
         {

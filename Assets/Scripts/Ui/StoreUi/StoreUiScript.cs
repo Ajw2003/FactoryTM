@@ -127,7 +127,7 @@ public class StoreUiScript : MonoBehaviour
         nameRt.offsetMin = new Vector2(8f, 0f);
         nameRt.offsetMax = Vector2.zero;
         TextMeshProUGUI nameTxt = nameGo.GetComponent<TextMeshProUGUI>();
-        nameTxt.fontSize = 16;
+        nameTxt.fontSize = 50;
         nameTxt.fontStyle = FontStyles.Bold;
         nameTxt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
         nameTxt.alignment = TextAlignmentOptions.MidlineLeft;
@@ -141,7 +141,7 @@ public class StoreUiScript : MonoBehaviour
         priceRt.offsetMin = new Vector2(8f, 0f);
         priceRt.offsetMax = Vector2.zero;
         TextMeshProUGUI priceTxt = priceGo.GetComponent<TextMeshProUGUI>();
-        priceTxt.fontSize = 13;
+        priceTxt.fontSize = 46;
         priceTxt.color = new Color(0.2f, 0.8f, 0.2f, 0.85f);
         priceTxt.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -304,12 +304,86 @@ public class StoreUiScript : MonoBehaviour
             btnRt.pivot = new Vector2(0.5f, 0.5f);
             btnRt.sizeDelta = new Vector2(btnRt.sizeDelta.x, 90f);
             
-            TMP_Text txt = btn.GetComponentInChildren<TMP_Text>();
-            if (txt != null)
+            if (itemBtn != null)
             {
-                txt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
-                buttonTexts[btn] = txt;
-                buttonOriginalTexts[btn] = txt.text;
+                // Deactivate stretched/overlapping graphics/icons
+                Image[] childImages = btn.GetComponentsInChildren<Image>(true);
+                foreach (var img in childImages)
+                {
+                    if (img != btnImg)
+                    {
+                        img.gameObject.SetActive(false);
+                    }
+                }
+
+                // Find name text (the text that is not priceText and not countText)
+                TMP_Text[] allTexts = btn.GetComponentsInChildren<TMP_Text>(true);
+                TMP_Text nameTxt = null;
+                foreach (var t in allTexts)
+                {
+                    if (t != itemBtn.priceText && t != itemBtn.countText)
+                    {
+                        nameTxt = t;
+                        break;
+                    }
+                }
+
+                // Reposition name text (centered, top half)
+                if (nameTxt != null)
+                {
+                    RectTransform nameRt = nameTxt.GetComponent<RectTransform>();
+                    nameRt.anchorMin = new Vector2(0.1f, 0.52f);
+                    nameRt.anchorMax = new Vector2(0.9f, 0.9f);
+                    nameRt.pivot = new Vector2(0.5f, 0.5f);
+                    nameRt.offsetMin = Vector2.zero;
+                    nameRt.offsetMax = Vector2.zero;
+                    nameTxt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
+                    nameTxt.alignment = TextAlignmentOptions.Center;
+                    nameTxt.fontSize = 50;
+                    nameTxt.fontStyle = FontStyles.Bold;
+
+                    buttonTexts[btn] = nameTxt;
+                    buttonOriginalTexts[btn] = nameTxt.text;
+                }
+
+                // Reposition priceText (centered, bottom half)
+                if (itemBtn.priceText != null)
+                {
+                    RectTransform priceRt = itemBtn.priceText.GetComponent<RectTransform>();
+                    priceRt.anchorMin = new Vector2(0.1f, 0.12f);
+                    priceRt.anchorMax = new Vector2(0.9f, 0.48f);
+                    priceRt.pivot = new Vector2(0.5f, 0.5f);
+                    priceRt.offsetMin = Vector2.zero;
+                    priceRt.offsetMax = Vector2.zero;
+                    itemBtn.priceText.color = new Color(0.2f, 0.8f, 0.2f, 0.85f);
+                    itemBtn.priceText.alignment = TextAlignmentOptions.Center;
+                    itemBtn.priceText.fontSize = 46;
+                }
+
+                // Reposition countText (top-right badge)
+                if (itemBtn.countText != null)
+                {
+                    RectTransform countRt = itemBtn.countText.GetComponent<RectTransform>();
+                    countRt.anchorMin = new Vector2(0.8f, 0.6f);
+                    countRt.anchorMax = new Vector2(0.97f, 0.95f);
+                    countRt.pivot = new Vector2(1f, 1f);
+                    countRt.offsetMin = Vector2.zero;
+                    countRt.offsetMax = Vector2.zero;
+                    itemBtn.countText.color = new Color(0.2f, 0.9f, 0.2f, 1f);
+                    itemBtn.countText.alignment = TextAlignmentOptions.TopRight;
+                    itemBtn.countText.fontSize = 44;
+                    itemBtn.countText.fontStyle = FontStyles.Bold;
+                }
+            }
+            else
+            {
+                TMP_Text txt = btn.GetComponentInChildren<TMP_Text>();
+                if (txt != null)
+                {
+                    txt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
+                    buttonTexts[btn] = txt;
+                    buttonOriginalTexts[btn] = txt.text;
+                }
             }
             
             buttonOriginalScales[btn] = btn.transform.localScale;
@@ -359,7 +433,7 @@ public class StoreUiScript : MonoBehaviour
         TextMeshProUGUI htTxt = headerTextGo.GetComponent<TextMeshProUGUI>();
         htTxt.text = "SYS_MONITOR // DECK_04";
         htTxt.color = new Color(0.2f, 1f, 0.2f, 1f);
-        htTxt.fontSize = 20;
+        htTxt.fontSize = 50;
         htTxt.fontStyle = FontStyles.Bold;
         htTxt.alignment = TextAlignmentOptions.Left;
         
@@ -388,7 +462,7 @@ public class StoreUiScript : MonoBehaviour
         
         terminalLogText = contentGo.GetComponent<TextMeshProUGUI>();
         terminalLogText.color = new Color(0.2f, 1f, 0.2f, 1f);
-        terminalLogText.fontSize = 18;
+        terminalLogText.fontSize = 44;
         terminalLogText.alignment = TextAlignmentOptions.BottomLeft;
         terminalLogText.textWrappingMode = TextWrappingModes.Normal;
         terminalLogText.text = "";
