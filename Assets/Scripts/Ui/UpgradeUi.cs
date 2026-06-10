@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using Singleton;
 using DG.Tweening;
+using Managers;
 using UnityEngine.EventSystems;
 
 public class UpgradeUi : SingletonBase<UpgradeUi>
