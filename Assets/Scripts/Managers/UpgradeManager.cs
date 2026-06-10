@@ -25,24 +25,137 @@ public class UpgradeManager : SingletonBase<UpgradeManager>
 
     private void LoadUpgradesFromResources()
     {
-        // Dynamically load all upgrade definitions inside "Assets/Resources/Upgrades/"
+        // Reset runtime state so a fresh play session starts clean
+        researchedUpgrades.Clear();
+        activeUpgradesInShop.Clear();
+
+        // Load any custom UpgradeDefinition assets from "Assets/Resources/Upgrades/"
         UpgradeDefinition[] loaded = Resources.LoadAll<UpgradeDefinition>("Upgrades");
         allUpgrades.Clear();
         foreach (var def in loaded)
         {
-            def.isResearched = false; // Reset state on load
+            def.isResearched = false; // Reset runtime state on each load
             allUpgrades.Add(def);
         }
-        
-        Debug.Log($"UpgradeManager: Loaded {allUpgrades.Count} upgrades from Resources.");
+        Debug.Log($"UpgradeManager: Loaded {allUpgrades.Count} upgrade asset(s) from Resources.");
 
+        // If no custom assets exist at all, generate building/weapon defaults too
         if (allUpgrades.Count == 0)
         {
-            GenerateDefaultUpgrades();
+            GenerateBuildingAndWeaponUpgrades();
         }
+
+        // ALWAYS ensure the core researchable upgrades exist in the pool.
+        // These are checked by upgradeId so custom assets with matching IDs aren't duplicated.
+        EnsureBaseUpgrades();
 
         // Auto-unlock any upgrades flagged to start unlocked at game start
         ApplyStartingUnlocks();
+    }
+
+    /// <summary>
+    /// Generates building and weapon upgrade definitions from Resources as a fallback
+    /// when no custom UpgradeDefinition assets exist.
+    /// </summary>
+    private void GenerateBuildingAndWeaponUpgrades()
+    {
+        Debug.Log("UpgradeManager: No custom assets found. Generating building/weapon upgrade defaults...");
+
+        BuildingData[] buildings = Resources.LoadAll<BuildingData>("BuildingData");
+        WeaponStats[] weapons = Resources.LoadAll<WeaponStats>("Weapons");
+
+        foreach (var b in buildings)
+        {
+            if (b == null) continue;
+            UpgradeDefinition def = ScriptableObject.CreateInstance<UpgradeDefinition>();
+            def.upgradeId = "unlock_" + b.name.ToLower();
+            def.upgradeName = "Unlock " + b.buildingName;
+            def.description = $"Research technology to enable building {b.buildingName}. Available to build via docked store.";
+            def.type = UpgradeType.Building;
+            def.buildingToUnlock = b;
+            def.costInShop = b.cost;
+            allUpgrades.Add(def);
+        }
+
+        foreach (var w in weapons)
+        {
+            if (w == null || w.name.Contains("Enemy")) continue;
+            UpgradeDefinition def = ScriptableObject.CreateInstance<UpgradeDefinition>();
+            def.upgradeId = "weapon_" + w.name.ToLower();
+            def.upgradeName = w.name + " Weapon";
+            def.description = $"Deploy the {w.name} weapon system. Swaps your primary weapon.";
+            def.type = UpgradeType.Weapon;
+            def.weaponToUnlock = w;
+            def.costInShop = w.cost;
+            allUpgrades.Add(def);
+        }
+
+        Debug.Log($"UpgradeManager: Generated {allUpgrades.Count} building/weapon upgrades.");
+    }
+
+    /// <summary>
+    /// Guarantees that armor, health pack, and ammo upgrade entries always exist in the pool,
+    /// regardless of what custom assets are loaded. Checks by upgradeId to avoid duplicates.
+    /// </summary>
+    private void EnsureBaseUpgrades()
+    {
+        if (!HasUpgradeWithId("armor_mk1"))
+        {
+            UpgradeDefinition def = ScriptableObject.CreateInstance<UpgradeDefinition>();
+            def.upgradeId = "armor_mk1";
+            def.upgradeName = "Heavy Plating Mk1";
+            def.description = "Increases damage reduction by 15% and grants +2 Max HP.";
+            def.type = UpgradeType.Armor;
+            def.armorPercentBoost = 0.15f;
+            def.maxHealthBoost = 2;
+            def.costInShop = 80f;
+            allUpgrades.Add(def);
+        }
+
+        if (!HasUpgradeWithId("armor_mk2"))
+        {
+            UpgradeDefinition def = ScriptableObject.CreateInstance<UpgradeDefinition>();
+            def.upgradeId = "armor_mk2";
+            def.upgradeName = "Titanium Plating Mk2";
+            def.description = "Increases damage reduction by 25% and grants +4 Max HP.";
+            def.type = UpgradeType.Armor;
+            def.armorPercentBoost = 0.25f;
+            def.maxHealthBoost = 4;
+            def.costInShop = 160f;
+            allUpgrades.Add(def);
+        }
+
+        if (!HasUpgradeWithId("health_pack_upgrade"))
+        {
+            UpgradeDefinition def = ScriptableObject.CreateInstance<UpgradeDefinition>();
+            def.upgradeId = "health_pack_upgrade";
+            def.upgradeName = "Emergency Medkits";
+            def.description = "Receive 2 emergency medkits immediately. Allows buying medkits in the shop. Press TAB to heal.";
+            def.type = UpgradeType.HealthPack;
+            def.costInShop = 30f;
+            allUpgrades.Add(def);
+        }
+
+        if (!HasUpgradeWithId("ammo_upgrade"))
+        {
+            UpgradeDefinition def = ScriptableObject.CreateInstance<UpgradeDefinition>();
+            def.upgradeId = "ammo_upgrade";
+            def.upgradeName = "Ammo Reserves";
+            def.description = "Receive 90 spare rounds immediately. Allows purchasing ammo packs (30 rounds) in the shop.";
+            def.type = UpgradeType.Ammo;
+            def.costInShop = 15f;
+            allUpgrades.Add(def);
+        }
+
+        Debug.Log($"UpgradeManager: Pool has {allUpgrades.Count} total upgrades after base-upgrade check.");
+    }
+
+    /// <summary>Returns true if allUpgrades already contains an entry with this id.</summary>
+    private bool HasUpgradeWithId(string id)
+    {
+        foreach (var def in allUpgrades)
+            if (def != null && def.upgradeId == id) return true;
+        return false;
     }
 
     /// <summary>
@@ -69,89 +182,6 @@ public class UpgradeManager : SingletonBase<UpgradeManager>
         }
     }
 
-    private void GenerateDefaultUpgrades()
-    {
-        Debug.Log("UpgradeManager: No custom upgrade definitions found. Generating defaults...");
-
-        // Load resources
-        BuildingData[] buildings = Resources.LoadAll<BuildingData>("BuildingData");
-        WeaponStats[] weapons = Resources.LoadAll<WeaponStats>("Weapons");
-
-        // 1. Generate Building Upgrades
-        foreach (var b in buildings)
-        {
-            if (b == null) continue;
-            UpgradeDefinition def = ScriptableObject.CreateInstance<UpgradeDefinition>();
-            def.upgradeId = "unlock_" + b.name.ToLower();
-            def.upgradeName = "Unlock " + b.buildingName;
-            def.description = $"Research technology to enable building {b.buildingName}. Available to build via docked store.";
-            def.type = UpgradeType.Building;
-            def.buildingToUnlock = b;
-            def.costInShop = b.cost;
-            allUpgrades.Add(def);
-        }
-
-        // 2. Generate Weapon Upgrades
-        foreach (var w in weapons)
-        {
-            if (w == null || w.name.Contains("Enemy")) continue; // Skip enemy weapons
-            UpgradeDefinition def = ScriptableObject.CreateInstance<UpgradeDefinition>();
-            def.upgradeId = "weapon_" + w.name.ToLower();
-            def.upgradeName = w.name + " Weapon";
-            def.description = $"Deploy the {w.name} weapon system. Swaps your primary weapon.";
-            def.type = UpgradeType.Weapon;
-            def.weaponToUnlock = w;
-            def.costInShop = w.cost;
-            allUpgrades.Add(def);
-        }
-
-        // 3. Generate Armor Upgrades
-        {
-            UpgradeDefinition def1 = ScriptableObject.CreateInstance<UpgradeDefinition>();
-            def1.upgradeId = "armor_mk1";
-            def1.upgradeName = "Heavy Plating Mk1";
-            def1.description = "Increases damage reduction by 15% and grants +2 Max HP.";
-            def1.type = UpgradeType.Armor;
-            def1.armorPercentBoost = 0.15f;
-            def1.maxHealthBoost = 2;
-            def1.costInShop = 80f;
-            allUpgrades.Add(def1);
-
-            UpgradeDefinition def2 = ScriptableObject.CreateInstance<UpgradeDefinition>();
-            def2.upgradeId = "armor_mk2";
-            def2.upgradeName = "Titanium Plating Mk2";
-            def2.description = "Increases damage reduction by 25% and grants +4 Max HP.";
-            def2.type = UpgradeType.Armor;
-            def2.armorPercentBoost = 0.25f;
-            def2.maxHealthBoost = 4;
-            def2.costInShop = 160f;
-            allUpgrades.Add(def2);
-        }
-
-        // 4. Generate Health Pack Upgrade
-        {
-            UpgradeDefinition def = ScriptableObject.CreateInstance<UpgradeDefinition>();
-            def.upgradeId = "health_pack_upgrade";
-            def.upgradeName = "Emergency Medkits";
-            def.description = "Receive 2 emergency medkits immediately. Allows buying medkits in the shop. Press TAB to heal.";
-            def.type = UpgradeType.HealthPack;
-            def.costInShop = 30f;
-            allUpgrades.Add(def);
-        }
-
-        // 5. Generate Ammo Upgrade
-        {
-            UpgradeDefinition def = ScriptableObject.CreateInstance<UpgradeDefinition>();
-            def.upgradeId = "ammo_upgrade";
-            def.upgradeName = "Ammo Reserves";
-            def.description = "Receive 90 spare rounds immediately. Allows purchasing ammo packs (30 rounds) in the shop.";
-            def.type = UpgradeType.Ammo;
-            def.costInShop = 15f;
-            allUpgrades.Add(def);
-        }
-
-        Debug.Log($"UpgradeManager: Generated {allUpgrades.Count} default upgrades dynamically.");
-    }
 
     public List<UpgradeDefinition> GetRandomUpgradeChoices(int count = 3)
     {
@@ -179,9 +209,6 @@ public class UpgradeManager : SingletonBase<UpgradeManager>
 
     public void ShowUpgradeSelection()
     {
-        // Pause timescale
-        Time.timeScale = 0f;
-
         // Populate and open UI
         var choices = GetRandomUpgradeChoices(3);
         if (choices.Count > 0)

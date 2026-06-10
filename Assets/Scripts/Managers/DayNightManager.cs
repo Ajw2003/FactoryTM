@@ -64,8 +64,8 @@ public class DayNightManager : SingletonBase<DayNightManager>
         }
         else if (currentPhase == CyclePhase.Evening)
         {
-            // Accumulate settle time after raid start before checking completion
-            raidSettleTimer += Time.deltaTime;
+            // Use unscaled time so the settle timer is never frozen by a pause
+            raidSettleTimer += Time.unscaledDeltaTime;
 
             int activeEnemies = GameManager.Instance != null ? GameManager.Instance.ActiveEnemies.Count : 0;
             
@@ -81,6 +81,7 @@ public class DayNightManager : SingletonBase<DayNightManager>
             if (allClear)
             {
                 TriggerUpgradePhase();
+                Debug.Log("triggerPhase");
             }
             else
             {
@@ -110,6 +111,8 @@ public class DayNightManager : SingletonBase<DayNightManager>
     private void TriggerUpgradePhase()
     {
         currentPhase = CyclePhase.UpgradePhase;
+        // Pause everything immediately — upgrade selection must be timescale-independent
+        Time.timeScale = 0f;
         UpdateTimerText("RAID REPELLED // RESEARCH INCOMING...", new Color(0.2f, 1f, 0.2f));
 
         // Open the upgrade panel

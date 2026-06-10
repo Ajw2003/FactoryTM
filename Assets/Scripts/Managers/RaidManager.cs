@@ -124,13 +124,13 @@ public class RaidManager : SingletonBase<RaidManager>
             for (int i = 0; i < settings.enemiesPerWave; i++)
             {
                 SpawnEnemy(settings.enemyPrefabs, settings.spawnDistance);
-                yield return new WaitForSeconds(settings.spawnInterval);
+                yield return new WaitForSecondsRealtime(settings.spawnInterval);
             }
 
             if (currentWave < settings.totalWaves)
             {
                 Debug.Log($"Wave {currentWave} finished. Next wave in {settings.waveFrequency} seconds.");
-                yield return new WaitForSeconds(settings.waveFrequency);
+                yield return new WaitForSecondsRealtime(settings.waveFrequency);
             }
         }
     }
@@ -142,7 +142,7 @@ public class RaidManager : SingletonBase<RaidManager>
         {
             SpawnEnemy(settings.enemyPrefabs, settings.spawnDistance);
             float waitTime = settings.spawnInterval;
-            yield return new WaitForSeconds(waitTime);
+            yield return new WaitForSecondsRealtime(waitTime);
             remainingDuration -= waitTime;
         }
     }
