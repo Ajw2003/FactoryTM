@@ -1,8 +1,6 @@
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
+using System.Collections;
+using System.Collections.Generic;
 using Code.Scripts.EventSystems;
-using Code.Scripts.EventSystems.EventTypes.EmptyEvents;
 using Code.Scripts.Player.PlayerStateMachine;
 using EventTypes.DialogueEvents;
 using SOs;
@@ -65,11 +63,9 @@ namespace StateMachine.Npcs
             {
                 _hasBeenEntered = true;
                 EventManager.Instance?.Subscribe(this, (NpcDialoguePassThroughEvent e) => EnableAndChangeCurrentDialogue());
-                EventManager.Instance?.Publish(new NpcColliderEvent { Entered = true });
                 TextIndex.Instance?.ShowCanvas();
                 TextIndex.Instance?.CanSpeak();
-
-                Invoke(nameof(DelayedEnable), 0.25f);
+                
             }
             
         }
@@ -92,25 +88,8 @@ namespace StateMachine.Npcs
         {
             EventManager.Instance?.Publish(new DialogueSoEvent{DialogueSo = currentDialogueSo });
             EventManager.Instance?.Publish(new IDialogueContextEvent{Context = _dialogueContext});
-            if (_isDealer && !_hasSpoken)
-            {
-                Invoke(nameof(OpenPuzzle), 1.0f);
-            }
 
             _hasSpoken = true;
-        }
-
-        private void OpenPuzzle()
-        {
-            EventManager.Instance?.Publish(new OpenPuzzleEvent());
-        }
-
-        private void DelayedEnable()
-        {
-            EventManager.Instance?.Publish(new TalkToNpcInputEvent
-            {
-                IsEnabled = true
-            });
         }
 
         public void OnTriggerExit2D(Collider2D other)// hide text boxes and or prompts and unsubscribe from event which should only be listened to with regards to said answers
@@ -122,10 +101,6 @@ namespace StateMachine.Npcs
                 EventManager.Instance?.Unsubscribe<NpcDialoguePassThroughEvent>(this);
                 TextIndex.Instance?.DisableUi();
                 TextIndex.Instance?.HideCanvas();
-                EventManager.Instance?.Publish(new NpcColliderEvent
-                {
-                    Entered = false
-                });
                 if (_hasSpoken && _dialogueContext == DialogueContext.Main)
                 {
                     _dialogueContext = DialogueContext.Neutral;

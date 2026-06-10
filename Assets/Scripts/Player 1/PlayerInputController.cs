@@ -27,7 +27,6 @@ public class PlayerInputController : MonoBehaviour
         EventManager.Instance?.Subscribe(this, (MovementInputEvent e) => MovementInputs(e.IsEnabled));
         EventManager.Instance?.Subscribe(this,(DialogueInputEvent e) => DialogueInputs(e.IsEnabled));
         EventManager.Instance?.Subscribe(this, (InventoryInputEvent e) => InventoryInputs(e.IsEnabled));
-        EventManager.Instance?.Subscribe(this, (PlayerEscapeInputEvent e) => EscapeInputs(e.IsEnabled));
         EventManager.Instance?.Subscribe(this, (SceneChangeEvent e) => OnSceneChange());
 
         _playerInputs.Enable();

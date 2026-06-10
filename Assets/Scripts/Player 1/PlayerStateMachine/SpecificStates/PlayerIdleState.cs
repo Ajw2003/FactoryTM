@@ -27,17 +27,5 @@ public class PlayerIdleState : PlayerState
         {
             IsEnabled = true
         });
-        EventManager.Instance?.Publish(new PlayerEscapeInputEvent
-        {
-            IsEnabled = false
-        });
-        
-        if (!_stateMachine.withinNpcTrigger)
-        {
-            EventManager.Instance?.Publish(new TalkToNpcInputEvent
-            {
-                IsEnabled = false
-            });
-        }
     }
 }

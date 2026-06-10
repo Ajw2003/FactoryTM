@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Code.Scripts.EventSystems;
-using Code.Scripts.EventSystems.EventTypes.EmptyEvents;
 using Code.Scripts.Player.PlayerStateMachine;
 using UnityEngine;
 using UnityEngine.AI;
@@ -48,9 +47,6 @@ namespace StateMachine.Monsters
             _caughtState = new MonsterPlayerCaughtState(this);
             agent.updateRotation = false;
             agent.updateUpAxis = false;
-            EventManager.Instance?.Subscribe(this, (LoseAgroEvent e) => LoseAgro());
-            EventManager.Instance?.Subscribe(this, (SafeZoneEnteredEvent e) => LoseAgro());
-            EventManager.Instance?.Subscribe(this, (SafeZoneLeftEvent e) => BecomeAgro());
             ChangeState(_agroState);
 
         }
@@ -90,17 +86,6 @@ namespace StateMachine.Monsters
             if (Target == null)
             {
                 Target = FindFirstObjectByType<PlayerStateMachine>().transform;
-            }
-        }
-
-        public void OnTriggerEnter2D(Collider2D other)
-        {
-            if (currentCooldown > 0 || PreviousState != _agroState) return;
-            if (other.GetComponent<PlayerStateMachine>() && PreviousState == _agroState)
-            {
-                EventManager.Instance?.Publish(new PlayerStateOverrideToCaughtEvent());
-                StartCoroutine(nameof(SecondsTillFinishRoutine));
-                ScreenShaker.Instance?.Shake(secondsTillFinish, 0.15f);
             }
         }
 

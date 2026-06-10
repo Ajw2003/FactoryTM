@@ -1,6 +1,5 @@
 using System.Collections;
 using Code.Scripts.EventSystems;
-using Code.Scripts.EventSystems.EventTypes.EmptyEvents;
 using EventTypes.StateEvents;
 using StateMachine;
 using UnityEngine;
@@ -73,10 +72,6 @@ namespace Code.Scripts.Player.PlayerStateMachine
             EventManager.Instance?.Subscribe(this, (PlayerStateChangeEvent e) => StateChange(e.NextState));
             EventManager.Instance?.Subscribe(this, (PlayerStateOverrideToDialogueEvent e) => ChangeToDialogue());
             EventManager.Instance?.Subscribe(this, (PlayerStateOverrideToIdleEvent e) => ChangeToIdle());
-            EventManager.Instance?.Subscribe(this, (PlayerStateOverrideToCaughtEvent e) => ChangeToCaught());
-            EventManager.Instance?.Subscribe(this, (IPlayerStateOverrideToPuzzleEvent e) => ChangeToPuzzle());
-            EventManager.Instance?.Subscribe(this, (NpcColliderEvent e) => NpcCollisionEntered(e.Entered));
-            EventManager.Instance?.Subscribe(this, (TeleportPlayerEvent e) => TeleportPlayer(e.Destination));
             EventManager.Instance?.Subscribe(this, (RespawnPlayerEvent e) => RespawnPlayer(e.Destination));
             ChangeState(IdleState);
             currentState = IdleState;
@@ -94,7 +89,6 @@ namespace Code.Scripts.Player.PlayerStateMachine
             {
                 NextState = DeadState
             });
-            EventManager.Instance?.Publish(new LoseAgroEvent());
             gameObject.transform.position = destination.position;
             ChangeToIdle();
         }
@@ -228,7 +222,6 @@ namespace Code.Scripts.Player.PlayerStateMachine
             if (currentEscapeCharge >= maxEscapeCharge)
             {
                 ChangeToIdle();
-                EventManager.Instance?.Publish(new LoseAgroEvent());
             }
 
             yield return null;
