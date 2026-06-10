@@ -31,8 +31,22 @@ public class PlayerInputController : MonoBehaviour
 
     private void Start()
     {
+        PermanentInputs(true);
         MovementInputs(true);
         InventoryInputs(true);
+    }
+
+    void PermanentInputs(bool isEnabled)
+    {
+        switch (isEnabled)
+        {
+            case true:
+                _playerInputs.Player.OpenStore.started += OnOpenStorePerformed;
+                break;
+            case false:
+                _playerInputs.Player.OpenStore.started -= OnOpenStorePerformed;
+                break;
+        }
     }
 
     void MovementInputs(bool isEnabled)
@@ -44,7 +58,6 @@ public class PlayerInputController : MonoBehaviour
                 _playerInputs.Player.Move.canceled += OnMovePerformed;
                 _playerInputs.Player.Dodge.performed += OnDodgePerformed;
                 _playerInputs.Player.Heal.performed += OnHealPerformed;
-                _playerInputs.Player.OpenStore.started += OnOpenStorePerformed;
                 _playerInputs.Player.Place.performed += OnPlacePerformed;
                 _playerInputs.Player.Remove.performed += OnRemovePerformed;
                 _playerInputs.Player.Rotate.performed += OnRotatePerformed;
@@ -56,7 +69,6 @@ public class PlayerInputController : MonoBehaviour
                 _playerInputs.Player.Move.canceled -= OnMovePerformed;
                 _playerInputs.Player.Dodge.performed -= OnDodgePerformed;
                 _playerInputs.Player.Heal.performed -= OnHealPerformed;
-                _playerInputs.Player.OpenStore.started -= OnOpenStorePerformed;
                 _playerInputs.Player.Place.performed -= OnPlacePerformed;
                 _playerInputs.Player.Remove.performed -= OnRemovePerformed;
                 _playerInputs.Player.Rotate.performed -= OnRotatePerformed;
