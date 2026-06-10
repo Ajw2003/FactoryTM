@@ -10,7 +10,8 @@ public enum UpgradeType
     Ammo,
     IncomeBoost,
     RaidReduction,
-    DodgeRoll
+    DodgeRoll,
+    StaminaBoost
 }
 
 [CreateAssetMenu(fileName = "UpgradeDefinition", menuName = "Scriptable Objects/UpgradeDefinition")]
