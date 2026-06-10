@@ -78,8 +78,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1672937583
+  m_SortingLayer: 1
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 7a82ec468fd80c1418a49b9294a3a29b, type: 3}
@@ -107,4 +107,3 @@ MonoBehaviour:
   minedItemPrefab: {fileID: 4074567141104984735, guid: 732d443bdf7106f428eacb6a29080dbb, type: 3}
   miningSpeed: 0.6
   oreCount: 100
-  isFinite: 1
