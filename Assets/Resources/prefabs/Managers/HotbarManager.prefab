@@ -44,4 +44,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b556eefafc0fc142ab988e8b8dafecc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HotbarManager
-  slotCount: 12
+  persistBetweenScenes: 1
+  slotCount: 10
