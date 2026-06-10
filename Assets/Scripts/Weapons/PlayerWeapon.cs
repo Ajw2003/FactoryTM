@@ -9,12 +9,19 @@ public class PlayerWeapon : BaseWeapon
     private Camera cam;
     private AmmoUI ammoUI;
 
-    private void UpdateAmmoUI()
+    public void UpdateAmmoUI()
     {
         if (ammoUI != null)
         {
-            ammoUI.UpdateAmmo(roundsLeft, magazineSize);
+            int reserve = PlayerController.Instance != null ? PlayerController.Instance.ammoReserve : 0;
+            ammoUI.UpdateAmmo(roundsLeft, magazineSize, reserve);
         }
+    }
+
+    protected override void SpawnBullet()
+    {
+        base.SpawnBullet();
+        UpdateAmmoUI();
     }
 
     protected override void Start()
@@ -59,12 +66,34 @@ public class PlayerWeapon : BaseWeapon
 
     protected override IEnumerator Reload()
     {
-        var enumerator = base.Reload();
+        if (isReloading) yield break;
+
+        int needed = magazineSize - roundsLeft;
+        if (needed <= 0) yield break;
+
+        int reserve = PlayerController.Instance != null ? PlayerController.Instance.ammoReserve : 0;
+        if (reserve <= 0)
+        {
+            Debug.Log("No ammo reserve left to reload!");
+            yield break;
+        }
+
+        Debug.Log("Reloading player weapon from reserve");
+        isReloading = true;
         if (ammoUI != null) ammoUI.SetReloading(true);
-        yield return base.Reload();
+
+        yield return new WaitForSeconds(reloadSpeed);
+
+        int toLoad = Mathf.Min(needed, reserve);
+        roundsLeft += toLoad;
+        if (PlayerController.Instance != null)
+        {
+            PlayerController.Instance.ammoReserve -= toLoad;
+        }
+
+        isReloading = false;
+        canFire = true;
         if (ammoUI != null) ammoUI.SetReloading(false);
         UpdateAmmoUI();
-        StopCoroutine(enumerator);
-        yield return null;
     }
 }

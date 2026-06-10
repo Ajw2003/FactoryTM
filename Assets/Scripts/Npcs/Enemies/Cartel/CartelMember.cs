@@ -122,7 +122,7 @@ public class CartelMember : MonoBehaviour, IHealth
     // Remove from the list when destroyed
     void OnDisable()
     {
-        if (GameManager.Instance != null) 
+        if (GameManager.HasInstance) 
         {
             GameManager.Instance.ActiveEnemies.Remove(this);
         }

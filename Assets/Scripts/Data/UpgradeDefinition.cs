@@ -6,7 +6,8 @@ public enum UpgradeType
     Building,
     Weapon,
     Armor,
-    HealthPack
+    HealthPack,
+    Ammo
 }
 
 [CreateAssetMenu(fileName = "UpgradeDefinition", menuName = "Scriptable Objects/UpgradeDefinition")]
