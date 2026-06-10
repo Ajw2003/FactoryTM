@@ -11,3 +11,11 @@ Make clear which way items eject from machines i.e. miners
 new enemy types with different attack patterns and traits such as explosive weapons, melee attacks, swarming and sniping 
 
 make sellers way more expensive after the first, or limit them some how so you are forced to use conveyors
+
+Refactor player and enemies to use statemachines
+
+Refactor game to use central event bus and manager for event based communication
+
+Refactor game to use input manager instead of old unity input 
+
+make upgrades not all be added to store afterwards, things like tax loop hole and soulslike should not be purchaseable more than once, where as ammo and health as well as machines should be added to the store for later purchase
