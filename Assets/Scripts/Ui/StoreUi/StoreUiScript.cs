@@ -358,7 +358,7 @@ public class StoreUiScript : MonoBehaviour
                     priceRt.offsetMax = Vector2.zero;
                     itemBtn.priceText.color = new Color(0.2f, 0.8f, 0.2f, 0.85f);
                     itemBtn.priceText.alignment = TextAlignmentOptions.Center;
-                    itemBtn.priceText.fontSize = 46;
+                    itemBtn.priceText.fontSize = 44;
                 }
 
                 // Reposition countText (top-right badge)
@@ -732,7 +732,7 @@ public class StoreUiScript : MonoBehaviour
         ptTxt.text = "<<";
         ptTxt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
         ptTxt.alignment = TextAlignmentOptions.Center;
-        ptTxt.fontSize = 20;
+        ptTxt.fontSize = 44;
         
         prevPageBtn.onClick.AddListener(() => {
             if (currentPageIndex > 0)
@@ -768,7 +768,7 @@ public class StoreUiScript : MonoBehaviour
         ntTxt.text = ">>";
         ntTxt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
         ntTxt.alignment = TextAlignmentOptions.Center;
-        ntTxt.fontSize = 20;
+        ntTxt.fontSize = 46;
         
         nextPageBtn.onClick.AddListener(() => {
             if (currentPageIndex < totalPages - 1)
@@ -790,7 +790,7 @@ public class StoreUiScript : MonoBehaviour
         pageIndicatorText = indGo.GetComponent<TextMeshProUGUI>();
         pageIndicatorText.color = new Color(0.2f, 0.9f, 0.2f, 1f);
         pageIndicatorText.alignment = TextAlignmentOptions.Center;
-        pageIndicatorText.fontSize = 18;
+        pageIndicatorText.fontSize = 44;
         pageIndicatorText.fontStyle = FontStyles.Bold;
 
         // Add hover triggers to pagination buttons too
