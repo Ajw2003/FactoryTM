@@ -5,8 +5,8 @@ namespace StateMachine
 {
     public abstract class BaseStateMachine : MonoBehaviour
     {
-        protected IState CurrentState { get; set; }
-        protected string CurrentStateName;
+        public IState CurrentState { get; set; }
+        public string currentStateName;
 
         public virtual void ChangeState(IState newState)// Change state with a pass through for the IState Interface 
         {
@@ -16,7 +16,7 @@ namespace StateMachine
             CurrentState?.Exit();
             CurrentState = newState;
             CurrentState?.Enter();
-            CurrentStateName = CurrentState?.ToString();
+            currentStateName = CurrentState?.ToString();
         }
 
         public virtual void Update()

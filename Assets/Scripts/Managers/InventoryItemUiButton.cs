@@ -294,7 +294,7 @@ public class UiItemButton : MonoBehaviour
         
         Image img = GetComponent<Image>();
         Color startColor = img != null ? img.color : originalColor;
-        Color failColor = new Color(1f, 0.3f, 0.3f, 1f); // vibrant red flash
+        Color failColor = new Color(0.15f, 0.05f, 0.05f, 0.85f); // vibrant red flash
         
         while (elapsed < duration)
         {

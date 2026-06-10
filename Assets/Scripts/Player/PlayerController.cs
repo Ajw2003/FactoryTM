@@ -1,4 +1,6 @@
 using System.Collections;
+using Code.Scripts.EventSystems;
+using Code.Scripts.Interfaces.EventTypes;
 using Singleton;
 using UnityEngine;
 
@@ -13,6 +15,7 @@ public class PlayerController : MonoBehaviour, IHealth
     private bool isDodging = false;
     public bool canDodgeRoll = false;
     private Vector2Int lastMoveDirection = Vector2Int.up;
+    private Vector2 rawInputDirection;
     private Coroutine currentCoroutine;
     
     public float width = 1.0f;
@@ -71,16 +74,49 @@ public class PlayerController : MonoBehaviour, IHealth
             transform.position = GridManager.Instance.CellToWorldConversion(currentCell);
         }
         targetPosition = transform.position;
+
+        // Subscribe to input events
+        EventManager.Instance?.Subscribe(this, (PlayerMoveEvent e) => OnMoveInput(e.MoveInput));
+        EventManager.Instance?.Subscribe(this, (PlayerDodgeEvent e) => OnDodgeInput());
+        EventManager.Instance?.Subscribe(this, (PlayerHealEvent e) => OnHealInput());
+    }
+
+    private void OnMoveInput(Vector2 input)
+    {
+        rawInputDirection = input;
+    }
+
+    private void OnDodgeInput()
+    {
+        if (canDodgeRoll && !isDodging && currentStamina >= staminaCostPerDodge)
+        {
+            if (currentCoroutine != null) StopCoroutine(currentCoroutine);
+            
+            Vector2Int inputDirection = GetDiscreteInputDirection();
+            Vector2Int dodgeDir = inputDirection != Vector2Int.zero ? inputDirection : lastMoveDirection;
+            currentCoroutine = StartCoroutine(DodgeRoutine(dodgeDir));
+        }
+    }
+
+    private void OnHealInput()
+    {
+        UseHealthPack();
+    }
+
+    private Vector2Int GetDiscreteInputDirection()
+    {
+        Vector2Int inputDirection = Vector2Int.zero;
+        if (rawInputDirection.y > 0.5f) inputDirection.y = 1;
+        else if (rawInputDirection.y < -0.5f) inputDirection.y = -1;
+        
+        if (rawInputDirection.x > 0.5f) inputDirection.x = 1;
+        else if (rawInputDirection.x < -0.5f) inputDirection.x = -1;
+        
+        return inputDirection;
     }
 
     private void Update()
     {
-        // Use health pack with Tab key
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            UseHealthPack();
-        }
-
         // Regenerate stamina
         if (currentStamina < maxStamina)
         {
@@ -88,27 +124,14 @@ public class PlayerController : MonoBehaviour, IHealth
             UiManager.Instance.UpdateStamina(currentStamina, maxStamina);
         }
 
-        Vector2Int inputDirection = Vector2Int.zero;
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) inputDirection.y += 1;
-        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) inputDirection.y -= 1;
-        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) inputDirection.x -= 1;
-        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) inputDirection.x += 1;
+        Vector2Int inputDirection = GetDiscreteInputDirection();
 
         if (inputDirection != Vector2Int.zero)
         {
             lastMoveDirection = inputDirection;
         }
 
-        // Dodge Roll with Space - can interrupt normal movement
-        if (canDodgeRoll && !isDodging && Input.GetKeyDown(KeyCode.Space) && currentStamina >= staminaCostPerDodge)
-        {
-            if (currentCoroutine != null) StopCoroutine(currentCoroutine);
-            Vector2Int dodgeDir = inputDirection != Vector2Int.zero ? inputDirection : lastMoveDirection;
-            currentCoroutine = StartCoroutine(DodgeRoutine(dodgeDir));
-            return;
-        }
-
-        if (isMoving) return;
+        if (isMoving || isDodging) return;
 
         if (inputDirection != Vector2Int.zero)
         {

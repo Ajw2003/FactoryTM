@@ -359,6 +359,7 @@ public class StoreUiScript : MonoBehaviour
                     itemBtn.priceText.color = new Color(0.2f, 0.8f, 0.2f, 0.85f);
                     itemBtn.priceText.alignment = TextAlignmentOptions.Center;
                     itemBtn.priceText.fontSize = 44;
+                    itemBtn.priceText.fontStyle = FontStyles.Bold;
                 }
 
                 // Reposition countText (top-right badge)
@@ -466,6 +467,7 @@ public class StoreUiScript : MonoBehaviour
         terminalLogText.fontSize = 44;
         terminalLogText.alignment = TextAlignmentOptions.BottomLeft;
         terminalLogText.textWrappingMode = TextWrappingModes.Normal;
+        terminalLogText.overflowMode = TextOverflowModes.Truncate;
         terminalLogText.text = "";
         
         terminalScroll.content = contentRt;
