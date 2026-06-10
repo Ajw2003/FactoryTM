@@ -182,6 +182,17 @@ namespace Managers
                 allUpgrades.Add(def);
             }
 
+            if (!HasUpgradeWithId("stamina_boost"))
+            {
+                UpgradeDefinition def = ScriptableObject.CreateInstance<UpgradeDefinition>();
+                def.upgradeId = "stamina_boost";
+                def.upgradeName = "Last Longer";
+                def.description = "Condition your body for intense combat. Increases maximum stamina by +50. (Stackable)";
+                def.type = UpgradeType.StaminaBoost;
+                def.costInShop = 140f;
+                allUpgrades.Add(def);
+            }
+
             Debug.Log($"UpgradeManager: Pool has {allUpgrades.Count} total upgrades after base-upgrade check.");
         }
 
@@ -359,6 +370,16 @@ namespace Managers
                     {
                         PlayerController.Instance.canDodgeRoll = true;
                         Debug.Log("Dodge Roll capability unlocked!");
+                    }
+                    break;
+
+                case UpgradeType.StaminaBoost:
+                    if (PlayerController.Instance != null)
+                    {
+                        PlayerController.Instance.maxStamina += 50f;
+                        PlayerController.Instance.currentStamina += 50f;
+                        UiManager.Instance.UpdateStamina(PlayerController.Instance.currentStamina, PlayerController.Instance.maxStamina);
+                        Debug.Log($"Applied Stamina Boost: New Max Stamina = {PlayerController.Instance.maxStamina}");
                     }
                     break;
             }
