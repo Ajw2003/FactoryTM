@@ -23,6 +23,7 @@ public class DayNightManager : SingletonBase<DayNightManager>
     public int baseEnemiesPerWave = 3;
     public int wavesPerRaid = 2;
     public float waveInterval = 10f;
+    public int raidEnemyReduction = 0;
 
     [Header("UI Reference")]
     private TMP_Text timerText;
@@ -101,7 +102,7 @@ public class DayNightManager : SingletonBase<DayNightManager>
         if (RaidManager.Instance != null)
         {
             // Scale raid difficulty dynamically based on current day
-            int enemies = baseEnemiesPerWave + (currentDay - 1) * 2;
+            int enemies = Mathf.Max(1, baseEnemiesPerWave + (currentDay - 1) * 2 - raidEnemyReduction);
             int waves = wavesPerRaid + (currentDay / 3); // Extra wave every 3 days
             
             Debug.Log($"DayNightManager: Triggering evening raid for Day {currentDay} ({waves} waves, {enemies} enemies per wave)");

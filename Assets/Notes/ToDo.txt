@@ -1,4 +1,4 @@
-make tutorial that integrates smoothly into gameplay, i.e. open your shop with E rotate objects with R place with left click, remove with Right click, shoot with middle click and build a miner and seller before the sun sets and the raiders come
+make tutorial that integrates smoothly into gameplay, i.e. Controls: open your shop with E rotate objects with R place with left click, remove with Right click, shoot with middle click. Then Instructions: build a miner and seller before the sun sets and the raiders come, rotate the miner to face the seller, aim with your mouse and shoot full auto but be wary as ammo is limited early game.
 
 FIX LAYER ISSUES FOR EVERYTHING
 
