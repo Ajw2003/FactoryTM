@@ -65,7 +65,7 @@ public class UpgradeUi : SingletonBase<UpgradeUi>
 
         TextMeshProUGUI titleTxt = titleGo.GetComponent<TextMeshProUGUI>();
         titleTxt.text = "CHOOSE NEXT RESEARCH PROGRAM";
-        titleTxt.fontSize = 28;
+        titleTxt.fontSize = 44;
         titleTxt.fontStyle = FontStyles.Bold;
         titleTxt.alignment = TextAlignmentOptions.Center;
         titleTxt.color = new Color(0.2f, 1f, 0.2f, 1f); // CRT Green
@@ -83,7 +83,7 @@ public class UpgradeUi : SingletonBase<UpgradeUi>
 
         TextMeshProUGUI subTxt = subGo.GetComponent<TextMeshProUGUI>();
         subTxt.text = "SELECT AN UPGRADE TO UNLOCK IN THE DOCKED STORE";
-        subTxt.fontSize = 18;
+        subTxt.fontSize = 40;
         subTxt.alignment = TextAlignmentOptions.Center;
         subTxt.color = new Color(0.2f, 0.7f, 0.2f, 0.8f);
     }
@@ -156,7 +156,7 @@ public class UpgradeUi : SingletonBase<UpgradeUi>
         titleRt.offsetMax = new Vector2(-10f, 50f);
         TextMeshProUGUI titleTxt = titleGo.GetComponent<TextMeshProUGUI>();
         titleTxt.text = def.upgradeName.ToUpper();
-        titleTxt.fontSize = 20;
+        titleTxt.fontSize = 40;
         titleTxt.fontStyle = FontStyles.Bold;
         titleTxt.alignment = TextAlignmentOptions.Center;
         titleTxt.color = new Color(0.2f, 1f, 0.2f, 1f);
@@ -171,7 +171,7 @@ public class UpgradeUi : SingletonBase<UpgradeUi>
         descRt.offsetMax = new Vector2(-12f, 110f);
         TextMeshProUGUI descTxt = descGo.GetComponent<TextMeshProUGUI>();
         descTxt.text = def.description;
-        descTxt.fontSize = 14;
+        descTxt.fontSize = 36;
         descTxt.alignment = TextAlignmentOptions.TopFlush;
         descTxt.color = new Color(0.2f, 0.8f, 0.2f, 0.8f);
 
