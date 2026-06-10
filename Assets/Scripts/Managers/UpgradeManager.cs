@@ -149,6 +149,39 @@ namespace Managers
                 allUpgrades.Add(def);
             }
 
+            if (!HasUpgradeWithId("tax_loophole"))
+            {
+                UpgradeDefinition def = ScriptableObject.CreateInstance<UpgradeDefinition>();
+                def.upgradeId = "tax_loophole";
+                def.upgradeName = "Taxloophole";
+                def.description = "Exploit financial technicalities to increase every dollar earned by +25%. (Stackable)";
+                def.type = UpgradeType.IncomeBoost;
+                def.costInShop = 120f;
+                allUpgrades.Add(def);
+            }
+
+            if (!HasUpgradeWithId("border_patrol"))
+            {
+                UpgradeDefinition def = ScriptableObject.CreateInstance<UpgradeDefinition>();
+                def.upgradeId = "border_patrol";
+                def.upgradeName = "BorderPatrol";
+                def.description = "Bolster off-screen security to reduce the number of enemies spawned per wave by 2.";
+                def.type = UpgradeType.RaidReduction;
+                def.costInShop = 150f;
+                allUpgrades.Add(def);
+            }
+
+            if (!HasUpgradeWithId("souls_like"))
+            {
+                UpgradeDefinition def = ScriptableObject.CreateInstance<UpgradeDefinition>();
+                def.upgradeId = "souls_like";
+                def.upgradeName = "SoulsLike?";
+                def.description = "Unlock a rapid tile-based dodge roll. Press SPACE while moving or holding a direction to evade.";
+                def.type = UpgradeType.DodgeRoll;
+                def.costInShop = 200f;
+                allUpgrades.Add(def);
+            }
+
             Debug.Log($"UpgradeManager: Pool has {allUpgrades.Count} total upgrades after base-upgrade check.");
         }
 
@@ -302,6 +335,30 @@ namespace Managers
                     {
                         upgrade.buildingToUnlock.ForceUnlock();
                         Debug.Log($"Unlocked building: {upgrade.buildingToUnlock.buildingName}");
+                    }
+                    break;
+
+                case UpgradeType.IncomeBoost:
+                    if (CurrencyManager.Instance != null)
+                    {
+                        CurrencyManager.Instance.incomeMultiplier += 0.25f; // +25% per upgrade
+                        Debug.Log($"Applied Income Boost: New multiplier = {CurrencyManager.Instance.incomeMultiplier}");
+                    }
+                    break;
+
+                case UpgradeType.RaidReduction:
+                    if (DayNightManager.Instance != null)
+                    {
+                        DayNightManager.Instance.raidEnemyReduction += 2; // -2 enemies per wave per upgrade
+                        Debug.Log($"Applied Raid Reduction: Total reduction = {DayNightManager.Instance.raidEnemyReduction}");
+                    }
+                    break;
+
+                case UpgradeType.DodgeRoll:
+                    if (PlayerController.Instance != null)
+                    {
+                        PlayerController.Instance.canDodgeRoll = true;
+                        Debug.Log("Dodge Roll capability unlocked!");
                     }
                     break;
             }

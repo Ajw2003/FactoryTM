@@ -7,7 +7,12 @@ public class PlayerController : MonoBehaviour, IHealth
     private Vector2 targetPosition;
     private Vector2Int currentCell;
     [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float dodgeSpeed = 15f;
+    [SerializeField] private float dodgeDistance = 2f;
     private bool isMoving = false;
+    private bool isDodging = false;
+    public bool canDodgeRoll = false;
+    private Vector2Int lastMoveDirection = Vector2Int.up;
     private Coroutine currentCoroutine;
     
     public float width = 1.0f;
@@ -80,6 +85,19 @@ public class PlayerController : MonoBehaviour, IHealth
 
         if (inputDirection != Vector2Int.zero)
         {
+            lastMoveDirection = inputDirection;
+        }
+
+        // Dodge Roll with Space
+        if (canDodgeRoll && Input.GetKeyDown(KeyCode.Space))
+        {
+            Vector2Int dodgeDir = inputDirection != Vector2Int.zero ? inputDirection : lastMoveDirection;
+            currentCoroutine = StartCoroutine(DodgeRoutine(dodgeDir));
+            return;
+        }
+
+        if (inputDirection != Vector2Int.zero)
+        {
             Vector2Int nextCell = currentCell + inputDirection;
             Vector3Int nextCellV3 = new Vector3Int(nextCell.x, nextCell.y, 0);
             
@@ -146,6 +164,47 @@ public class PlayerController : MonoBehaviour, IHealth
             StopCoroutine(currentCoroutine);
         }
     }
+
+    private IEnumerator DodgeRoutine(Vector2Int direction)
+    {
+        isMoving = true;
+        isDodging = true;
+        
+        // Dodge 2 tiles
+        Vector2Int targetCell = currentCell + (direction * (int)dodgeDistance);
+        
+        // Basic boundary check - don't dodge into locked zones or off-screen
+        // For simplicity, we'll just check if the final destination is valid
+        Vector3Int targetCellV3 = new Vector3Int(targetCell.x, targetCell.y, 0);
+        Vector2Int targetZone = ZoneManager.Instance.GetZoneCoordsFromTile(targetCellV3);
+        
+        if (!ZoneManager.Instance.IsZoneUnlocked(targetZone))
+        {
+            // If 2 tiles is too far, try 1 tile
+            targetCell = currentCell + direction;
+            targetCellV3 = new Vector3Int(targetCell.x, targetCell.y, 0);
+            targetZone = ZoneManager.Instance.GetZoneCoordsFromTile(targetCellV3);
+            if (!ZoneManager.Instance.IsZoneUnlocked(targetZone))
+            {
+                isMoving = false;
+                isDodging = false;
+                yield break;
+            }
+        }
+
+        currentCell = targetCell;
+        targetPosition = GridManager.Instance.CellToWorldConversion(currentCell);
+
+        while (Vector2.Distance(transform.position, targetPosition) > 0.001f)
+        {
+            transform.position = Vector2.MoveTowards(transform.position, targetPosition, dodgeSpeed * Time.deltaTime);
+            yield return null;
+        }
+
+        transform.position = targetPosition;
+        isMoving = false;
+        isDodging = false;
+    }
     
     public Rectangle2D GetBoundingBox()
     {
@@ -157,7 +216,7 @@ public class PlayerController : MonoBehaviour, IHealth
 
     public void TakeDamage(int amount)
     {
-        if (Health <= 0) return;
+        if (Health <= 0 || isDodging) return;
 
         // Apply armor damage reduction (e.g. 0.2f = 20% less damage)
         int reduced = Mathf.Max(1, Mathf.RoundToInt(amount * (1f - damageReductionFactor)));

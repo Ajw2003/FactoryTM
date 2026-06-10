@@ -4,6 +4,7 @@ using UnityEngine;
 public class CurrencyManager : SingletonBase<CurrencyManager>
 {
     public float currentCurrencyValue = 20;
+    public float incomeMultiplier = 1.0f;
 
     public delegate void OnCurrencyChange();
     public event OnCurrencyChange onCurrencyChange;
@@ -29,7 +30,7 @@ public class CurrencyManager : SingletonBase<CurrencyManager>
 
     public void AddCurrency(float currencyValue)
     {
-        currentCurrencyValue += currencyValue;
+        currentCurrencyValue += (currencyValue * incomeMultiplier);
         UiManager.Instance.UpdateCurrency(currentCurrencyValue);
         onCurrencyChange?.Invoke();
     }
