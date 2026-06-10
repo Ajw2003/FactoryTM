@@ -6,8 +6,8 @@ public class ZoneManager : SingletonBase<ZoneManager>
 {
     [Header("Settings")]
     public Vector2Int zoneSizeInTiles = new Vector2Int(40, 20);
-    public float initialUnlockCost = 100f;
-    public float costIncreasePerZone = 50f;
+    public float initialUnlockCost = 20000f;
+    public float costIncreasePerZone = 10000f;
 
     [Header("References")]
     public Camera mainCamera;
@@ -84,7 +84,7 @@ public class ZoneManager : SingletonBase<ZoneManager>
         if (unlockedZones.Contains(targetZone)) return true;
 
         float cost = GetUnlockCost();
-        if (CurrencyManager.Instance.currentCurrencyValue >= cost * CurrencyManager.Instance.exchangeRate)
+        if (CurrencyManager.Instance.currentCurrencyValue >= cost)
         {
             CurrencyManager.Instance.RemoveCurrency(cost);
             unlockedZones.Add(targetZone);

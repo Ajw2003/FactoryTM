@@ -67,7 +67,7 @@ public class UiZoneButton : MonoBehaviour
         if (textComp == null || ZoneManager.Instance == null) return;
 
         string dirStr = "EXPAND " + direction.ToString().ToUpper();
-        float cost = ZoneManager.Instance.GetUnlockCost() * (CurrencyManager.Instance != null ? CurrencyManager.Instance.exchangeRate : 1f);
+        float cost = ZoneManager.Instance.GetUnlockCost();
         textComp.text = dirStr + "\n$" + cost.ToString("F0");
     }
 
@@ -116,7 +116,7 @@ public class UiZoneButton : MonoBehaviour
         }
 
         float cost = ZoneManager.Instance.GetUnlockCost();
-        bool canAfford = CurrencyManager.Instance.currentCurrencyValue >= cost * CurrencyManager.Instance.exchangeRate;
+        bool canAfford = CurrencyManager.Instance.currentCurrencyValue >= cost;
         return canAfford ? originalColor : new Color(1f, 0.45f, 0.45f, 1f); // soft vibrant red tint for unaffordable
     }
 
