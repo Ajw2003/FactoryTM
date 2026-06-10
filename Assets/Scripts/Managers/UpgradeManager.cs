@@ -40,6 +40,33 @@ public class UpgradeManager : SingletonBase<UpgradeManager>
         {
             GenerateDefaultUpgrades();
         }
+
+        // Auto-unlock any upgrades flagged to start unlocked at game start
+        ApplyStartingUnlocks();
+    }
+
+    /// <summary>
+    /// Marks upgrades with startsUnlocked=true as researched and adds them to the shop
+    /// without triggering day progression or the upgrade-selection UI.
+    /// </summary>
+    private void ApplyStartingUnlocks()
+    {
+        foreach (var def in allUpgrades)
+        {
+            if (def.startsUnlocked && !def.isResearched)
+            {
+                def.isResearched = true;
+                researchedUpgrades.Add(def);
+                activeUpgradesInShop.Add(def);
+                ApplyUpgradeEffects(def);
+                Debug.Log($"UpgradeManager: Auto-unlocked '{def.upgradeName}' (startsUnlocked=true).");
+            }
+        }
+        // Notify the shop UI once after all starting unlocks are applied
+        if (researchedUpgrades.Count > 0)
+        {
+            onUpgradesChanged?.Invoke();
+        }
     }
 
     private void GenerateDefaultUpgrades()
@@ -177,6 +204,22 @@ public class UpgradeManager : SingletonBase<UpgradeManager>
         // Add to active shop pool so it is purchasable
         activeUpgradesInShop.Add(upgrade);
 
+        ApplyUpgradeEffects(upgrade);
+
+        onUpgradesChanged?.Invoke();
+        Debug.Log($"Upgrade Researched: {upgrade.upgradeName}. Now available in the Shop!");
+
+        // Resume and start next day
+        DayNightManager.Instance.StartNextDay();
+    }
+
+    /// <summary>
+    /// Applies the side-effects of an upgrade (stat boosts, weapon swap, building unlock, etc.)
+    /// without touching researched lists, shop lists, events, or day progression.
+    /// Called by both UnlockUpgrade (player researches) and ApplyStartingUnlocks (game start).
+    /// </summary>
+    private void ApplyUpgradeEffects(UpgradeDefinition upgrade)
+    {
         switch (upgrade.type)
         {
             case UpgradeType.Armor:
@@ -233,11 +276,5 @@ public class UpgradeManager : SingletonBase<UpgradeManager>
                 }
                 break;
         }
-
-        onUpgradesChanged?.Invoke();
-        Debug.Log($"Upgrade Researched: {upgrade.upgradeName}. Now available in the Shop!");
-
-        // Resume and start next day
-        DayNightManager.Instance.StartNextDay();
     }
 }

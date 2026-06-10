@@ -32,6 +32,10 @@ public class UpgradeDefinition : ScriptableObject
     public float armorPercentBoost = 0f; // E.g., 0.15f for 15% damage reduction
     public int maxHealthBoost = 0;
 
+    [Header("Unlock Settings")]
+    [Tooltip("If true, this upgrade will be available in the shop from the very start of the game, without needing to be researched.")]
+    public bool startsUnlocked = false;
+
     [Header("Status (Runtime Only)")]
     public bool isResearched = false;
 }
