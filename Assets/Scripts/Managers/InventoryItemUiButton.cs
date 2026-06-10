@@ -40,15 +40,15 @@ public class UiItemButton : MonoBehaviour
 
     private void OnDisable()
     {
-        if (InventoryManager.Instance != null)
+        if (InventoryManager.HasInstance)
         {
             InventoryManager.Instance.onInventoryChange -= RefreshUI;
         }
-        if (CurrencyManager.Instance != null)
+        if (CurrencyManager.HasInstance)
         {
             CurrencyManager.Instance.onCurrencyChange -= RefreshUI;
         }
-        if (ZoneManager.Instance != null)
+        if (ZoneManager.HasInstance)
         {
             ZoneManager.Instance.onZoneUnlock -= RefreshUI;
         }

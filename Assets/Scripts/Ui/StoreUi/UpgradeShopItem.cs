@@ -41,7 +41,7 @@ public class UpgradeShopItem : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (UpgradeManager.Instance != null)
+        if (UpgradeManager.HasInstance)
         {
             UpgradeManager.Instance.onUpgradesChanged -= RefreshUI;
         }
@@ -64,6 +64,7 @@ public class UpgradeShopItem : MonoBehaviour
         switch (definition.type)
         {
             case UpgradeType.HealthPack: return "HEALTH PACK (x1)";
+            case UpgradeType.Ammo: return "AMMO PACK (x30)";
             case UpgradeType.Weapon: return definition.upgradeName + "\n[WEAPON]";
             case UpgradeType.Building: return definition.buildingToUnlock != null
                 ? definition.buildingToUnlock.buildingName + "\n[BUILDING]"
@@ -117,6 +118,20 @@ public class UpgradeShopItem : MonoBehaviour
                 {
                     PlayerController.Instance.healthPacksCount += 1;
                     Debug.Log($"Purchased health pack. Total: {PlayerController.Instance.healthPacksCount}");
+                }
+                break;
+
+            case UpgradeType.Ammo:
+                if (PlayerController.Instance != null)
+                {
+                    PlayerController.Instance.ammoReserve += 30;
+                    Debug.Log($"Purchased ammo pack. Total: {PlayerController.Instance.ammoReserve}");
+                    
+                    PlayerWeapon playerWeapon = FindFirstObjectByType<PlayerWeapon>();
+                    if (playerWeapon != null)
+                    {
+                        playerWeapon.UpdateAmmoUI();
+                    }
                 }
                 break;
 

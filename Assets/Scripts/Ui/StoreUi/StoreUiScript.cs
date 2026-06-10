@@ -77,7 +77,7 @@ public class StoreUiScript : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (UpgradeManager.Instance != null)
+        if (UpgradeManager.HasInstance)
         {
             UpgradeManager.Instance.onUpgradesChanged -= OnUpgradesChanged;
         }

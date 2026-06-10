@@ -112,6 +112,17 @@ public class UpgradeManager : SingletonBase<UpgradeManager>
             allUpgrades.Add(def);
         }
 
+        // 5. Generate Ammo Upgrade
+        {
+            UpgradeDefinition def = ScriptableObject.CreateInstance<UpgradeDefinition>();
+            def.upgradeId = "ammo_upgrade";
+            def.upgradeName = "Ammo Reserves";
+            def.description = "Receive 90 spare rounds immediately. Allows purchasing ammo packs (30 rounds) in the shop.";
+            def.type = UpgradeType.Ammo;
+            def.costInShop = 15f;
+            allUpgrades.Add(def);
+        }
+
         Debug.Log($"UpgradeManager: Generated {allUpgrades.Count} default upgrades dynamically.");
     }
 
@@ -186,6 +197,15 @@ public class UpgradeManager : SingletonBase<UpgradeManager>
                 {
                     PlayerController.Instance.healthPacksCount += 2;
                     Debug.Log($"Granted 2 health packs. Total: {PlayerController.Instance.healthPacksCount}");
+                }
+                break;
+
+            case UpgradeType.Ammo:
+                // Grant 90 ammo immediately; more can be purchased from the shop
+                if (PlayerController.Instance != null)
+                {
+                    PlayerController.Instance.ammoReserve += 90;
+                    Debug.Log($"Granted 90 ammo. Total: {PlayerController.Instance.ammoReserve}");
                 }
                 break;
 

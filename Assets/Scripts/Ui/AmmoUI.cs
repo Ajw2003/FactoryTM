@@ -22,11 +22,11 @@ public class AmmoUI : MonoBehaviour
         }
     }
 
-    public void UpdateAmmo(int current, int max)
+    public void UpdateAmmo(int current, int max, int reserve)
     {
         if (ammoText != null)
         {
-            ammoText.text = $"{current} / {max}";
+            ammoText.text = $"{current} / {max} [{reserve}]";
         }
     }
 

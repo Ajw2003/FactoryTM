@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour, IHealth
 
     public float damageReductionFactor = 0f;
     public int healthPacksCount = 0;
+    public int ammoReserve = 90;
     
     public static PlayerController Instance { get; private set; }
 
