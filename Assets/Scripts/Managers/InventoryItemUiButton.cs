@@ -69,7 +69,7 @@ public class UiItemButton : MonoBehaviour
             {
                 if (isUnlocked)
                 {
-                    var adjustedPrice = buildingData.cost * CurrencyManager.Instance.exchangeRate;
+                    var adjustedPrice = buildingData.cost;
                     priceText.text = "$" + adjustedPrice;
                 }
                 else
@@ -121,14 +121,14 @@ public class UiItemButton : MonoBehaviour
         
         if (!buildingData.IsUnlocked())
         {
-            return new Color(0.25f, 0.25f, 0.25f, 0.6f);
+            return new Color(0.02f, 0.05f, 0.02f, 0.6f);
         }
 
-        float cost = buildingData.cost * CurrencyManager.Instance.exchangeRate;
+        float cost = buildingData.cost;
         bool canAfford = CurrencyManager.Instance.currentCurrencyValue >= cost;
         
-        // Terminal style: Green for afford, Red for can't afford
-        return canAfford ? new Color(0.1f, 0.8f, 0.1f, 0.85f) : new Color(0.8f, 0.1f, 0.1f, 0.85f);
+        // Terminal style: Dark green for afford, Dark red for can't afford
+        return canAfford ? new Color(0.05f, 0.15f, 0.05f, 0.85f) : new Color(0.15f, 0.05f, 0.05f, 0.85f);
     }
 
     private void StopActiveCoroutine()
@@ -155,7 +155,7 @@ public class UiItemButton : MonoBehaviour
             return;
         }
 
-        float cost = buildingData.cost * CurrencyManager.Instance.exchangeRate;
+        float cost = buildingData.cost;
         if (CurrencyManager.Instance.currentCurrencyValue >= cost)
         {
             CurrencyManager.Instance.RemoveCurrency(buildingData.cost);
