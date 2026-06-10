@@ -18,6 +18,8 @@ public class UiManager : SingletonBase<UiManager>
    private Coroutine currencyPulseCoroutine;
    
    [SerializeField] private TMP_Text healthText;
+   [SerializeField] private TMP_Text staminaText;
+   private GameObject staminaContainer;
 
    protected override void Awake()
    {
@@ -38,6 +40,36 @@ public class UiManager : SingletonBase<UiManager>
          GameObject go = GameObject.Find("CurrencyText");
          if (go != null) currentCurrency = go.GetComponent<TMP_Text>();
       }
+
+      SetupStaminaUI();
+   }
+
+   private void SetupStaminaUI()
+   {
+      GameObject staminaGo = GameObject.Find("StaminaText");
+      if (staminaGo != null)
+      {
+         staminaText = staminaGo.GetComponent<TMP_Text>();
+         staminaContainer = staminaGo;
+         return;
+      }
+
+      // Create stamina UI dynamically if not found
+      if (healthText != null)
+      {
+         staminaGo = Instantiate(healthText.gameObject, healthText.transform.parent);
+         staminaGo.name = "StaminaText";
+         staminaText = staminaGo.GetComponent<TMP_Text>();
+         staminaContainer = staminaGo;
+         
+         RectTransform rt = staminaGo.GetComponent<RectTransform>();
+         rt.anchoredPosition += new Vector2(0, -30f); // Position below health
+         
+         staminaText.color = new Color(1f, 0.8f, 0.2f); // Retro gold/yellow for stamina
+         staminaText.text = "STAMINA: 100 / 100";
+         
+         staminaContainer.SetActive(false); // Hide until unlocked
+      }
    }
 
    public void UpdateHp(int current, int max)
@@ -45,6 +77,14 @@ public class UiManager : SingletonBase<UiManager>
       if (healthText != null)
       {
          healthText.text = $"{current} / {max}";
+      }
+   }
+
+   public void UpdateStamina(float current, float max)
+   {
+      if (staminaText != null)
+      {
+         staminaText.text = $"STAMINA: {Mathf.CeilToInt(current)} / {Mathf.CeilToInt(max)}";
       }
    }
 
@@ -76,6 +116,15 @@ public class UiManager : SingletonBase<UiManager>
    private void Update()
    {
       if (isGameOver) return;
+
+      // Show stamina UI if dodge is unlocked
+      if (staminaContainer != null && PlayerController.Instance != null)
+      {
+         if (PlayerController.Instance.canDodgeRoll && !staminaContainer.activeSelf)
+         {
+            staminaContainer.SetActive(true);
+         }
+      }
 
       if (Input.GetKeyDown(KeyCode.E))
       {
