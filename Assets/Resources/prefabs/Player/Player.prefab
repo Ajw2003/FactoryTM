@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6518413504753095282}
   - component: {fileID: 5259834976339536750}
   - component: {fileID: 2005163431988548329}
+  - component: {fileID: 7797859226847318189}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -81,7 +82,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1813148273
-  m_SortingLayer: 2
+  m_SortingLayer: 4
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: -1940715614, guid: d957dd56792048d45bf12c15dc680dbc, type: 3}
@@ -107,12 +108,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 10
+  dodgeSpeed: 30
+  dodgeDistance: 2
+  canDodgeRoll: 1
   width: 1
   height: 1
   maxHealth: 10
   damageReductionFactor: 0
   healthPacksCount: 0
-  ammoReserve: 90
+  ammoReserve: 120
+  maxStamina: 100
+  currentStamina: 0
+  staminaRegenRate: 20
+  staminaCostPerDodge: 30
 --- !u!114 &2005163431988548329
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -128,6 +136,18 @@ MonoBehaviour:
   target: {x: 0, y: 0}
   Stats: {fileID: 11400000, guid: 74e3f480c75f2394e85fb99b36db22b9, type: 2}
   firePoint: {fileID: 0}
+--- !u!114 &7797859226847318189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 621520523354542303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5cb8cdfb3f94dd4d8c439fe8e6cb1ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInputController
 --- !u!1 &3818577784261062716
 GameObject:
   m_ObjectHideFlags: 0

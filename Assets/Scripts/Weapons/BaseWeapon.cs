@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class BaseWeapon : MonoBehaviour
 {
@@ -113,15 +114,17 @@ public class BaseWeapon : MonoBehaviour
     protected virtual void SpawnBullet()
     {
         if (roundsLeft <= 0) return;
-        
-        Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position;
-        GameObject bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity);
-        
-        roundsLeft--;
-        
-        if (bullet.TryGetComponent<BaseProjectile>(out var projectile))
+        for (int i = 0; i < bulletsFired; i++)
         {
-            projectile.Initialize(target, bulletSpeed, bulletDamage);
+            Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position;
+            GameObject bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity);
+        
+            roundsLeft--;
+        
+            if (bullet.TryGetComponent<BaseProjectile>(out var projectile))
+            {
+                projectile.Initialize(target, bulletSpeed, bulletDamage);
+            }
         }
     }
 
