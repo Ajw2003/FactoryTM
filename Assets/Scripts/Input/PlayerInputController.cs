@@ -24,6 +24,17 @@ public class PlayerInputController : MonoBehaviour
         _playerInputs.Enable();
     }
 
+    void OnDisable()
+    {
+        if (_playerInputs != null)
+        {
+            PermanentInputs(false);
+            MovementInputs(false);
+            InventoryInputs(false);
+            _playerInputs.Disable();
+        }
+    }
+
     public void OnSceneChange()
     {
         _playerInputs.Disable();
