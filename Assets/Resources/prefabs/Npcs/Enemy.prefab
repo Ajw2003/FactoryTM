@@ -172,7 +172,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1813148273
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 91689057, guid: d957dd56792048d45bf12c15dc680dbc, type: 3}
@@ -199,7 +199,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CartelMember
   speed: 5
   turnSpeed: 5
-  sightRange: 18
+  sightRange: 20
   weapon: {fileID: 7346447088165968546}
   target: {fileID: 0}
   attackSpeed: 0.25

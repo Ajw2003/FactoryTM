@@ -47,6 +47,12 @@ TagManager:
   - name: ores
     uniqueID: 2622029713
     locked: 0
+  - name: Buildings
+    uniqueID: 1631154295
+    locked: 0
+  - name: Items
+    uniqueID: 2830541093
+    locked: 0
   - name: Player
     uniqueID: 1813148273
     locked: 0
