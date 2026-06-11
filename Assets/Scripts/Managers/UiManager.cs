@@ -10,7 +10,6 @@ public class UiManager : SingletonBase<UiManager>
    
    public GameObject StorePanel;
    public GameObject GameOverPanel;
-   bool flip = false; // Start closed
    private bool isGameOver = false;
 
    private float lastCurrencyValue = -1f;
@@ -108,7 +107,7 @@ public class UiManager : SingletonBase<UiManager>
    private void Start()
    {
       Time.timeScale = 1f;
-      if (StorePanel != null) StorePanel.SetActive(flip);
+      if (StorePanel != null) StorePanel.SetActive(false);
       if (GameOverPanel != null) GameOverPanel.SetActive(false);
       isGameOver = false;
    }

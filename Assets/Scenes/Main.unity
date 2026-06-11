@@ -870,29 +870,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2005163431988548329, guid: 7f949cc0e86c45e4a87788a6f08247e9, type: 3}
-      propertyPath: Stats
-      value: 
-      objectReference: {fileID: 11400000, guid: 74e3f480c75f2394e85fb99b36db22b9, type: 2}
-    - target: {fileID: 5259834976339536750, guid: 7f949cc0e86c45e4a87788a6f08247e9, type: 3}
-      propertyPath: dodgeSpeed
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 5259834976339536750, guid: 7f949cc0e86c45e4a87788a6f08247e9, type: 3}
-      propertyPath: ammoReserve
-      value: 120
-      objectReference: {fileID: 0}
-    - target: {fileID: 5259834976339536750, guid: 7f949cc0e86c45e4a87788a6f08247e9, type: 3}
-      propertyPath: canDodgeRoll
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 621520523354542303, guid: 7f949cc0e86c45e4a87788a6f08247e9, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1837416529}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7f949cc0e86c45e4a87788a6f08247e9, type: 3}
 --- !u!4 &1665716448 stripped
 Transform:
@@ -909,23 +890,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8609428892281561364, guid: 788834090f052aa45b0f478726676145, type: 3}
   m_PrefabInstance: {fileID: 7989725989386502572}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1837416525 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 621520523354542303, guid: 7f949cc0e86c45e4a87788a6f08247e9, type: 3}
-  m_PrefabInstance: {fileID: 1665716447}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1837416529
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1837416525}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e5cb8cdfb3f94dd4d8c439fe8e6cb1ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerInputController
 --- !u!4 &1885369332 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5747927387559923337, guid: 97c5c939bd7a10a42acaff0792a21d98, type: 3}
