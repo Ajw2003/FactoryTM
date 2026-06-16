@@ -5,6 +5,7 @@ using UnityEngine;
 public class Furnace : BuildingLogic
 {
     private Vector2Int exportDirection;
+    private int rotationIndex;
     private float timer;
     private ConveyorItem currentItemPrefab;
     private ConveyorItem platePrefab;
@@ -13,8 +14,24 @@ public class Furnace : BuildingLogic
     public void Setup(Buildings.BuildingData furnace, Vector2Int cell, int rotationIndex, float speed)
     {
         base.Setup(furnace, cell);
+        this.rotationIndex = rotationIndex;
         exportDirection = GameManager.Instance.GetDirectionFromRotationIndex(rotationIndex);
         currentCookingSpeed = speed;
+        
+        // Calculate occupied cells
+        Vector2Int actualSize = data.size;
+        if (rotationIndex % 2 != 0) actualSize = new Vector2Int(data.size.y, data.size.x);
+        
+        List<Vector2Int> cells = new List<Vector2Int>();
+        for (int x = 0; x < actualSize.x; x++)
+        {
+            for (int y = 0; y < actualSize.y; y++)
+            {
+                cells.Add(myCell + new Vector2Int(x, y));
+            }
+        }
+        occupiedCells = cells;
+
         Debug.Log($"Furnace Setup at {myCell}: Initial exportDirection set to {exportDirection}");
     }
 
@@ -23,15 +40,18 @@ public class Furnace : BuildingLogic
 
     public override void PerformAction()
     {
-        List<ConveyorItem> items = ItemTracker.Instance.GetItemsInCell(myCell);
-        if (items != null)
+        foreach (var occupiedCell in occupiedCells)
         {
-            for (int i = items.Count - 1; i >= 0; i--)
+            List<ConveyorItem> items = ItemTracker.Instance.GetItemsInCell(occupiedCell);
+            if (items != null)
             {
-                ConveyorItem item = items[i];
-                if (!itemsInProcess.Contains(item))
+                for (int i = items.Count - 1; i >= 0; i--)
                 {
-                    StartCoroutine(ProccessItem(item));
+                    ConveyorItem item = items[i];
+                    if (!itemsInProcess.Contains(item))
+                    {
+                        StartCoroutine(ProccessItem(item));
+                    }
                 }
             }
         }
@@ -87,11 +107,17 @@ public class Furnace : BuildingLogic
         }
         currentItemPrefab = CookedItemToRecive;
 
-        // Log values before calculation
+        // Calculate the target cell based on size and direction
+        Vector2Int actualSize = data.size;
+        if (rotationIndex % 2 != 0) actualSize = new Vector2Int(data.size.y, data.size.x);
 
-        // 1. Calculate the neighbor cell in front of the furnace
-        Vector2Int targetCell = myCell + exportDirection;
+        Vector2Int offset = Vector2Int.zero;
+        if (exportDirection.x > 0) offset = new Vector2Int(actualSize.x, 0); // Right
+        else if (exportDirection.x < 0) offset = new Vector2Int(-1, 0);      // Left
+        else if (exportDirection.y > 0) offset = new Vector2Int(0, actualSize.y); // Up
+        else if (exportDirection.y < 0) offset = new Vector2Int(0, -1);      // Down
 
+        Vector2Int targetCell = myCell + offset;
         Vector2 spawnPos = GridManager.Instance.CellToWorldConversion(targetCell);
         
 

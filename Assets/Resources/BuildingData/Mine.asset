@@ -25,4 +25,5 @@ MonoBehaviour:
   itemPrefab: {fileID: 4074567141104984735, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
   cost: 10
   type: 1
+  size: {x: 2, y: 2}
   unlockConditions: []

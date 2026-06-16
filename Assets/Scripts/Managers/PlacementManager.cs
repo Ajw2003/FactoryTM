@@ -77,9 +77,23 @@ public class PlacementManager : SingletonBase<PlacementManager>
         // Rotate (R)
         if (Input.GetKeyDown(KeyCode.R)) rotationIndex = (rotationIndex + 1) % 4;// set the rotation index i.e. right,left,up,down
 
+        List<Vector2Int> occupiedCells = GetOccupiedCells(cell, activeBuilding.size, rotationIndex);
+        bool canPlace = true;
+
         // Preview
         previewTilemap.ClearAllTiles();
-        if (ZoneManager.Instance.IsTileInsideUnlockedZone(vector3Cell) && isWithinDistance)
+        
+        foreach (var occupiedCell in occupiedCells)
+        {
+            Vector3Int pos3 = new Vector3Int(occupiedCell.x, occupiedCell.y, 0);
+            if (!ZoneManager.Instance.IsTileInsideUnlockedZone(pos3) || !isWithinDistance || activeBuildings.ContainsKey(occupiedCell))
+            {
+                canPlace = false;
+                // Optional: show red preview?
+            }
+        }
+
+        if (canPlace)
         {
             previewTilemap.SetTile(vector3Cell, activeBuilding.rotatedTiles[rotationIndex]);
         }
@@ -93,9 +107,9 @@ public class PlacementManager : SingletonBase<PlacementManager>
                 return;
             }
 
-            if (!ZoneManager.Instance.IsTileInsideUnlockedZone(vector3Cell))
+            if (!canPlace)
             {
-                Debug.Log("Cannot place outside unlocked zone!");
+                Debug.Log("Cannot place here (blocked or outside zone)!");
                 return;
             }
 
@@ -105,32 +119,43 @@ public class PlacementManager : SingletonBase<PlacementManager>
                 Debug.Log("Don't have " + activeBuilding.buildingName + " in inventory!");
                 return;
             }
-            
-            // Check if cell is occupied
-            if (activeBuildings.ContainsKey(cell))
-            {
-                Debug.Log("Cell occupied!");
-                return;
-            }
 
             mainTilemap.SetTile(vector3Cell, activeBuilding.rotatedTiles[rotationIndex]);
+            GameObject buildingObj = null;
             switch (activeBuilding.type)
             {
                 case (BuildingType.Chest):
                     break;
                 case (BuildingType.Conveyor):
-                    SpawnBeltLogic(cell);
+                    buildingObj = SpawnBeltLogic(cell);
                     break;
                 case(BuildingType.Miner):
-                    SpawnMinerLogic(cell);
+                    buildingObj = SpawnMinerLogic(cell);
                     break;
                 case (BuildingType.Seller):
-                    SpawnSellerLogic(cell);
+                    buildingObj = SpawnSellerLogic(cell);
                     break;
                 case (BuildingType.Furnace):
-                    SpawnFurnaceLogic(cell);   
+                    buildingObj = SpawnFurnaceLogic(cell);   
                     break;
             }
+
+            if (buildingObj != null)
+            {
+                BuildingLogic logic = buildingObj.GetComponent<BuildingLogic>();
+                if (logic != null)
+                {
+                    logic.SetOccupiedCells(occupiedCells);
+                    foreach (var occupiedCell in occupiedCells)
+                    {
+                        if (occupiedCell != cell) // base cell already added in SpawnXLogic
+                        {
+                            activeBuildings[occupiedCell] = buildingObj;
+                        }
+                    }
+                }
+            }
+
             // Task 1: Consume from Inventory
             InventoryManager.Instance.RemoveBuilding(activeBuilding);
         }
@@ -144,17 +169,45 @@ public class PlacementManager : SingletonBase<PlacementManager>
                 GameObject buildingObj = activeBuildings[cell];
                 BuildingLogic logic = buildingObj.GetComponent<BuildingLogic>();
                 
-                if (logic != null && logic.data != null)
+                if (logic != null)
                 {
-                    // Task 1: Return to Inventory instead of refunding currency
-                    InventoryManager.Instance.AddBuilding(logic.data);
-                }
+                    if (logic.data != null)
+                    {
+                        // Task 1: Return to Inventory instead of refunding currency
+                        InventoryManager.Instance.AddBuilding(logic.data);
+                    }
 
-                mainTilemap.SetTile((vector3Cell), null);
-                Destroy(buildingObj);
-                activeBuildings.Remove(cell);
+                    // Clear all occupied tiles
+                    foreach (var occupiedCell in logic.occupiedCells)
+                    {
+                        activeBuildings.Remove(occupiedCell);
+                    }
+                    
+                    mainTilemap.SetTile(new Vector3Int(logic.GetMyCell().x, logic.GetMyCell().y, 0), null);
+
+                    Destroy(buildingObj);
+                }
             }
         }
+    }
+
+    public List<Vector2Int> GetOccupiedCells(Vector2Int baseCell, Vector2Int size, int rotationIndex)
+    {
+        List<Vector2Int> cells = new List<Vector2Int>();
+        Vector2Int actualSize = size;
+        if (rotationIndex % 2 != 0) // 1: Down, 3: Up
+        {
+            actualSize = new Vector2Int(size.y, size.x);
+        }
+
+        for (int x = 0; x < actualSize.x; x++)
+        {
+            for (int y = 0; y < actualSize.y; y++)
+            {
+                cells.Add(baseCell + new Vector2Int(x, y));
+            }
+        }
+        return cells;
     }
 
     public void ChangeSelection(BuildingData newBuilding)
@@ -177,7 +230,7 @@ public class PlacementManager : SingletonBase<PlacementManager>
     
     private Dictionary<Vector2Int, GameObject> activeBuildings = new Dictionary<Vector2Int, GameObject>();
 
-    void SpawnMinerLogic(Vector2Int cell)
+    GameObject SpawnMinerLogic(Vector2Int cell)
     {
         // Create the logic object
         GameObject MinerObj = new GameObject("Miner_Logic_" + cell);
@@ -187,27 +240,30 @@ public class PlacementManager : SingletonBase<PlacementManager>
 
         // Store it so we can delete it later if needed
         activeBuildings.Add(cell, MinerObj);
+        return MinerObj;
     }
 
-    void SpawnFurnaceLogic(Vector2Int cell)
+    GameObject SpawnFurnaceLogic(Vector2Int cell)
     {
         GameObject FurnaceObj = new GameObject("Furnace_Logic_" + cell);
         FurnaceObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
         Furnace furnace = FurnaceObj.AddComponent<Furnace>();
         furnace.Setup(activeBuilding, cell, rotationIndex, activeBuilding.proccessingSpeed);
         activeBuildings.Add(cell, FurnaceObj);
+        return FurnaceObj;
     }
 
-    void SpawnSellerLogic(Vector2Int cell)
+    GameObject SpawnSellerLogic(Vector2Int cell)
     {
         GameObject sellerObj = new GameObject("Seller_Logic_" + cell);
         sellerObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
         Seller seller = sellerObj.AddComponent<Seller>();
         seller.Setup(activeBuilding, cell);
         activeBuildings.Add(cell, sellerObj);
+        return sellerObj;
     }
 
-    void SpawnBeltLogic(Vector2Int cell)
+    GameObject SpawnBeltLogic(Vector2Int cell)
     {
         GameObject beltObj = new GameObject("Belt_Logic_" + cell);
         beltObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
@@ -217,5 +273,6 @@ public class PlacementManager : SingletonBase<PlacementManager>
         logic.Setup(activeBuilding, cell, dir, activeBuilding.proccessingSpeed); // Pass data
         
         activeBuildings.Add(cell, beltObj);
+        return beltObj;
     }
 }

@@ -76,7 +76,7 @@ public class StoreUiScript : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         if (UpgradeManager.HasInstance)
         {
@@ -618,7 +618,7 @@ public class StoreUiScript : MonoBehaviour
         yield return StartCoroutine(TypeLogLine("========================================"));
     }
     
-    private System.Collections.IEnumerator TypeLogLine(string line)
+    private IEnumerator TypeLogLine(string line)
     {
         isTypingLog = true;
         
@@ -657,7 +657,7 @@ public class StoreUiScript : MonoBehaviour
         }
     }
 
-    private System.Collections.IEnumerator ProcessLogQueue()
+    private IEnumerator ProcessLogQueue()
     {
         isProcessingQueue = true;
         while (logQueue.Count > 0)
