@@ -29,6 +29,8 @@ public class CartelMember : MonoBehaviour, IHealth
     
     [SerializeField] private float attackSpeed;
 
+    [SerializeField] private int profitFromKill;
+
     private bool attacking;
     
     public int Health { get; set; }
@@ -175,6 +177,7 @@ public class CartelMember : MonoBehaviour, IHealth
 
     public void Die()
     {
+        CurrencyManager.Instance.AddCurrency(profitFromKill);
         Destroy(this.gameObject);
     }
 }
