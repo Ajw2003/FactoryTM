@@ -178,6 +178,7 @@ public class CartelMember : MonoBehaviour, IHealth
     public void Die()
     {
         CurrencyManager.Instance.AddCurrency(profitFromKill);
+        SpawnDamageNumber(profitFromKill, Color.forestGreen, transform.position);
         Destroy(this.gameObject);
     }
 }

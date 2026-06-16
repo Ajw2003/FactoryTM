@@ -74,6 +74,7 @@ namespace Buildings
         public GameObject itemPrefab; // The "Resource" it creates
         public int cost;
         public BuildingType type;
+        public Vector2Int size = new Vector2Int(1, 1);
 
         [Header("Unlock Requirements")]
         public List<BuildingUnlockCondition> unlockConditions = new List<BuildingUnlockCondition>();

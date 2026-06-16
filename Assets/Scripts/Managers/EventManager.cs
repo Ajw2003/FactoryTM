@@ -188,7 +188,7 @@ namespace Code.Scripts.EventSystems
             _isPublishing = false;
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             Clear();
         }

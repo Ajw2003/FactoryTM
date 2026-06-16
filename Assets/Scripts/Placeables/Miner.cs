@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Buildings;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -5,6 +6,7 @@ using UnityEngine.Tilemaps;
 public class MinerLogic : BuildingLogic
 {
     private Vector2Int exportDirection;
+    private int rotationIndex;
     private float timer;
     private ResourceNode assignedResourceNode;
     private GameObject currentMinedItemPrefab;
@@ -14,11 +16,34 @@ public class MinerLogic : BuildingLogic
     public void Setup(Buildings.BuildingData minerData, Vector2Int cell, int rotationIndex)
     {
         base.Setup(minerData, cell);
+        this.rotationIndex = rotationIndex;
         finiteOres = GameManager.Instance.finiteOres;
-        // Attempt to find a ResourceNode at the miner's position
+        
+        // Calculate occupied cells if not already set (though PlacementManager sets them)
+        // For safety, let's calculate them here too or assume they will be set.
+        // Actually, Setup is called before SetOccupiedCells in PlacementManager.
+        // Let's calculate them here so we can find the node immediately.
+        Vector2Int actualSize = data.size;
+        if (rotationIndex % 2 != 0) actualSize = new Vector2Int(data.size.y, data.size.x);
+        
+        List<Vector2Int> cells = new List<Vector2Int>();
+        for (int x = 0; x < actualSize.x; x++)
+        {
+            for (int y = 0; y < actualSize.y; y++)
+            {
+                cells.Add(myCell + new Vector2Int(x, y));
+            }
+        }
+        occupiedCells = cells;
+
+        // Attempt to find a ResourceNode at any of the miner's positions
         if (ResourceManager.Instance != null)
         {
-            assignedResourceNode = ResourceManager.Instance.GetNodeAtPosition(myCell);
+            foreach (var occupiedCell in occupiedCells)
+            {
+                assignedResourceNode = ResourceManager.Instance.GetNodeAtPosition(occupiedCell);
+                if (assignedResourceNode != null) break;
+            }
         }
 
         if (assignedResourceNode != null)
@@ -58,8 +83,17 @@ public class MinerLogic : BuildingLogic
             return;
         }
 
-        // 1. Calculate the neighbor cell in front of the miner
-        Vector2Int targetCell = myCell + exportDirection;
+        // Calculate the target cell based on size and direction
+        Vector2Int actualSize = data.size;
+        if (rotationIndex % 2 != 0) actualSize = new Vector2Int(data.size.y, data.size.x);
+
+        Vector2Int offset = Vector2Int.zero;
+        if (exportDirection.x > 0) offset = new Vector2Int(actualSize.x, 0); // Right
+        else if (exportDirection.x < 0) offset = new Vector2Int(-1, 0);      // Left
+        else if (exportDirection.y > 0) offset = new Vector2Int(0, actualSize.y); // Up
+        else if (exportDirection.y < 0) offset = new Vector2Int(0, -1);      // Down
+
+        Vector2Int targetCell = myCell + offset;
         Vector2 spawnPos = GridManager.Instance.CellToWorldConversion(targetCell);
 
         // 2. Instantiate the item
