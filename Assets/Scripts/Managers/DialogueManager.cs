@@ -15,6 +15,7 @@ public class DialogueManager : SingletonBase<DialogueManager>
 
     private void Start()
     {
+        currentDialogueIndex = 0;
         SetDialogue();
         StartCoroutine(DialogueCoroutine());
     }
@@ -31,13 +32,24 @@ public class DialogueManager : SingletonBase<DialogueManager>
 
     private void SetDialogue()
     {
-        currentDialogueIndex = 0;
         currentDialogueText = currentDialogue.dialogues[currentDialogueIndex].text;
         text.text = null;
     }
 
     private void IncrementDialogueIndex()
     {
-        currentDialogueIndex+= 1 % currentDialogue.dialogues.Length;
+        StopCoroutine(DialogueCoroutine());
+        var newIndex = (currentDialogueIndex + 1) % currentDialogue.dialogues.Length;
+        currentDialogueIndex = newIndex;
+        SetDialogue();
+        StartCoroutine(DialogueCoroutine());
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            IncrementDialogueIndex();
+        }
     }
 }
