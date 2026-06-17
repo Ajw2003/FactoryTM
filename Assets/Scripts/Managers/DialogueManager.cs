@@ -10,7 +10,9 @@ public class DialogueManager : SingletonBase<DialogueManager>
     public int currentDialogueIndex;
     public float delayBetweenCharacters;
     public string currentDialogueText;
+    
     private bool _currentlyWriting;
+    private Coroutine _currentCoroutine;
     
     [SerializeField] private TMP_Text text;
 
@@ -18,7 +20,7 @@ public class DialogueManager : SingletonBase<DialogueManager>
     {
         currentDialogueIndex = 0;
         SetDialogue();
-        StartCoroutine(DialogueCoroutine());
+        _currentCoroutine = StartCoroutine(DialogueCoroutine());
     }
 
     private IEnumerator DialogueCoroutine()
@@ -42,12 +44,23 @@ public class DialogueManager : SingletonBase<DialogueManager>
 
     private void IncrementDialogueIndex()
     {
-        if(_currentlyWriting) return;
-        StopCoroutine(DialogueCoroutine());
+        if (_currentlyWriting)
+        {
+            StopCoroutine(_currentCoroutine);
+            text.text = null;
+            text.text = currentDialogueText;
+            _currentlyWriting = false;
+            return;
+        }
+
+        if (_currentCoroutine != null)
+        {
+            StopCoroutine(_currentCoroutine);
+        }
         var newIndex = (currentDialogueIndex + 1) % currentDialogue.dialogues.Length;
         currentDialogueIndex = newIndex;
         SetDialogue();
-        StartCoroutine(DialogueCoroutine());
+        _currentCoroutine = StartCoroutine(DialogueCoroutine());
     }
 
     private void Update()
