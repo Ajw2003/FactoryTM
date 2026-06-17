@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour, IHealth
     private Vector2Int lastMoveDirection = Vector2Int.up;
     private Vector2 rawInputDirection;
     private Coroutine currentCoroutine;
+    private PlayerWeapon weapon;
     
     public float width = 1.0f;
     public float height = 1.0f;
@@ -85,6 +86,8 @@ public class PlayerController : MonoBehaviour, IHealth
         EventManager.Instance?.Subscribe(this, (PlayerHealEvent e) => OnHealInput());
         EventManager.Instance?.Subscribe(this, (PlayerOpenStoreEvent e) => OnOpenStoreInput());
 
+        weapon = GetComponentInChildren<PlayerWeapon>();
+
         StateMachine.Initialize(StateMachine.idleState);
     }
 
@@ -137,6 +140,22 @@ public class PlayerController : MonoBehaviour, IHealth
         {
             currentStamina = Mathf.Min(maxStamina, currentStamina + staminaRegenRate * Time.deltaTime);
             UiManager.Instance.UpdateStamina(currentStamina, maxStamina);
+        }
+
+        // Rotate towards aim target
+        if (StateMachine.CurrentState != StateMachine.deadState && StateMachine.CurrentState != StateMachine.storeState)
+        {
+            if (weapon == null) weapon = GetComponentInChildren<PlayerWeapon>();
+            if (weapon != null)
+            {
+                Vector2 targetPos = weapon.target;
+                Vector2 direction = targetPos - (Vector2)transform.position;
+                if (direction.sqrMagnitude > 0.01f)
+                {
+                    float angle = (Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg)+ 90f;
+                    transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+                }
+            }
         }
 
         StateMachine.Update();

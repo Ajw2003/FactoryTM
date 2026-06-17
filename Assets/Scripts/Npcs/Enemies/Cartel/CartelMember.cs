@@ -72,6 +72,15 @@ public class CartelMember : MonoBehaviour, IHealth
         {
             transform.position = Vector3.MoveTowards(transform.position, target.transform.position, speed * Time.deltaTime);
             weapon.target = target.transform.position;
+
+            // Rotate towards target we are aiming at
+            Vector2 direction = (Vector2)target.transform.position - (Vector2)transform.position;
+            if (direction.sqrMagnitude > 0.01f)
+            {
+                float angle = (Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg) + 90f;
+                transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+            }
+
             if (attacking) return;
             attackRoutine = StartCoroutine(Attack());
             attacking = true;
