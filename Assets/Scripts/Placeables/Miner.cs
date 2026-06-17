@@ -96,26 +96,26 @@ public class MinerLogic : BuildingLogic
         Vector2Int targetCell = myCell + offset;
         Vector2 spawnPos = GridManager.Instance.CellToWorldConversion(targetCell);
 
-        // Align spawnPos to the exact exit boundary of the chute on the tile transition (aligned with bottom/left cell for 1x1 conveyors)
+        // Align spawnPos to the exact exit boundary of the chute on the tile transition (centered on the side of the 2x2 building)
         Vector2 tileSize = GridManager.Instance.tileSize;
-        if (exportDirection.x > 0) // Right boundary
+        if (exportDirection.x > 0) // Right boundary (chute is centered vertically)
         {
             spawnPos.x = targetCell.x * tileSize.x;
-            spawnPos.y = (myCell.y + 0.5f) * tileSize.y;
+            spawnPos.y = (myCell.y + 1f) * tileSize.y;
         }
-        else if (exportDirection.x < 0) // Left boundary
+        else if (exportDirection.x < 0) // Left boundary (chute is centered vertically)
         {
             spawnPos.x = (targetCell.x + 1) * tileSize.x;
-            spawnPos.y = (myCell.y + 0.5f) * tileSize.y;
+            spawnPos.y = (myCell.y + 1f) * tileSize.y;
         }
-        else if (exportDirection.y > 0) // Top boundary
+        else if (exportDirection.y > 0) // Top boundary (chute is centered horizontally)
         {
-            spawnPos.x = (myCell.x + 0.5f) * tileSize.x;
+            spawnPos.x = (myCell.x + 1f) * tileSize.x;
             spawnPos.y = targetCell.y * tileSize.y;
         }
-        else if (exportDirection.y < 0) // Bottom boundary
+        else if (exportDirection.y < 0) // Bottom boundary (chute is centered horizontally)
         {
-            spawnPos.x = (myCell.x + 0.5f) * tileSize.x;
+            spawnPos.x = (myCell.x + 1f) * tileSize.x;
             spawnPos.y = (targetCell.y + 1) * tileSize.y;
         }
 
