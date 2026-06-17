@@ -96,6 +96,29 @@ public class MinerLogic : BuildingLogic
         Vector2Int targetCell = myCell + offset;
         Vector2 spawnPos = GridManager.Instance.CellToWorldConversion(targetCell);
 
+        // Align spawnPos to the exact exit boundary of the chute on the tile transition
+        Vector2 tileSize = GridManager.Instance.tileSize;
+        if (exportDirection.x > 0) // Right boundary (chute is in bottom-right cell)
+        {
+            spawnPos.x = targetCell.x * tileSize.x;
+            spawnPos.y = (myCell.y * tileSize.y) + (tileSize.y / 2f);
+        }
+        else if (exportDirection.x < 0) // Left boundary (chute is in bottom-left cell)
+        {
+            spawnPos.x = (targetCell.x + 1) * tileSize.x;
+            spawnPos.y = (myCell.y * tileSize.y) + (tileSize.y / 2f);
+        }
+        else if (exportDirection.y > 0) // Top boundary (chute is in top-left cell)
+        {
+            spawnPos.x = (myCell.x * tileSize.x) + (tileSize.x / 2f);
+            spawnPos.y = targetCell.y * tileSize.y;
+        }
+        else if (exportDirection.y < 0) // Bottom boundary (chute is in bottom-left cell)
+        {
+            spawnPos.x = (myCell.x * tileSize.x) + (tileSize.x / 2f);
+            spawnPos.y = (targetCell.y + 1) * tileSize.y;
+        }
+
         // 2. Instantiate the item
         GameObject newItem = Instantiate(currentMinedItemPrefab, spawnPos, Quaternion.identity);
         ConveyorItem itemComp = newItem.GetComponent<ConveyorItem>();
