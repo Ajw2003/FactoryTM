@@ -64,15 +64,16 @@ public class StoreUiScript : MonoBehaviour
         // Add click listeners to store buttons for terminal feedback
         FindAndHookButtons();
 
+    }
+
+    private void OnEnable()
+    {
         // Subscribe to upgrade unlock events to dynamically add shop entries
         if (UpgradeManager.HasInstance)
         {
             UpgradeManager.Instance.onUpgradesChanged += OnUpgradesChanged;
-            // Spawn any already-researched upgrades in case we loaded mid-run
-            foreach (var upg in UpgradeManager.Instance.activeUpgradesInShop)
-            {
-                SpawnUpgradeShopButton(upg);
-            }
+            // Catch up on any upgrades that were unlocked while the store was disabled
+            OnUpgradesChanged();
         }
     }
 
