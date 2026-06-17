@@ -48,7 +48,7 @@ public class Furnace : BuildingLogic
                 for (int i = items.Count - 1; i >= 0; i--)
                 {
                     ConveyorItem item = items[i];
-                    if (!itemsInProcess.Contains(item))
+                    if (!item.IsMoving && !itemsInProcess.Contains(item))
                     {
                         StartCoroutine(ProccessItem(item));
                     }
