@@ -1,12 +1,8 @@
 make tutorial that integrates smoothly into gameplay, i.e. Controls: open your shop with E rotate objects with R place with left click, remove with Right click, shoot with middle click. Then Instructions: build a miner and seller before the sun sets and the raiders come, rotate the miner to face the seller, aim with your mouse and shoot full auto but be wary as ammo is limited early game.
 
-FIX LAYER ISSUES FOR EVERYTHING
-
-Add more upgrade types such as tax breaks or tax loop holes which increase profit by x% or More efficient machinery which increases production speed of ore, Higher tier guns and even special types such as explosives or shotguns, border control which decreases enemies spawned during each wave, and SoulsLike? which unlocks a dodge with the shift or space key.
+Add more upgrade and Higher tier guns and even special types such as explosives or shotguns
 
 increase player health and/or decrease enemy damage or spawn fewer enemies first wave, fuck around with balance basically.
-
-Make clear which way items eject from machines i.e. miners
 
 new enemy types with different attack patterns and traits such as explosive weapons, melee attacks, swarming and sniping 
 

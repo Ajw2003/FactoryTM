@@ -76,6 +76,7 @@ namespace Managers
                 def.type = UpgradeType.Building;
                 def.buildingToUnlock = b;
                 def.costInShop = b.cost;
+                def.addToShopAfterUnlock = true;
                 allUpgrades.Add(def);
             }
 
@@ -89,6 +90,7 @@ namespace Managers
                 def.type = UpgradeType.Weapon;
                 def.weaponToUnlock = w;
                 def.costInShop = w.cost;
+                def.addToShopAfterUnlock = true;
                 allUpgrades.Add(def);
             }
 
@@ -111,6 +113,7 @@ namespace Managers
                 def.armorPercentBoost = 0.15f;
                 def.maxHealthBoost = 2;
                 def.costInShop = 80f;
+                def.addToShopAfterUnlock = true;
                 allUpgrades.Add(def);
             }
 
@@ -124,6 +127,7 @@ namespace Managers
                 def.armorPercentBoost = 0.25f;
                 def.maxHealthBoost = 4;
                 def.costInShop = 160f;
+                def.addToShopAfterUnlock = true;
                 allUpgrades.Add(def);
             }
 
@@ -135,6 +139,7 @@ namespace Managers
                 def.description = "Receive 2 emergency medkits immediately. Allows buying medkits in the shop. Press TAB to heal.";
                 def.type = UpgradeType.HealthPack;
                 def.costInShop = 30f;
+                def.addToShopAfterUnlock = true;
                 allUpgrades.Add(def);
             }
 
@@ -146,6 +151,7 @@ namespace Managers
                 def.description = "Receive 90 spare rounds immediately. Allows purchasing ammo packs (30 rounds) in the shop.";
                 def.type = UpgradeType.Ammo;
                 def.costInShop = 15f;
+                def.addToShopAfterUnlock = true;
                 allUpgrades.Add(def);
             }
 
@@ -157,6 +163,7 @@ namespace Managers
                 def.description = "Exploit financial technicalities to increase every dollar earned by +25%. (Stackable)";
                 def.type = UpgradeType.IncomeBoost;
                 def.costInShop = 120f;
+                def.addToShopAfterUnlock = false;
                 allUpgrades.Add(def);
             }
 
@@ -168,6 +175,7 @@ namespace Managers
                 def.description = "Bolster off-screen security to reduce the number of enemies spawned per wave by 2.";
                 def.type = UpgradeType.RaidReduction;
                 def.costInShop = 150f;
+                def.addToShopAfterUnlock = false;
                 allUpgrades.Add(def);
             }
 
@@ -179,6 +187,7 @@ namespace Managers
                 def.description = "Unlock a rapid tile-based dodge roll. Press SPACE while moving or holding a direction to evade.";
                 def.type = UpgradeType.DodgeRoll;
                 def.costInShop = 200f;
+                def.addToShopAfterUnlock = false;
                 allUpgrades.Add(def);
             }
 
@@ -190,6 +199,7 @@ namespace Managers
                 def.description = "Condition your body for intense combat. Increases maximum stamina by +50. (Stackable)";
                 def.type = UpgradeType.StaminaBoost;
                 def.costInShop = 140f;
+                def.addToShopAfterUnlock = false;
                 allUpgrades.Add(def);
             }
 
@@ -216,7 +226,10 @@ namespace Managers
                 {
                     def.isResearched = true;
                     researchedUpgrades.Add(def);
-                    activeUpgradesInShop.Add(def);
+                    if (def.addToShopAfterUnlock)
+                    {
+                        activeUpgradesInShop.Add(def);
+                    }
                     ApplyUpgradeEffects(def);
                     Debug.Log($"UpgradeManager: Auto-unlocked '{def.upgradeName}' (startsUnlocked=true).");
                 }
@@ -275,12 +288,22 @@ namespace Managers
             researchedUpgrades.Add(upgrade);
         
             // Add to active shop pool so it is purchasable
-            activeUpgradesInShop.Add(upgrade);
+            if (upgrade.addToShopAfterUnlock)
+            {
+                activeUpgradesInShop.Add(upgrade);
+            }
 
             ApplyUpgradeEffects(upgrade);
 
             onUpgradesChanged?.Invoke();
-            Debug.Log($"Upgrade Researched: {upgrade.upgradeName}. Now available in the Shop!");
+            if (upgrade.addToShopAfterUnlock)
+            {
+                Debug.Log($"Upgrade Researched: {upgrade.upgradeName}. Now available in the Shop!");
+            }
+            else
+            {
+                Debug.Log($"Upgrade Researched: {upgrade.upgradeName}.");
+            }
 
             // Resume and start next day
             DayNightManager.Instance.StartNextDay();
