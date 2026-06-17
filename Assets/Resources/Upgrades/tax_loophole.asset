@@ -10,17 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 376ed30334c5e194e9beab8bf860ea20, type: 3}
-  m_Name: Ammo
+  m_Name: tax_loophole
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeDefinition
-  upgradeId: Ammo
-  upgradeName: Ammo
-  description: ammo for gun, does what it says on the tin
-  icon: {fileID: -1610335646, guid: e94c00a3273f09e4f872f433bdfb0da0, type: 3}
-  type: 4
-  costInShop: 50
+  upgradeId: tax_loophole
+  upgradeName: Taxloophole
+  description: Exploit financial technicalities to increase every dollar earned by
+    +25%. (Stackable)
+  icon: {fileID: 0}
+  type: 5
+  costInShop: 120
   buildingToUnlock: {fileID: 0}
   weaponToUnlock: {fileID: 0}
   armorPercentBoost: 0
   maxHealthBoost: 0
-  startsUnlocked: 1
+  startsUnlocked: 0
+  addToShopAfterUnlock: 0
   isResearched: 0
