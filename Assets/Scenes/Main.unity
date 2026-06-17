@@ -187,9 +187,9 @@ Camera:
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
-    y: 0
-    width: 1
-    height: 1
+    y: 0.041666668
+    width: 0.25
+    height: 0.25
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 34
@@ -511,7 +511,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DayNightManager
   persistBetweenScenes: 1
-  dayDuration: 90
+  dayDuration: 30
   currentDay: 1
   currentPhase: 0
   baseEnemiesPerWave: 3
@@ -692,7 +692,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5850238153392146976, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -939.7
+      value: -939.5
       objectReference: {fileID: 0}
     - target: {fileID: 7171439299912028277, guid: 7fd68aa2ca3290a44907b4fa358e4401, type: 3}
       propertyPath: m_AnchoredPosition.x

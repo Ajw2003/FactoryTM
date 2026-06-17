@@ -124,11 +124,8 @@ public class UiItemButton : MonoBehaviour
             return new Color(0.02f, 0.05f, 0.02f, 0.6f);
         }
 
-        float cost = buildingData.cost;
-        bool canAfford = CurrencyManager.Instance.currentCurrencyValue >= cost;
-        
-        // Terminal style: Dark green for afford, Dark red for can't afford
-        return canAfford ? new Color(0.05f, 0.15f, 0.05f, 0.85f) : new Color(0.15f, 0.05f, 0.05f, 0.85f);
+        // Terminal style: Dark green
+        return new Color(0.05f, 0.15f, 0.05f, 0.85f);
     }
 
     private void StopActiveCoroutine()
@@ -294,7 +291,7 @@ public class UiItemButton : MonoBehaviour
         
         Image img = GetComponent<Image>();
         Color startColor = img != null ? img.color : originalColor;
-        Color failColor = new Color(0.15f, 0.05f, 0.05f, 0.85f); // vibrant red flash
+        Color failColor = new Color(0.8f, 0.1f, 0.1f, 1f); // vibrant red flash
         
         while (elapsed < duration)
         {

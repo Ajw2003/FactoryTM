@@ -86,17 +86,16 @@ public class StoreUiScript : MonoBehaviour
 
     private void OnUpgradesChanged()
     {
-        // Find the most recently added upgrade and spawn its button
         if (!UpgradeManager.HasInstance) return;
         var shop = UpgradeManager.Instance.activeUpgradesInShop;
-        if (shop.Count == 0) return;
-
-        var latest = shop[shop.Count - 1];
-        // Avoid duplicates: only spawn if we don't already have a button for it
-        bool alreadySpawned = dynamicUpgradeButtons.Find(go => go != null && go.name == "UpgradeShopBtn_" + latest.upgradeId) != null;
-        if (!alreadySpawned)
+        foreach (var upg in shop)
         {
-            SpawnUpgradeShopButton(latest);
+            if (upg == null) continue;
+            bool alreadySpawned = dynamicUpgradeButtons.Find(go => go != null && go.name == "UpgradeShopBtn_" + upg.upgradeId) != null;
+            if (!alreadySpawned)
+            {
+                SpawnUpgradeShopButton(upg);
+            }
         }
     }
 
@@ -291,7 +290,7 @@ public class StoreUiScript : MonoBehaviour
             if (btnImg != null)
             {
                 // Use affordability color if available
-                btnImg.color = (itemBtn != null) ? itemBtn.GetTargetColor() : new Color(0.05f, 0.15f, 0.05f, 0.85f);
+                btnImg.color = GetButtonBaseColor(btn, itemBtn);
                 
                 Outline outline = btn.gameObject.GetComponent<Outline>();
                 if (outline == null) outline = btn.gameObject.AddComponent<Outline>();
@@ -488,7 +487,7 @@ public class StoreUiScript : MonoBehaviour
             Image btnImg = btn.GetComponent<Image>();
             if (btnImg != null)
             {
-                Color baseColor = (itemBtn != null) ? itemBtn.GetTargetColor() : new Color(0.05f, 0.15f, 0.05f, 0.85f);
+                Color baseColor = GetButtonBaseColor(btn, itemBtn);
                 // Brighten the base color slightly for hover
                 Color hoverColor = Color.Lerp(baseColor, Color.white, 0.15f);
                 btnImg.DOColor(hoverColor, 0.15f).SetUpdate(true);
@@ -514,7 +513,7 @@ public class StoreUiScript : MonoBehaviour
             Image btnImg = btn.GetComponent<Image>();
             if (btnImg != null)
             {
-                Color baseColor = (itemBtn != null) ? itemBtn.GetTargetColor() : new Color(0.05f, 0.15f, 0.05f, 0.85f);
+                Color baseColor = GetButtonBaseColor(btn, itemBtn);
                 btnImg.DOColor(baseColor, 0.15f).SetUpdate(true);
             }
             
@@ -529,6 +528,14 @@ public class StoreUiScript : MonoBehaviour
             }
         });
         trigger.triggers.Add(entryExit);
+    }
+
+    private Color GetButtonBaseColor(Button btn, UiItemButton itemBtn)
+    {
+        if (itemBtn != null) return itemBtn.GetTargetColor();
+        var upgItem = btn.GetComponent<UpgradeShopItem>();
+        if (upgItem != null) return upgItem.GetTargetColor();
+        return new Color(0.05f, 0.15f, 0.05f, 0.85f);
     }
     
     private void FindAndHookButtons()
@@ -695,7 +702,6 @@ public class StoreUiScript : MonoBehaviour
     private void CreatePaginationControls()
     {
         totalPages = Mathf.CeilToInt((float)storeButtons.Count / maxItemsPerPage);
-        if (totalPages <= 1) return; // No pagination needed if 1 page or fewer
 
         // Container panel for pagination buttons
         GameObject pagPanel = new GameObject("Pagination_Panel", typeof(RectTransform));
@@ -863,7 +869,13 @@ public class StoreUiScript : MonoBehaviour
             }
         }
 
-        // 3. Update Nav Button states
+        // 3. Update Nav Button states and pagination panel visibility
+        if (prevPageBtn != null && prevPageBtn.gameObject.transform.parent != null)
+        {
+            GameObject pagPanel = prevPageBtn.gameObject.transform.parent.gameObject;
+            pagPanel.SetActive(totalPages > 1);
+        }
+
         if (prevPageBtn != null)
         {
             prevPageBtn.interactable = (currentPageIndex > 0);

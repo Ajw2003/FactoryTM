@@ -83,12 +83,7 @@ public class UpgradeShopItem : MonoBehaviour
 
     public Color GetTargetColor()
     {
-        if (!CurrencyManager.HasInstance || definition == null) return new Color(0.05f, 0.15f, 0.05f, 0.85f);
-        float cost = definition.costInShop;
-        bool canAfford = CurrencyManager.Instance.currentCurrencyValue >= cost;
-        return canAfford
-            ? new Color(0.05f, 0.15f, 0.05f, 0.85f)
-            : new Color(0.15f, 0.05f, 0.05f, 0.85f);
+        return new Color(0.05f, 0.15f, 0.05f, 0.85f);
     }
 
     public void PurchaseUpgrade()
@@ -195,7 +190,7 @@ public class UpgradeShopItem : MonoBehaviour
         float duration = 0.25f;
         float elapsed = 0f;
         Color startColor = bgImage != null ? bgImage.color : Color.white;
-        Color failColor = new Color(1f, 0.3f, 0.3f, 1f);
+        Color failColor = new Color(0.8f, 0.1f, 0.1f, 1f);
 
         while (elapsed < duration)
         {
