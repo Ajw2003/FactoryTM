@@ -15,7 +15,7 @@ public enum CyclePhase
 public class DayNightManager : SingletonBase<DayNightManager>
 {
     [Header("Cycle Settings")]
-    public float dayDuration = 30f; // Duration of day in seconds
+    public float dayDuration = 90f; // Duration of day in seconds
     public int currentDay = 1;
     public CyclePhase currentPhase = CyclePhase.Day;
 

@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87e78062204f4144787f6e049cb80164, type: 3}
+  m_Name: Intro
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueSO
+  dialogues:
+  - text: Welcome to your new home away from home
+    sprite: {fileID: 0}
+    color: {r: 0, g: 0, b: 0, a: 0}
+  - text: It's a bit barren out here so lets just get straight to the good stuff
+      shall we?
+    sprite: {fileID: 0}
+    color: {r: 0, g: 0, b: 0, a: 0}
+  - text: Press E To open your company device
+    sprite: {fileID: 0}
+    color: {r: 0, g: 0, b: 0, a: 0}
+  - text: navigate between pages and get your bearings
+    sprite: {fileID: 0}
+    color: {r: 0, g: 0, b: 0, a: 0}
+  - text: Then when you're ready buy a seller, a miner, and 5 conveyors.
+    sprite: {fileID: 0}
+    color: {r: 0, g: 0, b: 0, a: 0}
+  - text: Now, when you're ready close the company device by pressing escape or E
+    sprite: {fileID: 0}
+    color: {r: 0, g: 0, b: 0, a: 0}
+  - text: Now back in the world you should see 3 items in your hotbar, they can be
+      accessed either through the scroll wheel, number keys or clicking the slot
+      ui
+    sprite: {fileID: 0}
+    color: {r: 0, g: 0, b: 0, a: 0}
+  - text: Now select your miner, once selected press the R key to rotate to your
+      desired orientation. this dictates the direction the ore will be outputted
+    sprite: {fileID: 0}
+    color: {r: 0, g: 0, b: 0, a: 0}
+  - text: Left click to place down a miner and then select your conveyor item
+    sprite: {fileID: 0}
+    color: {r: 0, g: 0, b: 0, a: 0}
+  - text: Once selected place down 1-5 conveyors together in sequence one  after
+      another
+    sprite: {fileID: 0}
+    color: {r: 0, g: 0, b: 0, a: 0}
+  - text: 'Finally select the seller and place it at the end of the conveyors, if
+      done correctly items should flow from the miner to the seller and you should
+      see money apear in your account '
+    sprite: {fileID: 0}
+    color: {r: 0, g: 0, b: 0, a: 0}
+  - text: If you decide that you don't want a given building in a specific position
+      you may right click it while that item is slected in your hotbar to return
+      the item to your inventory.
+    sprite: {fileID: 0}
+    color: {r: 0, g: 0, b: 0, a: 0}
