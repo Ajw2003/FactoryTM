@@ -1,7 +1,31 @@
 fileFormatVersion: 2
 guid: 2b6e8d5c843058f498ccb89bd47f1e90
 TextureImporter:
-  internalIDToNameTable: []
+  internalIDToNameTable:
+  - first:
+      213: -1835955414
+    second: ConveyorTileAnimatedUp_0
+  - first:
+      213: 1345230112
+    second: ConveyorTileAnimatedUp_1
+  - first:
+      213: -353097300
+    second: ConveyorTileAnimatedUp_2
+  - first:
+      213: 1345373541
+    second: ConveyorTileAnimatedUp_3
+  - first:
+      213: -1642556216
+    second: ConveyorTileAnimatedUp_4
+  - first:
+      213: -882964857
+    second: ConveyorTileAnimatedUp_5
+  - first:
+      213: 1516587415
+    second: ConveyorTileAnimatedUp_6
+  - first:
+      213: 1284814106
+    second: ConveyorTileAnimatedUp_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -85,7 +109,20 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -98,7 +135,20 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -125,8 +175,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 8e0c78b4508d2f54ea1be74af4939011
-      internalID: 264159828
+      spriteID: fa64ba1f6fba11cd0fa3f8cea81ad458
+      internalID: -1835955414
       vertices: []
       indices: 
       edges: []
@@ -147,8 +197,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 983b21bf319d87e4ca4365466b46566f
-      internalID: -46018260
+      spriteID: 2e31d170063757efffb989e99666675d
+      internalID: 1345230112
       vertices: []
       indices: 
       edges: []
@@ -169,8 +219,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 87c993e03e798924d994fb44fc2ea74f
-      internalID: 2107910389
+      spriteID: 16d36ba595c5db6ea31d90ae3b19e148
+      internalID: -353097300
       vertices: []
       indices: 
       edges: []
@@ -191,8 +241,96 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ae32ea05f79205646ade52763cf66e20
-      internalID: -1802794992
+      spriteID: f9ee89381b88f44a810cd130ca67498a
+      internalID: 1345373541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ConveyorTileAnimatedUp_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 475b250474048466cc7e4c68af1e121e
+      internalID: -1642556216
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ConveyorTileAnimatedUp_5
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8e9da9c2761e96a76a19b8d5a001a846
+      internalID: -882964857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ConveyorTileAnimatedUp_6
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c5f99b88988304886eb439a03aafa631
+      internalID: 1516587415
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ConveyorTileAnimatedUp_7
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f8d8d72c03951b2d072a771fe13d7e8e
+      internalID: 1284814106
       vertices: []
       indices: 
       edges: []
@@ -201,7 +339,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -209,14 +347,16 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries:
-      - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":32.0,"y":32.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
+      entries: []
     nameFileIdTable:
-      ConveyorTileAnimatedUp_0: 264159828
-      ConveyorTileAnimatedUp_1: -46018260
-      ConveyorTileAnimatedUp_2: 2107910389
-      ConveyorTileAnimatedUp_3: -1802794992
+      ConveyorTileAnimatedUp_0: -1835955414
+      ConveyorTileAnimatedUp_1: 1345230112
+      ConveyorTileAnimatedUp_2: -353097300
+      ConveyorTileAnimatedUp_3: 1345373541
+      ConveyorTileAnimatedUp_4: -1642556216
+      ConveyorTileAnimatedUp_5: -882964857
+      ConveyorTileAnimatedUp_6: 1516587415
+      ConveyorTileAnimatedUp_7: 1284814106
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

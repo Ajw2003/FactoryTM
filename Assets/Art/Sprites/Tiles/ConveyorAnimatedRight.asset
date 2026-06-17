@@ -13,12 +13,16 @@ MonoBehaviour:
   m_Name: ConveyorAnimatedRight
   m_EditorClassIdentifier: Unity.2D.Tilemap.Extras::UnityEngine.Tilemaps.AnimatedTile
   m_AnimatedSprites:
-  - {fileID: -336100313, guid: 0b6f6758b5437824881830ffcd1f97ba, type: 3}
-  - {fileID: -742055289, guid: 0b6f6758b5437824881830ffcd1f97ba, type: 3}
-  - {fileID: 9065244, guid: 0b6f6758b5437824881830ffcd1f97ba, type: 3}
-  - {fileID: -651690664, guid: 0b6f6758b5437824881830ffcd1f97ba, type: 3}
-  m_MinSpeed: 1
-  m_MaxSpeed: 1
+  - {fileID: -1932799954, guid: 0b6f6758b5437824881830ffcd1f97ba, type: 3}
+  - {fileID: 61750716, guid: 0b6f6758b5437824881830ffcd1f97ba, type: 3}
+  - {fileID: 788459200, guid: 0b6f6758b5437824881830ffcd1f97ba, type: 3}
+  - {fileID: 595655000, guid: 0b6f6758b5437824881830ffcd1f97ba, type: 3}
+  - {fileID: 1011881057, guid: 0b6f6758b5437824881830ffcd1f97ba, type: 3}
+  - {fileID: 731254281, guid: 0b6f6758b5437824881830ffcd1f97ba, type: 3}
+  - {fileID: -1492484512, guid: 0b6f6758b5437824881830ffcd1f97ba, type: 3}
+  - {fileID: -1610736993, guid: 0b6f6758b5437824881830ffcd1f97ba, type: 3}
+  m_MinSpeed: 10
+  m_MaxSpeed: 10
   m_AnimationStartTime: 0
   m_AnimationStartFrame: 0
   m_TileColliderType: 0
