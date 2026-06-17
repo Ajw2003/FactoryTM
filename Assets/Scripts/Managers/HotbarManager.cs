@@ -43,7 +43,8 @@ public class HotbarManager : SingletonBase<HotbarManager>
 
     protected override void OnDestroy()
     {
-        if (InventoryManager.Instance != null)
+        base.OnDestroy();
+        if (InventoryManager.HasInstance)
         {
             InventoryManager.Instance.onInventoryChange -= RefreshUI;
         }

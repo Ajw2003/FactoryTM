@@ -73,7 +73,7 @@ public class ConveyorItem : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (ItemTracker.Instance != null && isInitialized)
+        if (ItemTracker.HasInstance && isInitialized)
         {
             ItemTracker.Instance.UnregisterItem(this, currentCell);
         }
