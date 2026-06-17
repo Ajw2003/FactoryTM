@@ -39,6 +39,8 @@ public class UpgradeDefinition : ScriptableObject
     [Header("Unlock Settings")]
     [Tooltip("If true, this upgrade will be available in the shop from the very start of the game, without needing to be researched.")]
     public bool startsUnlocked = false;
+    [Tooltip("If true, this upgrade will be added to the shop for purchase after it is researched/unlocked.")]
+    public bool addToShopAfterUnlock = true;
 
     [Header("Status (Runtime Only)")]
     public bool isResearched = false;
