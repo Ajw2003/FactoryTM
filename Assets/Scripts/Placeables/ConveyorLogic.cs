@@ -10,7 +10,8 @@ public class ConveyorLogic : BuildingLogic
     {
         base.Setup(buildingData, cell);
         direction = dir;
-        moveSpeed = speed;
+        // Sync item movement speed to the 8-frame tile animation timing (10 fps / 8 frames = 1.25 units per second)
+        moveSpeed = 1.25f;
     }
 
     public override void PerformAction()
