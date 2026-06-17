@@ -15,7 +15,11 @@ public class Seller : BuildingLogic
         {
             for (int i = items.Count - 1; i >= 0; i--)
             {
-                GameManager.Instance.ProccessSale(items[i].gameObject);
+                ConveyorItem item = items[i];
+                if (!item.IsMoving)
+                {
+                    GameManager.Instance.ProccessSale(item.gameObject);
+                }
             }
         }
     }
