@@ -30,7 +30,7 @@ public abstract class BuildingLogic : MonoBehaviour
 
     protected virtual void OnDisable()
     {
-        if (BuildingManager.Instance != null)
+        if (BuildingManager.HasInstance)
             BuildingManager.Instance.UnregisterBuilding(this);
     }
 

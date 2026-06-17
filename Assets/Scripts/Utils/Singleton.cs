@@ -16,7 +16,9 @@ namespace Singleton
           {                
               if (_isQuitting)
               {
-                  return null;
+                  // Provide the instance if it still exists to allow safe unsubscription,
+                  // but DO NOT create a new one if it's already destroyed.
+                  return _instance;
               }
 
               // If the instance is not already set
@@ -35,7 +37,7 @@ namespace Singleton
           }
       }    
 
-        [SerializeField] protected bool persistBetweenScenes = true;
+        [SerializeField] protected bool persistBetweenScenes = false;
 
         // Protected METHODS: -----------------------------------------------------------------------                
         protected virtual void Awake()        

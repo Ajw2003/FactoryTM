@@ -32,11 +32,11 @@ public class UiZoneButton : MonoBehaviour
 
     private void OnDisable()
     {
-        if (CurrencyManager.Instance != null)
+        if (CurrencyManager.HasInstance)
         {
             CurrencyManager.Instance.onCurrencyChange -= RefreshUI;
         }
-        if (ZoneManager.Instance != null)
+        if (ZoneManager.HasInstance)
         {
             ZoneManager.Instance.onZoneUnlock -= RefreshUI;
         }
