@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Code.Scripts.EventSystems;
 using Singleton;
 using TMPro;
 using UnityEngine;
@@ -13,6 +14,8 @@ public class DialogueManager : SingletonBase<DialogueManager>
     
     private bool _currentlyWriting;
     private Coroutine _currentCoroutine;
+
+    private bool _canWrite;
     
     [SerializeField] private TMP_Text text;
 
@@ -21,10 +24,13 @@ public class DialogueManager : SingletonBase<DialogueManager>
         currentDialogueIndex = 0;
         SetDialogue();
         _currentCoroutine = StartCoroutine(DialogueCoroutine());
+        EventManager.Instance.Subscribe(this,(DialogueEvent e) => ToggleUi(e.enabled));
+        EventManager.Instance.Subscribe(this,(DialogueEvent e) => SetDialogueSo(e.dialogue));
     }
 
     private IEnumerator DialogueCoroutine()
     {
+        _canWrite = true;
         foreach (var character in currentDialogueText)
         {
             yield return new WaitForSeconds(delayBetweenCharacters);
@@ -40,6 +46,11 @@ public class DialogueManager : SingletonBase<DialogueManager>
     {
         currentDialogueText = currentDialogue.dialogues[currentDialogueIndex].text;
         text.text = null;
+    }
+
+    private void SetDialogueSo(DialogueSO newDialogue)
+    {
+        currentDialogue = newDialogue;
     }
 
     private void IncrementDialogueIndex()
@@ -65,9 +76,35 @@ public class DialogueManager : SingletonBase<DialogueManager>
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && _canWrite)
         {
             IncrementDialogueIndex();
+            _canWrite = true;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            _canWrite = !_canWrite;
+            ToggleUi(_canWrite);
+        }
+    }
+
+    private void ToggleUi(bool enabled)
+    {
+        switch (enabled)
+        {
+            case false :
+                _canWrite = false;
+                text.text = null;
+                _currentlyWriting = false;
+                StopCoroutine(_currentCoroutine);
+                break;
+            case true :
+                currentDialogueIndex = 0;
+                SetDialogue();
+                _currentCoroutine = StartCoroutine(DialogueCoroutine());
+                _canWrite = true;
+                break;
         }
     }
 }
