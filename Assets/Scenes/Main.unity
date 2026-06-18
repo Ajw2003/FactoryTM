@@ -511,11 +511,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DayNightManager
   persistBetweenScenes: 1
-  dayDuration: 30
+  dayDuration: 15
   currentDay: 1
   currentPhase: 0
-  baseEnemiesPerWave: 3
-  wavesPerRaid: 2
+  baseEnemiesPerWave: 2
+  wavesPerRaid: 1
   waveInterval: 10
   raidEnemyReduction: 0
 --- !u!4 &1155475865
