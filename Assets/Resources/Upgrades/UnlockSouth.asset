@@ -10,20 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 376ed30334c5e194e9beab8bf860ea20, type: 3}
-  m_Name: unlock_mine
+  m_Name: UnlockSouth
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeDefinition
-  upgradeId: unlock_mine
-  upgradeName: Unlock Miner
-  description: Research technology to enable building Miner. Available to build via
-    docked store.
+  upgradeId: Unlock_South
+  upgradeName: Unlock South
+  description: Unlocks one plot of land to the South
   icon: {fileID: 0}
-  type: 0
-  costInShop: 10
-  buildingToUnlock: {fileID: 11400000, guid: 879ba1482606309449b799396e84e593, type: 2}
+  type: 9
+  costInShop: 100
+  buildingToUnlock: {fileID: 0}
   weaponToUnlock: {fileID: 0}
   armorPercentBoost: 0
   maxHealthBoost: 0
-  zoneDirection: 0
+  zoneDirection: 1
   startsUnlocked: 1
   addToShopAfterUnlock: 1
-  isResearched: 1
+  isResearched: 0

@@ -59,12 +59,7 @@ public class StoreUiScript : MonoBehaviour
         RenderPage();
     }
     
-    private void Start()
-    {
-        // Add click listeners to store buttons for terminal feedback
-        FindAndHookButtons();
 
-    }
 
     private void OnEnable()
     {
@@ -267,133 +262,23 @@ public class StoreUiScript : MonoBehaviour
         vignetteOverlay.sprite = Sprite.Create(vignetteTex, new Rect(0, 0, 128, 128), new Vector2(0.5f, 0.5f));
         
         // 5. Layout existing UI elements on the LEFT
-        // Find existing buttons and reposition them in a terminal grid layout
-        LayoutItemGrid();
+        // Destroy existing static buttons since we unify to UpgradeDefinition
+        DestroyStaticButtons();
         
         // 6. Create Right Console/Terminal log output
         CreateTerminalConsole();
     }
-    
-    private void LayoutItemGrid()
+
+    private void DestroyStaticButtons()
     {
-        // We find all direct or nested children of StorePanel that are buttons, excluding our generated objects
-        Button[] buttons = GetComponentsInChildren<Button>(true);
-        
-        foreach (Button btn in buttons)
-        {
-            storeButtons.Add(btn);
-            RectTransform btnRt = btn.GetComponent<RectTransform>();
-            
-            UiItemButton itemBtn = btn.GetComponent<UiItemButton>();
+        var itemBtns = GetComponentsInChildren<UiItemButton>(true);
+        foreach(var btn in itemBtns) Destroy(btn.gameObject);
 
-            // Re-style buttons to look like terminal terminals
-            Image btnImg = btn.GetComponent<Image>();
-            if (btnImg != null)
-            {
-                // Use affordability color if available
-                btnImg.color = GetButtonBaseColor(btn, itemBtn);
-                
-                Outline outline = btn.gameObject.GetComponent<Outline>();
-                if (outline == null) outline = btn.gameObject.AddComponent<Outline>();
-                outline.effectColor = new Color(0.1f, 0.8f, 0.1f, 0.5f);
-                outline.effectDistance = new Vector2(2f, 2f);
-            }
-            
-            // Align setup (position is determined by RenderPage)
-            btnRt.anchorMin = new Vector2(0.1f, 0.5f);
-            btnRt.anchorMax = new Vector2(0.45f, 0.5f);
-            btnRt.pivot = new Vector2(0.5f, 0.5f);
-            btnRt.sizeDelta = new Vector2(btnRt.sizeDelta.x, 90f);
-            
-            if (itemBtn != null)
-            {
-                // Deactivate stretched/overlapping graphics/icons
-                Image[] childImages = btn.GetComponentsInChildren<Image>(true);
-                foreach (var img in childImages)
-                {
-                    if (img != btnImg)
-                    {
-                        img.gameObject.SetActive(false);
-                    }
-                }
-
-                // Find name text (the text that is not priceText and not countText)
-                TMP_Text[] allTexts = btn.GetComponentsInChildren<TMP_Text>(true);
-                TMP_Text nameTxt = null;
-                foreach (var t in allTexts)
-                {
-                    if (t != itemBtn.priceText && t != itemBtn.countText)
-                    {
-                        nameTxt = t;
-                        break;
-                    }
-                }
-
-                // Reposition name text (centered, top half)
-                if (nameTxt != null)
-                {
-                    RectTransform nameRt = nameTxt.GetComponent<RectTransform>();
-                    nameRt.anchorMin = new Vector2(0.1f, 0.52f);
-                    nameRt.anchorMax = new Vector2(0.9f, 0.9f);
-                    nameRt.pivot = new Vector2(0.5f, 0.5f);
-                    nameRt.offsetMin = Vector2.zero;
-                    nameRt.offsetMax = Vector2.zero;
-                    nameTxt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
-                    nameTxt.alignment = TextAlignmentOptions.Center;
-                    nameTxt.fontSize = 50;
-                    nameTxt.fontStyle = FontStyles.Bold;
-
-                    buttonTexts[btn] = nameTxt;
-                    buttonOriginalTexts[btn] = nameTxt.text;
-                }
-
-                // Reposition priceText (centered, bottom half)
-                if (itemBtn.priceText != null)
-                {
-                    RectTransform priceRt = itemBtn.priceText.GetComponent<RectTransform>();
-                    priceRt.anchorMin = new Vector2(0.1f, 0.12f);
-                    priceRt.anchorMax = new Vector2(0.9f, 0.48f);
-                    priceRt.pivot = new Vector2(0.5f, 0.5f);
-                    priceRt.offsetMin = Vector2.zero;
-                    priceRt.offsetMax = Vector2.zero;
-                    itemBtn.priceText.color = new Color(0.2f, 0.8f, 0.2f, 0.85f);
-                    itemBtn.priceText.alignment = TextAlignmentOptions.Center;
-                    itemBtn.priceText.fontSize = 44;
-                    itemBtn.priceText.fontStyle = FontStyles.Bold;
-                }
-
-                // Reposition countText (top-right badge)
-                if (itemBtn.countText != null)
-                {
-                    RectTransform countRt = itemBtn.countText.GetComponent<RectTransform>();
-                    countRt.anchorMin = new Vector2(0.8f, 0.6f);
-                    countRt.anchorMax = new Vector2(0.97f, 0.95f);
-                    countRt.pivot = new Vector2(1f, 1f);
-                    countRt.offsetMin = Vector2.zero;
-                    countRt.offsetMax = Vector2.zero;
-                    itemBtn.countText.color = new Color(0.2f, 0.9f, 0.2f, 1f);
-                    itemBtn.countText.alignment = TextAlignmentOptions.TopRight;
-                    itemBtn.countText.fontSize = 44;
-                    itemBtn.countText.fontStyle = FontStyles.Bold;
-                }
-            }
-            else
-            {
-                TMP_Text txt = btn.GetComponentInChildren<TMP_Text>();
-                if (txt != null)
-                {
-                    txt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
-                    buttonTexts[btn] = txt;
-                    buttonOriginalTexts[btn] = txt.text;
-                }
-            }
-            
-            buttonOriginalScales[btn] = btn.transform.localScale;
-            
-            // Hook up pointer animations
-            AddHoverAnimations(btn);
-        }
+        var zoneBtns = GetComponentsInChildren<UiZoneButton>(true);
+        foreach(var btn in zoneBtns) Destroy(btn.gameObject);
     }
+    
+
     
     private void CreateTerminalConsole()
     {
@@ -475,23 +360,15 @@ public class StoreUiScript : MonoBehaviour
     
     private void AddHoverAnimations(Button btn)
     {
-        EventTrigger trigger = btn.gameObject.GetComponent<EventTrigger>();
-        if (trigger == null) trigger = btn.gameObject.AddComponent<EventTrigger>();
-        
-        UiItemButton itemBtn = btn.GetComponent<UiItemButton>();
+        EventTrigger trigger = btn.gameObject.GetComponent<EventTrigger>() ?? btn.gameObject.AddComponent<EventTrigger>();
 
-        // Pointer Enter
+        // Hover enter
         EventTrigger.Entry entryEnter = new EventTrigger.Entry();
         entryEnter.eventID = EventTriggerType.PointerEnter;
         entryEnter.callback.AddListener((data) => {
-            btn.transform.DOScale(buttonOriginalScales[btn] * 1.05f, 0.15f).SetUpdate(true);
-            Image btnImg = btn.GetComponent<Image>();
-            if (btnImg != null)
+            if (btn.interactable)
             {
-                Color baseColor = GetButtonBaseColor(btn, itemBtn);
-                // Brighten the base color slightly for hover
-                Color hoverColor = Color.Lerp(baseColor, Color.white, 0.15f);
-                btnImg.DOColor(hoverColor, 0.15f).SetUpdate(true);
+                btn.transform.DOScale(buttonOriginalScales[btn] * 1.05f, 0.15f).SetUpdate(true);
             }
             
             if (buttonTexts.ContainsKey(btn))
@@ -501,7 +378,6 @@ public class StoreUiScript : MonoBehaviour
                 {
                     buttonTexts[btn].text = "> " + currentText + " <";
                 }
-                buttonTexts[btn].color = new Color(0.5f, 1f, 0.5f, 1f);
             }
         });
         trigger.triggers.Add(entryEnter);
@@ -511,12 +387,6 @@ public class StoreUiScript : MonoBehaviour
         entryExit.eventID = EventTriggerType.PointerExit;
         entryExit.callback.AddListener((data) => {
             btn.transform.DOScale(buttonOriginalScales[btn], 0.15f).SetUpdate(true);
-            Image btnImg = btn.GetComponent<Image>();
-            if (btnImg != null)
-            {
-                Color baseColor = GetButtonBaseColor(btn, itemBtn);
-                btnImg.DOColor(baseColor, 0.15f).SetUpdate(true);
-            }
             
             if (buttonTexts.ContainsKey(btn))
             {
@@ -525,33 +395,9 @@ public class StoreUiScript : MonoBehaviour
                 {
                     buttonTexts[btn].text = currentText.Substring(2, currentText.Length - 4);
                 }
-                buttonTexts[btn].color = new Color(0.2f, 0.9f, 0.2f, 1f);
             }
         });
         trigger.triggers.Add(entryExit);
-    }
-
-    private Color GetButtonBaseColor(Button btn, UiItemButton itemBtn)
-    {
-        if (itemBtn != null) return itemBtn.GetTargetColor();
-        var upgItem = btn.GetComponent<UpgradeShopItem>();
-        if (upgItem != null) return upgItem.GetTargetColor();
-        return new Color(0.05f, 0.15f, 0.05f, 0.85f);
-    }
-    
-    private void FindAndHookButtons()
-    {
-        foreach (Button btn in storeButtons)
-        {
-            btn.onClick.AddListener(() => {
-                // Shake and color flash buttons on purchase trigger
-                btn.transform.DOComplete();
-                btn.transform.DOPunchScale(new Vector3(0.08f, -0.08f, 0.08f), 0.25f, 10, 1f).SetUpdate(true);
-                
-                string itemName = buttonOriginalTexts[btn];
-                LogCommand("EXECUTE_BUY: " + itemName.ToUpper());
-            });
-        }
     }
     
     public void OpenStore()
