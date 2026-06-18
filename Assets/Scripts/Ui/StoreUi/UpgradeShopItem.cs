@@ -93,7 +93,7 @@ public class UpgradeShopItem : MonoBehaviour
         }
     }
 
-    private string GetTypeString()
+    public string GetTypeString()
     {
         switch (definition.type)
         {

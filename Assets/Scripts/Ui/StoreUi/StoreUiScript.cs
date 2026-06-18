@@ -192,7 +192,7 @@ public class StoreUiScript : MonoBehaviour
             if (page.Count > 0 && page.Count < maxItemsPerPage)
             {
                 var firstItem = page[0].GetComponent<UpgradeShopItem>();
-                if (firstItem != null && firstItem.Definition.type == def.type)
+                if (firstItem != null && firstItem.GetTypeString() == shopItem.GetTypeString())
                 {
                     page.Add(btn);
                     added = true;
