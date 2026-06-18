@@ -74,6 +74,7 @@ namespace Buildings
         public GameObject itemPrefab; // The "Resource" it creates
         public int cost;
         public BuildingType type;
+        public int maxHealth = 100;
         public Vector2Int size = new Vector2Int(1, 1);
 
         [Header("Unlock Requirements")]
@@ -164,7 +165,9 @@ namespace Buildings
         Miner,
         Seller,
         Conveyor,
-        Furnace
+        Furnace,
+        Wall,
+        Turret
     }
 }
 

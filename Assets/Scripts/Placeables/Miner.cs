@@ -49,7 +49,7 @@ public class MinerLogic : BuildingLogic
         if (assignedResourceNode != null)
         {
             currentMinedItemPrefab = assignedResourceNode.minedItemPrefab;
-            currentMiningSpeed = assignedResourceNode.miningSpeed;
+            currentMiningSpeed = assignedResourceNode.miningSpeed / GetTierMultiplier();
             timer = currentMiningSpeed; // Initialize timer with the node's speed
         }
         else

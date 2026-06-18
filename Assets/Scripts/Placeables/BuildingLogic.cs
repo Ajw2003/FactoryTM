@@ -1,15 +1,18 @@
 using UnityEngine;
 
-public abstract class BuildingLogic : MonoBehaviour
+public abstract class BuildingLogic : MonoBehaviour, IHealth
 {
     public Buildings.BuildingData data;
     protected Vector2Int myCell;
     public System.Collections.Generic.List<Vector2Int> occupiedCells = new System.Collections.Generic.List<Vector2Int>();
+    
+    public int Health { get; set; }
 
     public virtual void Setup(Buildings.BuildingData buildingData, Vector2Int cell)
     {
         data = buildingData;
         myCell = cell;
+        Health = data.maxHealth;
     }
 
     public virtual void SetOccupiedCells(System.Collections.Generic.List<Vector2Int> cells)
@@ -35,4 +38,59 @@ public abstract class BuildingLogic : MonoBehaviour
     }
 
     public abstract void PerformAction();
+
+    public virtual void TakeDamage(int amount)
+    {
+        Health -= amount;
+        
+        if (PlacementManager.HasInstance)
+        {
+            StartCoroutine(FlashRedTile());
+        }
+
+        if (Health <= 0)
+        {
+            Die();
+        }
+    }
+
+    private System.Collections.IEnumerator FlashRedTile()
+    {
+        Vector3Int pos3 = new Vector3Int(myCell.x, myCell.y, 0);
+        UnityEngine.Tilemaps.Tilemap map = PlacementManager.Instance.mainTilemap;
+        
+        // Ensure the tile can be tinted
+        map.SetTileFlags(pos3, UnityEngine.Tilemaps.TileFlags.None);
+        
+        Color originalColor = map.GetColor(pos3);
+        map.SetColor(pos3, new Color(1f, 0.3f, 0.3f, 1f));
+        yield return new WaitForSeconds(0.12f);
+        map.SetColor(pos3, originalColor);
+    }
+
+    public virtual void Die()
+    {
+        if (PlacementManager.HasInstance)
+        {
+            PlacementManager.Instance.DestroyBuilding(myCell, false);
+        }
+    }
+
+    public float GetTierMultiplier()
+    {
+        if (Managers.UpgradeManager.HasInstance)
+        {
+            int tier = Managers.UpgradeManager.Instance.GetBuildingTier(data.type);
+            // Tier 1: 1.0f, Tier 2: 1.25f, Tier 3: 1.50f, Tier 4: 2.0f
+            switch (tier)
+            {
+                case 1: return 1.0f;
+                case 2: return 1.25f;
+                case 3: return 1.50f;
+                case 4: return 2.0f;
+                default: return 1.0f;
+            }
+        }
+        return 1.0f;
+    }
 }

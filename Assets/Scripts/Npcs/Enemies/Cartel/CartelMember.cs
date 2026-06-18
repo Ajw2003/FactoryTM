@@ -58,13 +58,7 @@ public class CartelMember : MonoBehaviour, IHealth
     // Update is called once per frame
     void Update()
     {
-        if (target == null)
-        {
-            if (GameManager.Instance != null && GameManager.Instance.playerController != null)
-            {
-                target = GameManager.Instance.playerController.gameObject;
-            }
-        }
+        FindClosestTarget();
 
         if (target == null) return;
 
@@ -97,6 +91,42 @@ public class CartelMember : MonoBehaviour, IHealth
 
         attacking = false;
         yield return null;
+    }
+
+    private float targetSearchTimer = 0f;
+    private void FindClosestTarget()
+    {
+        targetSearchTimer -= Time.deltaTime;
+        if (targetSearchTimer > 0f) return;
+        targetSearchTimer = 0.5f; // Re-evaluate target every 0.5 seconds
+
+        float minDistance = float.MaxValue;
+        GameObject closest = null;
+
+        if (GameManager.Instance != null && GameManager.Instance.playerController != null)
+        {
+            float playerDist = Vector3.Distance(transform.position, GameManager.Instance.playerController.transform.position);
+            minDistance = playerDist;
+            closest = GameManager.Instance.playerController.gameObject;
+        }
+
+        if (BuildingManager.HasInstance)
+        {
+            foreach (var building in BuildingManager.Instance.Buildings)
+            {
+                if (building != null && building.Health > 0 && building.data.type != Buildings.BuildingType.Conveyor) // ignore conveyors maybe? Actually, all buildings are targetable except maybe conveyors if they are indestructible. But let's just target all for now.
+                {
+                    float dist = Vector3.Distance(transform.position, building.transform.position);
+                    if (dist < minDistance)
+                    {
+                        minDistance = dist;
+                        closest = building.gameObject;
+                    }
+                }
+            }
+        }
+
+        target = closest;
     }
 
     public void Setup()
