@@ -26,6 +26,36 @@ public class EnemyProjectile : BaseProjectile
             
             // Destroy the enemy bullet
             Destroy(gameObject);
+            return;
+        }
+
+        // 4. Check for building collision
+        if (BuildingManager.HasInstance)
+        {
+            foreach (var building in BuildingManager.Instance.Buildings)
+            {
+                if (building != null && building.Health > 0 && building.data.type != Buildings.BuildingType.Conveyor)
+                {
+                    bool hit = false;
+                    foreach (var cell in building.occupiedCells)
+                    {
+                        Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
+                        Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
+                        if (Rectangle2D.CheckCollision(bulletBox, cellBox))
+                        {
+                            hit = true;
+                            break;
+                        }
+                    }
+                    
+                    if (hit)
+                    {
+                        building.TakeDamage(Damage);
+                        Destroy(gameObject);
+                        return;
+                    }
+                }
+            }
         }
     }
 }

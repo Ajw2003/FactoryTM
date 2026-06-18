@@ -64,7 +64,38 @@ public class CartelMember : MonoBehaviour, IHealth
 
         if (Vector3.Distance(transform.position, target.transform.position) <= sightRange)
         {
-            transform.position = Vector3.MoveTowards(transform.position, target.transform.position, speed * Time.deltaTime);
+            Vector3 nextPos = Vector3.MoveTowards(transform.position, target.transform.position, speed * Time.deltaTime);
+
+            bool collision = false;
+            float angleRadians = transform.eulerAngles.z * Mathf.Deg2Rad;
+            Rectangle2D enemyBox = TwoDCollision.CreateFromRotated(nextPos.x, nextPos.y, width, height, angleRadians);
+
+            if (BuildingManager.HasInstance)
+            {
+                foreach (var building in BuildingManager.Instance.Buildings)
+                {
+                    if (building != null && building.Health > 0 && building.data.type != Buildings.BuildingType.Conveyor)
+                    {
+                        foreach (var cell in building.occupiedCells)
+                        {
+                            Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
+                            Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
+                            if (Rectangle2D.CheckCollision(enemyBox, cellBox))
+                            {
+                                collision = true;
+                                break;
+                            }
+                        }
+                        if (collision) break;
+                    }
+                }
+            }
+
+            if (!collision)
+            {
+                transform.position = nextPos;
+            }
+
             weapon.target = target.transform.position;
 
             // Rotate towards target we are aiming at

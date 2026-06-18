@@ -38,6 +38,11 @@ namespace StateMachine
             Vector2Int nextZone = ZoneManager.Instance.GetZoneCoordsFromTile(nextCellV3);
             Vector2Int currentZone = ZoneManager.Instance.GetCurrentZone();
 
+            if (PlacementManager.HasInstance && !PlacementManager.Instance.IsCellWalkable(nextCell))
+            {
+                return;
+            }
+
             if (nextZone != currentZone)
             {
                 if (ZoneManager.Instance.IsZoneUnlocked(nextZone))
