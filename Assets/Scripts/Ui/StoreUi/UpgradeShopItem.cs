@@ -54,10 +54,18 @@ public class UpgradeShopItem : MonoBehaviour
 
         if (nameLabel != null)
             nameLabel.text = GetDisplayName();
-        if (priceLabel != null)
-            priceLabel.text = "$" + definition.costInShop;
 
-        UpdateAffordabilityColor();
+        if (priceLabel != null)
+        {
+            if (definition.type == UpgradeType.ZoneExpansion && ZoneManager.HasInstance)
+            {
+                priceLabel.text = "$" + ZoneManager.Instance.GetUnlockCost().ToString("F0");
+            }
+            else
+            {
+                priceLabel.text = "$" + definition.costInShop;
+            }
+        }
     }
 
     private string GetDisplayName()
@@ -71,15 +79,12 @@ public class UpgradeShopItem : MonoBehaviour
                 ? definition.buildingToUnlock.buildingName + "\n[BUILDING]"
                 : definition.upgradeName;
             case UpgradeType.Armor: return definition.upgradeName + "\n[ARMOR]";
+            case UpgradeType.ZoneExpansion: return "EXPAND " + definition.zoneDirection.ToString().ToUpper();
             default: return definition.upgradeName;
         }
     }
 
-    private void UpdateAffordabilityColor()
-    {
-        if (bgImage == null || !CurrencyManager.HasInstance) return;
-        bgImage.color = GetTargetColor();
-    }
+
 
     public Color GetTargetColor()
     {
@@ -90,7 +95,9 @@ public class UpgradeShopItem : MonoBehaviour
     {
         if (definition == null) return;
 
-        float cost = definition.costInShop;
+        float cost = definition.type == UpgradeType.ZoneExpansion && ZoneManager.HasInstance 
+            ? ZoneManager.Instance.GetUnlockCost() 
+            : definition.costInShop;
 
         if (!CurrencyManager.HasInstance || CurrencyManager.Instance.currentCurrencyValue < cost)
         {
@@ -100,7 +107,28 @@ public class UpgradeShopItem : MonoBehaviour
             return;
         }
 
-        CurrencyManager.Instance.RemoveCurrency(definition.costInShop);
+        // Check if Zone is already unlocked so we don't charge them for nothing
+        if (definition.type == UpgradeType.ZoneExpansion && ZoneManager.HasInstance)
+        {
+            Vector2Int current = ZoneManager.Instance.GetCurrentZone();
+            Vector2Int target = current;
+            switch (definition.zoneDirection)
+            {
+                case UiZoneButton.Direction.North: target += Vector2Int.up; break;
+                case UiZoneButton.Direction.South: target += Vector2Int.down; break;
+                case UiZoneButton.Direction.East: target += Vector2Int.right; break;
+                case UiZoneButton.Direction.West: target += Vector2Int.left; break;
+            }
+            if (ZoneManager.Instance.IsZoneUnlocked(target))
+            {
+                Debug.Log($"Zone {definition.zoneDirection} is already unlocked!");
+                if (feedbackCoroutine != null) StopCoroutine(feedbackCoroutine);
+                feedbackCoroutine = StartCoroutine(ShakeAndRedFlash());
+                return;
+            }
+        }
+
+        CurrencyManager.Instance.RemoveCurrency(cost);
 
         // Apply the effect
         switch (definition.type)
@@ -151,8 +179,43 @@ public class UpgradeShopItem : MonoBehaviour
                 break;
 
             case UpgradeType.Building:
-                // Buildings are just unlocked in the store; player buys them through the normal building buttons
-                Debug.Log($"Building {definition.buildingToUnlock?.buildingName} already unlocked — no action needed.");
+                if (InventoryManager.HasInstance && definition.buildingToUnlock != null)
+                {
+                    InventoryManager.Instance.AddBuilding(definition.buildingToUnlock, 1);
+                    Debug.Log($"Purchased building: {definition.buildingToUnlock.buildingName}");
+                    
+                    // Auto-assign to first empty hotbar slot
+                    bool alreadyInHotbar = false;
+                    int emptySlot = -1;
+                    if (HotbarManager.HasInstance)
+                    {
+                        for (int i = 0; i < HotbarManager.Instance.slotCount; i++)
+                        {
+                            if (HotbarManager.Instance.Slots[i] == definition.buildingToUnlock) alreadyInHotbar = true;
+                            if (emptySlot == -1 && HotbarManager.Instance.Slots[i] == null) emptySlot = i;
+                        }
+
+                        if (!alreadyInHotbar && emptySlot != -1)
+                        {
+                            HotbarManager.Instance.AssignToSlot(emptySlot, definition.buildingToUnlock);
+                        }
+                    }
+                }
+                break;
+
+            case UpgradeType.ZoneExpansion:
+                if (ZoneManager.HasInstance)
+                {
+                    bool success = false;
+                    switch (definition.zoneDirection)
+                    {
+                        case UiZoneButton.Direction.North: success = ZoneManager.Instance.UnlockNorth(); break;
+                        case UiZoneButton.Direction.South: success = ZoneManager.Instance.UnlockSouth(); break;
+                        case UiZoneButton.Direction.East: success = ZoneManager.Instance.UnlockEast(); break;
+                        case UiZoneButton.Direction.West: success = ZoneManager.Instance.UnlockWest(); break;
+                    }
+                    if (success) Debug.Log($"Unlocked Zone {definition.zoneDirection}!");
+                }
                 break;
         }
 
