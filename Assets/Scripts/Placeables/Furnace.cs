@@ -16,7 +16,7 @@ public class Furnace : BuildingLogic
         base.Setup(furnace, cell);
         this.rotationIndex = rotationIndex;
         exportDirection = GameManager.Instance.GetDirectionFromRotationIndex(rotationIndex);
-        currentCookingSpeed = speed;
+        currentCookingSpeed = speed / GetTierMultiplier();
         
         // Calculate occupied cells
         Vector2Int actualSize = data.size;

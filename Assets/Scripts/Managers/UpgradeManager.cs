@@ -13,6 +13,8 @@ namespace Managers
         [Header("Runtime Status")]
         public List<UpgradeDefinition> researchedUpgrades = new List<UpgradeDefinition>();
         public List<UpgradeDefinition> activeUpgradesInShop = new List<UpgradeDefinition>();
+        
+        public Dictionary<BuildingType, int> buildingTiers = new Dictionary<BuildingType, int>();
 
         // Event triggered when a new upgrade is unlocked in the shop
         public delegate void OnUpgradesChanged();
@@ -30,6 +32,7 @@ namespace Managers
             // Reset runtime state so a fresh play session starts clean
             researchedUpgrades.Clear();
             activeUpgradesInShop.Clear();
+            buildingTiers.Clear();
 
             // Load any custom UpgradeDefinition assets from "Assets/Resources/Upgrades/"
             UpgradeDefinition[] loaded = Resources.LoadAll<UpgradeDefinition>("Upgrades");
@@ -236,7 +239,45 @@ namespace Managers
                         Debug.Log($"Applied Stamina Boost: New Max Stamina = {PlayerController.Instance.maxStamina}");
                     }
                     break;
+
+                case UpgradeType.BuildingTierUp:
+                    if (upgrade.buildingToUnlock != null)
+                    {
+                        IncreaseBuildingTier(upgrade.buildingToUnlock.type);
+                        Debug.Log($"Upgraded tier for building type: {upgrade.buildingToUnlock.type}");
+                    }
+                    else
+                    {
+                        // Upgrade all buildings if none specified
+                        foreach (BuildingType type in System.Enum.GetValues(typeof(BuildingType)))
+                        {
+                            IncreaseBuildingTier(type);
+                        }
+                        Debug.Log("Upgraded tier for ALL buildings.");
+                    }
+                    break;
             }
+        }
+
+        private void IncreaseBuildingTier(BuildingType type)
+        {
+            if (!buildingTiers.ContainsKey(type))
+            {
+                buildingTiers[type] = 1;
+            }
+            if (buildingTiers[type] < 4)
+            {
+                buildingTiers[type]++;
+            }
+        }
+
+        public int GetBuildingTier(BuildingType type)
+        {
+            if (buildingTiers.ContainsKey(type))
+            {
+                return buildingTiers[type];
+            }
+            return 1; // Default tier
         }
     }
 }

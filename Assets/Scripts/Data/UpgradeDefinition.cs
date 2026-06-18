@@ -12,7 +12,8 @@ public enum UpgradeType
     RaidReduction,
     DodgeRoll,
     StaminaBoost,
-    ZoneExpansion
+    ZoneExpansion,
+    BuildingTierUp
 }
 
 [CreateAssetMenu(fileName = "UpgradeDefinition", menuName = "Scriptable Objects/UpgradeDefinition")]

@@ -138,6 +138,12 @@ public class PlacementManager : SingletonBase<PlacementManager>
                 case (BuildingType.Furnace):
                     buildingObj = SpawnFurnaceLogic(cell);   
                     break;
+                case (BuildingType.Wall):
+                    buildingObj = SpawnWallLogic(cell);
+                    break;
+                case (BuildingType.Turret):
+                    buildingObj = SpawnTurretLogic(cell);
+                    break;
             }
 
             if (buildingObj != null)
@@ -166,27 +172,35 @@ public class PlacementManager : SingletonBase<PlacementManager>
         {
             if (activeBuildings.ContainsKey(cell))
             {
-                GameObject buildingObj = activeBuildings[cell];
-                BuildingLogic logic = buildingObj.GetComponent<BuildingLogic>();
-                
-                if (logic != null)
+                DestroyBuilding(cell, true);
+            }
+        }
+    }
+
+    public void DestroyBuilding(Vector2Int cell, bool returnToInventory)
+    {
+        if (activeBuildings.ContainsKey(cell))
+        {
+            GameObject buildingObj = activeBuildings[cell];
+            BuildingLogic logic = buildingObj.GetComponent<BuildingLogic>();
+            
+            if (logic != null)
+            {
+                if (returnToInventory && logic.data != null)
                 {
-                    if (logic.data != null)
-                    {
-                        // Task 1: Return to Inventory instead of refunding currency
-                        InventoryManager.Instance.AddBuilding(logic.data);
-                    }
-
-                    // Clear all occupied tiles
-                    foreach (var occupiedCell in logic.occupiedCells)
-                    {
-                        activeBuildings.Remove(occupiedCell);
-                    }
-                    
-                    mainTilemap.SetTile(new Vector3Int(logic.GetMyCell().x, logic.GetMyCell().y, 0), null);
-
-                    Destroy(buildingObj);
+                    // Task 1: Return to Inventory instead of refunding currency
+                    InventoryManager.Instance.AddBuilding(logic.data);
                 }
+
+                // Clear all occupied tiles
+                foreach (var occupiedCell in logic.occupiedCells)
+                {
+                    activeBuildings.Remove(occupiedCell);
+                }
+                
+                mainTilemap.SetTile(new Vector3Int(logic.GetMyCell().x, logic.GetMyCell().y, 0), null);
+
+                Destroy(buildingObj);
             }
         }
     }
@@ -274,5 +288,27 @@ public class PlacementManager : SingletonBase<PlacementManager>
         
         activeBuildings.Add(cell, beltObj);
         return beltObj;
+    }
+
+    GameObject SpawnWallLogic(Vector2Int cell)
+    {
+        GameObject wallObj = new GameObject("Wall_Logic_" + cell);
+        wallObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
+        WallLogic logic = wallObj.AddComponent<WallLogic>();
+        logic.Setup(activeBuilding, cell);
+        
+        activeBuildings.Add(cell, wallObj);
+        return wallObj;
+    }
+
+    GameObject SpawnTurretLogic(Vector2Int cell)
+    {
+        GameObject turretObj = new GameObject("Turret_Logic_" + cell);
+        turretObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
+        TurretLogic logic = turretObj.AddComponent<TurretLogic>();
+        logic.Setup(activeBuilding, cell);
+        
+        activeBuildings.Add(cell, turretObj);
+        return turretObj;
     }
 }

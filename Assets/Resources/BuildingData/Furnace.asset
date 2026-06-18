@@ -25,8 +25,6 @@ MonoBehaviour:
   itemPrefab: {fileID: 0}
   cost: 10
   type: 4
-  unlockConditions:
-  - type: 1
-    targetValue: 50000
-    requiredBuilding: {fileID: 0}
-    conditionDescription: reach 50k balance
+  maxHealth: 100
+  size: {x: 1, y: 1}
+  unlockConditions: []

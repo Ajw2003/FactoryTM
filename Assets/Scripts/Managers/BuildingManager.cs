@@ -5,6 +5,8 @@ using UnityEngine;
 public class BuildingManager : SingletonBase<BuildingManager>
 {
     private List<BuildingLogic> buildings = new List<BuildingLogic>();
+    public List<BuildingLogic> Buildings => buildings;
+
 
     protected override void Awake()
     {
