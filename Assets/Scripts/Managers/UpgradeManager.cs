@@ -188,8 +188,7 @@ namespace Managers
                         if (playerWeapon != null)
                         {
                             playerWeapon.Stats = upgrade.weaponToUnlock;
-                            // Force re-initialise weapon with new stats via Start()-equivalent
-                            playerWeapon.SendMessage("Start", SendMessageOptions.DontRequireReceiver);
+                            playerWeapon.ApplyStats();
                             Debug.Log($"Swapped player weapon to: {upgrade.weaponToUnlock.name}");
                         }
                     }

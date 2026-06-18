@@ -196,7 +196,7 @@ public class UpgradeShopItem : MonoBehaviour
                     if (playerWeapon != null)
                     {
                         playerWeapon.Stats = definition.weaponToUnlock;
-                        playerWeapon.SendMessage("Start", SendMessageOptions.DontRequireReceiver);
+                        playerWeapon.ApplyStats();
                     }
                 }
                 break;

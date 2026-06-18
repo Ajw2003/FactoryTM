@@ -34,6 +34,11 @@ public class BaseWeapon : MonoBehaviour
     
     protected virtual void Start()
     {
+        ApplyStats();
+    }
+
+    public virtual void ApplyStats()
+    {
         if (Stats != null)
         {
             fireRate = Stats.fireRate;
@@ -51,8 +56,6 @@ public class BaseWeapon : MonoBehaviour
             reloadSpeed = Stats.reloadSpeed;
             nextTimeToFire = fireRate;
         }
-
-        
     }
 
     protected virtual void Update()
