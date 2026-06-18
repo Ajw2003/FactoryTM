@@ -11,6 +11,7 @@ using UnityEngine.UI;
 public class UpgradeShopItem : MonoBehaviour
 {
     private UpgradeDefinition definition;
+    public UpgradeDefinition Definition => definition;
     private TMP_Text priceLabel;
     private TMP_Text nameLabel;
     private TMP_Text descLabel;
