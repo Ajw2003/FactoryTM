@@ -32,7 +32,7 @@ public class StoreUiScript : MonoBehaviour
     private bool cursorVisible = true;
     private string cursorChar = "█"; // Retro terminal cursor block
     
-    private List<Button> storeButtons = new List<Button>();
+    private List<List<Button>> storePages = new List<List<Button>>();
     private Dictionary<Button, Vector3> buttonOriginalScales = new Dictionary<Button, Vector3>();
     private Dictionary<Button, TMP_Text> buttonTexts = new Dictionary<Button, TMP_Text>();
     private Dictionary<Button, string> buttonOriginalTexts = new Dictionary<Button, string>();
@@ -185,7 +185,29 @@ public class StoreUiScript : MonoBehaviour
 
         // Track it and add to the paged list
         dynamicUpgradeButtons.Add(btnGo);
-        storeButtons.Add(btn);
+        
+        bool added = false;
+        foreach (var page in storePages)
+        {
+            if (page.Count > 0 && page.Count < maxItemsPerPage)
+            {
+                var firstItem = page[0].GetComponent<UpgradeShopItem>();
+                if (firstItem != null && firstItem.Definition.type == def.type)
+                {
+                    page.Add(btn);
+                    added = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!added)
+        {
+            var newPage = new List<Button>();
+            newPage.Add(btn);
+            storePages.Add(newPage);
+        }
+
         buttonOriginalScales[btn] = btnGo.transform.localScale;
         buttonTexts[btn] = nameTxt;
         buttonOriginalTexts[btn] = def.upgradeName;
@@ -193,7 +215,7 @@ public class StoreUiScript : MonoBehaviour
         AddHoverAnimations(btn);
 
         // Rebuild pagination
-        totalPages = Mathf.Max(1, Mathf.CeilToInt((float)storeButtons.Count / maxItemsPerPage));
+        totalPages = Mathf.Max(1, storePages.Count);
         RenderPage();
     }
     
@@ -579,7 +601,7 @@ public class StoreUiScript : MonoBehaviour
     
     private void CreatePaginationControls()
     {
-        totalPages = Mathf.CeilToInt((float)storeButtons.Count / maxItemsPerPage);
+        totalPages = Mathf.Max(1, storePages.Count);
 
         // Container panel for pagination buttons
         GameObject pagPanel = new GameObject("Pagination_Panel", typeof(RectTransform));
@@ -724,22 +746,24 @@ public class StoreUiScript : MonoBehaviour
     private void RenderPage()
     {
         // 1. Hide all buttons first
-        foreach (var btn in storeButtons)
+        foreach (var page in storePages)
         {
-            btn.gameObject.SetActive(false);
+            foreach (var btn in page)
+            {
+                btn.gameObject.SetActive(false);
+            }
         }
 
         // 2. Reposition and show active page buttons
-        int startIndex = currentPageIndex * maxItemsPerPage;
         float startY = 300f;
         float spacingY = -180f; // Increased spacing to fit 160f tall buttons
 
-        for (int i = 0; i < maxItemsPerPage; i++)
+        if (currentPageIndex < storePages.Count)
         {
-            int btnIndex = startIndex + i;
-            if (btnIndex < storeButtons.Count)
+            var activePage = storePages[currentPageIndex];
+            for (int i = 0; i < activePage.Count; i++)
             {
-                Button btn = storeButtons[btnIndex];
+                Button btn = activePage[i];
                 btn.gameObject.SetActive(true);
                 RectTransform btnRt = btn.GetComponent<RectTransform>();
                 
