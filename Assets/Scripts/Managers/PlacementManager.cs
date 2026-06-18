@@ -242,6 +242,24 @@ public class PlacementManager : SingletonBase<PlacementManager>
         return GridManager.Instance.WorldToCellConversion(new Vector2(p.x, p.y));
     }
     
+    public bool IsCellWalkable(Vector2Int cell)
+    {
+        if (activeBuildings.TryGetValue(cell, out GameObject obj))
+        {
+            BuildingLogic logic = obj.GetComponent<BuildingLogic>();
+            if (logic != null && logic.data != null)
+            {
+                // Can only walk through conveyors, all other buildings block movement
+                if (logic.data.type == BuildingType.Conveyor)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
     private Dictionary<Vector2Int, GameObject> activeBuildings = new Dictionary<Vector2Int, GameObject>();
 
     GameObject SpawnMinerLogic(Vector2Int cell)
