@@ -11,7 +11,8 @@ public enum UpgradeType
     IncomeBoost,
     RaidReduction,
     DodgeRoll,
-    StaminaBoost
+    StaminaBoost,
+    ZoneExpansion
 }
 
 [CreateAssetMenu(fileName = "UpgradeDefinition", menuName = "Scriptable Objects/UpgradeDefinition")]
@@ -35,6 +36,9 @@ public class UpgradeDefinition : ScriptableObject
     [Header("Armor / Health Boost Settings")]
     public float armorPercentBoost = 0f; // E.g., 0.15f for 15% damage reduction
     public int maxHealthBoost = 0;
+
+    [Header("Zone Expansion Settings")]
+    public UiZoneButton.Direction zoneDirection;
 
     [Header("Unlock Settings")]
     [Tooltip("If true, this upgrade will be available in the shop from the very start of the game, without needing to be researched.")]
