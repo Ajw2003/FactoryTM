@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeDefinition
   upgradeId: unlock_seller
   upgradeName: Unlock Seller
-  description: Research technology to enable building Seller. Available to build
-    via docked store.
+  description: 'Sells inputed items '
   icon: {fileID: 0}
   type: 0
   costInShop: 5

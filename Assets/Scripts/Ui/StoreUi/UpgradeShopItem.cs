@@ -13,6 +13,8 @@ public class UpgradeShopItem : MonoBehaviour
     private UpgradeDefinition definition;
     private TMP_Text priceLabel;
     private TMP_Text nameLabel;
+    private TMP_Text descLabel;
+    private TMP_Text typeLabel;
     private Image bgImage;
     private Vector3 originalScale;
     private Coroutine feedbackCoroutine;
@@ -29,6 +31,8 @@ public class UpgradeShopItem : MonoBehaviour
         {
             if (t.gameObject.name.Contains("Name")) nameLabel = t;
             else if (t.gameObject.name.Contains("Price")) priceLabel = t;
+            else if (t.gameObject.name.Contains("Desc")) descLabel = t;
+            else if (t.gameObject.name.Contains("Type")) typeLabel = t;
         }
 
         RefreshUI();
@@ -55,6 +59,12 @@ public class UpgradeShopItem : MonoBehaviour
         if (nameLabel != null)
             nameLabel.text = GetDisplayName();
 
+        if (descLabel != null)
+            descLabel.text = definition.description;
+
+        if (typeLabel != null)
+            typeLabel.text = "[" + GetTypeString() + "]";
+
         if (priceLabel != null)
         {
             if (definition.type == UpgradeType.ZoneExpansion && ZoneManager.HasInstance)
@@ -74,13 +84,25 @@ public class UpgradeShopItem : MonoBehaviour
         {
             case UpgradeType.HealthPack: return "HEALTH PACK (x1)";
             case UpgradeType.Ammo: return "AMMO PACK (x30)";
-            case UpgradeType.Weapon: return definition.upgradeName + "\n[WEAPON]";
             case UpgradeType.Building: return definition.buildingToUnlock != null
-                ? definition.buildingToUnlock.buildingName + "\n[BUILDING]"
+                ? definition.buildingToUnlock.buildingName
                 : definition.upgradeName;
-            case UpgradeType.Armor: return definition.upgradeName + "\n[ARMOR]";
             case UpgradeType.ZoneExpansion: return "EXPAND " + definition.zoneDirection.ToString().ToUpper();
             default: return definition.upgradeName;
+        }
+    }
+
+    private string GetTypeString()
+    {
+        switch (definition.type)
+        {
+            case UpgradeType.HealthPack: return "CONSUMABLE";
+            case UpgradeType.Ammo: return "CONSUMABLE";
+            case UpgradeType.Weapon: return "WEAPON";
+            case UpgradeType.Building: return "BUILDING";
+            case UpgradeType.Armor: return "ARMOR";
+            case UpgradeType.ZoneExpansion: return "EXPANSION";
+            default: return "UPGRADE";
         }
     }
 

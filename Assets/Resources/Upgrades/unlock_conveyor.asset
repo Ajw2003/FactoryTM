@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeDefinition
   upgradeId: unlock_conveyor
   upgradeName: Unlock Conveyor
-  description: Research technology to enable building Conveyor. Available to build
-    via docked store.
+  description: moves items in rotated direction
   icon: {fileID: 0}
   type: 0
   costInShop: 1
