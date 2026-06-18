@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: Turret
   m_EditorClassIdentifier: Assembly-CSharp::Buildings.BuildingData
   buildingName: Turret
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 870f69baa54ca0f459811f323234606b, type: 3}
   description: Turret that shoots duhhh
   rotatedTiles:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: e5adf15eef6908141822c28d723a54bb, type: 2}
+  - {fileID: 11400000, guid: 2cf135390fe7b9844927f1a340f6f641, type: 2}
+  - {fileID: 11400000, guid: 6316e05974588eb4a80b99aad73220e7, type: 2}
+  - {fileID: 11400000, guid: f3785938b0304644bb05f2f035f86ddb, type: 2}
   proccessingSpeed: 2
-  itemPrefab: {fileID: 0}
+  itemPrefab: {fileID: 2593228396439306384, guid: 2b7b7e16093c7cd418fb297d584faf33, type: 3}
   cost: 50
   type: 6
   maxHealth: 25

@@ -511,7 +511,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DayNightManager
   persistBetweenScenes: 1
-  dayDuration: 15
+  dayDuration: 90
   currentDay: 1
   currentPhase: 0
   baseEnemiesPerWave: 2
@@ -1666,6 +1666,10 @@ PrefabInstance:
     - target: {fileID: 6031304800165257802, guid: ab6bf33c51d90fa4bb6d7be624833602, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8985965208399664303, guid: ab6bf33c51d90fa4bb6d7be624833602, type: 3}
+      propertyPath: currentCurrencyValue
+      value: 1000
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
