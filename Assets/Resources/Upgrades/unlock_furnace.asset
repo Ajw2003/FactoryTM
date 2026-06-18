@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeDefinition
   upgradeId: unlock_furnace
   upgradeName: Unlock Furnace
-  description: Research technology to enable building Furnace. Available to build
-    via docked store.
+  description: Processes ore into plates $+
   icon: {fileID: 0}
   type: 0
   costInShop: 10

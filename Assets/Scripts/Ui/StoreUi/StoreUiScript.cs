@@ -106,7 +106,7 @@ public class StoreUiScript : MonoBehaviour
         rt.anchorMin = new Vector2(0.1f, 0.5f);
         rt.anchorMax = new Vector2(0.45f, 0.5f);
         rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = new Vector2(rt.sizeDelta.x, 90f);
+        rt.sizeDelta = new Vector2(rt.sizeDelta.x, 160f);
 
         Image img = btnGo.GetComponent<Image>();
         img.color = new Color(0.05f, 0.15f, 0.05f, 0.85f);
@@ -118,26 +118,57 @@ public class StoreUiScript : MonoBehaviour
         GameObject nameGo = new GameObject("NameText", typeof(RectTransform), typeof(TextMeshProUGUI));
         nameGo.transform.SetParent(btnGo.transform, false);
         RectTransform nameRt = nameGo.GetComponent<RectTransform>();
-        nameRt.anchorMin = new Vector2(0f, 0.55f);
+        nameRt.anchorMin = new Vector2(0f, 0.70f);
         nameRt.anchorMax = Vector2.one;
-        nameRt.offsetMin = new Vector2(8f, 0f);
-        nameRt.offsetMax = Vector2.zero;
+        nameRt.offsetMin = new Vector2(10f, 0f);
+        nameRt.offsetMax = new Vector2(-10f, 0f);
         TextMeshProUGUI nameTxt = nameGo.GetComponent<TextMeshProUGUI>();
-        nameTxt.fontSize = 50;
+        nameTxt.fontSize = 36;
         nameTxt.fontStyle = FontStyles.Bold;
         nameTxt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
         nameTxt.alignment = TextAlignmentOptions.MidlineLeft;
+
+        // Type label
+        GameObject typeGo = new GameObject("TypeText", typeof(RectTransform), typeof(TextMeshProUGUI));
+        typeGo.transform.SetParent(btnGo.transform, false);
+        RectTransform typeRt = typeGo.GetComponent<RectTransform>();
+        typeRt.anchorMin = new Vector2(0f, 0.45f);
+        typeRt.anchorMax = new Vector2(1f, 0.70f);
+        typeRt.offsetMin = new Vector2(10f, 0f);
+        typeRt.offsetMax = new Vector2(-10f, 0f);
+        TextMeshProUGUI typeTxt = typeGo.GetComponent<TextMeshProUGUI>();
+        typeTxt.fontSize = 32;
+        typeTxt.fontStyle = FontStyles.Bold;
+        typeTxt.color = new Color(0.15f, 0.75f, 0.15f, 0.9f);
+        typeTxt.alignment = TextAlignmentOptions.MidlineLeft;
+
+        // Description label
+        GameObject descGo = new GameObject("DescText", typeof(RectTransform), typeof(TextMeshProUGUI));
+        descGo.transform.SetParent(btnGo.transform, false);
+        RectTransform descRt = descGo.GetComponent<RectTransform>();
+        descRt.anchorMin = new Vector2(0f, 0.25f);
+        descRt.anchorMax = new Vector2(1f, 0.45f);
+        descRt.offsetMin = new Vector2(10f, 0f);
+        descRt.offsetMax = new Vector2(-10f, 0f);
+        TextMeshProUGUI descTxt = descGo.GetComponent<TextMeshProUGUI>();
+        descTxt.fontSize = 30;
+        // descTxt.fontStyle = FontStyles.Bold;
+        descTxt.color = new Color(0.1f, 0.65f, 0.1f, 0.8f);
+        descTxt.alignment = TextAlignmentOptions.TopLeft;
+        descTxt.enableWordWrapping = true;
+        descTxt.overflowMode = TextOverflowModes.Ellipsis;
 
         // Price label
         GameObject priceGo = new GameObject("PriceText", typeof(RectTransform), typeof(TextMeshProUGUI));
         priceGo.transform.SetParent(btnGo.transform, false);
         RectTransform priceRt = priceGo.GetComponent<RectTransform>();
         priceRt.anchorMin = Vector2.zero;
-        priceRt.anchorMax = new Vector2(1f, 0.45f);
-        priceRt.offsetMin = new Vector2(8f, 0f);
-        priceRt.offsetMax = Vector2.zero;
+        priceRt.anchorMax = new Vector2(1f, 0.25f);
+        priceRt.offsetMin = new Vector2(10f, 0f);
+        priceRt.offsetMax = new Vector2(-10f, 0f);
         TextMeshProUGUI priceTxt = priceGo.GetComponent<TextMeshProUGUI>();
-        priceTxt.fontSize = 46;
+        priceTxt.fontSize = 34;
+        priceTxt.fontStyle = FontStyles.Bold;
         priceTxt.color = new Color(0.2f, 0.8f, 0.2f, 0.85f);
         priceTxt.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -701,7 +732,7 @@ public class StoreUiScript : MonoBehaviour
         // 2. Reposition and show active page buttons
         int startIndex = currentPageIndex * maxItemsPerPage;
         float startY = 300f;
-        float spacingY = -110f;
+        float spacingY = -180f; // Increased spacing to fit 160f tall buttons
 
         for (int i = 0; i < maxItemsPerPage; i++)
         {

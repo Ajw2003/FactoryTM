@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeDefinition
   upgradeId: unlock_mine
   upgradeName: Unlock Miner
-  description: Research technology to enable building Miner. Available to build via
-    docked store.
+  description: Mines ore, requires 2x2 tiles to place
   icon: {fileID: 0}
   type: 0
   costInShop: 10
