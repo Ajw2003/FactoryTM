@@ -24,6 +24,12 @@ public class PlayerWeapon : BaseWeapon
         UpdateAmmoUI();
     }
 
+    public override void ApplyStats()
+    {
+        base.ApplyStats();
+        UpdateAmmoUI();
+    }
+
     protected override void Start()
     {
         base.Start();

@@ -453,11 +453,14 @@ public class StoreUiScript : MonoBehaviour
         trigger.triggers.Add(entryExit);
     }
     
+    private Sequence transitionSequence;
+
     public void OpenStore()
     {
         // Kill existing transitions
         rectTransform.DOComplete();
         canvasGroup.DOComplete();
+        if (transitionSequence != null) transitionSequence.Kill();
         
         // 1. Initial State: scale to a thin central line
         rectTransform.localScale = new Vector3(1f, 0.002f, 1f);
@@ -465,33 +468,35 @@ public class StoreUiScript : MonoBehaviour
         gameObject.SetActive(true);
         
         // 2. Play boot animation sequence
-        Sequence bootSequence = DOTween.Sequence();
-        bootSequence.Append(canvasGroup.DOFade(1f, 0.12f))
+        transitionSequence = DOTween.Sequence();
+        transitionSequence.Append(canvasGroup.DOFade(1f, 0.12f))
                     .Append(rectTransform.DOScaleY(1f, 0.35f).SetEase(Ease.OutExpo))
                     .AppendCallback(() => {
+                        if (!gameObject.activeInHierarchy) return;
                         // Trigger screen glitch/flicker effect
                         PlayFlickerGlitch();
                         // Trigger terminal boot-up printout logs
                         StartCoroutine(PlayBootLogs());
                     });
         
-        bootSequence.SetUpdate(true);
+        transitionSequence.SetUpdate(true);
     }
     
     public void CloseStore()
     {
         rectTransform.DOComplete();
         canvasGroup.DOComplete();
+        if (transitionSequence != null) transitionSequence.Kill();
         
         // Play collapse/shut down sequence
-        Sequence shutdownSequence = DOTween.Sequence();
-        shutdownSequence.Append(rectTransform.DOScaleY(0.003f, 0.25f).SetEase(Ease.InExpo))
+        transitionSequence = DOTween.Sequence();
+        transitionSequence.Append(rectTransform.DOScaleY(0.003f, 0.25f).SetEase(Ease.InExpo))
                         .Append(canvasGroup.DOFade(0f, 0.1f))
                         .AppendCallback(() => {
                             gameObject.SetActive(false);
                         });
         
-        shutdownSequence.SetUpdate(true);
+        transitionSequence.SetUpdate(true);
     }
     
     private void PlayFlickerGlitch()
