@@ -22,7 +22,7 @@ MonoBehaviour:
   bulletRange: 1
   burstSize: 0
   reloadSpeed: 1
-  explosionRadius: 2.5
+  explosionRadius: 3.5
   bulletPrefab: {fileID: 2593228396439306384, guid: bf7ff56fc7c114541b53255769e14998, type: 3}
   bulletSound: {fileID: 0}
   weaponType: 3

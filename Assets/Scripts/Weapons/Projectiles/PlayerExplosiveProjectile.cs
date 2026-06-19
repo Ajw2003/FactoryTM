@@ -50,6 +50,12 @@ public class PlayerExplosiveProjectile : BaseProjectile
             }
         }
         
+        // Spawn Visual Effect
+        GameObject visualObj = new GameObject("ExplosionVisual");
+        visualObj.transform.position = transform.position;
+        ExplosionVisual visual = visualObj.AddComponent<ExplosionVisual>();
+        visual.Initialize(ExplosionRadius, new Color(1f, 0.5f, 0f)); // Orange for player
+
         Destroy(gameObject);
     }
 }

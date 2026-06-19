@@ -205,7 +205,7 @@ MonoBehaviour:
   attackSpeed: 0.25
   profitFromKill: 1
   engagementDistance: 5
-  attackDistance: 3
+  attackDistance: 2
   MaxHealth: 10
   width: 1
   height: 1

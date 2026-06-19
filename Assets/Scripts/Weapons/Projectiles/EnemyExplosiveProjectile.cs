@@ -83,6 +83,12 @@ public class EnemyExplosiveProjectile : EnemyProjectile
             }
         }
 
+        // Spawn Visual Effect
+        GameObject visualObj = new GameObject("ExplosionVisual");
+        visualObj.transform.position = transform.position;
+        ExplosionVisual visual = visualObj.AddComponent<ExplosionVisual>();
+        visual.Initialize(ExplosionRadius, Color.red); // Red for enemy
+
         Destroy(gameObject);
     }
 }

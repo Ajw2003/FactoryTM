@@ -16,7 +16,7 @@ MonoBehaviour:
   upgradeName: Emergency Medkits
   description: Receive 2 emergency medkits immediately. Allows buying medkits in
     the shop. Press TAB to heal.
-  icon: {fileID: 0}
+  icon: {fileID: 483550413, guid: cb56e468af474594697f05b9582d781e, type: 3}
   type: 3
   costInShop: 30
   buildingToUnlock: {fileID: 0}
