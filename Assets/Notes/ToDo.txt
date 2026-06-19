@@ -1,10 +1,6 @@
-make tutorial that integrates smoothly into gameplay, i.e. Controls: open your shop with E rotate objects with R place with left click, remove with Right click, shoot with middle click. Then Instructions: build a miner and seller before the sun sets and the raiders come, rotate the miner to face the seller, aim with your mouse and shoot full auto but be wary as ammo is limited early game.
-
-Add more upgrade and Higher tier guns and even special types such as explosives or shotguns
-
-increase player health and/or decrease enemy damage or spawn fewer enemies first wave, fuck around with balance basically.
-
-new enemy types with different attack patterns and traits such as explosive weapons, melee attacks, swarming and sniping 
+make tutorial that integrates smoothly into gameplay, i.e. Controls: open your shop with E rotate objects with R place with left click, remove with Right click, 
+shoot with middle click. Then Instructions: build a miner and seller before the sun sets and the raiders come, rotate the miner to face the seller, 
+aim with your mouse and shoot full auto by default but be wary as ammo is limited early game.
 
 make sellers way more expensive after the first, or limit them some how so you are forced to use conveyors
 
