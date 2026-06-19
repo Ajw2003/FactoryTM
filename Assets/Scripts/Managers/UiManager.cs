@@ -467,14 +467,14 @@ public class UiManager : SingletonBase<UiManager>
          
          if (currentCurrency != null)
          {
-            currentCurrency.text = currentVal.ToString("F0");
+            currentCurrency.text = currentVal.ToString("F1");
          }
          yield return null;
       }
       
       if (currentCurrency != null)
       {
-         currentCurrency.text = endVal.ToString("F0");
+         currentCurrency.text = endVal.ToString("F1");
       }
    }
 
