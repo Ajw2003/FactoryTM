@@ -1850,6 +1850,14 @@ PrefabInstance:
       propertyPath: mainCamera
       value: 
       objectReference: {fileID: 376557036}
+    - target: {fileID: 596444704922865151, guid: ea4e366a7e7d72b41bbc41d8aa5939ac, type: 3}
+      propertyPath: zoneSizeInTiles.x
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 596444704922865151, guid: ea4e366a7e7d72b41bbc41d8aa5939ac, type: 3}
+      propertyPath: zoneSizeInTiles.y
+      value: 15
+      objectReference: {fileID: 0}
     - target: {fileID: 1062398598004397836, guid: ea4e366a7e7d72b41bbc41d8aa5939ac, type: 3}
       propertyPath: m_Name
       value: ZoneManager
