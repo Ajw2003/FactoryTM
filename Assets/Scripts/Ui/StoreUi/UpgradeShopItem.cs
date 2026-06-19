@@ -186,10 +186,13 @@ public class UpgradeShopItem : MonoBehaviour
             case UpgradeType.Armor:
                 if (PlayerController.Instance != null)
                 {
-                    PlayerController.Instance.damageReductionFactor = Mathf.Clamp01(
-                        PlayerController.Instance.damageReductionFactor + definition.armorPercentBoost * 0.5f); // Half bonus on re-buy
+                    PlayerController.Instance.damageReductionFactor = Mathf.Clamp01(PlayerController.Instance.damageReductionFactor + definition.armorPercentBoost * 0.5f); // Half bonus on re-buy
                     PlayerController.Instance.maxHealth += Mathf.RoundToInt(definition.maxHealthBoost * 0.5f);
-                    UiManager.Instance.UpdateHp(PlayerController.Instance.Health, PlayerController.Instance.maxHealth);
+                    int difference = PlayerController.Instance.Health + PlayerController.Instance.maxHealth;
+                    for (int i = PlayerController.Instance.Health; i < difference; i++)
+                    {
+                        UiManager.Instance.UpdateHp(PlayerController.Instance.Health, PlayerController.Instance.maxHealth, i);
+                    }
                 }
                 break;
 
