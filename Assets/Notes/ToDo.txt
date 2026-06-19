@@ -20,3 +20,15 @@ Fix not being able to walk into unlocked areas and zone unlock system in general
 
 make essential upgrades apear first in upgrade selection, turrets, walls, health
 
+make enemies force target player if shot at by them or within certain range
+
+add way of telling buildings are being damaged even off screen like factorio
+
+make enemies stand back a couple tiles from target while they attack
+
+make obvious visual and auditory indication of when out of ammo and need to reload.
+
+
+
+
+
