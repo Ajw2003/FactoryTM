@@ -187,12 +187,10 @@ public class UpgradeShopItem : MonoBehaviour
                 if (PlayerController.Instance != null)
                 {
                     PlayerController.Instance.damageReductionFactor = Mathf.Clamp01(PlayerController.Instance.damageReductionFactor + definition.armorPercentBoost * 0.5f); // Half bonus on re-buy
-                    PlayerController.Instance.maxHealth += Mathf.RoundToInt(definition.maxHealthBoost * 0.5f);
-                    int difference = PlayerController.Instance.Health + PlayerController.Instance.maxHealth;
-                    for (int i = PlayerController.Instance.Health; i < difference; i++)
-                    {
-                        UiManager.Instance.UpdateHp(PlayerController.Instance.Health, PlayerController.Instance.maxHealth, i);
-                    }
+                    int healthBoost = Mathf.RoundToInt(definition.maxHealthBoost * 0.5f);
+                    PlayerController.Instance.maxHealth += healthBoost;
+                    PlayerController.Instance.Health = Mathf.Min(PlayerController.Instance.maxHealth, PlayerController.Instance.Health + healthBoost);
+                    UiManager.Instance.UpdateHp(PlayerController.Instance.Health, PlayerController.Instance.maxHealth);
                 }
                 break;
 
