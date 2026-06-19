@@ -266,9 +266,8 @@ public class PlayerController : MonoBehaviour, IHealth
 
         // Apply armor damage reduction (e.g. 0.2f = 20% less damage)
         int reduced = Mathf.Max(1, Mathf.RoundToInt(amount * (1f - damageReductionFactor)));
-        int difference = Health - reduced;
-        ChangeHealth(reduced, Health);
-        UiManager.Instance.UpdateHp(Health, maxHealth, difference);
+        Health = Mathf.Max(0, Health - reduced);
+        UiManager.Instance.UpdateHp(Health, maxHealth);
 
         // Spawn floating damage text in red
         SpawnDamageNumber(reduced, Color.red, transform.position);
@@ -284,14 +283,7 @@ public class PlayerController : MonoBehaviour, IHealth
 
     public void ChangeHealth(int amount, int previous)
     {
-        if (previous > amount)
-        {
-            Health -= amount;
-        }
-        else if(previous < amount)
-        {
-            Health += amount;
-        }
+        // Satisfies IHealth interface, but unused since we modify Health directly.
     }
 
     /// <summary>Consume one health pack to restore half of max health.</summary>
@@ -302,14 +294,8 @@ public class PlayerController : MonoBehaviour, IHealth
 
         healthPacksCount--;
         int healAmount = Mathf.CeilToInt(maxHealth * 0.5f);
-        int previoushealth = Health;
-
-        ChangeHealth(healAmount, Health);
-        var difference = previoushealth + healAmount;
-        for (int i = previoushealth; i < difference % UiManager.Instance.Hearts.Length ; i++)
-        {
-            UiManager.Instance.UpdateHp(healAmount, previoushealth, i);
-        }
+        Health = Mathf.Min(maxHealth, Health + healAmount);
+        UiManager.Instance.UpdateHp(Health, maxHealth);
 
         // Green heal number
         SpawnDamageNumber(healAmount, new Color(0.2f, 1f, 0.2f, 1f), transform.position);

@@ -14,6 +14,8 @@ public class DialogueManager : SingletonBase<DialogueManager>
     
     private bool _currentlyWriting;
     private Coroutine _currentCoroutine;
+    
+    [SerializeField] private GameObject dialogueBox;
 
     private bool _canWrite;
     
@@ -96,12 +98,14 @@ public class DialogueManager : SingletonBase<DialogueManager>
             case false :
                 _canWrite = false;
                 text.text = null;
+                dialogueBox.SetActive(false);
                 _currentlyWriting = false;
                 StopCoroutine(_currentCoroutine);
                 break;
             case true :
                 currentDialogueIndex = 0;
                 SetDialogue();
+                dialogueBox.SetActive(true);
                 _currentCoroutine = StartCoroutine(DialogueCoroutine());
                 _canWrite = true;
                 break;

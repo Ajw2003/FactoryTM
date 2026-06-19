@@ -159,12 +159,9 @@ namespace Managers
                     {
                         PlayerController.Instance.damageReductionFactor = Mathf.Clamp01(PlayerController.Instance.damageReductionFactor + upgrade.armorPercentBoost);
                         PlayerController.Instance.maxHealth += upgrade.maxHealthBoost; 
-                        int difference = PlayerController.Instance.Health + upgrade.maxHealthBoost;
                         PlayerController.Instance.Health = Mathf.Min(PlayerController.Instance.maxHealth, PlayerController.Instance.Health + upgrade.maxHealthBoost);
-                        for (int i = PlayerController.Instance.Health; i < difference; i++)
-                        {
-                            UiManager.Instance.UpdateHp(PlayerController.Instance.Health, PlayerController.Instance.maxHealth, i);
-                        }
+                        UiManager.Instance.UpdateHp(PlayerController.Instance.Health, PlayerController.Instance.maxHealth);
+                        
                         Debug.Log($"Applied armor boost: +{upgrade.armorPercentBoost*100}% reduction, +{upgrade.maxHealthBoost} max HP");
                     }
                     break;

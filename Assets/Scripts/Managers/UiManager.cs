@@ -65,7 +65,7 @@ public class UiManager : SingletonBase<UiManager>
       // Create stamina UI dynamically if not found
       if (healthText != null)
       {
-         staminaGo = Instantiate(healthText.gameObject, healthText.transform.parent);
+         staminaGo = Instantiate(healthText.gameObject, playerStatsUi.transform.parent);
          staminaGo.name = "StaminaText";
          staminaText = staminaGo.GetComponent<TMP_Text>();
          staminaContainer = staminaGo;
@@ -80,21 +80,49 @@ public class UiManager : SingletonBase<UiManager>
       }
    }
 
-   public void UpdateHp(int current, int previous, int index)
+   public void AdjustHeartContainers(int maxHp)
    {
-      if (current > previous)
+      if (Hearts == null)
       {
-         Hearts[index].SetActive(true);
-      }
-      else
-      {
-         Hearts[index].SetActive(false);
+         Hearts = new GameObject[0];
       }
 
-      // if (healthText != null)
-      // {
-      //    healthText.text = $"{current} / {max}";
-      // }
+      if (Hearts.Length == maxHp) return;
+
+      int oldLength = Hearts.Length;
+      if (maxHp > oldLength)
+      {
+         Array.Resize(ref Hearts, maxHp);
+         for (int i = oldLength; i < maxHp; i++)
+         {
+            Hearts[i] = Instantiate(heartObject, playerStatsUi.transform);
+            Hearts[i].transform.localScale = new Vector3(150, 150, 0);
+         }
+      }
+      else if (maxHp < oldLength)
+      {
+         for (int i = maxHp; i < oldLength; i++)
+         {
+            if (Hearts[i] != null)
+            {
+               Destroy(Hearts[i]);
+            }
+         }
+         Array.Resize(ref Hearts, maxHp);
+      }
+   }
+
+   public void UpdateHp(int currentHealth, int maxHp)
+   {
+      AdjustHeartContainers(maxHp);
+
+      for (int i = 0; i < maxHp; i++)
+      {
+         if (Hearts[i] != null)
+         {
+            Hearts[i].SetActive(i < currentHealth);
+         }
+      }
    }
 
    public void UpdateStamina(float current, float max)
@@ -135,13 +163,10 @@ public class UiManager : SingletonBase<UiManager>
 
       if (GameOverPanel != null) GameOverPanel.SetActive(false);
       isGameOver = false;
-      heartCount = GameManager.Instance.playerController.Health;
-      Hearts = new GameObject[heartCount];
 
-      for (int i = 0; i < heartCount; i++)
+      if (GameManager.Instance != null && GameManager.Instance.playerController != null)
       {
-         Hearts[i] = Instantiate(heartObject, playerStatsUi.transform);
-         Hearts[i].transform.localScale = new Vector3(150,150,0);
+         UpdateHp(GameManager.Instance.playerController.Health, GameManager.Instance.playerController.maxHealth);
       }
    }
 
