@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoneManager
   persistBetweenScenes: 1
-  zoneSizeInTiles: {x: 36, y: 20}
+  zoneSizeInTiles: {x: 30, y: 15}
   initialUnlockCost: 100
   costIncreasePerZone: 50
   mainCamera: {fileID: 0}

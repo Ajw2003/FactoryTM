@@ -59,9 +59,23 @@ namespace StateMachine
                 {
                     Vector2 targetWorldPos = GridManager.Instance.CellToWorldConversion(nextCell);
                     Vector3 viewportPos = mainCam.WorldToViewportPoint(targetWorldPos);
-                    if (viewportPos.x < 0.02f || viewportPos.x > 0.98f || viewportPos.y < 0.04f || viewportPos.y > 0.96f)
+                    
+                    bool outOfBoundsX = viewportPos.x < 0.02f || viewportPos.x > 0.98f;
+                    bool outOfBoundsY = viewportPos.y < 0.04f || viewportPos.y > 0.96f;
+
+                    if (outOfBoundsX || outOfBoundsY)
                     {
-                        isVisible = false;
+                        // Check if the adjacent zone in the direction we're moving is unlocked
+                        Vector2Int adjacentZone = currentZone;
+                        if (viewportPos.x < 0.02f) adjacentZone.x -= 1;
+                        if (viewportPos.x > 0.98f) adjacentZone.x += 1;
+                        if (viewportPos.y < 0.04f) adjacentZone.y -= 1;
+                        if (viewportPos.y > 0.96f) adjacentZone.y += 1;
+
+                        if (!ZoneManager.Instance.IsZoneUnlocked(adjacentZone))
+                        {
+                            isVisible = false;
+                        }
                     }
                 }
 

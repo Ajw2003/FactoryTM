@@ -8,10 +8,15 @@ new enemy types with different attack patterns and traits such as explosive weap
 
 make sellers way more expensive after the first, or limit them some how so you are forced to use conveyors
 
-Refactor player and enemies to use statemachines
+fix being able to dodge roll through walls and turrets? might leave idk
 
-Refactor game to use central event bus and manager for event based communication
+Balance prices, ore yeilds, ore sale value, enemy spawns, day lengths and damage for and from player
 
-Refactor game to use input manager instead of old unity input 
+add ability to change length of days based on certain factors such as money earned, upgrades purchased, days survived ect.
 
-make upgrades not all be added to store afterwards, things like tax loop hole and soulslike should not be purchaseable more than once, where as ammo and health as well as machines should be added to the store for later purchase
+default make the first day 90 seconds and then subsequent days can be shorter or longer depending on various factors. test first day 90, second day 30
+
+Fix not being able to walk into unlocked areas and zone unlock system in general.
+
+make essential upgrades apear first in upgrade selection, turrets, walls, health
+

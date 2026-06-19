@@ -5,7 +5,7 @@ using Singleton;
 public class ZoneManager : SingletonBase<ZoneManager>
 {
     [Header("Settings")]
-    public Vector2Int zoneSizeInTiles = new Vector2Int(40, 20);
+    public Vector2Int zoneSizeInTiles = new Vector2Int(30, 15);
     public float initialUnlockCost = 20000f;
     public float costIncreasePerZone = 10000f;
 
