@@ -854,7 +854,7 @@ PrefabInstance:
     - target: {fileID: 2005163431988548329, guid: 7f949cc0e86c45e4a87788a6f08247e9, type: 3}
       propertyPath: Stats
       value: 
-      objectReference: {fileID: 11400000, guid: 74e3f480c75f2394e85fb99b36db22b9, type: 2}
+      objectReference: {fileID: 11400000, guid: 659d8b32bb2a5ea4594553cb14b23bdf, type: 2}
     - target: {fileID: 5259834976339536750, guid: 7f949cc0e86c45e4a87788a6f08247e9, type: 3}
       propertyPath: canDodgeRoll
       value: 0

@@ -15,6 +15,7 @@ public class WeaponStats : ScriptableObject
     public int bulletRange;
     public int burstSize;
     public int reloadSpeed;
+    public float explosionRadius;
     
     public GameObject bulletPrefab;
     
@@ -30,5 +31,6 @@ public enum WeaponType
     Automatic,
     SemiAutomatic,
     Burst,
-    Explosive
+    Explosive,
+    Shotgun
 }

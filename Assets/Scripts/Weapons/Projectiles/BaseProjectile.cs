@@ -26,6 +26,11 @@ public class BaseProjectile : MonoBehaviour
         transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
 
+    public virtual void InitializeExplosive(float radius)
+    {
+        // Overridden by explosive projectiles
+    }
+
     private void Update()
     {
         transform.Translate(direction * (speed * Time.deltaTime), Space.World);
