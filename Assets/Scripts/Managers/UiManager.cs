@@ -323,4 +323,62 @@ public class UiManager : SingletonBase<UiManager>
       }
    }
 
+   [Header("Alerts")]
+   public AudioClip buildingDamageAlertSound;
+
+   public void ShowBuildingDamageAlert()
+   {
+       if (buildingDamageAlertSound != null && Code.Scripts.Audio.AudioManager.HasInstance)
+       {
+           Code.Scripts.EventSystems.EventManager.Instance?.Publish(new AudioClipEvent { Clip = buildingDamageAlertSound, Channel = AudioChannel.Sfx, Volume = 1f, Duration = 0f });
+       }
+
+       GameObject canvas = GameObject.Find("Canvas");
+       if (canvas != null)
+       {
+           GameObject alert = new GameObject("BuildingDamageAlert", typeof(RectTransform), typeof(TextMeshProUGUI));
+           alert.transform.SetParent(canvas.transform, false);
+           
+           RectTransform rt = alert.GetComponent<RectTransform>();
+           rt.anchorMin = new Vector2(0.5f, 0.8f);
+           rt.anchorMax = new Vector2(0.5f, 0.8f);
+           rt.pivot = new Vector2(0.5f, 0.5f);
+           rt.anchoredPosition = Vector2.zero;
+           
+           TextMeshProUGUI tmp = alert.GetComponent<TextMeshProUGUI>();
+           tmp.text = "⚠️ BUILDINGS UNDER ATTACK! ⚠️";
+           tmp.color = Color.red;
+           tmp.fontSize = 42;
+           tmp.fontStyle = FontStyles.Bold;
+           tmp.alignment = TextAlignmentOptions.Center;
+           
+           StartCoroutine(AnimateDamageAlert(alert, tmp));
+       }
+   }
+
+   private System.Collections.IEnumerator AnimateDamageAlert(GameObject alertObj, TextMeshProUGUI tmp)
+   {
+       float duration = 4f;
+       float elapsed = 0f;
+       
+       while (elapsed < duration)
+       {
+           elapsed += Time.unscaledDeltaTime;
+           
+           float pingPong = Mathf.PingPong(elapsed * 5f, 1f);
+           tmp.color = Color.Lerp(Color.red, new Color(1f, 0.5f, 0f), pingPong);
+           
+           if (elapsed > duration - 1f)
+           {
+               Color c = tmp.color;
+               c.a = 1f - (elapsed - (duration - 1f));
+               tmp.color = c;
+           }
+           
+           if (tmp != null) yield return null;
+           else break;
+       }
+       
+       if (alertObj != null) Destroy(alertObj);
+   }
 }

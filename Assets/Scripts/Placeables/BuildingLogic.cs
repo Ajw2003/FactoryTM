@@ -48,6 +48,11 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
             StartCoroutine(FlashRedTile());
         }
 
+        if (BuildingManager.HasInstance)
+        {
+            BuildingManager.Instance.NotifyBuildingDamaged();
+        }
+
         if (Health <= 0)
         {
             Die();

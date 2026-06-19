@@ -7,11 +7,26 @@ public class BuildingManager : SingletonBase<BuildingManager>
     private List<BuildingLogic> buildings = new List<BuildingLogic>();
     public List<BuildingLogic> Buildings => buildings;
 
+    private float lastDamageNotificationTime = -999f;
+    [SerializeField] private float damageNotificationCooldown = 10f;
+
 
     protected override void Awake()
     {
         persistBetweenScenes = false;
         base.Awake();
+    }
+
+    public void NotifyBuildingDamaged()
+    {
+        if (Time.time - lastDamageNotificationTime >= damageNotificationCooldown)
+        {
+            lastDamageNotificationTime = Time.time;
+            if (UiManager.HasInstance)
+            {
+                UiManager.Instance.ShowBuildingDamageAlert();
+            }
+        }
     }
 
     public void RegisterBuilding(BuildingLogic building)
