@@ -8,6 +8,9 @@ public class PlayerWeapon : BaseWeapon
     
     private Camera cam;
     private AmmoUI ammoUI;
+    
+    private float lastNoAmmoWarningTime = -999f;
+    private float lastNoReserveWarningTime = -999f;
 
     public void UpdateAmmoUI()
     {
@@ -56,6 +59,7 @@ public class PlayerWeapon : BaseWeapon
         {
             if (Input.GetMouseButton(2))
             {
+                CheckAndWarnAmmo();
                 Shoot();
                 UpdateAmmoUI();
             }
@@ -64,8 +68,34 @@ public class PlayerWeapon : BaseWeapon
         {
             if (Input.GetMouseButtonDown(2))
             {
+                CheckAndWarnAmmo();
                 Shoot();
                 UpdateAmmoUI();
+            }
+        }
+    }
+
+    private void CheckAndWarnAmmo()
+    {
+        if (isReloading) return;
+        if (roundsLeft <= 0)
+        {
+            int reserve = PlayerController.Instance != null ? PlayerController.Instance.ammoReserve : 0;
+            if (reserve <= 0)
+            {
+                if (Time.time - lastNoReserveWarningTime > 1.5f)
+                {
+                    lastNoReserveWarningTime = Time.time;
+                    if (UiManager.HasInstance) UiManager.Instance.ShowAmmoAlert("NO RESERVE AMMO!", true);
+                }
+            }
+            else
+            {
+                if (Time.time - lastNoAmmoWarningTime > 1.5f)
+                {
+                    lastNoAmmoWarningTime = Time.time;
+                    if (UiManager.HasInstance) UiManager.Instance.ShowAmmoAlert("RELOADING...", false);
+                }
             }
         }
     }
@@ -81,6 +111,11 @@ public class PlayerWeapon : BaseWeapon
         if (reserve <= 0)
         {
             Debug.Log("No ammo reserve left to reload!");
+            if (Time.time - lastNoReserveWarningTime > 1.5f)
+            {
+                lastNoReserveWarningTime = Time.time;
+                if (UiManager.HasInstance) UiManager.Instance.ShowAmmoAlert("NO RESERVE AMMO!", true);
+            }
             yield break;
         }
 
