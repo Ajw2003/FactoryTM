@@ -15,7 +15,7 @@ MonoBehaviour:
   upgradeId: unlock_furnace
   upgradeName: Unlock Furnace
   description: Processes ore into plates $+
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 658c8cafa4d8eb84885ef82ed8367ea1, type: 3}
   type: 0
   costInShop: 10
   buildingToUnlock: {fileID: 11400000, guid: 14c1a306f9f36df4cb1e596341da8563, type: 2}

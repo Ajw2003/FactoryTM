@@ -854,7 +854,7 @@ PrefabInstance:
     - target: {fileID: 2005163431988548329, guid: 7f949cc0e86c45e4a87788a6f08247e9, type: 3}
       propertyPath: Stats
       value: 
-      objectReference: {fileID: 11400000, guid: 659d8b32bb2a5ea4594553cb14b23bdf, type: 2}
+      objectReference: {fileID: 11400000, guid: ec2197f2bd6ef6d4585f6307afe19cd5, type: 2}
     - target: {fileID: 5259834976339536750, guid: 7f949cc0e86c45e4a87788a6f08247e9, type: 3}
       propertyPath: canDodgeRoll
       value: 0
@@ -1369,6 +1369,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 330002848372207419914a9b45b20783, type: 2}
     - target: {fileID: 1560273341876645049, guid: 6a54f585295065a489b29352b9b752a7, type: 3}
+      propertyPath: persistBetweenScenes
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560273341876645049, guid: 6a54f585295065a489b29352b9b752a7, type: 3}
       propertyPath: delayBetweenCharacters
       value: 0.05
       objectReference: {fileID: 0}
@@ -1566,6 +1570,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4610859438225511393, guid: 217d5e30fd005584b974012cc70a4788, type: 3}
+      propertyPath: defaultSettings.totalWaves
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 5288935907995945694, guid: 217d5e30fd005584b974012cc70a4788, type: 3}
       propertyPath: m_Name
       value: RaidManager

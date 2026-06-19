@@ -10,20 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 376ed30334c5e194e9beab8bf860ea20, type: 3}
-  m_Name: tax_loophole
+  m_Name: weapon_rpg
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeDefinition
-  upgradeId: tax_loophole
-  upgradeName: Taxloophole
-  description: Exploit financial technicalities to increase every dollar earned by
-    +25%. (Stackable)
-  icon: {fileID: 1758304213, guid: cb56e468af474594697f05b9582d781e, type: 3}
-  type: 5
-  costInShop: 120
+  upgradeId: weapon_rpg
+  upgradeName: RPG Weapon
+  description: Deploy the RPG weapon system. Swaps your primary weapon.
+  icon: {fileID: 1597445459, guid: d957dd56792048d45bf12c15dc680dbc, type: 3}
+  type: 1
+  costInShop: 0
   buildingToUnlock: {fileID: 0}
-  weaponToUnlock: {fileID: 0}
+  weaponToUnlock: {fileID: 11400000, guid: ec2197f2bd6ef6d4585f6307afe19cd5, type: 2}
   armorPercentBoost: 0
   maxHealthBoost: 0
   zoneDirection: 0
   startsUnlocked: 0
-  addToShopAfterUnlock: 0
+  addToShopAfterUnlock: 1
   isResearched: 0

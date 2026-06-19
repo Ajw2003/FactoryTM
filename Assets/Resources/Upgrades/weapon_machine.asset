@@ -15,13 +15,14 @@ MonoBehaviour:
   upgradeId: weapon_machine
   upgradeName: Machine Weapon
   description: Deploy the Machine weapon system. Swaps your primary weapon.
-  icon: {fileID: 0}
+  icon: {fileID: -1956271238, guid: d957dd56792048d45bf12c15dc680dbc, type: 3}
   type: 1
   costInShop: 0
   buildingToUnlock: {fileID: 0}
   weaponToUnlock: {fileID: 11400000, guid: 74e3f480c75f2394e85fb99b36db22b9, type: 2}
   armorPercentBoost: 0
   maxHealthBoost: 0
+  zoneDirection: 0
   startsUnlocked: 0
   addToShopAfterUnlock: 1
   isResearched: 0

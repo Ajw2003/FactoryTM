@@ -15,13 +15,14 @@ MonoBehaviour:
   upgradeId: weapon_semi
   upgradeName: Semi Weapon
   description: Deploy the Semi weapon system. Swaps your primary weapon.
-  icon: {fileID: 0}
+  icon: {fileID: 1599626188, guid: d957dd56792048d45bf12c15dc680dbc, type: 3}
   type: 1
   costInShop: 0
   buildingToUnlock: {fileID: 0}
   weaponToUnlock: {fileID: 11400000, guid: 7ad749f1fde03fa48985326c9ffe0d1a, type: 2}
   armorPercentBoost: 0
   maxHealthBoost: 0
+  zoneDirection: 0
   startsUnlocked: 0
   addToShopAfterUnlock: 1
   isResearched: 0

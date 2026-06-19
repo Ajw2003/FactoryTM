@@ -108,4 +108,4 @@ MonoBehaviour:
   width: 0.2
   height: 0.5
   Damage: 1
-  ExplosionRadius: 2
+  ExplosionRadius: 3.5

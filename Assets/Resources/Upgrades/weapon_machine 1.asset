@@ -12,16 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 376ed30334c5e194e9beab8bf860ea20, type: 3}
   m_Name: weapon_machine 1
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeDefinition
-  upgradeId: weapon_machine 1
-  upgradeName: Machine 1 Weapon
+  upgradeId: Weapon_shotgun
+  upgradeName: Shotgun Weapon
   description: Deploy the Machine 1 weapon system. Swaps your primary weapon.
-  icon: {fileID: 0}
+  icon: {fileID: -338169377, guid: d957dd56792048d45bf12c15dc680dbc, type: 3}
   type: 1
   costInShop: 0
   buildingToUnlock: {fileID: 0}
   weaponToUnlock: {fileID: 11400000, guid: 659d8b32bb2a5ea4594553cb14b23bdf, type: 2}
   armorPercentBoost: 0
   maxHealthBoost: 0
+  zoneDirection: 0
   startsUnlocked: 0
   addToShopAfterUnlock: 1
   isResearched: 0

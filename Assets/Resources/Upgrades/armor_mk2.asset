@@ -15,13 +15,14 @@ MonoBehaviour:
   upgradeId: armor_mk2
   upgradeName: Titanium Plating Mk2
   description: Increases damage reduction by 25% and grants +4 Max HP.
-  icon: {fileID: 0}
+  icon: {fileID: -682562637, guid: cb56e468af474594697f05b9582d781e, type: 3}
   type: 2
   costInShop: 160
   buildingToUnlock: {fileID: 0}
   weaponToUnlock: {fileID: 0}
   armorPercentBoost: 0.25
   maxHealthBoost: 4
+  zoneDirection: 0
   startsUnlocked: 0
   addToShopAfterUnlock: 1
   isResearched: 0
