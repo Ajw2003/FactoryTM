@@ -153,6 +153,11 @@ public class UpgradeShopItem : MonoBehaviour
 
         CurrencyManager.Instance.RemoveCurrency(cost);
 
+        if (Managers.GameStatsManager.HasInstance)
+        {
+            Managers.GameStatsManager.Instance.IncrementUpgradesPurchased();
+        }
+
         // Apply the effect
         switch (definition.type)
         {

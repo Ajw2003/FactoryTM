@@ -121,6 +121,12 @@ public class MinerLogic : BuildingLogic
 
         // 2. Instantiate the item
         GameObject newItem = Instantiate(currentMinedItemPrefab, spawnPos, Quaternion.identity);
+        
+        if (Managers.GameStatsManager.HasInstance)
+        {
+            Managers.GameStatsManager.Instance.IncrementOreMined();
+        }
+
         ConveyorItem itemComp = newItem.GetComponent<ConveyorItem>();
         if (itemComp != null)
         {
