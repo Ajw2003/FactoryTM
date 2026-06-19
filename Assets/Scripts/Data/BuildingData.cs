@@ -72,7 +72,7 @@ namespace Buildings
         public TileBase[] rotatedTiles; // 0:Right, 1:Down, 2:Left, 3:Up
         public float proccessingSpeed = 2.0f;
         public GameObject itemPrefab; // The "Resource" it creates
-        public int cost;
+        public float cost;
         public BuildingType type;
         public int maxHealth = 100;
         public Vector2Int size = new Vector2Int(1, 1);
