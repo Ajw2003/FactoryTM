@@ -20,6 +20,7 @@ public class BaseWeapon : MonoBehaviour
     protected bool isReloading = false;
     protected int roundsLeft;
     protected int reloadSpeed;
+    protected float explosionRadius;
     
     protected GameObject bulletPrefab;
     protected WeaponType weaponType;
@@ -52,6 +53,7 @@ public class BaseWeapon : MonoBehaviour
             bulletPrefab = Stats.bulletPrefab;
             weaponType = Stats.weaponType;
             burstSize = Stats.burstSize;
+            explosionRadius = Stats.explosionRadius;
             roundsLeft = magazineSize;
             reloadSpeed = Stats.reloadSpeed;
             nextTimeToFire = fireRate;
@@ -90,6 +92,7 @@ public class BaseWeapon : MonoBehaviour
                 }
                 break;
             case WeaponType.Explosive:
+            case WeaponType.Shotgun:
                 if ( canFire)
                 {
                     SpawnBullet();
@@ -117,16 +120,31 @@ public class BaseWeapon : MonoBehaviour
     protected virtual void SpawnBullet()
     {
         if (roundsLeft <= 0) return;
+        
         for (int i = 0; i < bulletsFired; i++)
         {
             Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position;
             GameObject bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity);
         
-            roundsLeft--;
-        
             if (bullet.TryGetComponent<BaseProjectile>(out var projectile))
-            {
-                projectile.Initialize(target, bulletSpeed, bulletDamage);
+            { 
+                roundsLeft--;
+                Vector2 actualTarget = target;
+                if (bulletSpread > 0)
+                {
+                    float spreadAngle = Random.Range(-bulletSpread, bulletSpread);
+                    Vector2 direction = (target - (Vector2)spawnPos).normalized;
+                    float cos = Mathf.Cos(spreadAngle * Mathf.Deg2Rad);
+                    float sin = Mathf.Sin(spreadAngle * Mathf.Deg2Rad);
+                    Vector2 spreadDirection = new Vector2(
+                        direction.x * cos - direction.y * sin,
+                        direction.x * sin + direction.y * cos
+                    );
+                    actualTarget = (Vector2)spawnPos + spreadDirection * 10f; // multiply by arbitrary distance so it doesn't just target the unit circle
+                }
+                
+                projectile.Initialize(actualTarget, bulletSpeed, bulletDamage);
+                projectile.InitializeExplosive(explosionRadius);
             }
         }
     }
