@@ -72,6 +72,7 @@ public class GameManager : SingletonBase<GameManager>
         _ = DayNightManager.Instance;
         _ = UpgradeManager.Instance;
         _ = UpgradeUi.Instance;
+        _ = Managers.GameStatsManager.Instance;
     }
 
     void Start()

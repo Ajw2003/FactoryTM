@@ -9,6 +9,7 @@ public class UiManager : SingletonBase<UiManager>
    public TMP_Text currentCurrency;
    
    public GameObject StorePanel;
+   public GameObject StatsPanel;
    public GameObject GameOverPanel;
    private bool isGameOver = false;
 
@@ -26,6 +27,7 @@ public class UiManager : SingletonBase<UiManager>
       base.Awake();
 
       if (StorePanel == null) StorePanel = GameObject.Find("StorePanel");
+      if (StatsPanel == null) StatsPanel = GameObject.Find("StatsPanel");
       if (GameOverPanel == null) GameOverPanel = GameObject.Find("GameOverPanel");
 
       if (healthText == null)
@@ -108,6 +110,13 @@ public class UiManager : SingletonBase<UiManager>
    {
       Time.timeScale = 1f;
       if (StorePanel != null) StorePanel.SetActive(false);
+      
+      if (StatsPanel == null)
+      {
+         GenerateStatsUI();
+      }
+      if (StatsPanel != null) StatsPanel.SetActive(false);
+
       if (GameOverPanel != null) GameOverPanel.SetActive(false);
       isGameOver = false;
    }
@@ -154,6 +163,152 @@ public class UiManager : SingletonBase<UiManager>
          else
          {
             StorePanel.SetActive(false);
+         }
+      }
+   }
+
+   public void OpenStats()
+   {
+      if (StatsPanel == null) GenerateStatsUI();
+
+      if (StatsPanel != null)
+      {
+         StatsUiScript statsUi = StatsPanel.GetComponent<StatsUiScript>();
+         if (statsUi != null)
+         {
+            statsUi.OpenStats();
+         }
+         else
+         {
+            StatsPanel.SetActive(true);
+         }
+      }
+   }
+
+   private void GenerateStatsUI()
+   {
+      GameObject canvas = GameObject.Find("Canvas");
+      if (canvas == null) return;
+
+      // 1. Create Panel
+      StatsPanel = new GameObject("StatsPanel", typeof(RectTransform), typeof(UnityEngine.UI.Image));
+      StatsPanel.transform.SetParent(canvas.transform, false);
+
+      RectTransform panelRt = StatsPanel.GetComponent<RectTransform>();
+      panelRt.anchorMin = new Vector2(0.75f, 0f);
+      panelRt.anchorMax = new Vector2(1f, 1f);
+      panelRt.pivot = new Vector2(1f, 0.5f);
+      panelRt.offsetMin = Vector2.zero;
+      panelRt.offsetMax = Vector2.zero;
+
+      UnityEngine.UI.Image bg = StatsPanel.GetComponent<UnityEngine.UI.Image>();
+      bg.color = new Color(0.01f, 0.05f, 0.01f, 0.95f);
+
+      // 2. Add Title
+      GameObject title = new GameObject("TitleText", typeof(RectTransform), typeof(TextMeshProUGUI));
+      title.transform.SetParent(StatsPanel.transform, false);
+      RectTransform titleRt = title.GetComponent<RectTransform>();
+      titleRt.anchorMin = new Vector2(0.5f, 1f);
+      titleRt.anchorMax = new Vector2(0.5f, 1f);
+      titleRt.pivot = new Vector2(0.5f, 1f);
+      titleRt.anchoredPosition = new Vector2(0, -30);
+      titleRt.sizeDelta = new Vector2(400, 60);
+
+      TextMeshProUGUI titleTxt = title.GetComponent<TextMeshProUGUI>();
+      titleTxt.text = "STATISTICS";
+      titleTxt.fontSize = 48;
+      titleTxt.alignment = TextAlignmentOptions.Center;
+      titleTxt.fontStyle = FontStyles.Bold;
+      titleTxt.color = new Color(0.2f, 1f, 0.2f, 1f);
+
+      // 3. Create Scroll View Content area (StatsUiScript will populate this)
+      GameObject content = new GameObject("Content", typeof(RectTransform));
+      content.transform.SetParent(StatsPanel.transform, false);
+      RectTransform contentRt = content.GetComponent<RectTransform>();
+      contentRt.anchorMin = new Vector2(0f, 0f);
+      contentRt.anchorMax = new Vector2(1f, 1f);
+      contentRt.pivot = new Vector2(0.5f, 0.5f);
+      contentRt.offsetMin = new Vector2(20, 20);
+      contentRt.offsetMax = new Vector2(-20, -100);
+
+      // 4. Attach script
+      StatsPanel.AddComponent<StatsUiScript>();
+
+      // 5. Add Close Button
+      GameObject closeBtn = new GameObject("CloseBtn", typeof(RectTransform), typeof(UnityEngine.UI.Image), typeof(UnityEngine.UI.Button));
+      closeBtn.transform.SetParent(StatsPanel.transform, false);
+      RectTransform closeRt = closeBtn.GetComponent<RectTransform>();
+      closeRt.anchorMin = new Vector2(1f, 1f);
+      closeRt.anchorMax = new Vector2(1f, 1f);
+      closeRt.pivot = new Vector2(1f, 1f);
+      closeRt.anchoredPosition = new Vector2(-20, -20);
+      closeRt.sizeDelta = new Vector2(50, 50);
+      
+      UnityEngine.UI.Image closeBg = closeBtn.GetComponent<UnityEngine.UI.Image>();
+      closeBg.color = new Color(0.05f, 0.15f, 0.05f, 0.85f);
+
+      UnityEngine.UI.Button btn = closeBtn.GetComponent<UnityEngine.UI.Button>();
+      btn.onClick.AddListener(() => CloseStats());
+
+      GameObject closeTxtObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+      closeTxtObj.transform.SetParent(closeBtn.transform, false);
+      RectTransform closeTxtRt = closeTxtObj.GetComponent<RectTransform>();
+      closeTxtRt.anchorMin = Vector2.zero;
+      closeTxtRt.anchorMax = Vector2.one;
+      closeTxtRt.offsetMin = Vector2.zero;
+      closeTxtRt.offsetMax = Vector2.zero;
+
+      TextMeshProUGUI closeTxt = closeTxtObj.GetComponent<TextMeshProUGUI>();
+      closeTxt.text = "X";
+      closeTxt.fontSize = 24;
+      closeTxt.alignment = TextAlignmentOptions.Center;
+      closeTxt.fontStyle = FontStyles.Bold;
+      closeTxt.color = new Color(0.2f, 1f, 0.2f, 1f);
+
+      // 6. Create HUD Button to open Stats
+      GameObject openBtn = new GameObject("OpenStatsBtn", typeof(RectTransform), typeof(UnityEngine.UI.Image), typeof(UnityEngine.UI.Button));
+      openBtn.transform.SetParent(canvas.transform, false);
+      RectTransform openRt = openBtn.GetComponent<RectTransform>();
+      openRt.anchorMin = new Vector2(1f, 0f);
+      openRt.anchorMax = new Vector2(1f, 0f);
+      openRt.pivot = new Vector2(1f, 0f);
+      openRt.anchoredPosition = new Vector2(-120, 150); // Above the store button roughly
+      openRt.sizeDelta = new Vector2(100, 100);
+
+      UnityEngine.UI.Image openBg = openBtn.GetComponent<UnityEngine.UI.Image>();
+      openBg.color = new Color(0.05f, 0.15f, 0.05f, 0.85f);
+
+      UnityEngine.UI.Button openBtnComp = openBtn.GetComponent<UnityEngine.UI.Button>();
+      openBtnComp.onClick.AddListener(() => OpenStats());
+
+      GameObject openTxtObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+      openTxtObj.transform.SetParent(openBtn.transform, false);
+      RectTransform openTxtRt = openTxtObj.GetComponent<RectTransform>();
+      openTxtRt.anchorMin = Vector2.zero;
+      openTxtRt.anchorMax = Vector2.one;
+      openTxtRt.offsetMin = Vector2.zero;
+      openTxtRt.offsetMax = Vector2.zero;
+
+      TextMeshProUGUI openTxt = openTxtObj.GetComponent<TextMeshProUGUI>();
+      openTxt.text = "STATS";
+      openTxt.fontSize = 24;
+      openTxt.alignment = TextAlignmentOptions.Center;
+      openTxt.fontStyle = FontStyles.Bold;
+      openTxt.color = new Color(0.2f, 1f, 0.2f, 1f);
+   }
+
+   public void CloseStats()
+   {
+      if (StatsPanel != null)
+      {
+         StatsUiScript statsUi = StatsPanel.GetComponent<StatsUiScript>();
+         if (statsUi != null)
+         {
+            statsUi.CloseStats();
+         }
+         else
+         {
+            StatsPanel.SetActive(false);
          }
       }
    }

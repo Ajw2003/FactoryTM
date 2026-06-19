@@ -30,7 +30,14 @@ public class CurrencyManager : SingletonBase<CurrencyManager>
 
     public void AddCurrency(float currencyValue)
     {
-        currentCurrencyValue += (currencyValue * incomeMultiplier);
+        float valueToAdd = currencyValue * incomeMultiplier;
+        currentCurrencyValue += valueToAdd;
+        
+        if (Managers.GameStatsManager.HasInstance)
+        {
+            Managers.GameStatsManager.Instance.AddMoneyEarned(valueToAdd);
+        }
+
         UiManager.Instance.UpdateCurrency(currentCurrencyValue);
         onCurrencyChange?.Invoke();
     }

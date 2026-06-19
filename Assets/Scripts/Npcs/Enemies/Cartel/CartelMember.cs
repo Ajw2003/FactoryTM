@@ -279,6 +279,10 @@ public class CartelMember : MonoBehaviour, IHealth
 
     public void Die()
     {
+        if (Managers.GameStatsManager.HasInstance)
+        {
+            Managers.GameStatsManager.Instance.IncrementKills();
+        }
         CurrencyManager.Instance.AddCurrency(profitFromKill);
         SpawnDamageNumber(profitFromKill, Color.forestGreen, transform.position);
         Destroy(this.gameObject);

@@ -126,6 +126,11 @@ public class DayNightManager : SingletonBase<DayNightManager>
 
     public void StartNextDay()
     {
+        if (Managers.GameStatsManager.HasInstance)
+        {
+            Managers.GameStatsManager.Instance.IncrementDaysSurvived();
+        }
+
         currentDay++;
         currentPhase = CyclePhase.Day;
         timeRemaining = dayDuration;
