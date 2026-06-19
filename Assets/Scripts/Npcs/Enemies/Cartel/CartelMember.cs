@@ -31,6 +31,10 @@ public class CartelMember : MonoBehaviour, IHealth
 
     [SerializeField] private int profitFromKill;
 
+    [SerializeField] private float engagementDistance = 5f;
+    [SerializeField] private float attackDistance = 2f;
+    private float forceTargetTimer = 0f;
+
     private bool attacking;
     
     public int Health { get; set; }
@@ -62,38 +66,43 @@ public class CartelMember : MonoBehaviour, IHealth
 
         if (target == null) return;
 
-        if (Vector3.Distance(transform.position, target.transform.position) <= sightRange)
+        float distanceToTarget = Vector3.Distance(transform.position, target.transform.position);
+
+        if (distanceToTarget <= sightRange)
         {
-            Vector3 nextPos = Vector3.MoveTowards(transform.position, target.transform.position, speed * Time.deltaTime);
-
-            bool collision = false;
-            float angleRadians = transform.eulerAngles.z * Mathf.Deg2Rad;
-            Rectangle2D enemyBox = TwoDCollision.CreateFromRotated(nextPos.x, nextPos.y, width, height, angleRadians);
-
-            if (BuildingManager.HasInstance)
+            if (distanceToTarget > attackDistance)
             {
-                foreach (var building in BuildingManager.Instance.Buildings)
+                Vector3 nextPos = Vector3.MoveTowards(transform.position, target.transform.position, speed * Time.deltaTime);
+
+                bool collision = false;
+                float angleRadians = transform.eulerAngles.z * Mathf.Deg2Rad;
+                Rectangle2D enemyBox = TwoDCollision.CreateFromRotated(nextPos.x, nextPos.y, width, height, angleRadians);
+
+                if (BuildingManager.HasInstance)
                 {
-                    if (building != null && building.Health > 0 && building.data.type != Buildings.BuildingType.Conveyor)
+                    foreach (var building in BuildingManager.Instance.Buildings)
                     {
-                        foreach (var cell in building.occupiedCells)
+                        if (building != null && building.Health > 0 && building.data.type != Buildings.BuildingType.Conveyor)
                         {
-                            Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
-                            Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
-                            if (Rectangle2D.CheckCollision(enemyBox, cellBox))
+                            foreach (var cell in building.occupiedCells)
                             {
-                                collision = true;
-                                break;
+                                Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
+                                Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
+                                if (Rectangle2D.CheckCollision(enemyBox, cellBox))
+                                {
+                                    collision = true;
+                                    break;
+                                }
                             }
+                            if (collision) break;
                         }
-                        if (collision) break;
                     }
                 }
-            }
 
-            if (!collision)
-            {
-                transform.position = nextPos;
+                if (!collision)
+                {
+                    transform.position = nextPos;
+                }
             }
 
             weapon.target = target.transform.position;
@@ -114,10 +123,13 @@ public class CartelMember : MonoBehaviour, IHealth
 
     private IEnumerator Attack()
     {
-        while (Vector3.Distance(transform.position, target.transform.position) <= sightRange)
+        while (target != null && Vector3.Distance(transform.position, target.transform.position) <= sightRange)
         {
             yield return new WaitForSeconds(attackSpeed);
-            weapon.Shoot();
+            if (target != null)
+            {
+                weapon.Shoot();
+            }
         }
 
         attacking = false;
@@ -127,6 +139,16 @@ public class CartelMember : MonoBehaviour, IHealth
     private float targetSearchTimer = 0f;
     private void FindClosestTarget()
     {
+        if (forceTargetTimer > 0f)
+        {
+            forceTargetTimer -= Time.deltaTime;
+            if (GameManager.Instance != null && GameManager.Instance.playerController != null)
+            {
+                target = GameManager.Instance.playerController.gameObject;
+                return;
+            }
+        }
+
         targetSearchTimer -= Time.deltaTime;
         if (targetSearchTimer > 0f) return;
         targetSearchTimer = 0.5f; // Re-evaluate target every 0.5 seconds
@@ -137,6 +159,13 @@ public class CartelMember : MonoBehaviour, IHealth
         if (GameManager.Instance != null && GameManager.Instance.playerController != null)
         {
             float playerDist = Vector3.Distance(transform.position, GameManager.Instance.playerController.transform.position);
+            
+            if (playerDist <= engagementDistance)
+            {
+                target = GameManager.Instance.playerController.gameObject;
+                return;
+            }
+
             minDistance = playerDist;
             closest = GameManager.Instance.playerController.gameObject;
         }
@@ -217,6 +246,9 @@ public class CartelMember : MonoBehaviour, IHealth
 
         // Visual flash feedback
         StartCoroutine(FlashRed());
+
+        // Force target the player when shot
+        forceTargetTimer = 5f;
 
         if (Health <= 0)
         {

@@ -16,8 +16,6 @@ add ability to change length of days based on certain factors such as money earn
 
 default make the first day 90 seconds and then subsequent days can be shorter or longer depending on various factors. test first day 90, second day 30
 
-Fix not being able to walk into unlocked areas and zone unlock system in general.
-
 make essential upgrades apear first in upgrade selection, turrets, walls, health
 
 make enemies force target player if shot at by them or within certain range
