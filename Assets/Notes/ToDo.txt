@@ -18,13 +18,11 @@ default make the first day 90 seconds and then subsequent days can be shorter or
 
 make essential upgrades apear first in upgrade selection, turrets, walls, health
 
-make enemies force target player if shot at by them or within certain range
-
 add way of telling buildings are being damaged even off screen like factorio
 
-make enemies stand back a couple tiles from target while they attack
-
 make obvious visual and auditory indication of when out of ammo and need to reload.
+
+fix not being able to place tile on valid empty space with items on it. or make conveyors not move items onto empty spaces 
 
 
 
