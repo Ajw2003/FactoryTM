@@ -59,6 +59,11 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
         }
     }
 
+    public void ChangeHealth(int amount, int previous)
+    {
+        
+    }
+
     private System.Collections.IEnumerator FlashRedTile()
     {
         Vector3Int pos3 = new Vector3Int(myCell.x, myCell.y, 0);

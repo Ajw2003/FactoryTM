@@ -24,6 +24,6 @@ MonoBehaviour:
   armorPercentBoost: 0
   maxHealthBoost: 0
   zoneDirection: 0
-  startsUnlocked: 0
+  startsUnlocked: 1
   addToShopAfterUnlock: 1
   isResearched: 0

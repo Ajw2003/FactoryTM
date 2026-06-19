@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Singleton;
 using TMPro;
 using UnityEngine;
@@ -19,6 +20,12 @@ public class UiManager : SingletonBase<UiManager>
    
    [SerializeField] private TMP_Text healthText;
    [SerializeField] private TMP_Text staminaText;
+   [SerializeField] private GameObject heartObject;
+   [SerializeField] private GameObject playerStatsUi;
+
+   public GameObject[] Hearts;
+   
+   private int heartCount;
    private GameObject staminaContainer;
 
    protected override void Awake()
@@ -73,12 +80,21 @@ public class UiManager : SingletonBase<UiManager>
       }
    }
 
-   public void UpdateHp(int current, int max)
+   public void UpdateHp(int current, int previous, int index)
    {
-      if (healthText != null)
+      if (current > previous)
       {
-         healthText.text = $"{current} / {max}";
+         Hearts[index].SetActive(true);
       }
+      else
+      {
+         Hearts[index].SetActive(false);
+      }
+
+      // if (healthText != null)
+      // {
+      //    healthText.text = $"{current} / {max}";
+      // }
    }
 
    public void UpdateStamina(float current, float max)
@@ -119,6 +135,14 @@ public class UiManager : SingletonBase<UiManager>
 
       if (GameOverPanel != null) GameOverPanel.SetActive(false);
       isGameOver = false;
+      heartCount = GameManager.Instance.playerController.Health;
+      Hearts = new GameObject[heartCount];
+
+      for (int i = 0; i < heartCount; i++)
+      {
+         Hearts[i] = Instantiate(heartObject, playerStatsUi.transform);
+         Hearts[i].transform.localScale = new Vector3(150,150,0);
+      }
    }
 
    private void Update()

@@ -256,6 +256,11 @@ public class CartelMember : MonoBehaviour, IHealth
         }
     }
 
+    public void ChangeHealth(int amount, int previous)
+    {
+        
+    }
+
     private void SpawnDamageNumber(int amount, Color color, Vector3 position)
     {
         GameObject textObj = new GameObject("DamageNumber");
