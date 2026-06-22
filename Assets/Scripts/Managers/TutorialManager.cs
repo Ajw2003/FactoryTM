@@ -7,6 +7,16 @@ using UnityEngine.UI;
 using DG.Tweening;
 using Buildings;
 
+public enum TutorialState
+{
+    NotStarted,
+    IntroDialogue,
+    WaitingForBuildings,
+    WaitingForFirstDollar,
+    CombatDialogue,
+    Completed
+}
+
 public class TutorialManager : SingletonBase<TutorialManager>
 {
     [Header("Dialogue Assets")]
@@ -14,6 +24,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
     public DialogueSO combatDialogue;
 
     [Header("State (ReadOnly)")]
+    public TutorialState currentState = TutorialState.NotStarted;
     [SerializeField] private int currentDialogueIndex = -1;
     [SerializeField] private bool hasPlacedMiner = false;
     [SerializeField] private bool hasPlacedSeller = false;
@@ -28,10 +39,13 @@ public class TutorialManager : SingletonBase<TutorialManager>
         base.Awake();
     }
 
-    private void Start()
+    private bool isSubscribed = false;
+
+    private void SubscribeEvents()
     {
-        StartCoroutine(StartTutorialRoutine());
-        
+        if (isSubscribed) return;
+        isSubscribed = true;
+
         if (PlacementManager.Instance != null)
         {
             PlacementManager.Instance.OnBuildingPlaced += HandleBuildingPlaced;
@@ -49,8 +63,11 @@ public class TutorialManager : SingletonBase<TutorialManager>
         }
     }
 
-    private void OnDestroy()
+    private void UnsubscribeEvents()
     {
+        if (!isSubscribed) return;
+        isSubscribed = false;
+
         if (PlacementManager.Instance != null)
         {
             PlacementManager.Instance.OnBuildingPlaced -= HandleBuildingPlaced;
@@ -64,6 +81,29 @@ public class TutorialManager : SingletonBase<TutorialManager>
             DialogueManager.Instance.OnDialogueEnded -= HandleDialogueEnded;
             DialogueManager.Instance.CanAdvanceDialogue = null;
         }
+    }
+
+    private void Start()
+    {
+        bool playTutorial = PlayerPrefs.GetInt("PlayTutorial", 1) == 1;
+        if (!playTutorial)
+        {
+            currentState = TutorialState.Completed;
+            if (DayNightManager.Instance != null)
+            {
+                DayNightManager.Instance.isTutorialActive = false;
+            }
+            return;
+        }
+
+        SubscribeEvents();
+        StartCoroutine(StartTutorialRoutine());
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        UnsubscribeEvents();
     }
 
     private IEnumerator StartTutorialRoutine()
@@ -229,7 +269,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
         else
         {
             // Combat dialogue completed, start game
-            CompleteTutorial();
+            CompleteDialogueTutorial();
         }
     }
 
@@ -298,32 +338,83 @@ public class TutorialManager : SingletonBase<TutorialManager>
         return item != null ? item.count : 0;
     }
 
-    private void CompleteTutorial()
+    private void CompleteDialogueTutorial()
     {
-        ShowCompletionVisual();
+        CompleteTutorial(true);
+    }
+
+    public void CompleteTutorial(bool showVisual)
+    {
+        currentState = TutorialState.Completed;
+
+        if (showVisual)
+        {
+            ShowCompletionVisual();
+        }
+
+        // Save that they completed it so it persists between scene loads/launches
+        PlayerPrefs.SetInt("PlayTutorial", 0);
+        PlayerPrefs.Save();
 
         // Unsubscribe from all events to prevent any late Space key presses or changes from re-triggering tutorial code
+        UnsubscribeEvents();
+
         if (DialogueManager.Instance != null)
         {
-            DialogueManager.Instance.OnDialogueEnded -= HandleDialogueEnded;
-            DialogueManager.Instance.CanAdvanceDialogue = null;
-        }
-
-        if (PlacementManager.Instance != null)
-        {
-            PlacementManager.Instance.OnBuildingPlaced -= HandleBuildingPlaced;
-        }
-
-        if (CurrencyManager.Instance != null)
-        {
-            CurrencyManager.Instance.onCurrencyChange -= HandleCurrencyChange;
+            DialogueManager.Instance.ToggleUi(false);
         }
 
         if (DayNightManager.Instance != null)
         {
             DayNightManager.Instance.CompleteTutorial();
-            DayNightManager.Instance.timeRemaining = 5f; 
+            if (showVisual)
+            {
+                DayNightManager.Instance.timeRemaining = 5f; 
+            }
+            else
+            {
+                DayNightManager.Instance.isTutorialActive = false;
+            }
         }
+    }
+
+    public void RestartTutorial()
+    {
+        StopAllCoroutines();
+
+        if (DialogueManager.Instance != null)
+        {
+            DialogueManager.Instance.ToggleUi(false);
+        }
+
+        currentState = TutorialState.IntroDialogue;
+        currentDialogueIndex = -1;
+        hasPlacedMiner = false;
+        hasPlacedSeller = false;
+        hasPlacedConveyor = false;
+        currencyAtWaitStart = -1f;
+        introDialogueActive = true;
+
+        PlayerPrefs.SetInt("PlayTutorial", 1);
+        PlayerPrefs.Save();
+
+        if (DayNightManager.Instance != null)
+        {
+            DayNightManager.Instance.isTutorialActive = true;
+        }
+
+        SubscribeEvents();
+        StartCoroutine(StartTutorialRoutine());
+    }
+
+    /// <summary>
+    /// Call this from any options/settings menu button to enable the tutorial again for the next run.
+    /// </summary>
+    public static void RequestTutorialAgain()
+    {
+        PlayerPrefs.SetInt("PlayTutorial", 1);
+        PlayerPrefs.Save();
+        Debug.Log("Tutorial requested. It will play again on the next scene start!");
     }
 
     private void ShowCompletionVisual()

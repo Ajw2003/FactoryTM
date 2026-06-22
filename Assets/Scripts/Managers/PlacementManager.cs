@@ -52,6 +52,12 @@ public class PlacementManager : SingletonBase<PlacementManager>
 
     void Update()
     {
+        if (PauseManager.IsPaused)
+        {
+            if (previewTilemap != null) previewTilemap.ClearAllTiles();
+            return;
+        }
+
         if (activeBuilding == null) return;
 
         Vector2Int cell = GetMouseCell();

@@ -114,46 +114,59 @@ public class PlayerInputController : MonoBehaviour
 
     void OnOpenStorePerformed(InputAction.CallbackContext val)
     {
+        if (PauseManager.IsPaused) return;
         EventManager.Instance?.Publish(new PlayerOpenStoreEvent());
     }
     void OnMovePerformed(InputAction.CallbackContext val)
     {
+        if (PauseManager.IsPaused)
+        {
+            EventManager.Instance?.Publish(new PlayerMoveEvent(Vector2.zero));
+            return;
+        }
         EventManager.Instance?.Publish(new PlayerMoveEvent(val.ReadValue<Vector2>()));
     }
 
     void OnPlacePerformed(InputAction.CallbackContext val)
     {
+        if (PauseManager.IsPaused) return;
         EventManager.Instance?.Publish(new PlayerPlaceEvent());
         EventManager.Instance?.Publish(new PlayerInteractEvent()); // Legacy/Fallback
     }
 
     void OnRemovePerformed(InputAction.CallbackContext val)
     {
+        if (PauseManager.IsPaused) return;
         EventManager.Instance?.Publish(new PlayerRemoveEvent());
     }
 
     void OnRotatePerformed(InputAction.CallbackContext val)
     {
+        if (PauseManager.IsPaused) return;
         EventManager.Instance?.Publish(new PlayerRotateEvent());
     }
 
     void OnNextPerformed(InputAction.CallbackContext val)
     {
+        if (PauseManager.IsPaused) return;
         EventManager.Instance?.Publish(new PlayerNextItemEvent());
     }
 
     void OnPreviousPerformed(InputAction.CallbackContext val)
     {
+        if (PauseManager.IsPaused) return;
         EventManager.Instance?.Publish(new PlayerPreviousItemEvent());
     }
 
     void OnDodgePerformed(InputAction.CallbackContext val)
     {
+        if (PauseManager.IsPaused) return;
         EventManager.Instance?.Publish(new PlayerDodgeEvent());
     }
 
     void OnHealPerformed(InputAction.CallbackContext val)
     {
+        if (PauseManager.IsPaused) return;
         EventManager.Instance?.Publish(new PlayerHealEvent());
     }
 
