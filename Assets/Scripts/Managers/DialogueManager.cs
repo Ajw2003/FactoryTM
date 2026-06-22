@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class DialogueManager : SingletonBase<DialogueManager>
 {
+    public event Action OnDialogueEnded;
     public DialogueSO currentDialogue;
     public int currentDialogueIndex;
     public float delayBetweenCharacters;
@@ -70,7 +71,13 @@ public class DialogueManager : SingletonBase<DialogueManager>
         {
             StopCoroutine(_currentCoroutine);
         }
-        var newIndex = (currentDialogueIndex + 1) % currentDialogue.dialogues.Length;
+        if (currentDialogueIndex + 1 >= currentDialogue.dialogues.Length)
+        {
+            ToggleUi(false);
+            OnDialogueEnded?.Invoke();
+            return;
+        }
+        var newIndex = currentDialogueIndex + 1;
         currentDialogueIndex = newIndex;
         SetDialogue();
         _currentCoroutine = StartCoroutine(DialogueCoroutine());

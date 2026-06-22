@@ -18,6 +18,7 @@ public class DayNightManager : SingletonBase<DayNightManager>
     public float dayDuration = 90f; // Duration of day in seconds
     public int currentDay = 1;
     public CyclePhase currentPhase = CyclePhase.Day;
+    public bool isTutorialActive = true;
 
     [Header("Raid Settings per Day")]
     public int baseEnemiesPerWave = 3;
@@ -27,7 +28,7 @@ public class DayNightManager : SingletonBase<DayNightManager>
 
     [Header("UI Reference")]
     private TMP_Text timerText;
-    private float timeRemaining;
+    public float timeRemaining;
     private bool isRaidStarted = false;
     private bool raidHasBegun = false; // True only once enemies have actually spawned
     private float raidSettleTimer = 0f;
@@ -54,6 +55,12 @@ public class DayNightManager : SingletonBase<DayNightManager>
     {
         if (currentPhase == CyclePhase.Day)
         {
+            if (isTutorialActive)
+            {
+                UpdateTimerText("TUTORIAL ACTIVE");
+                return;
+            }
+
             if (timeRemaining > 0)
             {
                 timeRemaining -= Time.deltaTime;
@@ -140,6 +147,11 @@ public class DayNightManager : SingletonBase<DayNightManager>
         Time.timeScale = 1f;
 
         UpdateTimerText($"DAY {currentDay} STARTED");
+    }
+
+    public void CompleteTutorial()
+    {
+        isTutorialActive = false;
     }
 
     private void SetupTimerUI()

@@ -10,6 +10,8 @@ public class PlacementManager : SingletonBase<PlacementManager>
     public Tilemap mainTilemap;
     public Tilemap previewTilemap;
     
+    public event System.Action<BuildingData> OnBuildingPlaced;
+
     private BuildingData activeBuilding;
     private int rotationIndex = 0;
     private Camera cam;
@@ -164,6 +166,8 @@ public class PlacementManager : SingletonBase<PlacementManager>
 
             // Task 1: Consume from Inventory
             InventoryManager.Instance.RemoveBuilding(activeBuilding);
+            
+            OnBuildingPlaced?.Invoke(activeBuilding);
         }
             
 
