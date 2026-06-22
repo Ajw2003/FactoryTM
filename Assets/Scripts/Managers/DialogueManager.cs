@@ -46,11 +46,10 @@ public class DialogueManager : SingletonBase<DialogueManager>
     {
         EventManager.Instance.Subscribe(this, (DialogueEvent e) => HandleDialogueEvent(e));
         
-        currentDialogueIndex = 0;
-        if (currentDialogue != null)
+        bool playTutorial = PlayerPrefs.GetInt("PlayTutorial", 1) == 1;
+        if (!playTutorial)
         {
-            SetDialogue();
-            _currentCoroutine = StartCoroutine(DialogueCoroutine());
+            ToggleUi(false);
         }
         else
         {
@@ -60,6 +59,12 @@ public class DialogueManager : SingletonBase<DialogueManager>
 
     private void HandleDialogueEvent(DialogueEvent e)
     {
+        bool playTutorial = PlayerPrefs.GetInt("PlayTutorial", 1) == 1;
+        if (!playTutorial)
+        {
+            ToggleUi(false);
+            return;
+        }
         currentDialogue = e.dialogue;
         ToggleUi(e.enabled);
     }
@@ -163,6 +168,16 @@ public class DialogueManager : SingletonBase<DialogueManager>
     private void Update()
     {
         if (PauseManager.IsPaused) return;
+
+        bool playTutorial = PlayerPrefs.GetInt("PlayTutorial", 1) == 1;
+        if (!playTutorial)
+        {
+            if (isDialogueActive)
+            {
+                ToggleUi(false);
+            }
+            return;
+        }
 
         bool isStoreOpen = StoreUiScript.HasInstance && StoreUiScript.Instance.gameObject.activeInHierarchy;
 

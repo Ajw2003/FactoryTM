@@ -28,6 +28,10 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
     private Queue<string> logQueue = new Queue<string>();
     private bool isProcessingQueue = false;
     
+    private Coroutine bootLogsCoroutine;
+    private Coroutine processLogQueueCoroutine;
+    private Coroutine typeLogLineCoroutine;
+    
     // Blinking cursor
     private float cursorTimer = 0f;
     private bool cursorVisible = true;
@@ -492,7 +496,8 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
                         }
                         else
                         {
-                            StartCoroutine(PlayBootLogs());
+                            if (bootLogsCoroutine != null) StopCoroutine(bootLogsCoroutine);
+                            bootLogsCoroutine = StartCoroutine(PlayBootLogs());
                         }
                     });
         
@@ -505,6 +510,25 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         canvasGroup.DOComplete();
         if (transitionSequence != null) transitionSequence.Kill();
         
+        // Stop coroutines
+        if (bootLogsCoroutine != null)
+        {
+            StopCoroutine(bootLogsCoroutine);
+            bootLogsCoroutine = null;
+        }
+        if (processLogQueueCoroutine != null)
+        {
+            StopCoroutine(processLogQueueCoroutine);
+            processLogQueueCoroutine = null;
+        }
+        if (typeLogLineCoroutine != null)
+        {
+            StopCoroutine(typeLogLineCoroutine);
+            typeLogLineCoroutine = null;
+        }
+        isProcessingQueue = false;
+        logQueue.Clear();
+
         // Play collapse/shut down sequence
         transitionSequence = DOTween.Sequence();
         transitionSequence.Append(rectTransform.DOScaleY(0.003f, 0.25f).SetEase(Ease.InExpo))
@@ -579,10 +603,13 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
     
     public void LogCommand(string cmd)
     {
+        if (isDisplayingDialogue) return;
+
         logQueue.Enqueue(cmd);
         if (!isProcessingQueue)
         {
-            StartCoroutine(ProcessLogQueue());
+            if (processLogQueueCoroutine != null) StopCoroutine(processLogQueueCoroutine);
+            processLogQueueCoroutine = StartCoroutine(ProcessLogQueue());
         }
     }
 
@@ -591,18 +618,37 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         isProcessingQueue = true;
         while (logQueue.Count > 0)
         {
+            if (isDisplayingDialogue)
+            {
+                isProcessingQueue = false;
+                yield break;
+            }
             string msg = logQueue.Dequeue();
             
             // If it's a purchase command, add a prefix and a suffix response
             if (msg.StartsWith("EXECUTE_BUY:"))
             {
-                yield return StartCoroutine(TypeLogLine("> " + msg));
+                if (typeLogLineCoroutine != null) StopCoroutine(typeLogLineCoroutine);
+                typeLogLineCoroutine = StartCoroutine(TypeLogLine("> " + msg));
+                yield return typeLogLineCoroutine;
+                
                 yield return new WaitForSecondsRealtime(0.05f);
-                yield return StartCoroutine(TypeLogLine("SYS: COMMAND_OK. EXECUTING TRANSACTION..."));
+                
+                if (isDisplayingDialogue)
+                {
+                    isProcessingQueue = false;
+                    yield break;
+                }
+                
+                if (typeLogLineCoroutine != null) StopCoroutine(typeLogLineCoroutine);
+                typeLogLineCoroutine = StartCoroutine(TypeLogLine("SYS: COMMAND_OK. EXECUTING TRANSACTION..."));
+                yield return typeLogLineCoroutine;
             }
             else
             {
-                yield return StartCoroutine(TypeLogLine(msg));
+                if (typeLogLineCoroutine != null) StopCoroutine(typeLogLineCoroutine);
+                typeLogLineCoroutine = StartCoroutine(TypeLogLine(msg));
+                yield return typeLogLineCoroutine;
             }
             yield return new WaitForSecondsRealtime(0.02f);
         }
@@ -651,6 +697,25 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         isDisplayingDialogue = true;
         currentDialogueSpeaker = speaker;
         currentDialogueTextTyped = "";
+        
+        // Stop any running log coroutines to prevent terminal text flickering/race conditions
+        if (bootLogsCoroutine != null)
+        {
+            StopCoroutine(bootLogsCoroutine);
+            bootLogsCoroutine = null;
+        }
+        if (processLogQueueCoroutine != null)
+        {
+            StopCoroutine(processLogQueueCoroutine);
+            processLogQueueCoroutine = null;
+        }
+        if (typeLogLineCoroutine != null)
+        {
+            StopCoroutine(typeLogLineCoroutine);
+            typeLogLineCoroutine = null;
+        }
+        isProcessingQueue = false;
+        logQueue.Clear();
         
         if (isTypingLog) isTypingLog = false;
         activeLogs.Clear();
