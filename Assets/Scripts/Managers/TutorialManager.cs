@@ -87,25 +87,24 @@ public class TutorialManager : SingletonBase<TutorialManager>
 
         currentDialogueIndex = DialogueManager.Instance.currentDialogueIndex;
 
+        // Dynamically shift dialogue position when store is open/closed
+        bool isStoreOpen = UiManager.Instance != null && UiManager.Instance.StorePanel != null && UiManager.Instance.StorePanel.activeSelf;
+        DialogueManager.Instance.SetPositionToTop(isStoreOpen);
+
         // Perform specific update checks for blocking steps
         switch (currentDialogueIndex)
         {
             case 2: // "Press E To open your company device"
-                if (UiManager.Instance != null && UiManager.Instance.StorePanel != null && UiManager.Instance.StorePanel.activeSelf)
+                if (isStoreOpen)
                 {
-                    // Switched off the dialogue UI so they can navigate
-                    DialogueManager.Instance.ToggleUi(false);
                     AdvanceToDialogueIndex(3);
                 }
                 break;
 
             case 3: // "navigate between pages and get your bearings"
-                // Turned off currently. Turn back on when they reach the BUILDING page.
                 int buildingPage = GetBuildingPage();
                 if (buildingPage != -1 && StoreUiScript.Instance != null && StoreUiScript.Instance.CurrentPageIndex == buildingPage)
                 {
-                    // Turn UI back on to guide them
-                    DialogueManager.Instance.ToggleUi(true);
                     AdvanceToDialogueIndex(4);
                 }
                 break;

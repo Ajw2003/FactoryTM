@@ -152,6 +152,7 @@ public class DialogueManager : SingletonBase<DialogueManager>
                 // CRT flicker opening effect
                 dialogueBox.transform.localScale = new Vector3(1f, 0.05f, 1f);
                 dialogueBox.transform.DOScaleY(1f, 0.2f).SetUpdate(true);
+                if (_currentCoroutine != null) StopCoroutine(_currentCoroutine);
                 _currentCoroutine = StartCoroutine(DialogueCoroutine());
                 _canWrite = true;
                 break;
@@ -271,6 +272,21 @@ public class DialogueManager : SingletonBase<DialogueManager>
         StartCoroutine(BlinkPromptCursor());
 
         dialogueBox.SetActive(false);
+    }
+
+    private bool isCurrentlyAtTop = false;
+    public void SetPositionToTop(bool top)
+    {
+        if (dialogueBox == null || isCurrentlyAtTop == top) return;
+        isCurrentlyAtTop = top;
+        
+        RectTransform rt = dialogueBox.GetComponent<RectTransform>();
+        Vector2 targetMin = top ? new Vector2(0.15f, 0.72f) : new Vector2(0.15f, 0.05f);
+        Vector2 targetMax = top ? new Vector2(0.85f, 0.95f) : new Vector2(0.85f, 0.28f);
+
+        rt.DOComplete();
+        rt.DOAnchorMin(targetMin, 0.35f).SetUpdate(true);
+        rt.DOAnchorMax(targetMax, 0.35f).SetUpdate(true);
     }
 
     private IEnumerator BlinkPromptCursor()
