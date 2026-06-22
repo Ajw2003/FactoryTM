@@ -14,8 +14,7 @@ public struct Dialogue
     [TextArea(1,10)]public string text;
     public Sprite sprite;
     public Color color;
-    DialogueType type;
-    
+    public DialogueType type;
 }
 
 public enum DialogueType
