@@ -346,7 +346,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         
         RectTransform consoleRt = consolePanel.GetComponent<RectTransform>();
         consoleRt.anchorMin = new Vector2(0.55f, 0.15f);
-        consoleRt.anchorMax = new Vector2(0.96f, 0.81f);
+        consoleRt.anchorMax = new Vector2(0.96f, 0.96f);
         consoleRt.offsetMin = Vector2.zero;
         consoleRt.offsetMax = Vector2.zero;
         
@@ -764,7 +764,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         }
 
         // 2. Reposition and show active page buttons
-        float startY = 300f;
+        float startY = 200f;
         float spacingY = -180f; // Increased spacing to fit 160f tall buttons
 
         if (currentPageIndex < storePages.Count)

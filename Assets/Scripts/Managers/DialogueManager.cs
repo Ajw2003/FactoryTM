@@ -7,6 +7,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 
+public enum DialoguePositionMode
+{
+    DefaultBottom,
+    AboveHotbar,
+    PlacementTop,
+    ShopLeftTop
+}
+
 public class DialogueManager : SingletonBase<DialogueManager>
 {
     public event Action OnDialogueEnded;
@@ -33,8 +41,7 @@ public class DialogueManager : SingletonBase<DialogueManager>
 
     private void Start()
     {
-        EventManager.Instance.Subscribe(this,(DialogueEvent e) => ToggleUi(e.enabled));
-        EventManager.Instance.Subscribe(this,(DialogueEvent e) => SetDialogueSo(e.dialogue));
+        EventManager.Instance.Subscribe(this, (DialogueEvent e) => HandleDialogueEvent(e));
         
         currentDialogueIndex = 0;
         if (currentDialogue != null)
@@ -46,6 +53,12 @@ public class DialogueManager : SingletonBase<DialogueManager>
         {
             ToggleUi(false);
         }
+    }
+
+    private void HandleDialogueEvent(DialogueEvent e)
+    {
+        currentDialogue = e.dialogue;
+        ToggleUi(e.enabled);
     }
 
     private IEnumerator DialogueCoroutine()
@@ -83,10 +96,7 @@ public class DialogueManager : SingletonBase<DialogueManager>
         }
     }
 
-    private void SetDialogueSo(DialogueSO newDialogue)
-    {
-        currentDialogue = newDialogue;
-    }
+
 
     private void IncrementDialogueIndex()
     {
@@ -105,8 +115,12 @@ public class DialogueManager : SingletonBase<DialogueManager>
         }
         if (currentDialogueIndex + 1 >= currentDialogue.dialogues.Length)
         {
-            ToggleUi(false);
+            DialogueSO oldDialogue = currentDialogue;
             OnDialogueEnded?.Invoke();
+            if (currentDialogue == oldDialogue)
+            {
+                ToggleUi(false);
+            }
             return;
         }
         var newIndex = currentDialogueIndex + 1;
@@ -147,10 +161,16 @@ public class DialogueManager : SingletonBase<DialogueManager>
             case true :
                 currentDialogueIndex = 0;
                 SetDialogue();
+                bool wasActive = dialogueBox.activeSelf;
                 dialogueBox.SetActive(true);
-                // CRT flicker opening effect
-                dialogueBox.transform.localScale = new Vector3(1f, 0.05f, 1f);
-                dialogueBox.transform.DOScaleY(1f, 0.2f).SetUpdate(true);
+                if (!wasActive)
+                {
+                    // Reset position to bottom on initial opening
+                    SetPositionMode(DialoguePositionMode.DefaultBottom, true);
+                    // CRT flicker opening effect
+                    dialogueBox.transform.localScale = new Vector3(1f, 0.05f, 1f);
+                    dialogueBox.transform.DOScaleY(1f, 0.2f).SetUpdate(true);
+                }
                 if (_currentCoroutine != null) StopCoroutine(_currentCoroutine);
                 _currentCoroutine = StartCoroutine(DialogueCoroutine());
                 _canWrite = true;
@@ -273,16 +293,41 @@ public class DialogueManager : SingletonBase<DialogueManager>
         dialogueBox.SetActive(false);
     }
 
-    private bool isCurrentlyAtTop = false;
-    public void SetPositionToTop(bool top)
-    {
-        if (dialogueBox == null || isCurrentlyAtTop == top) return;
-        isCurrentlyAtTop = top;
-        
-        RectTransform rt = dialogueBox.GetComponent<RectTransform>();
-        Vector2 targetMin = top ? new Vector2(0.15f, 0.72f) : new Vector2(0.15f, 0.05f);
-        Vector2 targetMax = top ? new Vector2(0.85f, 0.95f) : new Vector2(0.85f, 0.28f);
+    private DialoguePositionMode currentPositionMode = DialoguePositionMode.DefaultBottom;
+    private bool hasPositionInitialized = false;
 
+    public void SetPositionMode(DialoguePositionMode mode, bool force = false)
+    {
+        if (dialogueBox == null) return;
+        if (hasPositionInitialized && currentPositionMode == mode && !force) return;
+
+        currentPositionMode = mode;
+        hasPositionInitialized = true;
+
+        Vector2 targetMin = new Vector2(0.15f, 0.05f);
+        Vector2 targetMax = new Vector2(0.85f, 0.28f);
+
+        switch (mode)
+        {
+            case DialoguePositionMode.DefaultBottom:
+                targetMin = new Vector2(0.15f, 0.05f);
+                targetMax = new Vector2(0.85f, 0.28f);
+                break;
+            case DialoguePositionMode.AboveHotbar:
+                targetMin = new Vector2(0.15f, 0.22f);
+                targetMax = new Vector2(0.85f, 0.45f);
+                break;
+            case DialoguePositionMode.PlacementTop:
+                targetMin = new Vector2(0.15f, 0.72f);
+                targetMax = new Vector2(0.85f, 0.95f);
+                break;
+            case DialoguePositionMode.ShopLeftTop:
+                targetMin = new Vector2(0.1f, 0.78f);
+                targetMax = new Vector2(0.5f, 0.96f);
+                break;
+        }
+
+        RectTransform rt = dialogueBox.GetComponent<RectTransform>();
         rt.DOComplete();
         rt.DOAnchorMin(targetMin, 0.35f).SetUpdate(true);
         rt.DOAnchorMax(targetMax, 0.35f).SetUpdate(true);

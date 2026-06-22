@@ -297,7 +297,13 @@ public class UiManager : SingletonBase<UiManager>
       closeBg.color = new Color(0.05f, 0.15f, 0.05f, 0.85f);
 
       UnityEngine.UI.Button btn = closeBtn.GetComponent<UnityEngine.UI.Button>();
-      btn.onClick.AddListener(() => CloseStats());
+      btn.onClick.AddListener(() => {
+          CloseStats();
+          if (PauseManager.IsPaused && PauseManager.Instance != null)
+          {
+              PauseManager.Instance.ShowPauseMenuOnly();
+          }
+      });
 
       GameObject closeTxtObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
       closeTxtObj.transform.SetParent(closeBtn.transform, false);
@@ -313,37 +319,6 @@ public class UiManager : SingletonBase<UiManager>
       closeTxt.alignment = TextAlignmentOptions.Center;
       closeTxt.fontStyle = FontStyles.Bold;
       closeTxt.color = new Color(0.2f, 1f, 0.2f, 1f);
-
-      // 6. Create HUD Button to open Stats
-      GameObject openBtn = new GameObject("OpenStatsBtn", typeof(RectTransform), typeof(UnityEngine.UI.Image), typeof(UnityEngine.UI.Button));
-      openBtn.transform.SetParent(canvas.transform, false);
-      RectTransform openRt = openBtn.GetComponent<RectTransform>();
-      openRt.anchorMin = new Vector2(1f, 0f);
-      openRt.anchorMax = new Vector2(1f, 0f);
-      openRt.pivot = new Vector2(1f, 0f);
-      openRt.anchoredPosition = new Vector2(-120, 150); // Above the store button roughly
-      openRt.sizeDelta = new Vector2(100, 100);
-
-      UnityEngine.UI.Image openBg = openBtn.GetComponent<UnityEngine.UI.Image>();
-      openBg.color = new Color(0.05f, 0.15f, 0.05f, 0.85f);
-
-      UnityEngine.UI.Button openBtnComp = openBtn.GetComponent<UnityEngine.UI.Button>();
-      openBtnComp.onClick.AddListener(() => OpenStats());
-
-      GameObject openTxtObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
-      openTxtObj.transform.SetParent(openBtn.transform, false);
-      RectTransform openTxtRt = openTxtObj.GetComponent<RectTransform>();
-      openTxtRt.anchorMin = Vector2.zero;
-      openTxtRt.anchorMax = Vector2.one;
-      openTxtRt.offsetMin = Vector2.zero;
-      openTxtRt.offsetMax = Vector2.zero;
-
-      TextMeshProUGUI openTxt = openTxtObj.GetComponent<TextMeshProUGUI>();
-      openTxt.text = "STATS";
-      openTxt.fontSize = 24;
-      openTxt.alignment = TextAlignmentOptions.Center;
-      openTxt.fontStyle = FontStyles.Bold;
-      openTxt.color = new Color(0.2f, 1f, 0.2f, 1f);
    }
 
    public void CloseStats()
