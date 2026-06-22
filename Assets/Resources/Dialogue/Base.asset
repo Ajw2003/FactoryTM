@@ -13,12 +13,15 @@ MonoBehaviour:
   m_Name: Base
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSO
   dialogues:
-  - text: Gaylord
+  - text: Here come the raiders
     sprite: {fileID: 0}
     color: {r: 0, g: 0, b: 0, a: 0}
-  - text: JoeMama
+    type: 0
+  - text: Aim with your mouse cursor and shoot with middle click
     sprite: {fileID: 0}
     color: {r: 0, g: 0, b: 0, a: 0}
-  - text: LOOOOSERRRRR
+    type: 0
+  - text: Good luck...
     sprite: {fileID: 0}
     color: {r: 0, g: 0, b: 0, a: 0}
+    type: 0
