@@ -32,6 +32,9 @@ public class DialogueManager : SingletonBase<DialogueManager>
     private TMP_Text text;
     private TMP_Text speakerText;
     private TMP_Text promptText;
+    
+    private bool isDialogueActive = false;
+    public bool IsDialogueActive => isDialogueActive;
 
     protected override void Awake()
     {
@@ -64,15 +67,43 @@ public class DialogueManager : SingletonBase<DialogueManager>
     private IEnumerator DialogueCoroutine()
     {
         _canWrite = true;
-        foreach (var character in currentDialogueText)
+        _currentlyWriting = true;
+
+        bool isStoreOpen = StoreUiScript.HasInstance && StoreUiScript.Instance.gameObject.activeInHierarchy;
+
+        if (isStoreOpen)
         {
-            yield return new WaitForSeconds(delayBetweenCharacters);
-            text.text += character;
-            _currentlyWriting = true;
+            if (dialogueBox != null && dialogueBox.activeSelf)
+            {
+                dialogueBox.SetActive(false);
+            }
+            
+            var currentType = currentDialogue.dialogues[currentDialogueIndex].type;
+            string speakerStr = currentType != DialogueType.None 
+                ? (currentType.ToString().ToUpper() + " // TRANSMISSION")
+                : "SYSTEM // INCOMING TRANSMISSION";
+
+            yield return StartCoroutine(StoreUiScript.Instance.TypeDialogue(
+                speakerStr,
+                currentDialogueText,
+                delayBetweenCharacters
+            ));
+        }
+        else
+        {
+            if (dialogueBox != null && !dialogueBox.activeSelf)
+            {
+                dialogueBox.SetActive(true);
+            }
+            if (text != null) text.text = "";
+            foreach (var character in currentDialogueText)
+            {
+                yield return new WaitForSeconds(delayBetweenCharacters);
+                if (text != null) text.text += character;
+            }
         }
 
         _currentlyWriting = false;
-
     }
 
     private void SetDialogue()
@@ -133,15 +164,34 @@ public class DialogueManager : SingletonBase<DialogueManager>
     {
         if (PauseManager.IsPaused) return;
 
+        bool isStoreOpen = StoreUiScript.HasInstance && StoreUiScript.Instance.gameObject.activeInHierarchy;
+
+        if (isDialogueActive)
+        {
+            if (isStoreOpen)
+            {
+                if (dialogueBox != null && dialogueBox.activeSelf)
+                {
+                    dialogueBox.SetActive(false);
+                }
+            }
+            else
+            {
+                if (dialogueBox != null && !dialogueBox.activeSelf)
+                {
+                    dialogueBox.SetActive(true);
+                    SetPositionMode(currentPositionMode, true);
+                    ReplayCurrentDialogue();
+                }
+            }
+        }
+
         if (Input.GetKeyDown(KeyCode.Space) && _canWrite)
         {
             if (CanAdvanceDialogue != null && !CanAdvanceDialogue()) return;
             
             IncrementDialogueIndex();
-            if (dialogueBox != null && dialogueBox.activeSelf)
-            {
-                _canWrite = true;
-            }
+            _canWrite = true;
         }
     }
 
@@ -153,29 +203,53 @@ public class DialogueManager : SingletonBase<DialogueManager>
         {
             case false :
                 _canWrite = false;
+                isDialogueActive = false;
                 if (text != null) text.text = null;
                 dialogueBox.SetActive(false);
                 _currentlyWriting = false;
                 if (_currentCoroutine != null) StopCoroutine(_currentCoroutine);
+                if (StoreUiScript.HasInstance)
+                {
+                    StoreUiScript.Instance.ClearDialogueMode();
+                }
                 break;
             case true :
+                isDialogueActive = true;
                 currentDialogueIndex = 0;
                 SetDialogue();
+                
+                bool isStoreOpen = StoreUiScript.HasInstance && StoreUiScript.Instance.gameObject.activeInHierarchy;
                 bool wasActive = dialogueBox.activeSelf;
-                dialogueBox.SetActive(true);
-                if (!wasActive)
+                
+                if (isStoreOpen)
                 {
-                    // Reset position to bottom on initial opening
-                    SetPositionMode(DialoguePositionMode.DefaultBottom, true);
-                    // CRT flicker opening effect
-                    dialogueBox.transform.localScale = new Vector3(1f, 0.05f, 1f);
-                    dialogueBox.transform.DOScaleY(1f, 0.2f).SetUpdate(true);
+                    dialogueBox.SetActive(false);
+                }
+                else
+                {
+                    dialogueBox.SetActive(true);
+                    if (!wasActive)
+                    {
+                        // Reset position to bottom on initial opening
+                        SetPositionMode(DialoguePositionMode.DefaultBottom, true);
+                        // CRT flicker opening effect
+                        dialogueBox.transform.localScale = new Vector3(1f, 0.05f, 1f);
+                        dialogueBox.transform.DOScaleY(1f, 0.2f).SetUpdate(true);
+                    }
                 }
                 if (_currentCoroutine != null) StopCoroutine(_currentCoroutine);
                 _currentCoroutine = StartCoroutine(DialogueCoroutine());
                 _canWrite = true;
                 break;
         }
+    }
+
+    public void ReplayCurrentDialogue()
+    {
+        if (!isDialogueActive || currentDialogue == null) return;
+        
+        if (_currentCoroutine != null) StopCoroutine(_currentCoroutine);
+        _currentCoroutine = StartCoroutine(DialogueCoroutine());
     }
 
     private void CreateDialogueUIProgrammatically()
