@@ -41,6 +41,12 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
     // Dynamically created upgrade shop buttons (from UpgradeManager)
     private List<GameObject> dynamicUpgradeButtons = new List<GameObject>();
     
+    private bool isDisplayingDialogue = false;
+    private string currentDialogueSpeaker = "";
+    private string currentDialogueTextTyped = "";
+    
+    public bool IsDisplayingDialogue => isDisplayingDialogue;
+    
     // Pagination fields
     [SerializeField]private int maxItemsPerPage = 3;
     private int currentPageIndex = 0;
@@ -346,7 +352,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         
         RectTransform consoleRt = consolePanel.GetComponent<RectTransform>();
         consoleRt.anchorMin = new Vector2(0.55f, 0.15f);
-        consoleRt.anchorMax = new Vector2(0.96f, 0.96f);
+        consoleRt.anchorMax = new Vector2(0.96f, 0.81f);
         consoleRt.offsetMin = Vector2.zero;
         consoleRt.offsetMax = Vector2.zero;
         
@@ -479,8 +485,15 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
                         if (!gameObject.activeInHierarchy) return;
                         // Trigger screen glitch/flicker effect
                         PlayFlickerGlitch();
-                        // Trigger terminal boot-up printout logs
-                        StartCoroutine(PlayBootLogs());
+                        // Trigger terminal boot-up printout logs or play tutorial dialogue
+                        if (DialogueManager.HasInstance && DialogueManager.Instance.IsDialogueActive)
+                        {
+                            DialogueManager.Instance.ReplayCurrentDialogue();
+                        }
+                        else
+                        {
+                            StartCoroutine(PlayBootLogs());
+                        }
                     });
         
         transitionSequence.SetUpdate(true);
@@ -598,14 +611,66 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
     
     private void UpdateLogDisplay()
     {
+        if (isDisplayingDialogue)
+        {
+            string header = $"*** INCOMING {currentDialogueSpeaker} ***\n";
+            header += "========================================\n";
+            string prompt = "\n\n[PRESS SPACE TO CONTINUE]";
+            
+            terminalLogText.text = header + currentDialogueTextTyped + (cursorVisible ? prompt + " " + cursorChar : prompt);
+            
+            Canvas.ForceUpdateCanvases();
+            if (terminalScroll != null) terminalScroll.verticalNormalizedPosition = 0f;
+            return;
+        }
+
         if (isTypingLog) return;
         
         string baseText = string.Join("\n", activeLogs);
+        if (activeLogs.Count > 0) baseText += "\n";
         terminalLogText.text = baseText + (cursorVisible ? cursorChar : "");
         
         // Keep scroll at bottom
         Canvas.ForceUpdateCanvases();
         if (terminalScroll != null) terminalScroll.verticalNormalizedPosition = 0f;
+    }
+
+    public void ClearDialogueMode()
+    {
+        if (isDisplayingDialogue)
+        {
+            isDisplayingDialogue = false;
+            activeLogs.Clear();
+            terminalLogText.text = "";
+            LogCommand("SYS: DIALOGUE_DISCONNECTED.");
+        }
+    }
+
+    public IEnumerator TypeDialogue(string speaker, string dialogueText, float delay)
+    {
+        isDisplayingDialogue = true;
+        currentDialogueSpeaker = speaker;
+        currentDialogueTextTyped = "";
+        
+        if (isTypingLog) isTypingLog = false;
+        activeLogs.Clear();
+        
+        string header = $"*** INCOMING {speaker} ***\n";
+        header += "========================================\n";
+        
+        for (int i = 0; i <= dialogueText.Length; i++)
+        {
+            if (!isDisplayingDialogue) yield break;
+
+            currentDialogueTextTyped = dialogueText.Substring(0, i);
+            terminalLogText.text = header + currentDialogueTextTyped + (cursorVisible ? cursorChar : "");
+            
+            Canvas.ForceUpdateCanvases();
+            if (terminalScroll != null) terminalScroll.verticalNormalizedPosition = 0f;
+            
+            yield return new WaitForSecondsRealtime(delay);
+        }
+        UpdateLogDisplay();
     }
     
     private void CreatePaginationControls()
@@ -764,7 +829,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         }
 
         // 2. Reposition and show active page buttons
-        float startY = 200f;
+        float startY = 300f;
         float spacingY = -180f; // Increased spacing to fit 160f tall buttons
 
         if (currentPageIndex < storePages.Count)
