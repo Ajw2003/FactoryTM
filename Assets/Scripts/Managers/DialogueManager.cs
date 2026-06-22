@@ -245,7 +245,7 @@ public class DialogueManager : SingletonBase<DialogueManager>
         textRt.offsetMax = new Vector2(-30f, -5f);
 
         text = textGo.GetComponent<TextMeshProUGUI>();
-        text.fontSize = 28;
+        text.fontSize = 36;
         text.color = new Color(0.2f, 0.9f, 0.2f, 1f);
         text.alignment = TextAlignmentOptions.TopLeft;
         text.enableWordWrapping = true;
@@ -262,7 +262,7 @@ public class DialogueManager : SingletonBase<DialogueManager>
         promptRt.offsetMax = new Vector2(-30f, 0f);
 
         promptText = promptGo.GetComponent<TextMeshProUGUI>();
-        promptText.fontSize = 22;
+        promptText.fontSize = 32;
         promptText.fontStyle = FontStyles.Italic;
         promptText.color = new Color(0.2f, 0.9f, 0.2f, 0.6f);
         promptText.alignment = TextAlignmentOptions.MidlineRight;

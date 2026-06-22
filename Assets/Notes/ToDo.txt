@@ -1,6 +1,3 @@
-make tutorial that integrates smoothly into gameplay, i.e. Controls: open your shop with E rotate objects with R place with left click, remove with Right click, 
-shoot with middle click. Then Instructions: build a miner and seller before the sun sets and the raiders come, rotate the miner to face the seller, 
-aim with your mouse and shoot full auto by default but be wary as ammo is limited early game.
 
 make sellers way more expensive after the first, or limit them some how so you are forced to use conveyors
 
@@ -12,7 +9,7 @@ add ability to change length of days based on certain factors such as money earn
 
 default make the first day 90 seconds and then subsequent days can be shorter or longer depending on various factors. test first day 90, second day 30
 
-make essential upgrades apear first in upgrade selection, turrets, walls, health
+make essential upgrades apear first in upgrade selection, turrets, walls, health packs
 
 fix not being able to place tile on valid empty space with items on it. or make conveyors not move items onto empty spaces 
 
