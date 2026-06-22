@@ -64,7 +64,8 @@ public class PlacementManager : SingletonBase<PlacementManager>
         Vector3Int vector3Cell = new Vector3Int(cell.x, cell.y, 0);
         Vector3 worldPos = GridManager.Instance.CellToWorldConversion(cell);
         
-        if (EventSystem.current.IsPointerOverGameObject())
+        bool isStoreOpen = StoreUiScript.HasInstance && StoreUiScript.Instance.gameObject.activeInHierarchy;
+        if (isStoreOpen && EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
         {
             // If it is, clear the ghost preview and stop here
             previewTilemap.ClearAllTiles();
