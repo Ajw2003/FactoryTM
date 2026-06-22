@@ -34,15 +34,21 @@ public class PauseManager : SingletonBase<PauseManager>
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            // If the store is open, we let the store handle closing or we close it.
-            // Let's assume if Pause Menu is open, we close it. Otherwise open it.
             if (isPaused)
             {
-                ResumeGame();
+                // If StatsPanel is currently active, we close it and reopen the Pause Menu
+                if (UiManager.Instance != null && UiManager.Instance.StatsPanel != null && UiManager.Instance.StatsPanel.activeSelf)
+                {
+                    UiManager.Instance.CloseStats();
+                    ShowPauseMenuOnly();
+                }
+                else
+                {
+                    ResumeGame();
+                }
             }
             else
             {
-                // Prevent opening pause menu if other modal menus are active, or just pause anyway.
                 PauseGame();
             }
         }
@@ -82,6 +88,29 @@ public class PauseManager : SingletonBase<PauseManager>
             pauseMenuPanel.transform.DOScaleY(0.005f, 0.2f).SetEase(Ease.InExpo).SetUpdate(true).OnComplete(() => {
                 pauseMenuPanel.SetActive(false);
             });
+        }
+    }
+
+    private void OpenStatsFromPauseMenu()
+    {
+        if (pauseMenuPanel != null)
+        {
+            pauseMenuPanel.SetActive(false);
+        }
+
+        if (UiManager.Instance != null)
+        {
+            UiManager.Instance.OpenStats();
+        }
+    }
+
+    public void ShowPauseMenuOnly()
+    {
+        if (pauseMenuPanel != null)
+        {
+            mainMenuContainer.SetActive(true);
+            settingsMenuContainer.SetActive(false);
+            pauseMenuPanel.SetActive(true);
         }
     }
 
@@ -236,13 +265,16 @@ public class PauseManager : SingletonBase<PauseManager>
         mmRt.offsetMax = Vector2.zero;
 
         // Button 1: Resume
-        CreateMenuButton("ResumeBtn", mmRt, "RESUME GAME", 160f, () => ResumeGame());
+        CreateMenuButton("ResumeBtn", mmRt, "RESUME GAME", 180f, () => ResumeGame());
 
-        // Button 2: Settings
-        CreateMenuButton("SettingsBtn", mmRt, "SETTINGS MENU", 60f, () => OpenSettingsSubmenu());
+        // Button 2: Stats
+        CreateMenuButton("StatsBtn", mmRt, "VIEW STATS", 80f, () => OpenStatsFromPauseMenu());
 
-        // Button 3: Quit
-        CreateMenuButton("QuitBtn", mmRt, "ABORT RUN [QUIT]", -40f, () => QuitGame());
+        // Button 3: Settings
+        CreateMenuButton("SettingsBtn", mmRt, "SETTINGS MENU", -20f, () => OpenSettingsSubmenu());
+
+        // Button 4: Quit
+        CreateMenuButton("QuitBtn", mmRt, "ABORT RUN [QUIT]", -120f, () => QuitGame());
 
         // ------------------ SETTINGS SUB-MENU ------------------
         settingsMenuContainer = new GameObject("SettingsMenuContainer", typeof(RectTransform));

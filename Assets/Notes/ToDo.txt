@@ -13,7 +13,25 @@ make essential upgrades apear first in upgrade selection, turrets, walls, health
 
 fix not being able to place tile on valid empty space with items on it. or make conveyors not move items onto empty spaces 
 
+add section of tutorial for land expansion 
 
+fix raycasting being blocked for placing buildings, nothing but the pause menu and store menu should be able to block placement ui wise.
 
+explain that different ore is worth more or less and some can be made into higher teired materials while others cannot.
 
+make it so you can hold left click and drag to place multiple of a tile.
+
+add difficulty settings 
+
+add end goal 
+
+add achievements 
+
+fix transition from intro to combat where dialogue closes tries to move then reopens. dialogue window should just stay and not transition 
+
+fix height of dialogue box for hot bar section, move just above the hot bar at first then up to the top of the screen when placing 
+
+make dialogue fit into shop when in shop window and not awkwardly cover certain elements
+
+make stats button part of pause menu instead of onscreen button
 
