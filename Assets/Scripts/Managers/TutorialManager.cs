@@ -2,6 +2,9 @@ using System.Collections;
 using Code.Scripts.EventSystems;
 using Singleton;
 using UnityEngine;
+using TMPro;
+using UnityEngine.UI;
+using DG.Tweening;
 
 public enum TutorialState
 {
@@ -150,6 +153,8 @@ public class TutorialManager : SingletonBase<TutorialManager>
     {
         currentState = TutorialState.Completed;
         
+        ShowCompletionVisual();
+
         if (DayNightManager.Instance != null)
         {
             DayNightManager.Instance.CompleteTutorial();
@@ -157,5 +162,87 @@ public class TutorialManager : SingletonBase<TutorialManager>
             // Force the day to end quickly so the raid starts soon after
             DayNightManager.Instance.timeRemaining = 5f; 
         }
+    }
+
+    private void ShowCompletionVisual()
+    {
+        GameObject canvasGo = GameObject.Find("HUD Canvas");
+        if (canvasGo == null) canvasGo = GameObject.Find("Canvas");
+        if (canvasGo == null) canvasGo = FindFirstObjectByType<Canvas>()?.gameObject;
+
+        if (canvasGo == null) return;
+
+        // Create UI Panel
+        GameObject visualPanel = new GameObject("TutorialCompletionVisual", typeof(RectTransform), typeof(CanvasGroup));
+        visualPanel.transform.SetParent(canvasGo.transform, false);
+
+        RectTransform panelRt = visualPanel.GetComponent<RectTransform>();
+        panelRt.anchorMin = new Vector2(0.5f, 0.5f);
+        panelRt.anchorMax = new Vector2(0.5f, 0.5f);
+        panelRt.pivot = new Vector2(0.5f, 0.5f);
+        panelRt.anchoredPosition = new Vector2(0f, 100f); // Slightly above center
+        panelRt.sizeDelta = new Vector2(600f, 150f);
+
+        CanvasGroup cg = visualPanel.GetComponent<CanvasGroup>();
+        cg.alpha = 0f;
+
+        // Background
+        GameObject bgGo = new GameObject("Background", typeof(RectTransform), typeof(Image));
+        bgGo.transform.SetParent(visualPanel.transform, false);
+        RectTransform bgRt = bgGo.GetComponent<RectTransform>();
+        bgRt.anchorMin = Vector2.zero;
+        bgRt.anchorMax = Vector2.one;
+        bgRt.offsetMin = Vector2.zero;
+        bgRt.offsetMax = Vector2.zero;
+        Image bgImg = bgGo.GetComponent<Image>();
+        bgImg.color = new Color(0f, 0.05f, 0f, 0.9f); // CRT dark green
+        Outline outline = bgGo.AddComponent<Outline>();
+        outline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
+        outline.effectDistance = new Vector2(2f, -2f);
+
+        // Text
+        GameObject textGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+        textGo.transform.SetParent(visualPanel.transform, false);
+        RectTransform textRt = textGo.GetComponent<RectTransform>();
+        textRt.anchorMin = Vector2.zero;
+        textRt.anchorMax = Vector2.one;
+        textRt.offsetMin = new Vector2(10f, 10f);
+        textRt.offsetMax = new Vector2(-10f, -10f);
+
+        TextMeshProUGUI txt = textGo.GetComponent<TextMeshProUGUI>();
+        txt.fontSize = 36;
+        txt.fontStyle = FontStyles.Bold;
+        txt.color = new Color(0.2f, 0.9f, 0.2f, 1f); // Glowing green
+        txt.alignment = TextAlignmentOptions.Center;
+        txt.text = "<color=#32FF32>TUTORIAL COMPLETED</color>\nSYSTEMS UNLOCKED\n<color=#FF3232>WARNING: RAID DETECTED</color>";
+
+        // Animation sequence using DOTween (fades in, flashes color, fades out)
+        Sequence seq = DOTween.Sequence();
+        seq.Append(cg.DOFade(1f, 0.5f))
+           .AppendInterval(0.2f)
+           // Flash outline red/green
+           .AppendCallback(() => {
+               outline.effectColor = new Color(1f, 0.2f, 0.2f, 0.9f);
+           })
+           .AppendInterval(0.3f)
+           .AppendCallback(() => {
+               outline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
+           })
+           .AppendInterval(0.3f)
+           .AppendCallback(() => {
+               outline.effectColor = new Color(1f, 0.2f, 0.2f, 0.9f);
+           })
+           .AppendInterval(0.3f)
+           .AppendCallback(() => {
+               outline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
+           })
+           .AppendInterval(2f) // Let it stay
+           .Append(panelRt.DOAnchorPosY(150f, 0.8f).SetEase(Ease.InBack)) // slide up
+           .Join(cg.DOFade(0f, 0.8f)) // fade out
+           .AppendCallback(() => {
+               Destroy(visualPanel);
+           });
+
+        seq.SetUpdate(true); // run timescale independent
     }
 }
