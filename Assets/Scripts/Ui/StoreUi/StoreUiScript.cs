@@ -5,9 +5,10 @@ using DG.Tweening;
 using System.Collections.Generic;
 using System.Collections;
 using Managers;
+using Singleton;
 using UnityEngine.EventSystems;
 
-public class StoreUiScript : MonoBehaviour
+public class StoreUiScript: SingletonBase<StoreUiScript>
 {
     private CanvasGroup canvasGroup;
     private RectTransform rectTransform;
@@ -47,6 +48,9 @@ public class StoreUiScript : MonoBehaviour
     private Button prevPageBtn;
     private Button nextPageBtn;
     private TMP_Text pageIndicatorText;
+
+    public int CurrentPageIndex => currentPageIndex;
+    public List<List<Button>> StorePages => storePages;
     
     private void Awake()
     {

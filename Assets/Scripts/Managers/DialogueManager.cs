@@ -10,6 +10,7 @@ using DG.Tweening;
 public class DialogueManager : SingletonBase<DialogueManager>
 {
     public event Action OnDialogueEnded;
+    public Func<bool> CanAdvanceDialogue;
     public DialogueSO currentDialogue;
     public int currentDialogueIndex;
     public float delayBetweenCharacters;
@@ -118,6 +119,8 @@ public class DialogueManager : SingletonBase<DialogueManager>
     {
         if (Input.GetKeyDown(KeyCode.Space) && _canWrite)
         {
+            if (CanAdvanceDialogue != null && !CanAdvanceDialogue()) return;
+            
             IncrementDialogueIndex();
             _canWrite = true;
         }
@@ -129,7 +132,7 @@ public class DialogueManager : SingletonBase<DialogueManager>
         }
     }
 
-    private void ToggleUi(bool enabled)
+    public void ToggleUi(bool enabled)
     {
         if (dialogueBox == null) return;
         
@@ -180,6 +183,7 @@ public class DialogueManager : SingletonBase<DialogueManager>
 
         Image panelImg = dialogueBox.GetComponent<Image>();
         panelImg.color = new Color(0.01f, 0.05f, 0.01f, 0.95f);
+        panelImg.raycastTarget = false;
 
         Outline outline = dialogueBox.AddComponent<Outline>();
         outline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
@@ -229,6 +233,7 @@ public class DialogueManager : SingletonBase<DialogueManager>
         speakerText.fontStyle = FontStyles.Bold;
         speakerText.color = new Color(0.3f, 1f, 0.3f, 1f);
         speakerText.alignment = TextAlignmentOptions.MidlineLeft;
+        speakerText.raycastTarget = false;
 
         // Main Text
         GameObject textGo = new GameObject("MainText", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -245,6 +250,7 @@ public class DialogueManager : SingletonBase<DialogueManager>
         text.alignment = TextAlignmentOptions.TopLeft;
         text.enableWordWrapping = true;
         text.text = "";
+        text.raycastTarget = false;
 
         // Continue prompt
         GameObject promptGo = new GameObject("PromptText", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -260,6 +266,7 @@ public class DialogueManager : SingletonBase<DialogueManager>
         promptText.fontStyle = FontStyles.Italic;
         promptText.color = new Color(0.2f, 0.9f, 0.2f, 0.6f);
         promptText.alignment = TextAlignmentOptions.MidlineRight;
+        promptText.raycastTarget = false;
 
         StartCoroutine(BlinkPromptCursor());
 

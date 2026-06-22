@@ -5,16 +5,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using DG.Tweening;
-
-public enum TutorialState
-{
-    NotStarted,
-    IntroDialogue,
-    WaitingForBuildings,
-    WaitingForFirstDollar,
-    CombatDialogue,
-    Completed
-}
+using Buildings;
 
 public class TutorialManager : SingletonBase<TutorialManager>
 {
@@ -22,12 +13,14 @@ public class TutorialManager : SingletonBase<TutorialManager>
     public DialogueSO introDialogue;
     public DialogueSO combatDialogue;
 
-    [Header("State")]
-    public TutorialState currentState = TutorialState.NotStarted;
-
-    private bool hasPlacedMiner = false;
-    private bool hasPlacedSeller = false;
-    private float initialCurrency = -1;
+    [Header("State (ReadOnly)")]
+    [SerializeField] private int currentDialogueIndex = -1;
+    [SerializeField] private bool hasPlacedMiner = false;
+    [SerializeField] private bool hasPlacedSeller = false;
+    [SerializeField] private bool hasPlacedConveyor = false;
+    
+    private float currencyAtWaitStart = -1f;
+    private bool introDialogueActive = false;
 
     protected override void Awake()
     {
@@ -46,13 +39,13 @@ public class TutorialManager : SingletonBase<TutorialManager>
 
         if (CurrencyManager.Instance != null)
         {
-            initialCurrency = CurrencyManager.Instance.currentCurrencyValue;
             CurrencyManager.Instance.onCurrencyChange += HandleCurrencyChange;
         }
         
         if (DialogueManager.Instance != null)
         {
             DialogueManager.Instance.OnDialogueEnded += HandleDialogueEnded;
+            DialogueManager.Instance.CanAdvanceDialogue = CheckCanAdvanceDialogue;
         }
     }
 
@@ -69,12 +62,13 @@ public class TutorialManager : SingletonBase<TutorialManager>
         if (DialogueManager.Instance != null)
         {
             DialogueManager.Instance.OnDialogueEnded -= HandleDialogueEnded;
+            DialogueManager.Instance.CanAdvanceDialogue = null;
         }
     }
 
     private IEnumerator StartTutorialRoutine()
     {
-        yield return new WaitForSeconds(1f); // Wait a moment for the scene to settle
+        yield return new WaitForSeconds(1.5f); // Wait a moment for the scene and UI to settle
         
         // Ensure DayNightManager is paused
         if (DayNightManager.Instance != null)
@@ -82,8 +76,88 @@ public class TutorialManager : SingletonBase<TutorialManager>
             DayNightManager.Instance.isTutorialActive = true;
         }
 
-        currentState = TutorialState.IntroDialogue;
+        introDialogueActive = true;
         PlayDialogue(introDialogue);
+    }
+
+    private void Update()
+    {
+        if (!introDialogueActive || DialogueManager.Instance == null || DialogueManager.Instance.currentDialogue != introDialogue)
+            return;
+
+        currentDialogueIndex = DialogueManager.Instance.currentDialogueIndex;
+
+        // Perform specific update checks for blocking steps
+        switch (currentDialogueIndex)
+        {
+            case 2: // "Press E To open your company device"
+                if (UiManager.Instance != null && UiManager.Instance.StorePanel != null && UiManager.Instance.StorePanel.activeSelf)
+                {
+                    // Switched off the dialogue UI so they can navigate
+                    DialogueManager.Instance.ToggleUi(false);
+                    AdvanceToDialogueIndex(3);
+                }
+                break;
+
+            case 3: // "navigate between pages and get your bearings"
+                // Turned off currently. Turn back on when they reach the BUILDING page.
+                int buildingPage = GetBuildingPage();
+                if (buildingPage != -1 && StoreUiScript.Instance != null && StoreUiScript.Instance.CurrentPageIndex == buildingPage)
+                {
+                    // Turn UI back on to guide them
+                    DialogueManager.Instance.ToggleUi(true);
+                    AdvanceToDialogueIndex(4);
+                }
+                break;
+
+            case 4: // "Then when you're ready buy a seller, a miner, and 5 conveyors."
+                if (GetInventoryCount(BuildingType.Miner) >= 1 &&
+                    GetInventoryCount(BuildingType.Seller) >= 1 &&
+                    GetInventoryCount(BuildingType.Conveyor) >= 5)
+                {
+                    AdvanceToDialogueIndex(5);
+                }
+                break;
+
+            case 5: // "Now, when you're ready close the company device by pressing escape or E"
+                if (UiManager.Instance != null && UiManager.Instance.StorePanel != null && !UiManager.Instance.StorePanel.activeSelf)
+                {
+                    AdvanceToDialogueIndex(6);
+                }
+                break;
+
+            case 7: // "Now select your miner, once selected press the R key to rotate..."
+                bool isMinerSelected = HotbarManager.Instance != null && 
+                                       HotbarManager.Instance.GetSelectedBuilding() != null && 
+                                       HotbarManager.Instance.GetSelectedBuilding().type == BuildingType.Miner;
+                if (isMinerSelected && Input.GetKeyDown(KeyCode.R))
+                {
+                    AdvanceToDialogueIndex(8);
+                }
+                break;
+
+            case 8: // "Left click to place down a miner and then select your conveyor item"
+                bool isConveyorSelected = HotbarManager.Instance != null && 
+                                         HotbarManager.Instance.GetSelectedBuilding() != null && 
+                                         HotbarManager.Instance.GetSelectedBuilding().type == BuildingType.Conveyor;
+                if (hasPlacedMiner && isConveyorSelected)
+                {
+                    AdvanceToDialogueIndex(9);
+                }
+                break;
+
+            case 9: // "Once selected place down 1-5 conveyors..."
+                if (hasPlacedConveyor)
+                {
+                    AdvanceToDialogueIndex(10);
+                }
+                break;
+
+            case 10: // "Finally select the seller and place it..."
+                // We handle advancing from index 10 when they earn their first dollar.
+                // It is checked in HandleCurrencyChange below.
+                break;
+        }
     }
 
     private void PlayDialogue(DialogueSO dialogue)
@@ -91,7 +165,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
         if (dialogue == null)
         {
             Debug.LogWarning("TutorialManager: DialogueSO is null. Skipping dialogue step.");
-            HandleDialogueEnded(); // Skip if not assigned
+            HandleDialogueEnded();
             return;
         }
         
@@ -99,67 +173,138 @@ public class TutorialManager : SingletonBase<TutorialManager>
         EventManager.Instance.Publish(eSet);
     }
 
+    private bool CheckCanAdvanceDialogue()
+    {
+        if (!introDialogueActive || DialogueManager.Instance == null || DialogueManager.Instance.currentDialogue != introDialogue)
+            return true;
+
+        int index = DialogueManager.Instance.currentDialogueIndex;
+
+        // Block spacebar advancement on task steps so they must perform the action
+        if (index == 2 || index == 3 || index == 4 || index == 5 || index == 7 || index == 8 || index == 9 || index == 10)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void AdvanceToDialogueIndex(int targetIndex)
+    {
+        if (DialogueManager.Instance != null)
+        {
+            DialogueManager.Instance.currentDialogueIndex = targetIndex;
+            // Calls SetDialogue() which pulls text and speaker name dynamically
+            // It will also trigger the coroutine to display characters
+            var method = typeof(DialogueManager).GetMethod("SetDialogue", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (method != null) method.Invoke(DialogueManager.Instance, null);
+            
+            // Re-trigger dialogue typing coroutine
+            var coroutineMethod = typeof(DialogueManager).GetMethod("DialogueCoroutine", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (coroutineMethod != null)
+            {
+                var coroutine = (IEnumerator)coroutineMethod.Invoke(DialogueManager.Instance, null);
+                // Stop any running typewriter coroutine on the DialogueManager first
+                var coroutineField = typeof(DialogueManager).GetField("_currentCoroutine", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (coroutineField != null)
+                {
+                    Coroutine current = (Coroutine)coroutineField.GetValue(DialogueManager.Instance);
+                    if (current != null) DialogueManager.Instance.StopCoroutine(current);
+                    
+                    Coroutine newCoroutine = DialogueManager.Instance.StartCoroutine(coroutine);
+                    coroutineField.SetValue(DialogueManager.Instance, newCoroutine);
+                }
+            }
+        }
+    }
+
     private void HandleDialogueEnded()
     {
-        if (currentState == TutorialState.IntroDialogue)
+        if (introDialogueActive)
         {
-            currentState = TutorialState.WaitingForBuildings;
-            CheckBuildingsCondition();
+            introDialogueActive = false;
+            // Intro dialogue is fully completed, start combat tutorial
+            PlayDialogue(combatDialogue);
         }
-        else if (currentState == TutorialState.CombatDialogue)
+        else
         {
+            // Combat dialogue completed, start game
             CompleteTutorial();
         }
     }
 
-    private void HandleBuildingPlaced(Buildings.BuildingData data)
+    private void HandleBuildingPlaced(BuildingData data)
     {
-        if (data.type == Buildings.BuildingType.Miner)
+        if (data.type == BuildingType.Miner)
         {
             hasPlacedMiner = true;
         }
-        else if (data.type == Buildings.BuildingType.Seller)
+        else if (data.type == BuildingType.Seller)
         {
             hasPlacedSeller = true;
+            // Record starting currency right when seller is placed (so we can check if it goes up)
+            if (CurrencyManager.Instance != null)
+            {
+                currencyAtWaitStart = CurrencyManager.Instance.currentCurrencyValue;
+            }
         }
-        
-        if (currentState == TutorialState.WaitingForBuildings)
+        else if (data.type == BuildingType.Conveyor)
         {
-            CheckBuildingsCondition();
-        }
-    }
-
-    private void CheckBuildingsCondition()
-    {
-        if (hasPlacedMiner && hasPlacedSeller)
-        {
-            currentState = TutorialState.WaitingForFirstDollar;
+            hasPlacedConveyor = true;
         }
     }
 
     private void HandleCurrencyChange()
     {
-        if (currentState == TutorialState.WaitingForFirstDollar)
+        if (introDialogueActive && currentDialogueIndex == 10)
         {
-            if (CurrencyManager.Instance != null && CurrencyManager.Instance.currentCurrencyValue > initialCurrency)
+            if (CurrencyManager.Instance != null && currencyAtWaitStart >= 0f)
             {
-                currentState = TutorialState.CombatDialogue;
-                PlayDialogue(combatDialogue);
+                if (CurrencyManager.Instance.currentCurrencyValue > currencyAtWaitStart)
+                {
+                    // Ernt first dollar!
+                    AdvanceToDialogueIndex(11);
+                }
             }
         }
     }
 
+    private int GetBuildingPage()
+    {
+        if (StoreUiScript.Instance == null || StoreUiScript.Instance.StorePages == null) return -1;
+        var pages = StoreUiScript.Instance.StorePages;
+        for (int i = 0; i < pages.Count; i++)
+        {
+            if (pages[i].Count > 0)
+            {
+                var btn = pages[i][0];
+                if (btn != null)
+                {
+                    var shopItem = btn.GetComponent<UpgradeShopItem>();
+                    if (shopItem != null && shopItem.GetTypeString() == "BUILDING")
+                    {
+                        return i;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+
+    private int GetInventoryCount(BuildingType type)
+    {
+        if (InventoryManager.Instance == null || InventoryManager.Instance.items == null) return 0;
+        var item = InventoryManager.Instance.items.Find(i => i.data != null && i.data.type == type);
+        return item != null ? item.count : 0;
+    }
+
     private void CompleteTutorial()
     {
-        currentState = TutorialState.Completed;
-        
         ShowCompletionVisual();
 
         if (DayNightManager.Instance != null)
         {
             DayNightManager.Instance.CompleteTutorial();
-            
-            // Force the day to end quickly so the raid starts soon after
             DayNightManager.Instance.timeRemaining = 5f; 
         }
     }
@@ -172,7 +317,6 @@ public class TutorialManager : SingletonBase<TutorialManager>
 
         if (canvasGo == null) return;
 
-        // Create UI Panel
         GameObject visualPanel = new GameObject("TutorialCompletionVisual", typeof(RectTransform), typeof(CanvasGroup));
         visualPanel.transform.SetParent(canvasGo.transform, false);
 
@@ -180,13 +324,12 @@ public class TutorialManager : SingletonBase<TutorialManager>
         panelRt.anchorMin = new Vector2(0.5f, 0.5f);
         panelRt.anchorMax = new Vector2(0.5f, 0.5f);
         panelRt.pivot = new Vector2(0.5f, 0.5f);
-        panelRt.anchoredPosition = new Vector2(0f, 100f); // Slightly above center
+        panelRt.anchoredPosition = new Vector2(0f, 100f);
         panelRt.sizeDelta = new Vector2(600f, 150f);
 
         CanvasGroup cg = visualPanel.GetComponent<CanvasGroup>();
         cg.alpha = 0f;
 
-        // Background
         GameObject bgGo = new GameObject("Background", typeof(RectTransform), typeof(Image));
         bgGo.transform.SetParent(visualPanel.transform, false);
         RectTransform bgRt = bgGo.GetComponent<RectTransform>();
@@ -195,12 +338,11 @@ public class TutorialManager : SingletonBase<TutorialManager>
         bgRt.offsetMin = Vector2.zero;
         bgRt.offsetMax = Vector2.zero;
         Image bgImg = bgGo.GetComponent<Image>();
-        bgImg.color = new Color(0f, 0.05f, 0f, 0.9f); // CRT dark green
+        bgImg.color = new Color(0f, 0.05f, 0f, 0.9f);
         Outline outline = bgGo.AddComponent<Outline>();
         outline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
         outline.effectDistance = new Vector2(2f, -2f);
 
-        // Text
         GameObject textGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
         textGo.transform.SetParent(visualPanel.transform, false);
         RectTransform textRt = textGo.GetComponent<RectTransform>();
@@ -212,15 +354,13 @@ public class TutorialManager : SingletonBase<TutorialManager>
         TextMeshProUGUI txt = textGo.GetComponent<TextMeshProUGUI>();
         txt.fontSize = 36;
         txt.fontStyle = FontStyles.Bold;
-        txt.color = new Color(0.2f, 0.9f, 0.2f, 1f); // Glowing green
+        txt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
         txt.alignment = TextAlignmentOptions.Center;
         txt.text = "<color=#32FF32>TUTORIAL COMPLETED</color>\nSYSTEMS UNLOCKED\n<color=#FF3232>WARNING: RAID DETECTED</color>";
 
-        // Animation sequence using DOTween (fades in, flashes color, fades out)
         Sequence seq = DOTween.Sequence();
         seq.Append(cg.DOFade(1f, 0.5f))
            .AppendInterval(0.2f)
-           // Flash outline red/green
            .AppendCallback(() => {
                outline.effectColor = new Color(1f, 0.2f, 0.2f, 0.9f);
            })
@@ -236,13 +376,13 @@ public class TutorialManager : SingletonBase<TutorialManager>
            .AppendCallback(() => {
                outline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
            })
-           .AppendInterval(2f) // Let it stay
-           .Append(panelRt.DOAnchorPosY(150f, 0.8f).SetEase(Ease.InBack)) // slide up
-           .Join(cg.DOFade(0f, 0.8f)) // fade out
+           .AppendInterval(2.5f)
+           .Append(panelRt.DOAnchorPosY(150f, 0.8f).SetEase(Ease.InBack))
+           .Join(cg.DOFade(0f, 0.8f))
            .AppendCallback(() => {
                Destroy(visualPanel);
            });
 
-        seq.SetUpdate(true); // run timescale independent
+        seq.SetUpdate(true);
     }
 }
