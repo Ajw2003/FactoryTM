@@ -122,7 +122,10 @@ public class DialogueManager : SingletonBase<DialogueManager>
             if (CanAdvanceDialogue != null && !CanAdvanceDialogue()) return;
             
             IncrementDialogueIndex();
-            _canWrite = true;
+            if (dialogueBox != null && dialogueBox.activeSelf)
+            {
+                _canWrite = true;
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))

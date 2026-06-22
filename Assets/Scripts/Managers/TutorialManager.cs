@@ -302,6 +302,23 @@ public class TutorialManager : SingletonBase<TutorialManager>
     {
         ShowCompletionVisual();
 
+        // Unsubscribe from all events to prevent any late Space key presses or changes from re-triggering tutorial code
+        if (DialogueManager.Instance != null)
+        {
+            DialogueManager.Instance.OnDialogueEnded -= HandleDialogueEnded;
+            DialogueManager.Instance.CanAdvanceDialogue = null;
+        }
+
+        if (PlacementManager.Instance != null)
+        {
+            PlacementManager.Instance.OnBuildingPlaced -= HandleBuildingPlaced;
+        }
+
+        if (CurrencyManager.Instance != null)
+        {
+            CurrencyManager.Instance.onCurrencyChange -= HandleCurrencyChange;
+        }
+
         if (DayNightManager.Instance != null)
         {
             DayNightManager.Instance.CompleteTutorial();
