@@ -117,6 +117,8 @@ public class DialogueManager : SingletonBase<DialogueManager>
 
     private void Update()
     {
+        if (PauseManager.IsPaused) return;
+
         if (Input.GetKeyDown(KeyCode.Space) && _canWrite)
         {
             if (CanAdvanceDialogue != null && !CanAdvanceDialogue()) return;
@@ -126,12 +128,6 @@ public class DialogueManager : SingletonBase<DialogueManager>
             {
                 _canWrite = true;
             }
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            _canWrite = !_canWrite;
-            ToggleUi(_canWrite);
         }
     }
 

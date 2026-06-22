@@ -18,6 +18,8 @@ public class HotbarManager : SingletonBase<HotbarManager>
 
     private void Update()
     {
+        if (PauseManager.IsPaused) return;
+
         // Handle slot selection via number keys
         for (int i = 0; i < slotCount; i++)
         {

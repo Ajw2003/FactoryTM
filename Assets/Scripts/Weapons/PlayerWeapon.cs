@@ -45,6 +45,8 @@ public class PlayerWeapon : BaseWeapon
     {
         base.Update();
        
+        if (PauseManager.IsPaused) return;
+
         if (cam == null) cam = Camera.main;
         if (cam == null) return;
             
