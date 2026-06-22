@@ -87,9 +87,10 @@ public class TutorialManager : SingletonBase<TutorialManager>
 
         currentDialogueIndex = DialogueManager.Instance.currentDialogueIndex;
 
-        // Dynamically shift dialogue position when store is open/closed
+        // Dynamically shift dialogue position when store is open or when hotbar tutorial is active (indices 6 to 11)
         bool isStoreOpen = UiManager.Instance != null && UiManager.Instance.StorePanel != null && UiManager.Instance.StorePanel.activeSelf;
-        DialogueManager.Instance.SetPositionToTop(isStoreOpen);
+        bool shouldBeAtTop = isStoreOpen || (currentDialogueIndex >= 6 && currentDialogueIndex <= 11);
+        DialogueManager.Instance.SetPositionToTop(shouldBeAtTop);
 
         // Perform specific update checks for blocking steps
         switch (currentDialogueIndex)
