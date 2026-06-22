@@ -74,38 +74,15 @@ public class DialogueManager : SingletonBase<DialogueManager>
         _canWrite = true;
         _currentlyWriting = true;
 
-        bool isStoreOpen = StoreUiScript.HasInstance && StoreUiScript.Instance.gameObject.activeInHierarchy;
-
-        if (isStoreOpen)
+        if (dialogueBox != null && !dialogueBox.activeSelf)
         {
-            if (dialogueBox != null && dialogueBox.activeSelf)
-            {
-                dialogueBox.SetActive(false);
-            }
-            
-            var currentType = currentDialogue.dialogues[currentDialogueIndex].type;
-            string speakerStr = currentType != DialogueType.None 
-                ? (currentType.ToString().ToUpper() + " // TRANSMISSION")
-                : "SYSTEM // INCOMING TRANSMISSION";
-
-            yield return StartCoroutine(StoreUiScript.Instance.TypeDialogue(
-                speakerStr,
-                currentDialogueText,
-                delayBetweenCharacters
-            ));
+            dialogueBox.SetActive(true);
         }
-        else
+        if (text != null) text.text = "";
+        foreach (var character in currentDialogueText)
         {
-            if (dialogueBox != null && !dialogueBox.activeSelf)
-            {
-                dialogueBox.SetActive(true);
-            }
-            if (text != null) text.text = "";
-            foreach (var character in currentDialogueText)
-            {
-                yield return new WaitForSeconds(delayBetweenCharacters);
-                if (text != null) text.text += character;
-            }
+            yield return new WaitForSeconds(delayBetweenCharacters);
+            if (text != null) text.text += character;
         }
 
         _currentlyWriting = false;
@@ -179,24 +156,19 @@ public class DialogueManager : SingletonBase<DialogueManager>
             return;
         }
 
-        bool isStoreOpen = StoreUiScript.HasInstance && StoreUiScript.Instance.gameObject.activeInHierarchy;
-
         if (isDialogueActive)
         {
-            if (isStoreOpen)
+            if (dialogueBox != null)
             {
-                if (dialogueBox != null && dialogueBox.activeSelf)
-                {
-                    dialogueBox.SetActive(false);
-                }
-            }
-            else
-            {
-                if (dialogueBox != null && !dialogueBox.activeSelf)
+                if (!dialogueBox.activeSelf)
                 {
                     dialogueBox.SetActive(true);
                     SetPositionMode(currentPositionMode, true);
                     ReplayCurrentDialogue();
+                }
+                else
+                {
+                    dialogueBox.transform.SetAsLastSibling();
                 }
             }
         }
@@ -223,10 +195,6 @@ public class DialogueManager : SingletonBase<DialogueManager>
                 dialogueBox.SetActive(false);
                 _currentlyWriting = false;
                 if (_currentCoroutine != null) StopCoroutine(_currentCoroutine);
-                if (StoreUiScript.HasInstance)
-                {
-                    StoreUiScript.Instance.ClearDialogueMode();
-                }
                 break;
             case true :
                 isDialogueActive = true;
@@ -238,7 +206,8 @@ public class DialogueManager : SingletonBase<DialogueManager>
                 
                 if (isStoreOpen)
                 {
-                    dialogueBox.SetActive(false);
+                    dialogueBox.SetActive(true);
+                    SetPositionMode(DialoguePositionMode.ShopLeftTop, true);
                 }
                 else
                 {
@@ -411,8 +380,8 @@ public class DialogueManager : SingletonBase<DialogueManager>
                 targetMax = new Vector2(0.85f, 0.95f);
                 break;
             case DialoguePositionMode.ShopLeftTop:
-                targetMin = new Vector2(0.1f, 0.78f);
-                targetMax = new Vector2(0.5f, 0.96f);
+                targetMin = new Vector2(0.55f, 0.15f);
+                targetMax = new Vector2(0.96f, 0.81f);
                 break;
         }
 

@@ -45,11 +45,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
     // Dynamically created upgrade shop buttons (from UpgradeManager)
     private List<GameObject> dynamicUpgradeButtons = new List<GameObject>();
     
-    private bool isDisplayingDialogue = false;
-    private string currentDialogueSpeaker = "";
-    private string currentDialogueTextTyped = "";
-    
-    public bool IsDisplayingDialogue => isDisplayingDialogue;
+
     
     // Pagination fields
     [SerializeField]private int maxItemsPerPage = 3;
@@ -489,16 +485,9 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
                         if (!gameObject.activeInHierarchy) return;
                         // Trigger screen glitch/flicker effect
                         PlayFlickerGlitch();
-                        // Trigger terminal boot-up printout logs or play tutorial dialogue
-                        if (DialogueManager.HasInstance && DialogueManager.Instance.IsDialogueActive)
-                        {
-                            DialogueManager.Instance.ReplayCurrentDialogue();
-                        }
-                        else
-                        {
-                            if (bootLogsCoroutine != null) StopCoroutine(bootLogsCoroutine);
-                            bootLogsCoroutine = StartCoroutine(PlayBootLogs());
-                        }
+                        // Trigger terminal boot-up printout logs
+                        if (bootLogsCoroutine != null) StopCoroutine(bootLogsCoroutine);
+                        bootLogsCoroutine = StartCoroutine(PlayBootLogs());
                     });
         
         transitionSequence.SetUpdate(true);
@@ -603,8 +592,6 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
     
     public void LogCommand(string cmd)
     {
-        if (isDisplayingDialogue) return;
-
         logQueue.Enqueue(cmd);
         if (!isProcessingQueue)
         {
@@ -618,11 +605,6 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         isProcessingQueue = true;
         while (logQueue.Count > 0)
         {
-            if (isDisplayingDialogue)
-            {
-                isProcessingQueue = false;
-                yield break;
-            }
             string msg = logQueue.Dequeue();
             
             // If it's a purchase command, add a prefix and a suffix response
@@ -633,12 +615,6 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
                 yield return typeLogLineCoroutine;
                 
                 yield return new WaitForSecondsRealtime(0.05f);
-                
-                if (isDisplayingDialogue)
-                {
-                    isProcessingQueue = false;
-                    yield break;
-                }
                 
                 if (typeLogLineCoroutine != null) StopCoroutine(typeLogLineCoroutine);
                 typeLogLineCoroutine = StartCoroutine(TypeLogLine("SYS: COMMAND_OK. EXECUTING TRANSACTION..."));
@@ -654,22 +630,8 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         }
         isProcessingQueue = false;
     }
-    
-    private void UpdateLogDisplay()
+        private void UpdateLogDisplay()
     {
-        if (isDisplayingDialogue)
-        {
-            string header = $"*** INCOMING {currentDialogueSpeaker} ***\n";
-            header += "========================================\n";
-            string prompt = "\n\n[PRESS SPACE TO CONTINUE]";
-            
-            terminalLogText.text = header + currentDialogueTextTyped + (cursorVisible ? prompt + " " + cursorChar : prompt);
-            
-            Canvas.ForceUpdateCanvases();
-            if (terminalScroll != null) terminalScroll.verticalNormalizedPosition = 0f;
-            return;
-        }
-
         if (isTypingLog) return;
         
         string baseText = string.Join("\n", activeLogs);
@@ -679,63 +641,6 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         // Keep scroll at bottom
         Canvas.ForceUpdateCanvases();
         if (terminalScroll != null) terminalScroll.verticalNormalizedPosition = 0f;
-    }
-
-    public void ClearDialogueMode()
-    {
-        if (isDisplayingDialogue)
-        {
-            isDisplayingDialogue = false;
-            activeLogs.Clear();
-            terminalLogText.text = "";
-            LogCommand("SYS: DIALOGUE_DISCONNECTED.");
-        }
-    }
-
-    public IEnumerator TypeDialogue(string speaker, string dialogueText, float delay)
-    {
-        isDisplayingDialogue = true;
-        currentDialogueSpeaker = speaker;
-        currentDialogueTextTyped = "";
-        
-        // Stop any running log coroutines to prevent terminal text flickering/race conditions
-        if (bootLogsCoroutine != null)
-        {
-            StopCoroutine(bootLogsCoroutine);
-            bootLogsCoroutine = null;
-        }
-        if (processLogQueueCoroutine != null)
-        {
-            StopCoroutine(processLogQueueCoroutine);
-            processLogQueueCoroutine = null;
-        }
-        if (typeLogLineCoroutine != null)
-        {
-            StopCoroutine(typeLogLineCoroutine);
-            typeLogLineCoroutine = null;
-        }
-        isProcessingQueue = false;
-        logQueue.Clear();
-        
-        if (isTypingLog) isTypingLog = false;
-        activeLogs.Clear();
-        
-        string header = $"*** INCOMING {speaker} ***\n";
-        header += "========================================\n";
-        
-        for (int i = 0; i <= dialogueText.Length; i++)
-        {
-            if (!isDisplayingDialogue) yield break;
-
-            currentDialogueTextTyped = dialogueText.Substring(0, i);
-            terminalLogText.text = header + currentDialogueTextTyped + (cursorVisible ? cursorChar : "");
-            
-            Canvas.ForceUpdateCanvases();
-            if (terminalScroll != null) terminalScroll.verticalNormalizedPosition = 0f;
-            
-            yield return new WaitForSecondsRealtime(delay);
-        }
-        UpdateLogDisplay();
     }
     
     private void CreatePaginationControls()
