@@ -486,6 +486,54 @@ MonoBehaviour:
   m_FirstSelected: {fileID: 0}
   m_sendNavigationEvents: 1
   m_DragThreshold: 10
+--- !u!1 &1052424218
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1052424220}
+  - component: {fileID: 1052424219}
+  m_Layer: 0
+  m_Name: Tutorial
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1052424219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1052424218}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 712d1ed50f08a1f4eac335bb659b7b9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialManager
+  persistBetweenScenes: 0
+  introDialogue: {fileID: 11400000, guid: 330002848372207419914a9b45b20783, type: 2}
+  combatDialogue: {fileID: 11400000, guid: 475d409c71d2f924993749151365df86, type: 2}
+  currentState: 0
+--- !u!4 &1052424220
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1052424218}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1087605985
 GameObject:
   m_ObjectHideFlags: 0
@@ -556,10 +604,12 @@ MonoBehaviour:
   dayDuration: 10
   currentDay: 1
   currentPhase: 0
+  isTutorialActive: 1
   baseEnemiesPerWave: 2
   wavesPerRaid: 1
   waveInterval: 10
   raidEnemyReduction: 0
+  timeRemaining: 0
 --- !u!4 &1155475865
 Transform:
   m_ObjectHideFlags: 0
@@ -719,7 +769,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1439403121
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2958,7 +3008,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5251824614163932693, guid: 6a54f585295065a489b29352b9b752a7, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3284,7 +3334,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -20}
-  m_SizeDelta: {x: 100, y: 34.81}
+  m_SizeDelta: {x: 100, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &5958647667387087516
 RectTransform:
@@ -4346,3 +4396,4 @@ SceneRoots:
   - {fileID: 2459535363872391810}
   - {fileID: 5050246103741614207}
   - {fileID: 1155475865}
+  - {fileID: 1052424220}
