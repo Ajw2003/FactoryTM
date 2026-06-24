@@ -344,18 +344,7 @@ public class GameManager : SingletonBase<GameManager>
         }
     }
 
-    private void Zoom()
-    {
-        if (Input.mouseScrollDelta.y != 0)
-        {
-            mainCamera.GetComponent<PixelPerfectCamera>().assetsPPU += (int)Input.mouseScrollDelta.y;
-        }
-        else if (Input.mouseScrollDelta.x != 0)
-        {
-            mainCamera.GetComponent<PixelPerfectCamera>().assetsPPU -= (int)Input.mouseScrollDelta.x;
-        }
-        //add a clamp for min and max zoom
-    }
+
 
     private void SpawnSingleResourceNode(Vector2Int cell, ResourceNodeDefinition definition)
     {

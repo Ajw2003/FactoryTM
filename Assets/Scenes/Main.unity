@@ -519,6 +519,10 @@ MonoBehaviour:
   introDialogue: {fileID: 11400000, guid: 330002848372207419914a9b45b20783, type: 2}
   combatDialogue: {fileID: 11400000, guid: 475d409c71d2f924993749151365df86, type: 2}
   currentState: 0
+  currentDialogueIndex: -1
+  hasPlacedMiner: 0
+  hasPlacedSeller: 0
+  hasPlacedConveyor: 0
 --- !u!4 &1052424220
 Transform:
   m_ObjectHideFlags: 0
@@ -1724,6 +1728,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35353376e79d6044094917219b15e28e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StoreUiScript
+  persistBetweenScenes: 0
   maxItemsPerPage: 4
 --- !u!1001 &3622028842122694276
 PrefabInstance:
@@ -3707,6 +3712,30 @@ PrefabInstance:
       propertyPath: mainCamera
       value: 
       objectReference: {fileID: 376557036}
+    - target: {fileID: 596444704922865151, guid: ea4e366a7e7d72b41bbc41d8aa5939ac, type: 3}
+      propertyPath: defaultUnlockedZones.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 596444704922865151, guid: ea4e366a7e7d72b41bbc41d8aa5939ac, type: 3}
+      propertyPath: defaultUnlockedZones.Array.data[1].x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 596444704922865151, guid: ea4e366a7e7d72b41bbc41d8aa5939ac, type: 3}
+      propertyPath: defaultUnlockedZones.Array.data[2].x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 596444704922865151, guid: ea4e366a7e7d72b41bbc41d8aa5939ac, type: 3}
+      propertyPath: defaultUnlockedZones.Array.data[2].y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 596444704922865151, guid: ea4e366a7e7d72b41bbc41d8aa5939ac, type: 3}
+      propertyPath: defaultUnlockedZones.Array.data[3].x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 596444704922865151, guid: ea4e366a7e7d72b41bbc41d8aa5939ac, type: 3}
+      propertyPath: defaultUnlockedZones.Array.data[3].y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1062398598004397836, guid: ea4e366a7e7d72b41bbc41d8aa5939ac, type: 3}
       propertyPath: m_Name
       value: ZoneManager
