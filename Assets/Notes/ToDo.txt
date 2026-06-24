@@ -41,6 +41,22 @@ add enemy outposts, toy around with raids not starting until you attack them or 
 
 better ui contrast, color choices and general style unification.
 
+do minecraft hotbar scroll to view name of item
+
+better shooting tutorial/ introduction 
+
+enemy wandering and differentiation between raiders and spawned enemies in structures
+
+
+Test finite resources removing resource nodes when depleted, you send the items back home through interdimensional transport which you can only have 1 of as they are so expensive to produce, if you die or your interdimensional transport is 
+broken then you lose. 
+
+ground the ui and design for this change and deprecate the seller, use its logic but make it no longer purchasable or an upgrade and start the player with one and only 1.
+
+now items are sent home and you are payed by the company per resource and are given a chart of estimated resource value.
+
+look at mindustery 
+
 
 
 BAD: 
