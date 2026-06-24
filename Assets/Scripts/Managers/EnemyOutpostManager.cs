@@ -281,6 +281,33 @@ namespace Managers
             }
         }
 
+        private bool CanPlaceStructureOfSize(Vector2Int baseCell, Vector2Int size)
+        {
+            if (GameManager.Instance == null || GameManager.Instance.MainTileMap == null) return false;
+
+            for (int x = 0; x < size.x; x++)
+            {
+                for (int y = 0; y < size.y; y++)
+                {
+                    Vector2Int cell = baseCell + new Vector2Int(x, y);
+                    Vector3Int tilePos = new Vector3Int(cell.x, cell.y, 0);
+
+                    // Must be on the map
+                    if (!GameManager.Instance.MainTileMap.HasTile(tilePos))
+                        return false;
+
+                    // Must not have a resource node
+                    if (ResourceManager.Instance != null && ResourceManager.Instance.GetNodeAtPosition(cell) != null)
+                        return false;
+
+                    // Must not have another active building
+                    if (PlacementManager.HasInstance && PlacementManager.Instance.GetActiveBuildings().ContainsKey(cell))
+                        return false;
+                }
+            }
+            return true;
+        }
+
         private void CreateOutpostAt(List<Vector2Int> cells)
         {
             EnemyOutpost outpost = new EnemyOutpost();
@@ -289,6 +316,13 @@ namespace Managers
             for (int i = 0; i < cells.Count; i++)
             {
                 Vector2Int cell = cells[i];
+
+                // Skip if this cell is already occupied by a previously placed multi-cell building
+                if (PlacementManager.HasInstance && PlacementManager.Instance.GetActiveBuildings().ContainsKey(cell))
+                {
+                    continue;
+                }
+
                 BuildingLogic building = null;
 
                 if (i == 0)
@@ -348,15 +382,27 @@ namespace Managers
                 return null;
             }
             
-            logic.Setup(buildingData, cell);
             logic.isEnemyOwned = true;
+            logic.Setup(buildingData, cell);
  
-            List<Vector2Int> occupied = new List<Vector2Int> { cell };
+            // Calculate all occupied cells based on size
+            List<Vector2Int> occupied = new List<Vector2Int>();
+            Vector2Int size = buildingData.size;
+            for (int x = 0; x < size.x; x++)
+            {
+                for (int y = 0; y < size.y; y++)
+                {
+                    occupied.Add(cell + new Vector2Int(x, y));
+                }
+            }
             logic.SetOccupiedCells(occupied);
  
             if (PlacementManager.HasInstance)
             {
-                PlacementManager.Instance.RegisterActiveBuilding(cell, buildingObj);
+                foreach (var occupiedCell in occupied)
+                {
+                    PlacementManager.Instance.RegisterActiveBuilding(occupiedCell, buildingObj);
+                }
             }
  
             return logic;
@@ -399,19 +445,23 @@ namespace Managers
             if (rand < 0.4f)
             {
                 Buildings.BuildingData data = Resources.Load<Buildings.BuildingData>("BuildingData/Furnace");
-                return SpawnEnemyBuilding(cell, data, typeof(Furnace));
+                if (data != null && CanPlaceStructureOfSize(cell, data.size))
+                {
+                    return SpawnEnemyBuilding(cell, data, typeof(Furnace));
+                }
             }
             else if (rand < 0.8f)
             {
                 Buildings.BuildingData data = Resources.Load<Buildings.BuildingData>("BuildingData/Mine");
-                return SpawnEnemyBuilding(cell, data, typeof(MinerLogic));
+                if (data != null && CanPlaceStructureOfSize(cell, data.size))
+                {
+                    return SpawnEnemyBuilding(cell, data, typeof(MinerLogic));
+                }
             }
-            else
-            {
-                // Chest in this codebase is a plain MonoBehaviour (not BuildingLogic), so fallback to spawning Wall
-                Buildings.BuildingData data = Resources.Load<Buildings.BuildingData>("BuildingData/Wall");
-                return SpawnEnemyBuilding(cell, data, typeof(WallLogic));
-            }
+
+            // Fallback to spawning Wall (1x1)
+            Buildings.BuildingData wallData = Resources.Load<Buildings.BuildingData>("BuildingData/Wall");
+            return SpawnEnemyBuilding(cell, wallData, typeof(WallLogic));
         }
     }
 }

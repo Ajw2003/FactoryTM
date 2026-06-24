@@ -57,6 +57,10 @@ public class CartelMember : MonoBehaviour, IHealth
             target = GameManager.Instance.playerController.gameObject;
         }
         weapon = GetComponent<EnemyWeapon>();
+        if (weapon != null)
+        {
+            weapon.isEnemyFired = true;
+        }
         Health = MaxHealth;
     }
 
