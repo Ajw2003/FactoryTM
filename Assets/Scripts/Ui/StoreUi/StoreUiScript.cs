@@ -57,6 +57,17 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
 
     public int CurrentPageIndex => currentPageIndex;
     public List<List<Button>> StorePages => storePages;
+
+    // Tabs & Map Grid UI panels
+    private GameObject upgradesContainer;
+    private GameObject mapGridPanel;
+    private Button upgradesTabBtn;
+    private Button mapTabBtn;
+    private TMP_Text upgradesTabTxt;
+    private TMP_Text mapTabTxt;
+
+    public enum StoreTab { Upgrades, Map }
+    private StoreTab activeTab = StoreTab.Upgrades;
     
     private void Awake()
     {
@@ -80,6 +91,10 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
             // Catch up on any upgrades that were unlocked while the store was disabled
             OnUpgradesChanged();
         }
+        if (CurrencyManager.HasInstance)
+        {
+            CurrencyManager.Instance.onCurrencyChange += OnCurrencyChange;
+        }
     }
 
     private void OnDisable()
@@ -87,6 +102,18 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         if (UpgradeManager.HasInstance)
         {
             UpgradeManager.Instance.onUpgradesChanged -= OnUpgradesChanged;
+        }
+        if (CurrencyManager.HasInstance)
+        {
+            CurrencyManager.Instance.onCurrencyChange -= OnCurrencyChange;
+        }
+    }
+
+    private void OnCurrencyChange()
+    {
+        if (activeTab == StoreTab.Map && mapGridPanel != null && mapGridPanel.activeSelf)
+        {
+            RefreshMapGrid();
         }
     }
 
@@ -110,7 +137,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         // Create button GameObject
         GameObject btnGo = new GameObject("UpgradeShopBtn_" + def.upgradeId,
             typeof(RectTransform), typeof(Image), typeof(Button), typeof(UpgradeShopItem));
-        btnGo.transform.SetParent(transform, false);
+        btnGo.transform.SetParent(upgradesContainer != null ? upgradesContainer.transform : transform, false);
 
         RectTransform rt = btnGo.GetComponent<RectTransform>();
         rt.anchorMin = new Vector2(0.1f, 0.5f);
@@ -243,6 +270,13 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
     
     private void SetupTerminalAesthetics()
     {
+        // Disable old HUD zone panel if found in the scene
+        ZoneUiManager oldZoneUi = FindFirstObjectByType<ZoneUiManager>(FindObjectsInactive.Include);
+        if (oldZoneUi != null)
+        {
+            oldZoneUi.gameObject.SetActive(false);
+        }
+
         // 1. Force the StorePanel to cover the entire screen
         rectTransform.anchorMin = Vector2.zero;
         rectTransform.anchorMax = Vector2.one;
@@ -323,6 +357,30 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         }
         vignetteTex.Apply();
         vignetteOverlay.sprite = Sprite.Create(vignetteTex, new Rect(0, 0, 128, 128), new Vector2(0.5f, 0.5f));
+
+        // Create container for upgrades page
+        upgradesContainer = new GameObject("UpgradesContainer", typeof(RectTransform));
+        upgradesContainer.transform.SetParent(transform, false);
+        upgradesContainer.transform.SetSiblingIndex(4);
+        RectTransform ucRt = upgradesContainer.GetComponent<RectTransform>();
+        ucRt.anchorMin = Vector2.zero;
+        ucRt.anchorMax = Vector2.one;
+        ucRt.offsetMin = Vector2.zero;
+        ucRt.offsetMax = Vector2.zero;
+
+        // Create container for map grid
+        mapGridPanel = new GameObject("MapGridPanel", typeof(RectTransform));
+        mapGridPanel.transform.SetParent(transform, false);
+        mapGridPanel.transform.SetSiblingIndex(5);
+        RectTransform mgRt = mapGridPanel.GetComponent<RectTransform>();
+        mgRt.anchorMin = new Vector2(0.1f, 0.15f);
+        mgRt.anchorMax = new Vector2(0.45f, 0.81f);
+        mgRt.offsetMin = Vector2.zero;
+        mgRt.offsetMax = Vector2.zero;
+        mapGridPanel.SetActive(false);
+
+        // Create Tabs Panel
+        CreateTabsPanel();
         
         // 5. Layout existing UI elements on the LEFT
         // Destroy existing static buttons since we unify to UpgradeDefinition
@@ -472,6 +530,10 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         canvasGroup.DOComplete();
         if (transitionSequence != null) transitionSequence.Kill();
         
+        // Reset active tab to Upgrades
+        activeTab = StoreTab.Map;
+        SwitchTab(StoreTab.Upgrades);
+
         // 1. Initial State: scale to a thin central line
         rectTransform.localScale = new Vector3(1f, 0.002f, 1f);
         canvasGroup.alpha = 0f;
@@ -649,7 +711,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
 
         // Container panel for pagination buttons
         GameObject pagPanel = new GameObject("Pagination_Panel", typeof(RectTransform));
-        pagPanel.transform.SetParent(transform, false);
+        pagPanel.transform.SetParent(upgradesContainer != null ? upgradesContainer.transform : transform, false);
         RectTransform pagRt = pagPanel.GetComponent<RectTransform>();
         
         // Position it at the bottom left area
@@ -837,5 +899,368 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         {
             pageIndicatorText.text = $"PAGE {currentPageIndex + 1:D2} / {totalPages:D2}";
         }
+    }
+
+    private void CreateTabsPanel()
+    {
+        GameObject tabsPanel = new GameObject("TabsPanel", typeof(RectTransform));
+        tabsPanel.transform.SetParent(transform, false);
+        RectTransform tpRt = tabsPanel.GetComponent<RectTransform>();
+        tpRt.anchorMin = new Vector2(0.1f, 0.83f);
+        tpRt.anchorMax = new Vector2(0.45f, 0.89f);
+        tpRt.offsetMin = Vector2.zero;
+        tpRt.offsetMax = Vector2.zero;
+
+        // 1. Upgrades Tab
+        GameObject upgGo = new GameObject("UpgradesTabBtn", typeof(RectTransform), typeof(Image), typeof(Button));
+        upgGo.transform.SetParent(tabsPanel.transform, false);
+        upgradesTabBtn = upgGo.GetComponent<Button>();
+        RectTransform upgRt = upgGo.GetComponent<RectTransform>();
+        upgRt.anchorMin = new Vector2(0f, 0f);
+        upgRt.anchorMax = new Vector2(0.48f, 1f);
+        upgRt.offsetMin = Vector2.zero;
+        upgRt.offsetMax = Vector2.zero;
+        
+        Image upgImg = upgGo.GetComponent<Image>();
+        upgImg.color = new Color(0.1f, 0.35f, 0.1f, 0.95f); // Active by default
+        Outline upgOutline = upgGo.AddComponent<Outline>();
+        upgOutline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
+        upgOutline.effectDistance = new Vector2(2f, 2f);
+
+        GameObject upgTxtGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+        upgTxtGo.transform.SetParent(upgGo.transform, false);
+        RectTransform utRt = upgTxtGo.GetComponent<RectTransform>();
+        utRt.anchorMin = Vector2.zero;
+        utRt.anchorMax = Vector2.one;
+        utRt.offsetMin = Vector2.zero;
+        utRt.offsetMax = Vector2.zero;
+        upgradesTabTxt = upgTxtGo.GetComponent<TextMeshProUGUI>();
+        upgradesTabTxt.text = "UPGRADES SHOP";
+        upgradesTabTxt.color = new Color(0.02f, 0.04f, 0.02f, 1f); // Dark text for active tab
+        upgradesTabTxt.alignment = TextAlignmentOptions.Center;
+        upgradesTabTxt.fontSize = 32;
+        upgradesTabTxt.fontStyle = FontStyles.Bold;
+
+        // 2. Map Tab
+        GameObject mapGo = new GameObject("MapTabBtn", typeof(RectTransform), typeof(Image), typeof(Button));
+        mapGo.transform.SetParent(tabsPanel.transform, false);
+        mapTabBtn = mapGo.GetComponent<Button>();
+        RectTransform mapRt = mapGo.GetComponent<RectTransform>();
+        mapRt.anchorMin = new Vector2(0.52f, 0f);
+        mapRt.anchorMax = new Vector2(1f, 1f);
+        mapRt.offsetMin = Vector2.zero;
+        mapRt.offsetMax = Vector2.zero;
+
+        Image mapImg = mapGo.GetComponent<Image>();
+        mapImg.color = new Color(0.05f, 0.15f, 0.05f, 0.85f); // Inactive by default
+        Outline mapOutline = mapGo.AddComponent<Outline>();
+        mapOutline.effectColor = new Color(0.1f, 0.8f, 0.1f, 0.5f);
+        mapOutline.effectDistance = new Vector2(2f, 2f);
+
+        GameObject mapTxtGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+        mapTxtGo.transform.SetParent(mapGo.transform, false);
+        RectTransform mtRt = mapTxtGo.GetComponent<RectTransform>();
+        mtRt.anchorMin = Vector2.zero;
+        mtRt.anchorMax = Vector2.one;
+        mtRt.offsetMin = Vector2.zero;
+        mtRt.offsetMax = Vector2.zero;
+        mapTabTxt = mapTxtGo.GetComponent<TextMeshProUGUI>();
+        mapTabTxt.text = "SATELLITE MAP";
+        mapTabTxt.color = new Color(0.2f, 0.9f, 0.2f, 1f); // Bright text for inactive tab
+        mapTabTxt.alignment = TextAlignmentOptions.Center;
+        mapTabTxt.fontSize = 32;
+        mapTabTxt.fontStyle = FontStyles.Bold;
+
+        // Wire click events
+        upgradesTabBtn.onClick.AddListener(() => SwitchTab(StoreTab.Upgrades));
+        mapTabBtn.onClick.AddListener(() => SwitchTab(StoreTab.Map));
+
+        // Add hover effects for tabs
+        AddTabHoverEffect(upgradesTabBtn, upgradesTabTxt, "UPGRADES SHOP", true);
+        AddTabHoverEffect(mapTabBtn, mapTabTxt, "SATELLITE MAP", false);
+    }
+
+    private void AddTabHoverEffect(Button btn, TMP_Text txt, string origText, bool startsActive)
+    {
+        EventTrigger trigger = btn.gameObject.GetComponent<EventTrigger>() ?? btn.gameObject.AddComponent<EventTrigger>();
+
+        EventTrigger.Entry entryEnter = new EventTrigger.Entry();
+        entryEnter.eventID = EventTriggerType.PointerEnter;
+        entryEnter.callback.AddListener((data) => {
+            if (activeTab == StoreTab.Upgrades && btn == upgradesTabBtn) return;
+            if (activeTab == StoreTab.Map && btn == mapTabBtn) return;
+
+            btn.transform.DOScale(1.03f, 0.1f).SetUpdate(true);
+            txt.color = new Color(0.5f, 1f, 0.5f, 1f);
+        });
+        trigger.triggers.Add(entryEnter);
+
+        EventTrigger.Entry entryExit = new EventTrigger.Entry();
+        entryExit.eventID = EventTriggerType.PointerExit;
+        entryExit.callback.AddListener((data) => {
+            btn.transform.DOScale(1f, 0.1f).SetUpdate(true);
+            if (activeTab == StoreTab.Upgrades && btn == upgradesTabBtn)
+            {
+                txt.color = new Color(0.02f, 0.04f, 0.02f, 1f);
+            }
+            else if (activeTab == StoreTab.Map && btn == mapTabBtn)
+            {
+                txt.color = new Color(0.02f, 0.04f, 0.02f, 1f);
+            }
+            else
+            {
+                txt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
+            }
+        });
+        trigger.triggers.Add(entryExit);
+    }
+
+    public void SwitchTab(StoreTab tab)
+    {
+        if (activeTab == tab) return;
+        activeTab = tab;
+
+        // Visual feedback on tab buttons
+        if (activeTab == StoreTab.Upgrades)
+        {
+            if (upgradesTabBtn != null)
+            {
+                upgradesTabBtn.GetComponent<Image>().color = new Color(0.1f, 0.35f, 0.1f, 0.95f);
+                upgradesTabBtn.GetComponent<Outline>().effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
+            }
+            if (upgradesTabTxt != null) upgradesTabTxt.color = new Color(0.02f, 0.04f, 0.02f, 1f);
+
+            if (mapTabBtn != null)
+            {
+                mapTabBtn.GetComponent<Image>().color = new Color(0.05f, 0.15f, 0.05f, 0.85f);
+                mapTabBtn.GetComponent<Outline>().effectColor = new Color(0.1f, 0.8f, 0.1f, 0.5f);
+            }
+            if (mapTabTxt != null) mapTabTxt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
+
+            if (upgradesContainer != null) upgradesContainer.SetActive(true);
+            if (mapGridPanel != null) mapGridPanel.SetActive(false);
+            LogCommand("NAVIGATED TO UPGRADES SHOP");
+        }
+        else
+        {
+            if (mapTabBtn != null)
+            {
+                mapTabBtn.GetComponent<Image>().color = new Color(0.1f, 0.35f, 0.1f, 0.95f);
+                mapTabBtn.GetComponent<Outline>().effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
+            }
+            if (mapTabTxt != null) mapTabTxt.color = new Color(0.02f, 0.04f, 0.02f, 1f);
+
+            if (upgradesTabBtn != null)
+            {
+                upgradesTabBtn.GetComponent<Image>().color = new Color(0.05f, 0.15f, 0.05f, 0.85f);
+                upgradesTabBtn.GetComponent<Outline>().effectColor = new Color(0.1f, 0.8f, 0.1f, 0.5f);
+            }
+            if (upgradesTabTxt != null) upgradesTabTxt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
+
+            if (upgradesContainer != null) upgradesContainer.SetActive(false);
+            if (mapGridPanel != null) mapGridPanel.SetActive(true);
+            LogCommand("INITIALIZING SATELLITE MAP GRID...");
+            
+            RefreshMapGrid();
+        }
+    }
+
+    private void RefreshMapGrid()
+    {
+        if (mapGridPanel == null) return;
+        if (ZoneManager.Instance == null) return;
+
+        // Clear old children in mapGridPanel
+        foreach (Transform child in mapGridPanel.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        Vector2Int centerZone = ZoneManager.Instance.GetCurrentZone();
+        float cellMargin = 0.008f;
+        float cellSize = 0.2f;
+
+        for (int row = 0; row < 5; row++)
+        {
+            for (int col = 0; col < 5; col++)
+            {
+                int zoneX = centerZone.x + (col - 2);
+                int zoneY = centerZone.y + (2 - row);
+                Vector2Int zoneCoords = new Vector2Int(zoneX, zoneY);
+
+                CreateGridCell(col, row, zoneCoords, cellMargin, cellSize);
+            }
+        }
+    }
+
+    private void CreateGridCell(int col, int row, Vector2Int zoneCoords, float margin, float size)
+    {
+        bool isUnlocked = ZoneManager.Instance.IsZoneUnlocked(zoneCoords);
+        bool isCurrent = (zoneCoords == ZoneManager.Instance.GetCurrentZone());
+        bool isAdjacent = false;
+
+        // Check if adjacent to ANY unlocked zone
+        if (!isUnlocked)
+        {
+            Vector2Int[] neighbors = new Vector2Int[] {
+                zoneCoords + Vector2Int.up,
+                zoneCoords + Vector2Int.down,
+                zoneCoords + Vector2Int.left,
+                zoneCoords + Vector2Int.right
+            };
+            foreach (var n in neighbors)
+            {
+                if (ZoneManager.Instance.IsZoneUnlocked(n))
+                {
+                    isAdjacent = true;
+                    break;
+                }
+            }
+        }
+
+        // Create the cell GameObject
+        GameObject cellGo = new GameObject($"Cell_{zoneCoords.x}_{zoneCoords.y}", typeof(RectTransform), typeof(Image), typeof(Button));
+        cellGo.transform.SetParent(mapGridPanel.transform, false);
+
+        RectTransform rt = cellGo.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(col * size + margin, (4 - row) * size + margin);
+        rt.anchorMax = new Vector2((col + 1) * size - margin, (4 - row + 1) * size - margin);
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+
+        Image img = cellGo.GetComponent<Image>();
+        Button btn = cellGo.GetComponent<Button>();
+        Outline outline = cellGo.AddComponent<Outline>();
+        outline.effectColor = new Color(0.1f, 0.8f, 0.1f, 0.5f);
+        outline.effectDistance = new Vector2(2f, 2f);
+
+        // Text display on cell
+        GameObject txtGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+        txtGo.transform.SetParent(cellGo.transform, false);
+        RectTransform txtRt = txtGo.GetComponent<RectTransform>();
+        txtRt.anchorMin = Vector2.zero;
+        txtRt.anchorMax = Vector2.one;
+        txtRt.offsetMin = new Vector2(5f, 5f);
+        txtRt.offsetMax = new Vector2(-5f, -5f);
+        TextMeshProUGUI txt = txtGo.GetComponent<TextMeshProUGUI>();
+        txt.alignment = TextAlignmentOptions.Center;
+        txt.textWrappingMode = TextWrappingModes.Normal;
+        txt.fontSize = 28;
+        txt.fontStyle = FontStyles.Bold;
+
+        if (isUnlocked)
+        {
+            // Owned / Active zone
+            if (isCurrent)
+            {
+                img.color = new Color(0.15f, 0.45f, 0.15f, 0.95f); // brighter active green for current zone
+                outline.effectColor = new Color(0.3f, 1f, 0.3f, 0.9f);
+                txt.text = $"ZONE {zoneCoords.x},{zoneCoords.y}\n[ CURRENT ]";
+                txt.color = new Color(0.5f, 1f, 0.5f, 1f);
+            }
+            else
+            {
+                img.color = new Color(0.05f, 0.25f, 0.05f, 0.85f);
+                outline.effectColor = new Color(0.15f, 0.75f, 0.15f, 0.6f);
+                txt.text = $"ZONE {zoneCoords.x},{zoneCoords.y}\n[ OWNED ]";
+                txt.color = new Color(0.2f, 0.9f, 0.2f, 0.8f);
+            }
+
+            // Unlocked zones are owned, clicking does nothing
+            btn.interactable = false;
+        }
+        else if (isAdjacent)
+        {
+            // Available to purchase
+            img.color = new Color(0.08f, 0.18f, 0.08f, 0.85f);
+            outline.effectColor = new Color(0.2f, 0.8f, 0.2f, 0.5f);
+            float cost = ZoneManager.Instance.GetUnlockCost();
+            txt.text = $"ZONE {zoneCoords.x},{zoneCoords.y}\n${cost:F0}";
+            txt.color = new Color(0.2f, 0.8f, 0.2f, 0.9f);
+
+            btn.onClick.AddListener(() => {
+                PurchaseZone(zoneCoords);
+            });
+
+            // Hover animation for purchasable zone
+            AddCellHoverEffect(btn, txt, img, outline, $"ZONE {zoneCoords.x},{zoneCoords.y}\n${cost:F0}", true);
+        }
+        else
+        {
+            // Obscured / Locked zone (out of range)
+            img.color = new Color(0.01f, 0.05f, 0.01f, 0.95f);
+            outline.effectColor = new Color(0.05f, 0.2f, 0.05f, 0.3f);
+            txt.text = "[ ??? ]\nOFFLINE";
+            txt.color = new Color(0.1f, 0.4f, 0.1f, 0.5f);
+
+            btn.onClick.AddListener(() => {
+                LogCommand("SYS: CONNECTION ERROR. ZONE OUT OF RANGE.");
+            });
+
+            // Hover animation for obscured zone
+            AddCellHoverEffect(btn, txt, img, outline, "[ ??? ]\nOFFLINE", false);
+        }
+    }
+
+    private void PurchaseZone(Vector2Int zoneCoords)
+    {
+        LogCommand($"EXECUTE_UNLOCK: ZONE {zoneCoords.x},{zoneCoords.y}");
+        bool success = ZoneManager.Instance.TryUnlockZone(zoneCoords);
+        if (success)
+        {
+            LogCommand($"SYS: ZONE {zoneCoords.x},{zoneCoords.y} ONLINE.");
+            RefreshMapGrid();
+        }
+        else
+        {
+            LogCommand("SYS: ERROR. INSUFFICIENT CAPITAL.");
+        }
+    }
+
+    private void AddCellHoverEffect(Button btn, TextMeshProUGUI txt, Image img, Outline outline, string origText, bool isPurchasable)
+    {
+        EventTrigger trigger = btn.gameObject.GetComponent<EventTrigger>() ?? btn.gameObject.AddComponent<EventTrigger>();
+
+        EventTrigger.Entry entryEnter = new EventTrigger.Entry();
+        entryEnter.eventID = EventTriggerType.PointerEnter;
+        entryEnter.callback.AddListener((data) => {
+            if (!btn.interactable) return;
+
+            btn.transform.DOScale(1.04f, 0.1f).SetUpdate(true);
+            if (isPurchasable)
+            {
+                img.color = new Color(0.12f, 0.3f, 0.12f, 0.95f);
+                outline.effectColor = new Color(0.3f, 1f, 0.3f, 0.9f);
+                txt.color = new Color(0.5f, 1f, 0.5f, 1f);
+            }
+            else
+            {
+                // Obscured cell hover feedback
+                txt.text = "[ !!! ]\nBLOCKED";
+                txt.color = new Color(0.8f, 0.2f, 0.2f, 0.8f);
+                outline.effectColor = new Color(0.6f, 0.1f, 0.1f, 0.5f);
+            }
+        });
+        trigger.triggers.Add(entryEnter);
+
+        EventTrigger.Entry entryExit = new EventTrigger.Entry();
+        entryExit.eventID = EventTriggerType.PointerExit;
+        entryExit.callback.AddListener((data) => {
+            btn.transform.DOScale(1f, 0.1f).SetUpdate(true);
+            if (isPurchasable)
+            {
+                img.color = new Color(0.08f, 0.18f, 0.08f, 0.85f);
+                outline.effectColor = new Color(0.2f, 0.8f, 0.2f, 0.5f);
+                txt.color = new Color(0.2f, 0.8f, 0.2f, 0.9f);
+            }
+            else
+            {
+                img.color = new Color(0.01f, 0.05f, 0.01f, 0.95f);
+                outline.effectColor = new Color(0.05f, 0.2f, 0.05f, 0.3f);
+                txt.text = origText;
+                txt.color = new Color(0.1f, 0.4f, 0.1f, 0.5f);
+            }
+        });
+        trigger.triggers.Add(entryExit);
     }
 }
