@@ -7,7 +7,7 @@ public class EnemySpawnerLogic : BuildingLogic
     public int spawnLimit = 5; // 0 for infinite/repeatable
     public float spawnCooldown = 8f;
     public int maxConcurrentEnemies = 3;
-    public float activationRange = 15f;
+    public float activationRange = 9f; // Reduced from 15f to prevent off-screen activation
 
     private List<CartelMember> spawnedEnemies = new List<CartelMember>();
     private float lastSpawnTime = -99f;

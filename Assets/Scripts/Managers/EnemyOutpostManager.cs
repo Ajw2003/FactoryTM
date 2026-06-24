@@ -422,6 +422,10 @@ namespace Managers
             spawnerData.size = new Vector2Int(1, 1);
 
             EnemySpawnerLogic spawner = SpawnEnemyBuilding(cell, spawnerData, typeof(EnemySpawnerLogic)) as EnemySpawnerLogic;
+            if (spawner != null)
+            {
+                spawner.activationRange = 9f;
+            }
             return spawner;
         }
 

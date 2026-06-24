@@ -62,6 +62,12 @@ public class CartelMember : MonoBehaviour, IHealth
             weapon.isEnemyFired = true;
         }
         Health = MaxHealth;
+
+        // Cap sight range to prevent off-screen targeting / shooting
+        if (sightRange > 10f)
+        {
+            sightRange = 10f;
+        }
     }
 
     // Update is called once per frame
@@ -102,7 +108,7 @@ public class CartelMember : MonoBehaviour, IHealth
                                 if (buildingObj != null)
                                 {
                                     BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
-                                    if (building != null && building.Health > 0 && building.data.type != Buildings.BuildingType.Conveyor)
+                                     if (building != null && building.Health > 0 && !building.isEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
                                     {
                                         Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
                                         Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);

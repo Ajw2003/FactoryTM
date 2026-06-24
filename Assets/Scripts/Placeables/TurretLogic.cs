@@ -28,6 +28,11 @@ public class TurretLogic : BuildingLogic
             turretWeapon.ApplyTierMultiplier(GetTierMultiplier());
             turretWeapon.isEnemyFired = isEnemyOwned;
         }
+
+        if (isEnemyOwned)
+        {
+            targetRange = 8f; // Reduce range of enemy turrets so player can out-range them
+        }
     }
 
     private float targetScanTimer = 0f;
