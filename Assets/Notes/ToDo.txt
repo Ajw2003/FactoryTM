@@ -40,3 +40,9 @@ add enemy outposts, toy around with raids not starting until you attack them or 
 
 
 better ui contrast, color choices and general style unification.
+
+
+
+BAD: 
+
+I will optimize the collision check in CartelMember.cs to query only the grid cells the enemy overlaps rather than iterating through all buildings in the scene.

@@ -49,6 +49,9 @@ public class BaseProjectile : MonoBehaviour
         Rectangle2D bulletBox = TwoDCollision.CreateFromRotated(
             transform.position.x, transform.position.y, width, height, angleRadians);
 
+        if (GridManager.Instance == null) return;
+        Vector2Int cell = GridManager.Instance.WorldToCellConversion(transform.position);
+
         if (isEnemy)
         {
             // Collide with player
@@ -64,25 +67,15 @@ public class BaseProjectile : MonoBehaviour
             }
 
             // Collide with player-owned buildings (where !building.isEnemyOwned and not conveyor)
-            if (BuildingManager.HasInstance)
+            if (PlacementManager.HasInstance)
             {
-                foreach (var building in BuildingManager.Instance.Buildings)
+                var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
+                if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
                 {
-                    if (building != null && building.Health > 0 && !building.isEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
+                    if (buildingObj != null)
                     {
-                        bool hit = false;
-                        foreach (var cell in building.occupiedCells)
-                        {
-                            Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
-                            Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
-                            if (Rectangle2D.CheckCollision(bulletBox, cellBox))
-                            {
-                                hit = true;
-                                break;
-                            }
-                        }
-                        
-                        if (hit)
+                        BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
+                        if (building != null && building.Health > 0 && !building.isEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
                         {
                             building.TakeDamage(Damage);
                             Destroy(gameObject);
@@ -111,25 +104,15 @@ public class BaseProjectile : MonoBehaviour
             }
 
             // Collide with enemy-owned buildings
-            if (BuildingManager.HasInstance)
+            if (PlacementManager.HasInstance)
             {
-                foreach (var building in BuildingManager.Instance.Buildings)
+                var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
+                if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
                 {
-                    if (building != null && building.Health > 0 && building.isEnemyOwned)
+                    if (buildingObj != null)
                     {
-                        bool hit = false;
-                        foreach (var cell in building.occupiedCells)
-                        {
-                            Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
-                            Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
-                            if (Rectangle2D.CheckCollision(bulletBox, cellBox))
-                            {
-                                hit = true;
-                                break;
-                            }
-                        }
-                        
-                        if (hit)
+                        BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
+                        if (building != null && building.Health > 0 && building.isEnemyOwned)
                         {
                             building.TakeDamage(Damage);
                             Destroy(gameObject);

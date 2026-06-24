@@ -30,15 +30,25 @@ public class TurretLogic : BuildingLogic
         }
     }
 
+    private float targetScanTimer = 0f;
+    private const float TARGET_SCAN_INTERVAL = 0.25f;
+    private Vector3? currentTargetPos = null;
+
     public override void PerformAction()
     {
         // autonomous targeting logic
         if (turretWeapon != null)
         {
-            Vector3? targetPos = FindClosestTarget();
-            if (targetPos.HasValue)
+            targetScanTimer -= Time.deltaTime;
+            if (targetScanTimer <= 0f)
             {
-                turretWeapon.target = targetPos.Value;
+                targetScanTimer = TARGET_SCAN_INTERVAL + Random.Range(-0.05f, 0.05f); // Jitter to space out frames
+                currentTargetPos = FindClosestTarget();
+            }
+
+            if (currentTargetPos.HasValue)
+            {
+                turretWeapon.target = currentTargetPos.Value;
                 turretWeapon.hasTarget = true;
             }
             else

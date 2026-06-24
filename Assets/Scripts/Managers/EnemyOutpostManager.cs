@@ -131,9 +131,11 @@ namespace Managers
         [Header("Outpost Spawning Settings")]
         public int minOutpostSize = 4;
         public int maxOutpostSize = 8;
-        public float outpostSpawnChance = 0.015f; // Chance per cell to attempt spawning
+        public float outpostSpawnChance = 0.003f; // Reduced from 0.015f to prevent overcrowding
+        public float minDistanceBetweenOutposts = 20f; // Minimum distance in tiles between outposts
 
         private List<EnemyOutpost> activeOutposts = new List<EnemyOutpost>();
+        private List<Vector2Int> outpostCenters = new List<Vector2Int>();
 
         protected override void Awake()
         {
@@ -196,6 +198,21 @@ namespace Managers
                         continue;
                     }
 
+                    // Ensure minimum distance from all other outposts
+                    bool tooClose = false;
+                    foreach (var outpostCenter in outpostCenters)
+                    {
+                        if (Vector2Int.Distance(cell, outpostCenter) < minDistanceBetweenOutposts)
+                        {
+                            tooClose = true;
+                            break;
+                        }
+                    }
+                    if (tooClose)
+                    {
+                        continue;
+                    }
+
                     if (Random.value > outpostSpawnChance)
                     {
                         continue;
@@ -211,6 +228,7 @@ namespace Managers
 
         private void SpawnOutpostPatch(Vector2Int startCell, int patchSize, HashSet<Vector2Int> occupiedCells)
         {
+            outpostCenters.Add(startCell);
             Queue<Vector2Int> cellsToProcess = new Queue<Vector2Int>();
             cellsToProcess.Enqueue(startCell);
             occupiedCells.Add(startCell);
@@ -324,17 +342,23 @@ namespace Managers
             buildingObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
             
             BuildingLogic logic = buildingObj.AddComponent(logicType) as BuildingLogic;
+            if (logic == null)
+            {
+                Destroy(buildingObj);
+                return null;
+            }
+            
             logic.Setup(buildingData, cell);
             logic.isEnemyOwned = true;
-
+ 
             List<Vector2Int> occupied = new List<Vector2Int> { cell };
             logic.SetOccupiedCells(occupied);
-
+ 
             if (PlacementManager.HasInstance)
             {
                 PlacementManager.Instance.RegisterActiveBuilding(cell, buildingObj);
             }
-
+ 
             return logic;
         }
 
@@ -384,9 +408,9 @@ namespace Managers
             }
             else
             {
-                Buildings.BuildingData data = Resources.Load<Buildings.BuildingData>("BuildingData/Chest");
-                if (data == null) data = Resources.Load<Buildings.BuildingData>("BuildingData/Wall");
-                return SpawnEnemyBuilding(cell, data, typeof(Chest));
+                // Chest in this codebase is a plain MonoBehaviour (not BuildingLogic), so fallback to spawning Wall
+                Buildings.BuildingData data = Resources.Load<Buildings.BuildingData>("BuildingData/Wall");
+                return SpawnEnemyBuilding(cell, data, typeof(WallLogic));
             }
         }
     }

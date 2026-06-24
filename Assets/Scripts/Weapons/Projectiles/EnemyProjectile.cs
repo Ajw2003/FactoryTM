@@ -29,26 +29,17 @@ public class EnemyProjectile : BaseProjectile
             return;
         }
 
-        // 4. Check for building collision
-        if (BuildingManager.HasInstance)
+        // 4. Check for building collision using dictionary
+        if (PlacementManager.HasInstance && GridManager.Instance != null)
         {
-            foreach (var building in BuildingManager.Instance.Buildings)
+            Vector2Int cell = GridManager.Instance.WorldToCellConversion(transform.position);
+            var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
+            if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
             {
-                if (building != null && building.Health > 0 && building.data.type != Buildings.BuildingType.Conveyor)
+                if (buildingObj != null)
                 {
-                    bool hit = false;
-                    foreach (var cell in building.occupiedCells)
-                    {
-                        Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
-                        Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
-                        if (Rectangle2D.CheckCollision(bulletBox, cellBox))
-                        {
-                            hit = true;
-                            break;
-                        }
-                    }
-                    
-                    if (hit)
+                    BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
+                    if (building != null && building.Health > 0 && !building.isEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
                     {
                         building.TakeDamage(Damage);
                         Destroy(gameObject);

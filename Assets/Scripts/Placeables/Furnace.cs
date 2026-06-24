@@ -11,6 +11,11 @@ public class Furnace : BuildingLogic
     private ConveyorItem platePrefab;
     private float currentCookingSpeed;
     
+    public override void Setup(Buildings.BuildingData buildingData, Vector2Int cell)
+    {
+        Setup(buildingData, cell, 0, buildingData != null ? buildingData.proccessingSpeed : 2f);
+    }
+
     public void Setup(Buildings.BuildingData furnace, Vector2Int cell, int rotationIndex, float speed)
     {
         base.Setup(furnace, cell);
