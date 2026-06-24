@@ -26,6 +26,7 @@ public class TurretLogic : BuildingLogic
         if (turretWeapon != null)
         {
             turretWeapon.ApplyTierMultiplier(GetTierMultiplier());
+            turretWeapon.isEnemyFired = isEnemyOwned;
         }
     }
 
@@ -34,10 +35,10 @@ public class TurretLogic : BuildingLogic
         // autonomous targeting logic
         if (turretWeapon != null)
         {
-            CartelMember target = FindClosestEnemy();
-            if (target != null)
+            Vector3? targetPos = FindClosestTarget();
+            if (targetPos.HasValue)
             {
-                turretWeapon.target = target.transform.position;
+                turretWeapon.target = targetPos.Value;
                 turretWeapon.hasTarget = true;
             }
             else
@@ -53,27 +54,60 @@ public class TurretLogic : BuildingLogic
         PerformAction(); // continuously scan and update target
     }
 
-    private CartelMember FindClosestEnemy()
+    private Vector3? FindClosestTarget()
     {
-        CartelMember closestEnemy = null;
-        float minDistance = float.MaxValue;
+        float minDistance = targetRange;
+        Vector3? closestTarget = null;
 
-        // Ensure GameManager and ActiveEnemies exist
-        if (GameManager.HasInstance && GameManager.Instance.ActiveEnemies != null)
+        if (isEnemyOwned)
         {
-            foreach (var enemy in GameManager.Instance.ActiveEnemies)
+            // Target player
+            if (PlayerController.Instance != null && PlayerController.Instance.Health > 0 && PlayerController.Instance.gameObject.activeInHierarchy)
             {
-                if (enemy == null) continue;
-
-                float distance = Vector2.Distance(transform.position, enemy.transform.position);
-                if (distance <= targetRange && distance < minDistance)
+                float distance = Vector2.Distance(transform.position, PlayerController.Instance.transform.position);
+                if (distance <= minDistance)
                 {
                     minDistance = distance;
-                    closestEnemy = enemy;
+                    closestTarget = PlayerController.Instance.transform.position;
+                }
+            }
+
+            // Target player-owned buildings (where !building.isEnemyOwned and not conveyor)
+            if (BuildingManager.HasInstance)
+            {
+                foreach (var building in BuildingManager.Instance.Buildings)
+                {
+                    if (building != null && building.Health > 0 && !building.isEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
+                    {
+                        float distance = Vector2.Distance(transform.position, building.transform.position);
+                        if (distance <= minDistance)
+                        {
+                            minDistance = distance;
+                            closestTarget = building.transform.position;
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Target closest enemy (CartelMember)
+            if (GameManager.HasInstance && GameManager.Instance.ActiveEnemies != null)
+            {
+                foreach (var enemy in GameManager.Instance.ActiveEnemies)
+                {
+                    if (enemy == null) continue;
+
+                    float distance = Vector2.Distance(transform.position, enemy.transform.position);
+                    if (distance <= minDistance)
+                    {
+                        minDistance = distance;
+                        closestTarget = enemy.transform.position;
+                    }
                 }
             }
         }
 
-        return closestEnemy;
+        return closestTarget;
     }
 }

@@ -80,6 +80,8 @@ public class GameManager : SingletonBase<GameManager>
     {
         SpawnResourceNodes();
         
+        gameObject.AddComponent<Managers.EnemyOutpostManager>();
+        
         // --- NEW LOGIC FOR POPULATING PLATES LIST ---
         Plates = new List<ConveyorItem>();
         if (AssetScanner.Instance != null)

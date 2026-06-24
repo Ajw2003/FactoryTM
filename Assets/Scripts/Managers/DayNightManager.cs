@@ -76,7 +76,18 @@ public class DayNightManager : SingletonBase<DayNightManager>
             // Use unscaled time so the settle timer is never frozen by a pause
             raidSettleTimer += Time.unscaledDeltaTime;
 
-            int activeEnemies = GameManager.Instance != null ? GameManager.Instance.ActiveEnemies.Count : 0;
+            int activeEnemies = 0;
+            if (GameManager.Instance != null && GameManager.Instance.ActiveEnemies != null)
+            {
+                for (int i = 0; i < GameManager.Instance.ActiveEnemies.Count; i++)
+                {
+                    var enemy = GameManager.Instance.ActiveEnemies[i];
+                    if (enemy != null && enemy.isRaidEnemy)
+                    {
+                        activeEnemies++;
+                    }
+                }
+            }
             
             // Mark raidHasBegun once enemies actually appear on screen
             if (!raidHasBegun && activeEnemies > 0)

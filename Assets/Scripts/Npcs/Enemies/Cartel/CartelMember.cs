@@ -16,6 +16,7 @@ public class CartelMember : MonoBehaviour, IHealth
 {
 
     public MemberType Rank { get; private set; }
+    public bool isRaidEnemy = false;
 
     [SerializeField] private float speed;
 
@@ -174,7 +175,7 @@ public class CartelMember : MonoBehaviour, IHealth
         {
             foreach (var building in BuildingManager.Instance.Buildings)
             {
-                if (building != null && building.Health > 0 && building.data.type != Buildings.BuildingType.Conveyor) // ignore conveyors maybe? Actually, all buildings are targetable except maybe conveyors if they are indestructible. But let's just target all for now.
+                if (building != null && building.Health > 0 && !building.isEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
                 {
                     float dist = Vector3.Distance(transform.position, building.transform.position);
                     if (dist < minDistance)

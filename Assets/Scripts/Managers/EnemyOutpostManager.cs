@@ -1,0 +1,393 @@
+using System.Collections.Generic;
+using UnityEngine;
+using Singleton;
+
+public class EnemyOutpost
+{
+    public List<BuildingLogic> buildings = new List<BuildingLogic>();
+    public List<CartelMember> spawnedEnemies = new List<CartelMember>();
+    public List<EnemySpawnerLogic> spawners = new List<EnemySpawnerLogic>();
+
+    public bool IsCleared { get; private set; } = false;
+    public bool IsClaimed { get; private set; } = false;
+
+    public void RegisterBuilding(BuildingLogic building)
+    {
+        if (building == null) return;
+        
+        building.outpost = this;
+        buildings.Add(building);
+        
+        if (building is EnemySpawnerLogic spawner)
+        {
+            spawners.Add(spawner);
+        }
+    }
+
+    public void RegisterSpawnedEnemy(CartelMember enemy)
+    {
+        if (enemy == null) return;
+        if (!spawnedEnemies.Contains(enemy))
+        {
+            spawnedEnemies.Add(enemy);
+        }
+    }
+
+    public void RemoveBuilding(BuildingLogic building)
+    {
+        if (building == null) return;
+        buildings.Remove(building);
+        if (building is EnemySpawnerLogic spawner)
+        {
+            spawners.Remove(spawner);
+        }
+        CheckClearedStatus();
+    }
+
+    public void UpdateStatus()
+    {
+        CheckClearedStatus();
+    }
+
+    private void CheckClearedStatus()
+    {
+        if (IsCleared) return;
+
+        spawnedEnemies.RemoveAll(e => e == null);
+        spawners.RemoveAll(s => s == null);
+
+        bool anyActiveSpawners = false;
+        foreach (var spawner in spawners)
+        {
+            if (spawner != null && !spawner.HasFinishedSpawning())
+            {
+                anyActiveSpawners = true;
+                break;
+            }
+        }
+
+        if (!anyActiveSpawners && spawnedEnemies.Count == 0)
+        {
+            IsCleared = true;
+            Debug.Log("Enemy Outpost Cleared!");
+            
+            if (PlayerController.Instance != null)
+            {
+                GameObject textObj = new GameObject("OutpostClearedText");
+                FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
+                floatText.Initialize("OUTPOST CLEARED!", Color.yellow, PlayerController.Instance.transform.position + new Vector3(0, 1f, 0));
+            }
+            
+            Code.Scripts.EventSystems.EventManager.Instance?.Publish(new EnemyOutpostClearedEvent(this));
+        }
+    }
+
+    public void ClaimAllBuildings()
+    {
+        if (!IsCleared || IsClaimed) return;
+
+        IsClaimed = true;
+
+        foreach (var building in buildings)
+        {
+            if (building != null && building.isEnemyOwned)
+            {
+                building.isEnemyOwned = false;
+                
+                // Reset color tint of the tile to white
+                Vector2Int cell = building.GetMyCell();
+                Vector3Int tilePos = new Vector3Int(cell.x, cell.y, 0);
+                if (GameManager.Instance != null && GameManager.Instance.BuildingTileMap != null)
+                {
+                    GameManager.Instance.BuildingTileMap.SetTileFlags(tilePos, UnityEngine.Tilemaps.TileFlags.None);
+                    GameManager.Instance.BuildingTileMap.SetColor(tilePos, Color.white);
+                }
+
+                // If it's a turret, reset weapon flag
+                if (building is TurretLogic turret)
+                {
+                    var turretWeapon = turret.GetComponentInChildren<TurretWeapon>();
+                    if (turretWeapon != null)
+                    {
+                        turretWeapon.isEnemyFired = false;
+                    }
+                }
+
+                // Spawn floating "+CLAIMED!" text
+                GameObject textObj = new GameObject("ClaimedText");
+                FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
+                floatText.Initialize("CLAIMED!", Color.green, building.transform.position + new Vector3(0, 0.5f, 0));
+            }
+        }
+
+        Debug.Log("Enemy Outpost Claimed by Player!");
+    }
+}
+
+namespace Managers
+{
+    public class EnemyOutpostManager : SingletonBase<EnemyOutpostManager>
+    {
+        [Header("Outpost Spawning Settings")]
+        public int minOutpostSize = 4;
+        public int maxOutpostSize = 8;
+        public float outpostSpawnChance = 0.015f; // Chance per cell to attempt spawning
+
+        private List<EnemyOutpost> activeOutposts = new List<EnemyOutpost>();
+
+        protected override void Awake()
+        {
+            persistBetweenScenes = false;
+            base.Awake();
+        }
+
+        private void Start()
+        {
+            GenerateOutposts();
+        }
+
+        private void Update()
+        {
+            for (int i = activeOutposts.Count - 1; i >= 0; i--)
+            {
+                if (activeOutposts[i] != null)
+                {
+                    activeOutposts[i].UpdateStatus();
+                }
+            }
+        }
+
+        private void GenerateOutposts()
+        {
+            if (GameManager.Instance == null || GameManager.Instance.MainTileMap == null)
+            {
+                Debug.LogWarning("EnemyOutpostManager: GameManager or MainTileMap is null. Cannot generate outposts.");
+                return;
+            }
+
+            BoundsInt bounds = GameManager.Instance.MainTileMap.cellBounds;
+            HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>();
+
+            // Find existing buildings/nodes to exclude
+            if (PlacementManager.HasInstance)
+            {
+                foreach (var cell in PlacementManager.Instance.GetActiveBuildings().Keys)
+                {
+                    occupiedCells.Add(cell);
+                }
+            }
+
+            for (int x = bounds.xMin; x < bounds.xMax; x++)
+            {
+                for (int y = bounds.yMin; y < bounds.yMax; y++)
+                {
+                    Vector2Int cell = new Vector2Int(x, y);
+
+                    // Skip if occupied, no tile present, too close to starting center (0,0), or chance fails
+                    if (occupiedCells.Contains(cell) || !GameManager.Instance.MainTileMap.HasTile(new Vector3Int(x, y, 0)))
+                    {
+                        continue;
+                    }
+
+                    // Keep starting area clear (within 10 tiles of (0,0) or GridManager center)
+                    Vector2Int center = GridManager.Instance != null ? GridManager.Instance.center : Vector2Int.zero;
+                    if (Vector2Int.Distance(cell, center) < 12f)
+                    {
+                        continue;
+                    }
+
+                    if (Random.value > outpostSpawnChance)
+                    {
+                        continue;
+                    }
+
+                    int patchSize = Random.Range(minOutpostSize, maxOutpostSize + 1);
+                    SpawnOutpostPatch(cell, patchSize, occupiedCells);
+                }
+            }
+
+            Debug.Log($"EnemyOutpostManager: Generated {activeOutposts.Count} enemy outposts.");
+        }
+
+        private void SpawnOutpostPatch(Vector2Int startCell, int patchSize, HashSet<Vector2Int> occupiedCells)
+        {
+            Queue<Vector2Int> cellsToProcess = new Queue<Vector2Int>();
+            cellsToProcess.Enqueue(startCell);
+            occupiedCells.Add(startCell);
+
+            List<Vector2Int> patchCells = new List<Vector2Int>();
+
+            while (cellsToProcess.Count > 0 && patchCells.Count < patchSize)
+            {
+                Vector2Int currentCell = cellsToProcess.Dequeue();
+                patchCells.Add(currentCell);
+
+                Vector2Int[] neighbors = new Vector2Int[]
+                {
+                    currentCell + Vector2Int.right,
+                    currentCell + Vector2Int.left,
+                    currentCell + Vector2Int.up,
+                    currentCell + Vector2Int.down
+                };
+
+                foreach (var neighbor in neighbors)
+                {
+                    Vector3Int tempNeighbor = new Vector3Int(neighbor.x, neighbor.y, 0);
+                    if (!GameManager.Instance.MainTileMap.HasTile(tempNeighbor) || occupiedCells.Contains(neighbor))
+                    {
+                        continue;
+                    }
+
+                    // Check resource nodes
+                    if (ResourceManager.Instance != null && ResourceManager.Instance.GetNodeAtPosition(neighbor) != null)
+                    {
+                        occupiedCells.Add(neighbor);
+                        continue;
+                    }
+
+                    // Check other buildings
+                    if (PlacementManager.HasInstance && PlacementManager.Instance.GetActiveBuildings().ContainsKey(neighbor))
+                    {
+                        occupiedCells.Add(neighbor);
+                        continue;
+                    }
+
+                    occupiedCells.Add(neighbor);
+                    cellsToProcess.Enqueue(neighbor);
+                }
+            }
+
+            if (patchCells.Count > 0)
+            {
+                CreateOutpostAt(patchCells);
+            }
+        }
+
+        private void CreateOutpostAt(List<Vector2Int> cells)
+        {
+            EnemyOutpost outpost = new EnemyOutpost();
+            activeOutposts.Add(outpost);
+
+            for (int i = 0; i < cells.Count; i++)
+            {
+                Vector2Int cell = cells[i];
+                BuildingLogic building = null;
+
+                if (i == 0)
+                {
+                    // Center is the spawner
+                    building = SpawnEnemySpawner(cell);
+                }
+                else if (i % 3 == 0)
+                {
+                    // Every 3rd block is a turret
+                    building = SpawnEnemyTurret(cell);
+                }
+                else
+                {
+                    // Other blocks are walls or generic factory buildings
+                    float rand = Random.value;
+                    if (rand < 0.6f)
+                    {
+                        building = SpawnEnemyWall(cell);
+                    }
+                    else
+                    {
+                        building = SpawnEnemyFactoryBlock(cell);
+                    }
+                }
+
+                if (building != null)
+                {
+                    outpost.RegisterBuilding(building);
+                }
+            }
+        }
+
+        private BuildingLogic SpawnEnemyBuilding(Vector2Int cell, Buildings.BuildingData buildingData, System.Type logicType)
+        {
+            if (buildingData == null || buildingData.rotatedTiles == null || buildingData.rotatedTiles.Length == 0)
+            {
+                return null;
+            }
+
+            Vector3Int tilePos = new Vector3Int(cell.x, cell.y, 0);
+            
+            if (GameManager.Instance != null && GameManager.Instance.BuildingTileMap != null)
+            {
+                GameManager.Instance.BuildingTileMap.SetTile(tilePos, buildingData.rotatedTiles[0]);
+                GameManager.Instance.BuildingTileMap.SetTileFlags(tilePos, UnityEngine.Tilemaps.TileFlags.None);
+                GameManager.Instance.BuildingTileMap.SetColor(tilePos, new Color(1f, 0.4f, 0.4f, 1f));
+            }
+
+            GameObject buildingObj = new GameObject(buildingData.buildingName + "_Enemy_Logic_" + cell);
+            buildingObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
+            
+            BuildingLogic logic = buildingObj.AddComponent(logicType) as BuildingLogic;
+            logic.Setup(buildingData, cell);
+            logic.isEnemyOwned = true;
+
+            List<Vector2Int> occupied = new List<Vector2Int> { cell };
+            logic.SetOccupiedCells(occupied);
+
+            if (PlacementManager.HasInstance)
+            {
+                PlacementManager.Instance.RegisterActiveBuilding(cell, buildingObj);
+            }
+
+            return logic;
+        }
+
+        private EnemySpawnerLogic SpawnEnemySpawner(Vector2Int cell)
+        {
+            Buildings.BuildingData spawnerData = ScriptableObject.CreateInstance<Buildings.BuildingData>();
+            spawnerData.buildingName = "Enemy Spawner";
+            spawnerData.maxHealth = 200;
+            
+            Buildings.BuildingData furnaceData = Resources.Load<Buildings.BuildingData>("BuildingData/Furnace");
+            if (furnaceData != null)
+            {
+                spawnerData.rotatedTiles = furnaceData.rotatedTiles;
+            }
+            spawnerData.size = new Vector2Int(1, 1);
+
+            EnemySpawnerLogic spawner = SpawnEnemyBuilding(cell, spawnerData, typeof(EnemySpawnerLogic)) as EnemySpawnerLogic;
+            return spawner;
+        }
+
+        private TurretLogic SpawnEnemyTurret(Vector2Int cell)
+        {
+            Buildings.BuildingData turretData = Resources.Load<Buildings.BuildingData>("BuildingData/Turret");
+            TurretLogic turret = SpawnEnemyBuilding(cell, turretData, typeof(TurretLogic)) as TurretLogic;
+            return turret;
+        }
+
+        private WallLogic SpawnEnemyWall(Vector2Int cell)
+        {
+            Buildings.BuildingData wallData = Resources.Load<Buildings.BuildingData>("BuildingData/Wall");
+            WallLogic wall = SpawnEnemyBuilding(cell, wallData, typeof(WallLogic)) as WallLogic;
+            return wall;
+        }
+
+        private BuildingLogic SpawnEnemyFactoryBlock(Vector2Int cell)
+        {
+            float rand = Random.value;
+            if (rand < 0.4f)
+            {
+                Buildings.BuildingData data = Resources.Load<Buildings.BuildingData>("BuildingData/Furnace");
+                return SpawnEnemyBuilding(cell, data, typeof(Furnace));
+            }
+            else if (rand < 0.8f)
+            {
+                Buildings.BuildingData data = Resources.Load<Buildings.BuildingData>("BuildingData/Mine");
+                return SpawnEnemyBuilding(cell, data, typeof(MinerLogic));
+            }
+            else
+            {
+                Buildings.BuildingData data = Resources.Load<Buildings.BuildingData>("BuildingData/Chest");
+                if (data == null) data = Resources.Load<Buildings.BuildingData>("BuildingData/Wall");
+                return SpawnEnemyBuilding(cell, data, typeof(Chest));
+            }
+        }
+    }
+}

@@ -28,7 +28,8 @@ public class BaseWeapon : MonoBehaviour
     
     public Vector2 target;
 
-    protected bool canFire = true;
+    public bool canFire = true;
+    public bool isEnemyFired = false;
     
     public WeaponStats Stats;
     public Transform firePoint;
@@ -128,6 +129,7 @@ public class BaseWeapon : MonoBehaviour
         
             if (bullet.TryGetComponent<BaseProjectile>(out var projectile))
             { 
+                projectile.isEnemy = isEnemyFired;
                 roundsLeft--;
                 Vector2 actualTarget = target;
                 if (bulletSpread > 0)

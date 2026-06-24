@@ -154,9 +154,11 @@ public class RaidManager : SingletonBase<RaidManager>
 
         GameObject enemy = Instantiate(prefab, spawnPos, Quaternion.identity);
         
-        // Optional: If we want to randomly assign a rank or scale difficulty
-        // CartelMember member = enemy.GetComponent<CartelMember>();
-        // if (member != null) { ... }
+        CartelMember member = enemy.GetComponent<CartelMember>();
+        if (member != null)
+        {
+            member.isRaidEnemy = true;
+        }
     }
 
     private Vector3 GetRandomSpawnPosition(float distance)
