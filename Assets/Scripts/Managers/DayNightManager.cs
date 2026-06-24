@@ -36,6 +36,7 @@ public class DayNightManager : SingletonBase<DayNightManager>
     private float raidSettleTimer = 0f;
     private const float RaidSettleDelay = 3f; // Wait at least this many seconds after raid start before checking completion
     [SerializeField]private Light2D sun;
+    [SerializeField] private Light2D nightVis;
 
     private float currentTime;
 
@@ -47,14 +48,14 @@ public class DayNightManager : SingletonBase<DayNightManager>
 
     private void Start()
     {
-        sun = FindFirstObjectByType<Light2D>();
+        // sun = FindFirstObjectByType<Light2D>();
         currentTime = dayDuration;
         currentPhase = CyclePhase.Day;
         timeRemaining = dayDuration;
         isRaidStarted = false;
         raidHasBegun = false;
         raidSettleTimer = 0f;
-        
+        nightVis.intensity = 0f;
         SetupTimerUI();
     }
 
@@ -119,6 +120,7 @@ public class DayNightManager : SingletonBase<DayNightManager>
 
     private void StartEveningRaid()
     {
+        nightVis.intensity = 5.0f;
         currentPhase = CyclePhase.Evening;
         isRaidStarted = true;
         raidHasBegun = false;
@@ -157,6 +159,7 @@ public class DayNightManager : SingletonBase<DayNightManager>
         }
 
         currentDay++;
+        nightVis.intensity = 0f;
         currentPhase = CyclePhase.Day;
         timeRemaining = dayDuration;
         isRaidStarted = false;
@@ -220,7 +223,7 @@ public class DayNightManager : SingletonBase<DayNightManager>
         {
             timerText.text = text;
             currentTime -= Time.deltaTime;
-            currentTime = Math.Clamp(currentTime, 0.0f, dayDuration);
+            currentTime = Math.Clamp(currentTime, 0.1f, dayDuration);
             sun.intensity = timeRemaining / dayDuration;
             
             if (color.HasValue)
