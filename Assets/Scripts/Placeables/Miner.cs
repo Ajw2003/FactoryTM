@@ -13,11 +13,16 @@ public class MinerLogic : BuildingLogic
     private float currentMiningSpeed;
     private bool finiteOres;
 
+    public override void Setup(Buildings.BuildingData buildingData, Vector2Int cell)
+    {
+        Setup(buildingData, cell, 0);
+    }
+
     public void Setup(Buildings.BuildingData minerData, Vector2Int cell, int rotationIndex)
     {
         base.Setup(minerData, cell);
         this.rotationIndex = rotationIndex;
-        finiteOres = GameManager.Instance.finiteOres;
+        finiteOres = GameManager.Instance != null ? GameManager.Instance.finiteOres : false;
         
         // Calculate occupied cells if not already set (though PlacementManager sets them)
         // For safety, let's calculate them here too or assume they will be set.
@@ -54,7 +59,10 @@ public class MinerLogic : BuildingLogic
         }
         else
         {
-            Debug.LogWarning($"Miner at {myCell} has no ResourceNode assigned. Disabling miner.");
+            if (!isEnemyOwned)
+            {
+                Debug.LogWarning($"Miner at {myCell} has no ResourceNode assigned. Disabling miner.");
+            }
             enabled = false; // Disable the miner if no node is found
             return; // Exit setup early
         }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyExplosiveProjectile : EnemyProjectile
@@ -27,24 +28,20 @@ public class EnemyExplosiveProjectile : EnemyProjectile
             }
         }
 
-        // Check buildings
-        if (!hit && BuildingManager.HasInstance)
+        // Check buildings using current cell
+        if (!hit && PlacementManager.HasInstance && GridManager.Instance != null)
         {
-            foreach (var building in BuildingManager.Instance.Buildings)
+            Vector2Int cell = GridManager.Instance.WorldToCellConversion(transform.position);
+            var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
+            if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
             {
-                if (building != null && building.Health > 0 && building.data.type != Buildings.BuildingType.Conveyor)
+                if (buildingObj != null)
                 {
-                    foreach (var cell in building.occupiedCells)
+                    BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
+                    if (building != null && building.Health > 0 && !building.isEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
                     {
-                        Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
-                        Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
-                        if (Rectangle2D.CheckCollision(bulletBox, cellBox))
-                        {
-                            hit = true;
-                            break;
-                        }
+                        hit = true;
                     }
-                    if (hit) break;
                 }
             }
         }
@@ -67,18 +64,43 @@ public class EnemyExplosiveProjectile : EnemyProjectile
             }
         }
 
-        // Hit buildings
-        if (BuildingManager.HasInstance)
+        // Hit buildings using grid check (O(Radius^2))
+        if (PlacementManager.HasInstance && GridManager.Instance != null)
         {
-            foreach (var building in BuildingManager.Instance.Buildings)
+            Vector2 tileSize = GridManager.Instance.tileSize;
+            int minX = Mathf.FloorToInt((transform.position.x - ExplosionRadius) / tileSize.x);
+            int maxX = Mathf.FloorToInt((transform.position.x + ExplosionRadius) / tileSize.x);
+            int minY = Mathf.FloorToInt((transform.position.y - ExplosionRadius) / tileSize.y);
+            int maxY = Mathf.FloorToInt((transform.position.y + ExplosionRadius) / tileSize.y);
+
+            HashSet<BuildingLogic> damagedBuildings = new HashSet<BuildingLogic>();
+            var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
+
+            for (int x = minX; x <= maxX; x++)
             {
-                if (building != null && building.Health > 0 && building.data.type != Buildings.BuildingType.Conveyor)
+                for (int y = minY; y <= maxY; y++)
                 {
-                    float dist = Vector2.Distance(transform.position, building.transform.position);
-                    if (dist <= ExplosionRadius)
+                    Vector2Int cell = new Vector2Int(x, y);
+                    if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
                     {
-                        building.TakeDamage(Damage);
+                        if (buildingObj != null)
+                        {
+                            BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
+                            if (building != null && building.Health > 0 && !building.isEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
+                            {
+                                damagedBuildings.Add(building);
+                            }
+                        }
                     }
+                }
+            }
+
+            foreach (var building in damagedBuildings)
+            {
+                float dist = Vector2.Distance(transform.position, building.transform.position);
+                if (dist <= ExplosionRadius)
+                {
+                    building.TakeDamage(Damage);
                 }
             }
         }

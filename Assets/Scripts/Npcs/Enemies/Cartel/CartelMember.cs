@@ -79,24 +79,39 @@ public class CartelMember : MonoBehaviour, IHealth
                 float angleRadians = transform.eulerAngles.z * Mathf.Deg2Rad;
                 Rectangle2D enemyBox = TwoDCollision.CreateFromRotated(nextPos.x, nextPos.y, width, height, angleRadians);
 
-                if (BuildingManager.HasInstance)
+                if (PlacementManager.HasInstance && GridManager.Instance != null)
                 {
-                    foreach (var building in BuildingManager.Instance.Buildings)
+                    Vector2 tileSize = GridManager.Instance.tileSize;
+                    int minX = Mathf.FloorToInt((nextPos.x - width / 2f) / tileSize.x);
+                    int maxX = Mathf.FloorToInt((nextPos.x + width / 2f) / tileSize.x);
+                    int minY = Mathf.FloorToInt((nextPos.y - height / 2f) / tileSize.y);
+                    int maxY = Mathf.FloorToInt((nextPos.y + height / 2f) / tileSize.y);
+
+                    var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
+                    for (int x = minX; x <= maxX; x++)
                     {
-                        if (building != null && building.Health > 0 && building.data.type != Buildings.BuildingType.Conveyor)
+                        for (int y = minY; y <= maxY; y++)
                         {
-                            foreach (var cell in building.occupiedCells)
+                            Vector2Int cell = new Vector2Int(x, y);
+                            if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
                             {
-                                Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
-                                Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
-                                if (Rectangle2D.CheckCollision(enemyBox, cellBox))
+                                if (buildingObj != null)
                                 {
-                                    collision = true;
-                                    break;
+                                    BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
+                                    if (building != null && building.Health > 0 && building.data.type != Buildings.BuildingType.Conveyor)
+                                    {
+                                        Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
+                                        Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
+                                        if (Rectangle2D.CheckCollision(enemyBox, cellBox))
+                                        {
+                                            collision = true;
+                                            break;
+                                        }
+                                    }
                                 }
                             }
-                            if (collision) break;
                         }
+                        if (collision) break;
                     }
                 }
 
