@@ -605,7 +605,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DayNightManager
   persistBetweenScenes: 1
-  dayDuration: 10
+  dayDuration: 90
   currentDay: 1
   currentPhase: 0
   isTutorialActive: 1
