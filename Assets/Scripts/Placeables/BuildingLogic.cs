@@ -50,7 +50,7 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
             StartCoroutine(FlashRedTile());
         }
 
-        if (BuildingManager.HasInstance)
+        if (BuildingManager.HasInstance && !isEnemyOwned)
         {
             BuildingManager.Instance.NotifyBuildingDamaged();
         }

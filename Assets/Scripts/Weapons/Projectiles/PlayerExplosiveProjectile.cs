@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerExplosiveProjectile : BaseProjectile
@@ -17,15 +18,54 @@ public class PlayerExplosiveProjectile : BaseProjectile
 
         bool hit = false;
         
+        // Check active enemies (Cartel members)
         for (int i = GameManager.Instance.ActiveEnemies.Count - 1; i >= 0; i--)
         {
             CartelMember currentEnemy = GameManager.Instance.ActiveEnemies[i];
+            if (currentEnemy == null) continue;
             Rectangle2D enemyBox = currentEnemy.GetBoundingBox();
 
             if (Rectangle2D.CheckCollision(bulletBox, enemyBox))
             {
                 hit = true;
                 break; 
+            }
+        }
+
+        // Check enemy-owned buildings
+        if (!hit && PlacementManager.HasInstance && GridManager.Instance != null)
+        {
+            Vector2 tileSize = GridManager.Instance.tileSize;
+            int minX = Mathf.FloorToInt((transform.position.x - width / 2f) / tileSize.x);
+            int maxX = Mathf.FloorToInt((transform.position.x + width / 2f) / tileSize.x);
+            int minY = Mathf.FloorToInt((transform.position.y - height / 2f) / tileSize.y);
+            int maxY = Mathf.FloorToInt((transform.position.y + height / 2f) / tileSize.y);
+
+            var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
+            for (int x = minX; x <= maxX; x++)
+            {
+                for (int y = minY; y <= maxY; y++)
+                {
+                    Vector2Int cell = new Vector2Int(x, y);
+                    if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
+                    {
+                        if (buildingObj != null)
+                        {
+                            BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
+                            if (building != null && building.Health > 0 && building.isEnemyOwned)
+                            {
+                                Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
+                                Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
+                                if (Rectangle2D.CheckCollision(bulletBox, cellBox))
+                                {
+                                    hit = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (hit) break;
             }
         }
         
@@ -47,6 +87,47 @@ public class PlayerExplosiveProjectile : BaseProjectile
             if (dist <= ExplosionRadius)
             {
                 enemy.TakeDamage(Damage);
+            }
+        }
+
+        // Deal damage to all enemy-owned buildings within ExplosionRadius
+        if (PlacementManager.HasInstance && GridManager.Instance != null)
+        {
+            Vector2 tileSize = GridManager.Instance.tileSize;
+            int minX = Mathf.FloorToInt((transform.position.x - ExplosionRadius) / tileSize.x);
+            int maxX = Mathf.FloorToInt((transform.position.x + ExplosionRadius) / tileSize.x);
+            int minY = Mathf.FloorToInt((transform.position.y - ExplosionRadius) / tileSize.y);
+            int maxY = Mathf.FloorToInt((transform.position.y + ExplosionRadius) / tileSize.y);
+
+            HashSet<BuildingLogic> damagedBuildings = new HashSet<BuildingLogic>();
+            var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
+
+            for (int x = minX; x <= maxX; x++)
+            {
+                for (int y = minY; y <= maxY; y++)
+                {
+                    Vector2Int cell = new Vector2Int(x, y);
+                    if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
+                    {
+                        if (buildingObj != null)
+                        {
+                            BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
+                            if (building != null && building.Health > 0 && building.isEnemyOwned)
+                            {
+                                damagedBuildings.Add(building);
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach (var building in damagedBuildings)
+            {
+                float dist = Vector2.Distance(transform.position, building.transform.position);
+                if (dist <= ExplosionRadius)
+                {
+                    building.TakeDamage(Damage);
+                }
             }
         }
         
