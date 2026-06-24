@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using Managers;
 using UnityEngine;
 using Singleton;
 using TMPro;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 public enum CyclePhase
@@ -33,6 +35,9 @@ public class DayNightManager : SingletonBase<DayNightManager>
     private bool raidHasBegun = false; // True only once enemies have actually spawned
     private float raidSettleTimer = 0f;
     private const float RaidSettleDelay = 3f; // Wait at least this many seconds after raid start before checking completion
+    [SerializeField]private Light2D sun;
+
+    private float currentTime;
 
     protected override void Awake()
     {
@@ -42,6 +47,8 @@ public class DayNightManager : SingletonBase<DayNightManager>
 
     private void Start()
     {
+        sun = FindFirstObjectByType<Light2D>();
+        currentTime = dayDuration;
         currentPhase = CyclePhase.Day;
         timeRemaining = dayDuration;
         isRaidStarted = false;
@@ -156,8 +163,10 @@ public class DayNightManager : SingletonBase<DayNightManager>
         raidHasBegun = false;
         raidSettleTimer = 0f;
         Time.timeScale = 1f;
+        sun.intensity = 1f;
 
         UpdateTimerText($"DAY {currentDay} STARTED");
+        
     }
 
     public void CompleteTutorial()
@@ -210,6 +219,10 @@ public class DayNightManager : SingletonBase<DayNightManager>
         if (timerText != null)
         {
             timerText.text = text;
+            currentTime -= Time.deltaTime;
+            currentTime = Math.Clamp(currentTime, 0.0f, dayDuration);
+            sun.intensity = timeRemaining / dayDuration;
+            
             if (color.HasValue)
             {
                 timerText.color = color.Value;
