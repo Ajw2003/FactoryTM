@@ -5,6 +5,8 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
     public Buildings.BuildingData data;
     protected Vector2Int myCell;
     public System.Collections.Generic.List<Vector2Int> occupiedCells = new System.Collections.Generic.List<Vector2Int>();
+    public bool isEnemyOwned = false;
+    public EnemyOutpost outpost;
     
     public int Health { get; set; }
 
@@ -80,6 +82,22 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
 
     public virtual void Die()
     {
+        if (isEnemyOwned)
+        {
+            int reward = Mathf.RoundToInt(data != null ? data.cost * 1.5f : 50f);
+            if (CurrencyManager.Instance != null)
+            {
+                CurrencyManager.Instance.AddCurrency(reward);
+                GameObject textObj = new GameObject("DamageNumber");
+                FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
+                floatText.Initialize(reward.ToString(), Color.forestGreen, transform.position + new Vector3(0, 0.5f, 0));
+            }
+            if (outpost != null)
+            {
+                outpost.RemoveBuilding(this);
+            }
+        }
+
         if (PlacementManager.HasInstance)
         {
             PlacementManager.Instance.DestroyBuilding(myCell, false);

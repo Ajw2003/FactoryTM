@@ -9,6 +9,7 @@ public class BaseProjectile : MonoBehaviour
     public float width = 0.2f;
     public float height = 0.5f;
     public int Damage = 1;
+    public bool isEnemy = false;
 
     public void Start()
     {
@@ -48,22 +49,94 @@ public class BaseProjectile : MonoBehaviour
         Rectangle2D bulletBox = TwoDCollision.CreateFromRotated(
             transform.position.x, transform.position.y, width, height, angleRadians);
 
-        // Loop backwards through the list! 
-        // This is a neat trick: if you destroy an enemy, it gets removed from the list.
-        // Looping backwards ensures the list indices don't break when an item is removed.
-        for (int i = GameManager.Instance.ActiveEnemies.Count - 1; i >= 0; i--)
+        if (isEnemy)
         {
-            CartelMember currentEnemy = GameManager.Instance.ActiveEnemies[i];
-            Rectangle2D enemyBox = currentEnemy.GetBoundingBox();
-
-            if (Rectangle2D.CheckCollision(bulletBox, enemyBox))
+            // Collide with player
+            if (PlayerController.Instance != null && PlayerController.Instance.gameObject.activeInHierarchy)
             {
-                // Destroy the enemy
-                currentEnemy.TakeDamage(Damage);
-                
-                // Destroy the bullet and exit the loop so we don't hit two things at once
-                Destroy(gameObject);
-                break; 
+                Rectangle2D playerBox = PlayerController.Instance.GetBoundingBox();
+                if (Rectangle2D.CheckCollision(bulletBox, playerBox))
+                {
+                    PlayerController.Instance.TakeDamage(Damage);
+                    Destroy(gameObject);
+                    return;
+                }
+            }
+
+            // Collide with player-owned buildings (where !building.isEnemyOwned and not conveyor)
+            if (BuildingManager.HasInstance)
+            {
+                foreach (var building in BuildingManager.Instance.Buildings)
+                {
+                    if (building != null && building.Health > 0 && !building.isEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
+                    {
+                        bool hit = false;
+                        foreach (var cell in building.occupiedCells)
+                        {
+                            Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
+                            Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
+                            if (Rectangle2D.CheckCollision(bulletBox, cellBox))
+                            {
+                                hit = true;
+                                break;
+                            }
+                        }
+                        
+                        if (hit)
+                        {
+                            building.TakeDamage(Damage);
+                            Destroy(gameObject);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Collide with active enemies (Cartel members)
+            for (int i = GameManager.Instance.ActiveEnemies.Count - 1; i >= 0; i--)
+            {
+                CartelMember currentEnemy = GameManager.Instance.ActiveEnemies[i];
+                if (currentEnemy == null) continue;
+
+                Rectangle2D enemyBox = currentEnemy.GetBoundingBox();
+
+                if (Rectangle2D.CheckCollision(bulletBox, enemyBox))
+                {
+                    currentEnemy.TakeDamage(Damage);
+                    Destroy(gameObject);
+                    return; 
+                }
+            }
+
+            // Collide with enemy-owned buildings
+            if (BuildingManager.HasInstance)
+            {
+                foreach (var building in BuildingManager.Instance.Buildings)
+                {
+                    if (building != null && building.Health > 0 && building.isEnemyOwned)
+                    {
+                        bool hit = false;
+                        foreach (var cell in building.occupiedCells)
+                        {
+                            Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
+                            Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
+                            if (Rectangle2D.CheckCollision(bulletBox, cellBox))
+                            {
+                                hit = true;
+                                break;
+                            }
+                        }
+                        
+                        if (hit)
+                        {
+                            building.TakeDamage(Damage);
+                            Destroy(gameObject);
+                            return;
+                        }
+                    }
+                }
             }
         }
     }

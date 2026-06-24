@@ -108,7 +108,7 @@ public class PlacementManager : SingletonBase<PlacementManager>
         }
 
         // Place
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButton(0))
         {
             if (!isWithinDistance)
             {
@@ -178,12 +178,44 @@ public class PlacementManager : SingletonBase<PlacementManager>
         }
             
 
-        // Delete
+        // Delete / Claim
         if (Input.GetMouseButtonDown(1))
         {
             if (activeBuildings.ContainsKey(cell))
             {
-                DestroyBuilding(cell, true);
+                GameObject buildingObj = activeBuildings[cell];
+                if (buildingObj != null)
+                {
+                    BuildingLogic logic = buildingObj.GetComponent<BuildingLogic>();
+                    if (logic != null)
+                    {
+                        if (logic.isEnemyOwned)
+                        {
+                            if (logic.outpost != null && logic.outpost.IsCleared)
+                            {
+                                // Claim the entire outpost!
+                                logic.outpost.ClaimAllBuildings();
+                            }
+                            else
+                            {
+                                // Enemies still remain
+                                GameObject textObj = new GameObject("ClaimText");
+                                FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
+                                floatText.Initialize("ENEMIES REMAIN!", Color.red, logic.transform.position + new Vector3(0, 0.5f, 0));
+                                Debug.LogWarning("Cannot claim or destroy this building. Defeat all enemies in the outpost first!");
+                            }
+                        }
+                        else
+                        {
+                            // Player-owned, destroy normally
+                            DestroyBuilding(cell, true);
+                        }
+                    }
+                    else
+                    {
+                        DestroyBuilding(cell, true);
+                    }
+                }
             }
         }
     }
@@ -269,6 +301,16 @@ public class PlacementManager : SingletonBase<PlacementManager>
             }
         }
         return true;
+    }
+
+    public Dictionary<Vector2Int, GameObject> GetActiveBuildings()
+    {
+        return activeBuildings;
+    }
+
+    public void RegisterActiveBuilding(Vector2Int cell, GameObject buildingObj)
+    {
+        activeBuildings[cell] = buildingObj;
     }
 
     private Dictionary<Vector2Int, GameObject> activeBuildings = new Dictionary<Vector2Int, GameObject>();
