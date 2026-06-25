@@ -1716,6 +1716,10 @@ PrefabInstance:
       propertyPath: currentCurrency
       value: 
       objectReference: {fileID: 1772957232930269764}
+    - target: {fileID: 317322962384005534, guid: 6f978039bef582949afa70fa367e2c2d, type: 3}
+      propertyPath: persistBetweenScenes
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2631676904323828596, guid: 6f978039bef582949afa70fa367e2c2d, type: 3}
       propertyPath: m_Name
       value: UiManager

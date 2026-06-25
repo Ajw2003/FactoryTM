@@ -214,6 +214,9 @@ public class DayNightManager : SingletonBase<DayNightManager>
             Outline outline = timerGo.AddComponent<Outline>();
             outline.effectColor = new Color(0f, 0f, 0f, 0.75f);
             outline.effectDistance = new Vector2(1.5f, -1.5f);
+            Canvas canvas = timerText.GetComponent<Canvas>();
+            
+            canvas.worldCamera = Camera.main; 
         }
     }
 
