@@ -10,6 +10,9 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
     
     public int Health { get; set; }
 
+    private Sprite crackSprite;
+    private SpriteRenderer crackRenderer;
+
     public virtual void Setup(Buildings.BuildingData buildingData, Vector2Int cell)
     {
         data = buildingData;
@@ -44,6 +47,15 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
     public virtual void TakeDamage(int amount)
     {
         Health -= amount;
+
+        // Spawn floating damage text!
+        GameObject textObj = new GameObject("DamageNumber");
+        FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
+        Color textColor = isEnemyOwned ? new Color(1f, 0.7f, 0.2f) : Color.red; // Orange/yellow for enemy, red for player
+        floatText.Initialize(amount.ToString(), textColor, transform.position + new Vector3(0, 0.5f, 0));
+
+        // Update visual crack overlay
+        UpdateCrackVisuals();
         
         if (PlacementManager.HasInstance)
         {
@@ -120,5 +132,115 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
             }
         }
         return 1.0f;
+    }
+
+    private void UpdateCrackVisuals()
+    {
+        if (data == null || data.maxHealth <= 0) return;
+        
+        float healthPct = (float)Health / data.maxHealth;
+        
+        if (healthPct >= 0.99f)
+        {
+            if (crackRenderer != null)
+            {
+                crackRenderer.gameObject.SetActive(false);
+            }
+            return;
+        }
+
+        if (crackRenderer == null)
+        {
+            GameObject crackObj = new GameObject("CrackOverlay");
+            crackObj.transform.SetParent(transform);
+            Vector2 sizeOffset = new Vector2(data.size.x - 1, data.size.y - 1) * 0.5f;
+            crackObj.transform.localPosition = new Vector3(sizeOffset.x, sizeOffset.y, -0.1f);
+            
+            crackRenderer = crackObj.AddComponent<SpriteRenderer>();
+            
+            if (crackSprite == null)
+            {
+                Texture2D crackTex = GenerateCrackTexture();
+                crackSprite = Sprite.Create(crackTex, new Rect(0, 0, crackTex.width, crackTex.height), new Vector2(0.5f, 0.5f), 64f);
+            }
+            crackRenderer.sprite = crackSprite;
+            crackRenderer.sortingLayerName = "Buildings";
+            crackRenderer.sortingOrder = 10;
+        }
+
+        crackRenderer.gameObject.SetActive(true);
+        
+        float damagePct = 1f - healthPct;
+        Color c = crackRenderer.color;
+        c.a = Mathf.Clamp(damagePct * 1.2f, 0.2f, 1f);
+        crackRenderer.color = c;
+
+        float scale = Mathf.Lerp(0.5f, 1.0f, damagePct);
+        crackRenderer.transform.localScale = new Vector3(data.size.x * scale, data.size.y * scale, 1f);
+    }
+
+    private Texture2D GenerateCrackTexture()
+    {
+        int size = 64;
+        Texture2D texture = new Texture2D(size, size);
+        texture.filterMode = FilterMode.Point;
+        
+        Color transparent = new Color(0, 0, 0, 0);
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                texture.SetPixel(x, y, transparent);
+            }
+        }
+        
+        Color crackColor = new Color(0.1f, 0.1f, 0.1f, 0.8f);
+        
+        // Draw crack lines stemming from center
+        DrawCrackLine(texture, size / 2, size / 2, size / 2 + Random.Range(-15, 15), size / 2 + Random.Range(-15, 15), crackColor);
+        DrawCrackLine(texture, size / 2, size / 2, size / 2 + Random.Range(-15, 15), size / 2 - Random.Range(-15, 15), crackColor);
+        DrawCrackLine(texture, size / 2, size / 2, size / 2 - Random.Range(-15, 15), size / 2 + Random.Range(-15, 15), crackColor);
+        DrawCrackLine(texture, size / 2, size / 2, size / 2 - Random.Range(-15, 15), size / 2 - Random.Range(-15, 15), crackColor);
+        
+        texture.Apply();
+        return texture;
+    }
+
+    private void DrawCrackLine(Texture2D tex, int x0, int y0, int x1, int y1, Color color)
+    {
+        int dx = Mathf.Abs(x1 - x0);
+        int dy = Mathf.Abs(y1 - y0);
+        int sx = x0 < x1 ? 1 : -1;
+        int sy = y0 < y1 ? 1 : -1;
+        int err = dx - dy;
+
+        while (true)
+        {
+            tex.SetPixel(x0, y0, color);
+            if (x0 == x1 && y0 == y1) break;
+            int e2 = 2 * err;
+            if (e2 > -dy)
+            {
+                err -= dy;
+                x0 += sx;
+            }
+            if (e2 < dx)
+            {
+                err += dx;
+                y0 += sy;
+            }
+        }
+    }
+
+    protected virtual void OnDestroy()
+    {
+        if (crackSprite != null)
+        {
+            if (crackSprite.texture != null)
+            {
+                Destroy(crackSprite.texture);
+            }
+            Destroy(crackSprite);
+        }
     }
 }
