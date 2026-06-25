@@ -22,8 +22,9 @@ public class TurretLogic : BuildingLogic
         
         if (turretWeapon != null)
         {
-            float fRate = data.proccessingSpeed > 0 ? data.proccessingSpeed : 1f;
-            turretWeapon.SetupWeapon(data.itemPrefab, fRate, data.damage, data.bulletSpeed);
+            float fRate = data.fireRate > 0 ? data.fireRate : 1f;
+            int bullets = data.bulletsFired > 0 ? data.bulletsFired : 1;
+            turretWeapon.SetupWeapon(data.itemPrefab, fRate, data.damage, data.bulletSpeed, bullets, data.bulletSpread, data.weaponType);
             turretWeapon.ApplyTierMultiplier(GetTierMultiplier());
             turretWeapon.isEnemyFired = isEnemyOwned;
         }

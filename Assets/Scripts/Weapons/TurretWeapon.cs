@@ -24,7 +24,7 @@ public class TurretWeapon : BaseWeapon
         }
     }
 
-    public void SetupWeapon(GameObject projectilePrefab, float defaultFireRate = 1f, int defaultDamage = 10, float defaultSpeed = 10f)
+    public void SetupWeapon(GameObject projectilePrefab, float defaultFireRate = 1f, int defaultDamage = 10, float defaultSpeed = 10f, int defaultBulletsFired = 1, float defaultSpread = 0f, WeaponType defaultWeaponType = WeaponType.Automatic)
     {
         bulletPrefab = projectilePrefab;
         fireRate = defaultFireRate;
@@ -32,8 +32,9 @@ public class TurretWeapon : BaseWeapon
         bulletSpeed = defaultSpeed;
         magazineSize = 99999;
         roundsLeft = magazineSize;
-        bulletsFired = 1;
-        weaponType = WeaponType.Automatic;
+        bulletsFired = defaultBulletsFired;
+        bulletSpread = defaultSpread;
+        weaponType = defaultWeaponType;
         nextTimeToFire = Time.time + fireRate;
     }
 

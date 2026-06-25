@@ -28,6 +28,10 @@ MonoBehaviour:
   size: {x: 1, y: 1}
   damage: 2
   bulletSpeed: 15
+  fireRate: 3
+  bulletsFired: 3
+  bulletSpread: 10
+  weaponType: 0
   spawnLimit: 0
   spawnCooldown: 0
   maxConcurrentEnemies: 0
