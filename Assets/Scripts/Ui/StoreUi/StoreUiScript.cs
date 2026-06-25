@@ -71,6 +71,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
     
     private void Awake()
     {
+        maxItemsPerPage = 3; // Force 3 items per page to prevent overlapping with pagination controls
         rectTransform = GetComponent<RectTransform>();
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
@@ -107,6 +108,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         {
             CurrencyManager.Instance.onCurrencyChange -= OnCurrencyChange;
         }
+        EnableOtherUi();
     }
 
     private void OnCurrencyChange()
@@ -140,9 +142,9 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         btnGo.transform.SetParent(upgradesContainer != null ? upgradesContainer.transform : transform, false);
 
         RectTransform rt = btnGo.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.1f, 0.5f);
-        rt.anchorMax = new Vector2(0.45f, 0.5f);
-        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchorMin = new Vector2(0.1f, 0.81f);
+        rt.anchorMax = new Vector2(0.45f, 0.81f);
+        rt.pivot = new Vector2(0.5f, 1f);
         rt.sizeDelta = new Vector2(rt.sizeDelta.x, 160f);
 
         Image img = btnGo.GetComponent<Image>();
@@ -522,6 +524,100 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
     }
     
     private Sequence transitionSequence;
+    private List<GameObject> temporarilyDisabledUiElements = new List<GameObject>();
+
+    private void DisableOtherUi()
+    {
+        temporarilyDisabledUiElements.Clear();
+        
+        // Find the canvas containing StorePanel, or fallback canvas
+        Transform canvasTransform = transform.parent;
+        if (canvasTransform == null)
+        {
+            GameObject canvasGo = GameObject.Find("HUD Canvas") ?? GameObject.Find("Canvas");
+            if (canvasGo != null) canvasTransform = canvasGo.transform;
+        }
+
+        if (canvasTransform == null) return;
+        
+        GameObject moneyUiObj = null;
+        if (UiManager.Instance != null && UiManager.Instance.currentCurrency != null)
+        {
+            moneyUiObj = UiManager.Instance.currentCurrency.gameObject;
+        }
+        else
+        {
+            var currencyGo = GameObject.Find("CurrencyText");
+            if (currencyGo != null) moneyUiObj = currencyGo;
+        }
+
+        // We also check other canvases if they exist and are different
+        List<Transform> canvases = new List<Transform> { canvasTransform };
+        GameObject hudCanvasGo = GameObject.Find("HUD Canvas");
+        if (hudCanvasGo != null && hudCanvasGo.transform != canvasTransform)
+        {
+            canvases.Add(hudCanvasGo.transform);
+        }
+        GameObject mainCanvasGo = GameObject.Find("Canvas");
+        if (mainCanvasGo != null && mainCanvasGo.transform != canvasTransform && !canvases.Contains(mainCanvasGo.transform))
+        {
+            canvases.Add(mainCanvasGo.transform);
+        }
+
+        foreach (var canvas in canvases)
+        {
+            for (int i = 0; i < canvas.childCount; i++)
+            {
+                Transform child = canvas.GetChild(i);
+                GameObject childGo = child.gameObject;
+
+                // Don't disable ourselves or descendants
+                if (childGo == this.gameObject || IsAncestorOrSelf(child, this.transform)) continue;
+
+                // Don't disable the money UI or its parent/ancestors
+                if (moneyUiObj != null && IsAncestorOrSelf(child, moneyUiObj.transform))
+                {
+                    continue;
+                }
+
+                // Don't disable EventSystem or other essential UI/Managers
+                if (childGo.name.Contains("EventSystem") || childGo.name.Contains("Manager"))
+                {
+                    continue;
+                }
+
+                // If active, disable and record
+                if (childGo.activeSelf)
+                {
+                    childGo.SetActive(false);
+                    temporarilyDisabledUiElements.Add(childGo);
+                }
+            }
+        }
+    }
+
+    private bool IsAncestorOrSelf(Transform potentialAncestor, Transform child)
+    {
+        Transform current = child;
+        while (current != null)
+        {
+            if (current == potentialAncestor) return true;
+            current = current.parent;
+        }
+        return false;
+    }
+
+    private void EnableOtherUi()
+    {
+        foreach (var go in temporarilyDisabledUiElements)
+        {
+            if (go != null)
+            {
+                go.SetActive(true);
+            }
+        }
+        temporarilyDisabledUiElements.Clear();
+    }
 
     public void OpenStore()
     {
@@ -534,6 +630,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         rectTransform.localScale = new Vector3(1f, 0.002f, 1f);
         canvasGroup.alpha = 0f;
         gameObject.SetActive(true);
+        DisableOtherUi();
         
         // Reset active tab to Upgrades
         activeTab = StoreTab.Map;
@@ -586,6 +683,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
                         .Append(canvasGroup.DOFade(0f, 0.1f))
                         .AppendCallback(() => {
                             gameObject.SetActive(false);
+                            EnableOtherUi();
                         });
         
         transitionSequence.SetUpdate(true);
@@ -861,7 +959,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         }
 
         // 2. Reposition and show active page buttons
-        float startY = 300f;
+        float startY = -10f;
         float spacingY = -180f; // Increased spacing to fit 160f tall buttons
 
         if (currentPageIndex < storePages.Count)
