@@ -209,7 +209,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
         if (InventoryManager.Instance != null)
         {
             if (minerData != null) InventoryManager.Instance.AddBuilding(minerData, 1);
-            if (conveyorData != null) InventoryManager.Instance.AddBuilding(conveyorData, 8);
+            if (conveyorData != null) InventoryManager.Instance.AddBuilding(conveyorData, 10);
         }
     }
 
@@ -539,10 +539,10 @@ public class TutorialManager : SingletonBase<TutorialManager>
         objectivePanel.transform.SetParent(canvasGo.transform, false);
 
         RectTransform panelRt = objectivePanel.GetComponent<RectTransform>();
-        panelRt.anchorMin = new Vector2(1f, 1f);
-        panelRt.anchorMax = new Vector2(1f, 1f);
-        panelRt.pivot = new Vector2(1f, 1f);
-        panelRt.anchoredPosition = new Vector2(-20f, -80f);
+        panelRt.anchorMin = new Vector2(1f, 0f);
+        panelRt.anchorMax = new Vector2(1f, 0f);
+        panelRt.pivot = new Vector2(1f, 0f);
+        panelRt.anchoredPosition = new Vector2(-20f, 20f);
         panelRt.sizeDelta = new Vector2(440f, 180f);
 
         Image img = objectivePanel.GetComponent<Image>();
