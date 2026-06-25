@@ -80,6 +80,10 @@ namespace Buildings
         [Header("Combat & Spawner Settings")]
         public int damage = 10;
         public float bulletSpeed = 15f;
+        public float fireRate = 1.0f;
+        public int bulletsFired = 1;
+        public float bulletSpread = 0f;
+        public WeaponType weaponType = WeaponType.Automatic;
         public int spawnLimit = 5;
         public float spawnCooldown = 8f;
         public int maxConcurrentEnemies = 3;
