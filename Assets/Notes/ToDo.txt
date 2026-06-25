@@ -19,6 +19,8 @@ add section of tutorial for purchasing ammo and purchasing and using health pack
 
 need reason to progress, something to work towards /  a driving force and motivation for your actions
 
+fix not being able to destroy all enemy buildings and make
+
 add difficulty settings 
 
 add end goal 

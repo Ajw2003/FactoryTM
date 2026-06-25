@@ -530,14 +530,14 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         canvasGroup.DOComplete();
         if (transitionSequence != null) transitionSequence.Kill();
         
-        // Reset active tab to Upgrades
-        activeTab = StoreTab.Map;
-        SwitchTab(StoreTab.Upgrades);
-
         // 1. Initial State: scale to a thin central line
         rectTransform.localScale = new Vector3(1f, 0.002f, 1f);
         canvasGroup.alpha = 0f;
         gameObject.SetActive(true);
+        
+        // Reset active tab to Upgrades
+        activeTab = StoreTab.Map;
+        SwitchTab(StoreTab.Upgrades);
         
         // 2. Play boot animation sequence
         transitionSequence = DOTween.Sequence();
