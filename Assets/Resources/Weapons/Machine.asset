@@ -16,12 +16,14 @@ MonoBehaviour:
   bulletSize: 1
   bulletSpread: 1
   bulletSpeed: 25
-  bulletDamage: 1
+  bulletDamage: 2
   magazineSize: 30
   bulletsFired: 1
   bulletRange: 1
   burstSize: 3
   reloadSpeed: 2
+  explosionRadius: 0
   bulletPrefab: {fileID: 2593228396439306384, guid: 2b7b7e16093c7cd418fb297d584faf33, type: 3}
   bulletSound: {fileID: 0}
   weaponType: 0
+  cost: 0
