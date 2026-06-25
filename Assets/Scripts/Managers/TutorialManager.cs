@@ -211,6 +211,13 @@ public class TutorialManager : SingletonBase<TutorialManager>
             if (minerData != null) InventoryManager.Instance.AddBuilding(minerData, 1);
             if (conveyorData != null) InventoryManager.Instance.AddBuilding(conveyorData, 10);
         }
+
+        if (HotbarManager.Instance != null)
+        {
+            if (minerData != null) HotbarManager.Instance.AssignToSlot(0, minerData);
+            if (conveyorData != null) HotbarManager.Instance.AssignToSlot(1, conveyorData);
+            HotbarManager.Instance.SelectSlot(0); // Select Miner by default
+        }
     }
 
     public bool IsStoreLocked()
