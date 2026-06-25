@@ -159,7 +159,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         rt.anchorMax = new Vector2(0.5f, 0.96f);
         rt.pivot = new Vector2(0.5f, 1f);
         rt.anchoredPosition = new Vector2(0f, 0f);
-        rt.sizeDelta = new Vector2(480f, 105f);
+        rt.sizeDelta = new Vector2(620f, 140f);
 
         Image img = jadePanel.GetComponent<Image>();
         img.color = new Color(0.01f, 0.05f, 0.01f, 0.92f); // CRT translucent green background
@@ -174,11 +174,11 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         RectTransform titleRt = titleGo.GetComponent<RectTransform>();
         titleRt.anchorMin = new Vector2(0f, 0.65f);
         titleRt.anchorMax = new Vector2(1f, 0.95f);
-        titleRt.offsetMin = new Vector2(15f, 0f);
-        titleRt.offsetMax = new Vector2(-15f, 0f);
+        titleRt.offsetMin = new Vector2(20f, 0f);
+        titleRt.offsetMax = new Vector2(-20f, 0f);
 
         jadeTitleText = titleGo.GetComponent<TextMeshProUGUI>();
-        jadeTitleText.fontSize = 24;
+        jadeTitleText.fontSize = 30;
         jadeTitleText.fontStyle = FontStyles.Bold;
         jadeTitleText.color = new Color(0.2f, 1f, 0.2f);
         jadeTitleText.alignment = TextAlignmentOptions.Left;
@@ -189,11 +189,11 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         RectTransform detailRt = detailGo.GetComponent<RectTransform>();
         detailRt.anchorMin = new Vector2(0f, 0.35f);
         detailRt.anchorMax = new Vector2(1f, 0.65f);
-        detailRt.offsetMin = new Vector2(15f, 0f);
-        detailRt.offsetMax = new Vector2(-15f, 0f);
+        detailRt.offsetMin = new Vector2(20f, 0f);
+        detailRt.offsetMax = new Vector2(-20f, 0f);
 
         jadeDetailText = detailGo.GetComponent<TextMeshProUGUI>();
-        jadeDetailText.fontSize = 20;
+        jadeDetailText.fontSize = 24;
         jadeDetailText.color = new Color(0.2f, 0.8f, 0.2f, 0.85f);
         jadeDetailText.alignment = TextAlignmentOptions.Left;
 
@@ -203,11 +203,11 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         RectTransform promptRt = promptGo.GetComponent<RectTransform>();
         promptRt.anchorMin = new Vector2(0f, 0.05f);
         promptRt.anchorMax = new Vector2(1f, 0.35f);
-        promptRt.offsetMin = new Vector2(15f, 0f);
-        promptRt.offsetMax = new Vector2(-15f, 0f);
+        promptRt.offsetMin = new Vector2(20f, 0f);
+        promptRt.offsetMax = new Vector2(-20f, 0f);
 
         jadePromptText = promptGo.GetComponent<TextMeshProUGUI>();
-        jadePromptText.fontSize = 18;
+        jadePromptText.fontSize = 22;
         jadePromptText.fontStyle = FontStyles.Italic;
         jadePromptText.color = new Color(1f, 0.8f, 0.2f); // gold prompt color
         jadePromptText.alignment = TextAlignmentOptions.Left;
@@ -232,7 +232,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         rt.anchorMax = new Vector2(0.5f, 0.5f);
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.anchoredPosition = Vector2.zero;
-        rt.sizeDelta = new Vector2(500f, 320f);
+        rt.sizeDelta = new Vector2(680f, 440f);
 
         Image img = buildingPanel.GetComponent<Image>();
         img.color = new Color(0.01f, 0.05f, 0.01f, 0.97f);
@@ -245,13 +245,13 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         GameObject titleGo = new GameObject("TitleText", typeof(RectTransform), typeof(TextMeshProUGUI));
         titleGo.transform.SetParent(buildingPanel.transform, false);
         RectTransform titleRt = titleGo.GetComponent<RectTransform>();
-        titleRt.anchorMin = new Vector2(0f, 0.85f);
+        titleRt.anchorMin = new Vector2(0f, 0.88f);
         titleRt.anchorMax = new Vector2(1f, 0.98f);
-        titleRt.offsetMin = new Vector2(20f, 0f);
-        titleRt.offsetMax = new Vector2(-60f, 0f);
+        titleRt.offsetMin = new Vector2(25f, 0f);
+        titleRt.offsetMax = new Vector2(-70f, 0f);
 
         buildingTitleText = titleGo.GetComponent<TextMeshProUGUI>();
-        buildingTitleText.fontSize = 28;
+        buildingTitleText.fontSize = 36;
         buildingTitleText.fontStyle = FontStyles.Bold;
         buildingTitleText.color = new Color(0.2f, 1f, 0.2f);
         buildingTitleText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -263,8 +263,8 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         closeRt.anchorMin = new Vector2(1f, 1f);
         closeRt.anchorMax = new Vector2(1f, 1f);
         closeRt.pivot = new Vector2(1f, 1f);
-        closeRt.anchoredPosition = new Vector2(-15f, -15f);
-        closeRt.sizeDelta = new Vector2(35f, 35f);
+        closeRt.anchoredPosition = new Vector2(-20f, -20f);
+        closeRt.sizeDelta = new Vector2(45f, 45f);
 
         Image closeImg = closeGo.GetComponent<Image>();
         closeImg.color = new Color(0.1f, 0.25f, 0.1f, 0.8f);
@@ -281,7 +281,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         closeTextRt.offsetMax = Vector2.zero;
         TextMeshProUGUI closeTxt = closeTextGo.GetComponent<TextMeshProUGUI>();
         closeTxt.text = "X";
-        closeTxt.fontSize = 24;
+        closeTxt.fontSize = 30;
         closeTxt.fontStyle = FontStyles.Bold;
         closeTxt.color = new Color(0.2f, 1f, 0.2f);
         closeTxt.alignment = TextAlignmentOptions.Center;
@@ -293,13 +293,13 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         GameObject detailGo = new GameObject("DetailText", typeof(RectTransform), typeof(TextMeshProUGUI));
         detailGo.transform.SetParent(buildingPanel.transform, false);
         RectTransform detailRt = detailGo.GetComponent<RectTransform>();
-        detailRt.anchorMin = new Vector2(0f, 0.45f);
-        detailRt.anchorMax = new Vector2(1f, 0.8f);
-        detailRt.offsetMin = new Vector2(25f, 0f);
-        detailRt.offsetMax = new Vector2(-25f, 0f);
+        detailRt.anchorMin = new Vector2(0f, 0.48f);
+        detailRt.anchorMax = new Vector2(1f, 0.85f);
+        detailRt.offsetMin = new Vector2(30f, 0f);
+        detailRt.offsetMax = new Vector2(-30f, 0f);
 
         buildingDetailText = detailGo.GetComponent<TextMeshProUGUI>();
-        buildingDetailText.fontSize = 22;
+        buildingDetailText.fontSize = 28;
         buildingDetailText.color = new Color(0.2f, 0.9f, 0.2f);
         buildingDetailText.alignment = TextAlignmentOptions.TopLeft;
         buildingDetailText.enableWordWrapping = true;
@@ -308,11 +308,11 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         fuelBarContainer = new GameObject("FuelBarContainer", typeof(RectTransform), typeof(Image));
         fuelBarContainer.transform.SetParent(buildingPanel.transform, false);
         RectTransform barRt = fuelBarContainer.GetComponent<RectTransform>();
-        barRt.anchorMin = new Vector2(0.5f, 0.35f);
-        barRt.anchorMax = new Vector2(0.5f, 0.35f);
+        barRt.anchorMin = new Vector2(0.5f, 0.38f);
+        barRt.anchorMax = new Vector2(0.5f, 0.38f);
         barRt.pivot = new Vector2(0.5f, 0.5f);
         barRt.anchoredPosition = Vector2.zero;
-        barRt.sizeDelta = new Vector2(450f, 26f);
+        barRt.sizeDelta = new Vector2(600f, 40f);
 
         Image barBg = fuelBarContainer.GetComponent<Image>();
         barBg.color = new Color(0.02f, 0.1f, 0.02f, 0.8f);
@@ -342,7 +342,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         barTextRt.offsetMin = Vector2.zero;
         barTextRt.offsetMax = Vector2.zero;
         fuelBarText = barTextGo.GetComponent<TextMeshProUGUI>();
-        fuelBarText.fontSize = 18;
+        fuelBarText.fontSize = 24;
         fuelBarText.color = Color.black; // high contrast black on green bar
         fuelBarText.fontStyle = FontStyles.Bold;
         fuelBarText.alignment = TextAlignmentOptions.Center;
@@ -352,7 +352,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         actionButton1Go.transform.SetParent(buildingPanel.transform, false);
         RectTransform btn1Rt = actionButton1Go.GetComponent<RectTransform>();
         btn1Rt.anchorMin = new Vector2(0.05f, 0.08f);
-        btn1Rt.anchorMax = new Vector2(0.48f, 0.26f);
+        btn1Rt.anchorMax = new Vector2(0.48f, 0.28f);
         btn1Rt.offsetMin = Vector2.zero;
         btn1Rt.offsetMax = Vector2.zero;
 
@@ -369,7 +369,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         btn1TxtRt.offsetMin = Vector2.zero;
         btn1TxtRt.offsetMax = Vector2.zero;
         actionButton1Text = btn1TxtGo.GetComponent<TextMeshProUGUI>();
-        actionButton1Text.fontSize = 20;
+        actionButton1Text.fontSize = 24;
         actionButton1Text.color = new Color(0.2f, 1f, 0.2f);
         actionButton1Text.alignment = TextAlignmentOptions.Center;
 
@@ -380,7 +380,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         actionButton2Go.transform.SetParent(buildingPanel.transform, false);
         RectTransform btn2Rt = actionButton2Go.GetComponent<RectTransform>();
         btn2Rt.anchorMin = new Vector2(0.52f, 0.08f);
-        btn2Rt.anchorMax = new Vector2(0.95f, 0.26f);
+        btn2Rt.anchorMax = new Vector2(0.95f, 0.28f);
         btn2Rt.offsetMin = Vector2.zero;
         btn2Rt.offsetMax = Vector2.zero;
 
@@ -397,7 +397,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         btn2TxtRt.offsetMin = Vector2.zero;
         btn2TxtRt.offsetMax = Vector2.zero;
         actionButton2Text = btn2TxtGo.GetComponent<TextMeshProUGUI>();
-        actionButton2Text.fontSize = 20;
+        actionButton2Text.fontSize = 24;
         actionButton2Text.color = new Color(0.2f, 1f, 0.2f);
         actionButton2Text.alignment = TextAlignmentOptions.Center;
 

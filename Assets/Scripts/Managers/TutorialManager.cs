@@ -539,11 +539,11 @@ public class TutorialManager : SingletonBase<TutorialManager>
         objectivePanel.transform.SetParent(canvasGo.transform, false);
 
         RectTransform panelRt = objectivePanel.GetComponent<RectTransform>();
-        panelRt.anchorMin = new Vector2(0f, 1f);
-        panelRt.anchorMax = new Vector2(0f, 1f);
-        panelRt.pivot = new Vector2(0f, 1f);
-        panelRt.anchoredPosition = new Vector2(20f, -80f);
-        panelRt.sizeDelta = new Vector2(340f, 130f);
+        panelRt.anchorMin = new Vector2(1f, 1f);
+        panelRt.anchorMax = new Vector2(1f, 1f);
+        panelRt.pivot = new Vector2(1f, 1f);
+        panelRt.anchoredPosition = new Vector2(-20f, -80f);
+        panelRt.sizeDelta = new Vector2(440f, 180f);
 
         Image img = objectivePanel.GetComponent<Image>();
         img.color = new Color(0.01f, 0.05f, 0.01f, 0.9f);
@@ -558,11 +558,11 @@ public class TutorialManager : SingletonBase<TutorialManager>
         RectTransform textRt = textGo.GetComponent<RectTransform>();
         textRt.anchorMin = Vector2.zero;
         textRt.anchorMax = Vector2.one;
-        textRt.offsetMin = new Vector2(12f, 12f);
-        textRt.offsetMax = new Vector2(-12f, -12f);
+        textRt.offsetMin = new Vector2(15f, 15f);
+        textRt.offsetMax = new Vector2(-15f, -15f);
 
         objectiveText = textGo.GetComponent<TextMeshProUGUI>();
-        objectiveText.fontSize = 20;
+        objectiveText.fontSize = 26;
         objectiveText.color = new Color(0.2f, 1f, 0.2f);
         objectiveText.alignment = TextAlignmentOptions.TopLeft;
         objectiveText.enableWordWrapping = true;

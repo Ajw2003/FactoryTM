@@ -137,9 +137,11 @@ public class PlayerController : MonoBehaviour, IHealth
                 return;
             }
 
-            if (BuildingUiManager.Instance.HoveredInteractable != null)
+            // Find nearest interactable building within 2 tiles
+            BuildingLogic nearest = FindNearestBuildingToPlayer(2f);
+            if (nearest != null)
             {
-                BuildingUiManager.Instance.InteractWithHovered();
+                BuildingUiManager.Instance.OpenPanel(nearest);
                 return;
             }
 
@@ -200,6 +202,38 @@ public class PlayerController : MonoBehaviour, IHealth
         {
             StateMachine.TransitionTo(StateMachine.idleState);
         }
+    }
+
+    public BuildingLogic FindNearestBuildingToPlayer(float maxDistanceInTiles)
+    {
+        if (BuildingManager.Instance == null || BuildingManager.Instance.Buildings == null) return null;
+
+        BuildingLogic nearest = null;
+        float minDistance = maxDistanceInTiles;
+
+        foreach (var building in BuildingManager.Instance.Buildings)
+        {
+            if (building == null || building.isEnemyOwned) continue;
+            if (building.data.type == Buildings.BuildingType.Conveyor) continue; // Exclude conveyors
+
+            float minCellDist = float.MaxValue;
+            foreach (var cell in building.occupiedCells)
+            {
+                float dist = Vector2.Distance(currentCell, cell);
+                if (dist < minCellDist) minCellDist = dist;
+            }
+
+            if (minCellDist <= maxDistanceInTiles)
+            {
+                if (minCellDist < minDistance)
+                {
+                    minDistance = minCellDist;
+                    nearest = building;
+                }
+            }
+        }
+
+        return nearest;
     }
 
     public Vector2Int GetDiscreteInputDirection()
