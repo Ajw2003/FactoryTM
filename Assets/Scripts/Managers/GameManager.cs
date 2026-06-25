@@ -117,6 +117,7 @@ public class GameManager : SingletonBase<GameManager>
                 Debug.LogWarning("GameManager: Null or invalid plate item found in Plates list.");
             }
         }
+        UiManager.Instance?.UpdateHp(playerController.Health, playerController.maxHealth);
     }
 
     void InitializeData()

@@ -53,20 +53,10 @@ public class EnemyOutpost
     {
         if (IsCleared) return;
 
-        spawnedEnemies.RemoveAll(e => e == null);
         spawners.RemoveAll(s => s == null);
 
-        bool anyActiveSpawners = false;
-        foreach (var spawner in spawners)
-        {
-            if (spawner != null && !spawner.HasFinishedSpawning())
-            {
-                anyActiveSpawners = true;
-                break;
-            }
-        }
-
-        if (!anyActiveSpawners && spawnedEnemies.Count == 0)
+        // Clear the outpost immediately when the spawner building is destroyed
+        if (spawners.Count == 0)
         {
             IsCleared = true;
             Debug.Log("Enemy Outpost Cleared!");
@@ -412,7 +402,7 @@ namespace Managers
         {
             Buildings.BuildingData spawnerData = ScriptableObject.CreateInstance<Buildings.BuildingData>();
             spawnerData.buildingName = "Enemy Spawner";
-            spawnerData.maxHealth = 200;
+            spawnerData.maxHealth = 120;
             
             Buildings.BuildingData furnaceData = Resources.Load<Buildings.BuildingData>("BuildingData/Furnace");
             if (furnaceData != null)
@@ -425,6 +415,7 @@ namespace Managers
             if (spawner != null)
             {
                 spawner.activationRange = 9f;
+                spawner.Health = 120;
             }
             return spawner;
         }
@@ -433,6 +424,10 @@ namespace Managers
         {
             Buildings.BuildingData turretData = Resources.Load<Buildings.BuildingData>("BuildingData/Turret");
             TurretLogic turret = SpawnEnemyBuilding(cell, turretData, typeof(TurretLogic)) as TurretLogic;
+            if (turret != null)
+            {
+                turret.Health = 80;
+            }
             return turret;
         }
 
@@ -440,6 +435,10 @@ namespace Managers
         {
             Buildings.BuildingData wallData = Resources.Load<Buildings.BuildingData>("BuildingData/Wall");
             WallLogic wall = SpawnEnemyBuilding(cell, wallData, typeof(WallLogic)) as WallLogic;
+            if (wall != null)
+            {
+                wall.Health = 50;
+            }
             return wall;
         }
 
@@ -451,7 +450,12 @@ namespace Managers
                 Buildings.BuildingData data = Resources.Load<Buildings.BuildingData>("BuildingData/Furnace");
                 if (data != null && CanPlaceStructureOfSize(cell, data.size))
                 {
-                    return SpawnEnemyBuilding(cell, data, typeof(Furnace));
+                    BuildingLogic furnace = SpawnEnemyBuilding(cell, data, typeof(Furnace));
+                    if (furnace != null)
+                    {
+                        furnace.Health = 80;
+                    }
+                    return furnace;
                 }
             }
             else if (rand < 0.8f)
@@ -459,13 +463,23 @@ namespace Managers
                 Buildings.BuildingData data = Resources.Load<Buildings.BuildingData>("BuildingData/Mine");
                 if (data != null && CanPlaceStructureOfSize(cell, data.size))
                 {
-                    return SpawnEnemyBuilding(cell, data, typeof(MinerLogic));
+                    BuildingLogic miner = SpawnEnemyBuilding(cell, data, typeof(MinerLogic));
+                    if (miner != null)
+                    {
+                        miner.Health = 100;
+                    }
+                    return miner;
                 }
             }
 
             // Fallback to spawning Wall (1x1)
             Buildings.BuildingData wallData = Resources.Load<Buildings.BuildingData>("BuildingData/Wall");
-            return SpawnEnemyBuilding(cell, wallData, typeof(WallLogic));
+            BuildingLogic wall = SpawnEnemyBuilding(cell, wallData, typeof(WallLogic));
+            if (wall != null)
+            {
+                wall.Health = 50;
+            }
+            return wall;
         }
     }
 }
