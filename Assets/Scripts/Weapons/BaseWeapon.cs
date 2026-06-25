@@ -74,6 +74,7 @@ public class BaseWeapon : MonoBehaviour
 
     public virtual void Shoot()
     {
+        if (Stats == null) return;
         if (isReloading) return;
         if (isReloading || Time.time < nextTimeToFire) return;
 
