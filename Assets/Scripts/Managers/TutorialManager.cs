@@ -62,10 +62,10 @@ public class TutorialManager : SingletonBase<TutorialManager>
         // 1. Crash Land Intro Dialogue
         string[] introTexts = new string[]
         {
-            "SYSTEM // INCOMING TRANSMISSION\n\nCRITICAL ERROR: Outpost ship hull breached. Crash-landed in sector Earth-99. Planetary atmospheric shield: OFFLINE.",
-            "SYSTEM // INCOMING TRANSMISSION\n\nInterdimensional Transport (IDT) Safe Mode: ACTIVE. Transceiver link: OFFLINE. Primary reactor battery: depleted.",
-            "OPERATIVE TRANSMISSION\n\nRequisition store is locked. You must route raw carbon (Coal) into the IDT input port to reboot systems and establish link.",
-            "OPERATIVE TRANSMISSION\n\nSwitch to [BUILDING MODE] (Press Tab) to show your hotbar, select your Miner (rotate with R), and place Conveyor belts to route Coal into the IDT."
+            "SYSTEM // INCOMING TRANSMISSION\n\nWARNING: Orbital extraction vessel hull breach. Crash-landed in hostile sector Earth-99. Atmospheric shields: DESTROYED.",
+            "SYSTEM // INCOMING TRANSMISSION\n\nInterdimensional Transceiver link: OFFLINE. Corporate database link severed. Instant tech delivery catalog: LOCKED.",
+            "OPERATIVE TRANSMISSION\n\nOperative, this is Company Command. Telemetry confirms your crash. The IDT is in safe mode due to power failure. Feed 5 units of Coal into the intake reactor to reboot systems.",
+            "OPERATIVE TRANSMISSION\n\nEnter [BUILDING MODE] (Press Tab) to show your hotbar. Place your extraction Miner on the nearby Coal deposit, rotate it with [R], and route conveyors to the IDT intake."
         };
         DialogueType[] introTypes = new DialogueType[]
         {
@@ -79,9 +79,9 @@ public class TutorialManager : SingletonBase<TutorialManager>
         // 2. IDT Online & Store Locked Dialogue
         string[] onlineTexts = new string[]
         {
-            "SYSTEM // INCOMING TRANSMISSION\n\nReboot successful. Transceiver online. Satellite telemetry established. Account credited: +$100.",
-            "OPERATIVE TRANSMISSION\n\nALERT: Active local scanning has exposed our position. Native human combatants are closing in.",
-            "OPERATIVE TRANSMISSION\n\nRequisition database unlocked. Access the Company Catalog (Press E) to purchase defense equipment."
+            "SYSTEM // INCOMING TRANSMISSION\n\nIntake registered: 5/5 Fuel units. IDT reactor boot complete. Satellite telemetry established. Account credited: +$100.",
+            "OPERATIVE TRANSMISSION\n\nConnection restored. Excellent. However, the boot sequence energy signature has alerted local human security forces. Intrusion imminent.",
+            "OPERATIVE TRANSMISSION\n\nRequisition catalog unlocked. Open the Store (Press E) immediately and purchase defensive ammunition or defensive structures to defend the ship."
         };
         DialogueType[] onlineTypes = new DialogueType[]
         {
@@ -94,8 +94,8 @@ public class TutorialManager : SingletonBase<TutorialManager>
         // 3. Combat Raid Dialogue
         string[] combatTexts = new string[]
         {
-            "OPERATIVE TRANSMISSION\n\nOutpost breach imminent. Equip standard arms. Switch to [COMBAT MODE] (Press Tab) to hide hotbar and activate target tracking.",
-            "OPERATIVE TRANSMISSION\n\nAim with Mouse, shoot with Left Click, and Dodge-Roll (Space/Dodge key) to avoid incoming fire. Protect the IDT!"
+            "OPERATIVE TRANSMISSION\n\nHostiles detected. Switch to [COMBAT MODE] (Press Tab) to arm your personal weapon. This locks building interfaces and enables Left Click aiming and shooting.",
+            "OPERATIVE TRANSMISSION\n\nAim with Mouse, shoot with Left Click, and use Dodge-Roll (Space/Dodge key) to evade incoming fire. Do not let them breach the IDT. Eliminate them."
         };
         DialogueType[] combatTypes = new DialogueType[]
         {
