@@ -401,30 +401,10 @@ namespace Managers
         private EnemySpawnerLogic SpawnEnemySpawner(Vector2Int cell)
         {
             Buildings.BuildingData spawnerData = Resources.Load<Buildings.BuildingData>("BuildingData/EnemySpawner");
-            bool isDynamicFallback = false;
-            if (spawnerData == null)
-            {
-                isDynamicFallback = true;
-                spawnerData = ScriptableObject.CreateInstance<Buildings.BuildingData>();
-                spawnerData.buildingName = "Enemy Spawner";
-                spawnerData.maxHealth = 120;
-                
-                Buildings.BuildingData furnaceData = Resources.Load<Buildings.BuildingData>("BuildingData/Furnace");
-                if (furnaceData != null)
-                {
-                    spawnerData.rotatedTiles = furnaceData.rotatedTiles;
-                }
-                spawnerData.size = new Vector2Int(1, 1);
-            }
-
             EnemySpawnerLogic spawner = SpawnEnemyBuilding(cell, spawnerData, typeof(EnemySpawnerLogic)) as EnemySpawnerLogic;
             if (spawner != null)
             {
                 spawner.activationRange = 9f;
-                if (isDynamicFallback)
-                {
-                    spawner.Health = 120;
-                }
             }
             return spawner;
         }
@@ -432,34 +412,14 @@ namespace Managers
         private TurretLogic SpawnEnemyTurret(Vector2Int cell)
         {
             Buildings.BuildingData turretData = Resources.Load<Buildings.BuildingData>("BuildingData/EnemyTurret");
-            bool isFallback = false;
-            if (turretData == null)
-            {
-                turretData = Resources.Load<Buildings.BuildingData>("BuildingData/Turret");
-                isFallback = true;
-            }
             TurretLogic turret = SpawnEnemyBuilding(cell, turretData, typeof(TurretLogic)) as TurretLogic;
-            if (turret != null && isFallback)
-            {
-                turret.Health = 80;
-            }
             return turret;
         }
 
         private WallLogic SpawnEnemyWall(Vector2Int cell)
         {
             Buildings.BuildingData wallData = Resources.Load<Buildings.BuildingData>("BuildingData/EnemyWall");
-            bool isFallback = false;
-            if (wallData == null)
-            {
-                wallData = Resources.Load<Buildings.BuildingData>("BuildingData/Wall");
-                isFallback = true;
-            }
             WallLogic wall = SpawnEnemyBuilding(cell, wallData, typeof(WallLogic)) as WallLogic;
-            if (wall != null && isFallback)
-            {
-                wall.Health = 50;
-            }
             return wall;
         }
 
@@ -469,55 +429,25 @@ namespace Managers
             if (rand < 0.4f)
             {
                 Buildings.BuildingData data = Resources.Load<Buildings.BuildingData>("BuildingData/EnemyFurnace");
-                bool isFallback = false;
-                if (data == null)
-                {
-                    data = Resources.Load<Buildings.BuildingData>("BuildingData/Furnace");
-                    isFallback = true;
-                }
                 if (data != null && CanPlaceStructureOfSize(cell, data.size))
                 {
                     BuildingLogic furnace = SpawnEnemyBuilding(cell, data, typeof(Furnace));
-                    if (furnace != null && isFallback)
-                    {
-                        furnace.Health = 80;
-                    }
                     return furnace;
                 }
             }
             else if (rand < 0.8f)
             {
                 Buildings.BuildingData data = Resources.Load<Buildings.BuildingData>("BuildingData/EnemyMine");
-                bool isFallback = false;
-                if (data == null)
-                {
-                    data = Resources.Load<Buildings.BuildingData>("BuildingData/Mine");
-                    isFallback = true;
-                }
                 if (data != null && CanPlaceStructureOfSize(cell, data.size))
                 {
                     BuildingLogic miner = SpawnEnemyBuilding(cell, data, typeof(MinerLogic));
-                    if (miner != null && isFallback)
-                    {
-                        miner.Health = 100;
-                    }
                     return miner;
                 }
             }
 
-            // Fallback to spawning Wall (1x1)
+            // Spawning Wall (1x1)
             Buildings.BuildingData wallData = Resources.Load<Buildings.BuildingData>("BuildingData/EnemyWall");
-            bool isWallFallback = false;
-            if (wallData == null)
-            {
-                wallData = Resources.Load<Buildings.BuildingData>("BuildingData/Wall");
-                isWallFallback = true;
-            }
             BuildingLogic wall = SpawnEnemyBuilding(cell, wallData, typeof(WallLogic));
-            if (wall != null && isWallFallback)
-            {
-                wall.Health = 50;
-            }
             return wall;
         }
     }
