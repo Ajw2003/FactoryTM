@@ -35,7 +35,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
     // Blinking cursor
     private float cursorTimer = 0f;
     private bool cursorVisible = true;
-    private string cursorChar = "█"; // Retro terminal cursor block
+    private string cursorChar = "_"; // Retro terminal cursor block
     
     private List<List<Button>> storePages = new List<List<Button>>();
     private Dictionary<Button, Vector3> buttonOriginalScales = new Dictionary<Button, Vector3>();
@@ -195,7 +195,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         descTxt.color = new Color(0.1f, 0.65f, 0.1f, 0.8f);
         descTxt.alignment = TextAlignmentOptions.TopLeft;
         descTxt.enableWordWrapping = true;
-        descTxt.overflowMode = TextOverflowModes.Ellipsis;
+        descTxt.overflowMode = TextOverflowModes.Truncate;
 
         // Price label
         GameObject priceGo = new GameObject("PriceText", typeof(RectTransform), typeof(TextMeshProUGUI));
