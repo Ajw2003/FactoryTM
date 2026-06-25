@@ -172,7 +172,7 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
         
         float damagePct = 1f - healthPct;
         Color c = crackRenderer.color;
-        c.a = Mathf.Clamp(damagePct * 1.2f, 0.2f, 1f);
+        c.a = Mathf.Clamp(damagePct * 1.6f, 0.45f, 1.0f);
         crackRenderer.color = c;
 
         float scale = Mathf.Lerp(0.5f, 1.0f, damagePct);
@@ -194,13 +194,13 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
             }
         }
         
-        Color crackColor = new Color(0.1f, 0.1f, 0.1f, 0.8f);
+        Color crackColor = new Color(0.02f, 0.02f, 0.02f, 0.95f);
         
-        // Draw crack lines stemming from center
-        DrawCrackLine(texture, size / 2, size / 2, size / 2 + Random.Range(-15, 15), size / 2 + Random.Range(-15, 15), crackColor);
-        DrawCrackLine(texture, size / 2, size / 2, size / 2 + Random.Range(-15, 15), size / 2 - Random.Range(-15, 15), crackColor);
-        DrawCrackLine(texture, size / 2, size / 2, size / 2 - Random.Range(-15, 15), size / 2 + Random.Range(-15, 15), crackColor);
-        DrawCrackLine(texture, size / 2, size / 2, size / 2 - Random.Range(-15, 15), size / 2 - Random.Range(-15, 15), crackColor);
+        // Draw crack lines spanning further towards the edges
+        DrawCrackLine(texture, size / 2, size / 2, size / 2 + Random.Range(-26, 26), size / 2 + Random.Range(-26, 26), crackColor);
+        DrawCrackLine(texture, size / 2, size / 2, size / 2 + Random.Range(-26, 26), size / 2 - Random.Range(-26, 26), crackColor);
+        DrawCrackLine(texture, size / 2, size / 2, size / 2 - Random.Range(-26, 26), size / 2 + Random.Range(-26, 26), crackColor);
+        DrawCrackLine(texture, size / 2, size / 2, size / 2 - Random.Range(-26, 26), size / 2 - Random.Range(-26, 26), crackColor);
         
         texture.Apply();
         return texture;
@@ -216,7 +216,9 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
 
         while (true)
         {
-            tex.SetPixel(x0, y0, color);
+            // Set thick pixel brush (cross shape) for high definition
+            SetThickPixel(tex, x0, y0, color);
+            
             if (x0 == x1 && y0 == y1) break;
             int e2 = 2 * err;
             if (e2 > -dy)
@@ -230,6 +232,15 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
                 y0 += sy;
             }
         }
+    }
+
+    private void SetThickPixel(Texture2D tex, int x, int y, Color color)
+    {
+        tex.SetPixel(x, y, color);
+        if (x > 0) tex.SetPixel(x - 1, y, color);
+        if (x < tex.width - 1) tex.SetPixel(x + 1, y, color);
+        if (y > 0) tex.SetPixel(x, y - 1, color);
+        if (y < tex.height - 1) tex.SetPixel(x, y + 1, color);
     }
 
     protected virtual void OnDestroy()
