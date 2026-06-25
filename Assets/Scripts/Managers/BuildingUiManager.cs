@@ -237,11 +237,11 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         buildingPanel.transform.SetParent(HUDCanvas.transform, false);
 
         RectTransform rt = buildingPanel.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.5f, 0.5f);
-        rt.anchorMax = new Vector2(0.5f, 0.5f);
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.anchoredPosition = Vector2.zero;
-        rt.sizeDelta = new Vector2(800f, 550f);
+        rt.anchorMin = new Vector2(1f, 0.5f);
+        rt.anchorMax = new Vector2(1f, 0.5f);
+        rt.pivot = new Vector2(1f, 0.5f);
+        rt.anchoredPosition = new Vector2(-50f, 0f);
+        rt.sizeDelta = new Vector2(1000f, 688f);
 
         Image img = buildingPanel.GetComponent<Image>();
         img.color = new Color(0.01f, 0.05f, 0.01f, 0.97f);
@@ -260,7 +260,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         titleRt.offsetMax = new Vector2(-70f, 0f);
 
         buildingTitleText = titleGo.GetComponent<TextMeshProUGUI>();
-        buildingTitleText.fontSize = 42;
+        buildingTitleText.fontSize = 52;
         buildingTitleText.fontStyle = FontStyles.Bold;
         buildingTitleText.color = new Color(0.2f, 1f, 0.2f);
         buildingTitleText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -273,7 +273,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         closeRt.anchorMax = new Vector2(1f, 1f);
         closeRt.pivot = new Vector2(1f, 1f);
         closeRt.anchoredPosition = new Vector2(-20f, -20f);
-        closeRt.sizeDelta = new Vector2(45f, 45f);
+        closeRt.sizeDelta = new Vector2(56f, 56f);
 
         Image closeImg = closeGo.GetComponent<Image>();
         closeImg.color = new Color(0.1f, 0.25f, 0.1f, 0.8f);
@@ -290,7 +290,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         closeTextRt.offsetMax = Vector2.zero;
         TextMeshProUGUI closeTxt = closeTextGo.GetComponent<TextMeshProUGUI>();
         closeTxt.text = "X";
-        closeTxt.fontSize = 30;
+        closeTxt.fontSize = 38;
         closeTxt.fontStyle = FontStyles.Bold;
         closeTxt.color = new Color(0.2f, 1f, 0.2f);
         closeTxt.alignment = TextAlignmentOptions.Center;
@@ -308,7 +308,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         detailRt.offsetMax = new Vector2(-30f, 0f);
 
         buildingDetailText = detailGo.GetComponent<TextMeshProUGUI>();
-        buildingDetailText.fontSize = 32;
+        buildingDetailText.fontSize = 40;
         buildingDetailText.color = new Color(0.2f, 0.9f, 0.2f);
         buildingDetailText.alignment = TextAlignmentOptions.TopLeft;
         buildingDetailText.enableWordWrapping = true;
@@ -321,7 +321,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         barRt.anchorMax = new Vector2(0.5f, 0.38f);
         barRt.pivot = new Vector2(0.5f, 0.5f);
         barRt.anchoredPosition = Vector2.zero;
-        barRt.sizeDelta = new Vector2(600f, 40f);
+        barRt.sizeDelta = new Vector2(750f, 50f);
 
         Image barBg = fuelBarContainer.GetComponent<Image>();
         barBg.color = new Color(0.02f, 0.1f, 0.02f, 0.8f);
@@ -351,7 +351,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         barTextRt.offsetMin = Vector2.zero;
         barTextRt.offsetMax = Vector2.zero;
         fuelBarText = barTextGo.GetComponent<TextMeshProUGUI>();
-        fuelBarText.fontSize = 28;
+        fuelBarText.fontSize = 35;
         fuelBarText.color = Color.black; // high contrast black on green bar
         fuelBarText.fontStyle = FontStyles.Bold;
         fuelBarText.alignment = TextAlignmentOptions.Center;
@@ -378,7 +378,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         btn1TxtRt.offsetMin = Vector2.zero;
         btn1TxtRt.offsetMax = Vector2.zero;
         actionButton1Text = btn1TxtGo.GetComponent<TextMeshProUGUI>();
-        actionButton1Text.fontSize = 24;
+        actionButton1Text.fontSize = 30;
         actionButton1Text.color = new Color(0.2f, 1f, 0.2f);
         actionButton1Text.alignment = TextAlignmentOptions.Center;
 
@@ -406,7 +406,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         btn2TxtRt.offsetMin = Vector2.zero;
         btn2TxtRt.offsetMax = Vector2.zero;
         actionButton2Text = btn2TxtGo.GetComponent<TextMeshProUGUI>();
-        actionButton2Text.fontSize = 24;
+        actionButton2Text.fontSize = 30;
         actionButton2Text.color = new Color(0.2f, 1f, 0.2f);
         actionButton2Text.alignment = TextAlignmentOptions.Center;
 
@@ -439,7 +439,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         arrowRt.offsetMax = Vector2.zero;
         TextMeshProUGUI arrowTxt = arrowGo.GetComponent<TextMeshProUGUI>();
         arrowTxt.text = "▼";
-        arrowTxt.fontSize = 64;
+        arrowTxt.fontSize = 80;
         arrowTxt.fontStyle = FontStyles.Bold;
         arrowTxt.color = new Color(0.2f, 1f, 0.2f);
         arrowTxt.alignment = TextAlignmentOptions.Center;
@@ -454,7 +454,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         labelRt.offsetMax = new Vector2(-10f, 0f);
         TextMeshProUGUI labelTxt = labelGo.GetComponent<TextMeshProUGUI>();
         labelTxt.text = "REACTOR INTAKE PORT";
-        labelTxt.fontSize = 24;
+        labelTxt.fontSize = 30;
         labelTxt.fontStyle = FontStyles.Bold;
         labelTxt.color = new Color(0.2f, 1f, 0.2f);
         labelTxt.alignment = TextAlignmentOptions.Center;
@@ -469,7 +469,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         descRt.offsetMax = new Vector2(-15f, 0f);
         TextMeshProUGUI descTxt = descGo.GetComponent<TextMeshProUGUI>();
         descTxt.text = "Drop Coal/Uranium to fuel\nor other resources to sell";
-        descTxt.fontSize = 18;
+        descTxt.fontSize = 22;
         descTxt.color = new Color(0.2f, 0.8f, 0.2f, 0.85f);
         descTxt.alignment = TextAlignmentOptions.Center;
         descTxt.enableWordWrapping = true;
@@ -486,11 +486,11 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         resourceInventoryPanel.transform.SetParent(HUDCanvas.transform, false);
 
         RectTransform rt = resourceInventoryPanel.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.5f, 0.5f);
-        rt.anchorMax = new Vector2(0.5f, 0.5f);
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.anchoredPosition = new Vector2(-610f, 0f);
-        rt.sizeDelta = new Vector2(380f, 550f);
+        rt.anchorMin = new Vector2(1f, 0.5f);
+        rt.anchorMax = new Vector2(1f, 0.5f);
+        rt.pivot = new Vector2(1f, 0.5f);
+        rt.anchoredPosition = new Vector2(-1070f, 0f);
+        rt.sizeDelta = new Vector2(475f, 688f);
 
         Image img = resourceInventoryPanel.GetComponent<Image>();
         img.color = new Color(0.01f, 0.05f, 0.01f, 0.97f);
@@ -509,7 +509,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         titleRt.offsetMax = new Vector2(-10f, 0f);
 
         TextMeshProUGUI titleText = titleGo.GetComponent<TextMeshProUGUI>();
-        titleText.fontSize = 30;
+        titleText.fontSize = 38;
         titleText.fontStyle = FontStyles.Bold;
         titleText.color = new Color(0.2f, 1f, 0.2f);
         titleText.alignment = TextAlignmentOptions.Center;
@@ -525,7 +525,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         instRt.offsetMax = new Vector2(-10f, 0f);
 
         TextMeshProUGUI instText = instGo.GetComponent<TextMeshProUGUI>();
-        instText.fontSize = 22;
+        instText.fontSize = 28;
         instText.color = new Color(0.2f, 0.8f, 0.2f, 0.8f);
         instText.alignment = TextAlignmentOptions.Center;
         instText.enableWordWrapping = true;
@@ -535,11 +535,11 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         ResourceType[] types = (ResourceType[])System.Enum.GetValues(typeof(ResourceType));
         
         float startX = 17.5f;
-        float startY = 240f;
-        float slotW = 75f;
-        float slotH = 100f;
-        float spacingX = 15f;
-        float spacingY = 25f;
+        float startY = 300f;
+        float slotW = 95f;
+        float slotH = 125f;
+        float spacingX = 20f;
+        float spacingY = 30f;
 
         for (int i = 0; i < types.Length; i++)
         {
@@ -575,7 +575,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
             iconRt.anchorMax = new Vector2(0.5f, 0.5f);
             iconRt.pivot = new Vector2(0.5f, 0.5f);
             iconRt.anchoredPosition = new Vector2(0f, 5f);
-            iconRt.sizeDelta = new Vector2(48f, 48f);
+            iconRt.sizeDelta = new Vector2(60f, 60f);
 
             Image iconImg = iconGo.GetComponent<Image>();
             iconImg.color = Color.white;
@@ -591,7 +591,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
             countRt.offsetMax = new Vector2(-4f, 2f);
 
             TextMeshProUGUI countText = countGo.GetComponent<TextMeshProUGUI>();
-            countText.fontSize = 18;
+            countText.fontSize = 22;
             countText.fontStyle = FontStyles.Bold;
             countText.color = new Color(0.2f, 1f, 0.2f);
             countText.alignment = TextAlignmentOptions.BottomRight;
@@ -606,7 +606,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
             valRt.offsetMax = new Vector2(-2f, -2f);
 
             TextMeshProUGUI valText = valGo.GetComponent<TextMeshProUGUI>();
-            valText.fontSize = 16;
+            valText.fontSize = 20;
             valText.color = new Color(1f, 0.8f, 0.2f);
             valText.alignment = TextAlignmentOptions.TopLeft;
 
@@ -759,13 +759,9 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
 
                     if (TutorialManager.HasInstance)
                     {
-                        var method = typeof(TutorialManager).GetMethod("HandleFuelAdded", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-                        if (method != null)
+                        for (int i = 0; i < count; i++)
                         {
-                            for (int i = 0; i < count; i++)
-                            {
-                                method.Invoke(TutorialManager.Instance, new object[] { ResourceType.Coal });
-                            }
+                            TutorialManager.Instance.HandleFuelAdded(ResourceType.Coal);
                         }
                     }
                 }
@@ -784,13 +780,9 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
 
                     if (TutorialManager.HasInstance)
                     {
-                        var method = typeof(TutorialManager).GetMethod("HandleFuelAdded", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-                        if (method != null)
+                        for (int i = 0; i < count; i++)
                         {
-                            for (int i = 0; i < count; i++)
-                            {
-                                method.Invoke(TutorialManager.Instance, new object[] { ResourceType.Uranium });
-                            }
+                            TutorialManager.Instance.HandleFuelAdded(ResourceType.Uranium);
                         }
                     }
                 }
@@ -892,7 +884,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         fuelBarRt.anchorMax = new Vector2(0.5f, 0.38f);
         fuelBarRt.pivot = new Vector2(0.5f, 0.5f);
         fuelBarRt.anchoredPosition = Vector2.zero;
-        fuelBarRt.sizeDelta = new Vector2(600f, 40f);
+        fuelBarRt.sizeDelta = new Vector2(750f, 50f);
 
         if (idtIntakeDropZone != null)
         {
