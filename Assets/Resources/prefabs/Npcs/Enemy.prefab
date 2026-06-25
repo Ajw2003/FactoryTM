@@ -119,7 +119,7 @@ Transform:
   m_GameObject: {fileID: 6975190516865702803}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.95035, y: 3.34558, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -197,6 +197,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aae49f8d842ec5048876fc96abcd7e6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CartelMember
+  isRaidEnemy: 0
   speed: 5
   turnSpeed: 5
   sightRange: 20
@@ -222,6 +223,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyWeapon
   target: {x: 0, y: 0}
+  canFire: 1
+  isEnemyFired: 0
   Stats: {fileID: 11400000, guid: 85e2376b935e60945915717599b98c83, type: 2}
   firePoint: {fileID: 0}
   Accuracy: 0

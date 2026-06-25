@@ -22,7 +22,7 @@ public class CartelMember : MonoBehaviour, IHealth
 
     [SerializeField] private float turnSpeed;
     
-    [SerializeField] private float sightRange;
+    [SerializeField] private float sightRange = 12f;
 
     [SerializeField] private EnemyWeapon weapon;
     
@@ -63,11 +63,7 @@ public class CartelMember : MonoBehaviour, IHealth
         }
         Health = MaxHealth;
 
-        // Cap sight range to prevent off-screen targeting / shooting
-        if (sightRange > 10f)
-        {
-            sightRange = 10f;
-        }
+        if (isRaidEnemy) sightRange = 100f;
     }
 
     // Update is called once per frame

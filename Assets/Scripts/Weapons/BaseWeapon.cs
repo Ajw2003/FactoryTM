@@ -66,6 +66,12 @@ public class BaseWeapon : MonoBehaviour
         
     }
 
+    protected virtual void OnDisable()
+    {
+        isReloading = false;
+        canFire = true;
+    }
+
     public virtual void Shoot()
     {
         if (isReloading) return;
