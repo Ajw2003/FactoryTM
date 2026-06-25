@@ -389,8 +389,8 @@ public class PlacementManager : SingletonBase<PlacementManager>
     {
         GameObject sellerObj = new GameObject("Seller_Logic_" + cell);
         sellerObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
-        Seller seller = sellerObj.AddComponent<Seller>();
-        seller.Setup(activeBuilding, cell);
+        InterDimensionalTransporter interDimensionalTransporter = sellerObj.AddComponent<InterDimensionalTransporter>();
+        interDimensionalTransporter.Setup(activeBuilding, cell);
         activeBuildings.Add(cell, sellerObj);
         return sellerObj;
     }

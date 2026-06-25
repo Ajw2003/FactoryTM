@@ -36,6 +36,9 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
     private Button actionButton2;
     private TMP_Text actionButton2Text;
 
+    private GameObject resourceInventoryPanel;
+    private Dictionary<ResourceType, GameObject> resourceSlots = new Dictionary<ResourceType, GameObject>();
+
     [Header("State")]
     private BuildingLogic currentOpenBuilding;
     public BuildingLogic CurrentOpenBuilding => currentOpenBuilding;
@@ -65,6 +68,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         FindCanvas();
         CreateJadePanel();
         CreateBuildingUiPanel();
+        CreateResourceInventoryPanel();
         
         // Start with Stone and Coal as undiscovered, but let player discover them systems-style!
         // We do not pre-register them, so they start as Unknown until mined!
@@ -126,10 +130,12 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         {
             TutorialManager.Instance.UpdateObjectiveText();
         }
+        RefreshResourceInventoryPanel();
     }
 
     public bool RemoveResource(ResourceType type, int count = 1)
     {
+        if (count <= 0) return true;
         if (GetResourceCount(type) >= count)
         {
             playerResources[type] -= count;
@@ -138,6 +144,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
             {
                 TutorialManager.Instance.UpdateObjectiveText();
             }
+            RefreshResourceInventoryPanel();
             return true;
         }
         return false;
@@ -407,6 +414,337 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         buildingPanel.SetActive(false);
     }
 
+    private void CreateResourceInventoryPanel()
+    {
+        if (HUDCanvas == null) return;
+
+        // Resource Inventory main background panel
+        resourceInventoryPanel = new GameObject("ResourceInventoryPanel", typeof(RectTransform), typeof(Image));
+        resourceInventoryPanel.transform.SetParent(HUDCanvas.transform, false);
+
+        RectTransform rt = resourceInventoryPanel.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = new Vector2(-510f, 0f);
+        rt.sizeDelta = new Vector2(300f, 440f);
+
+        Image img = resourceInventoryPanel.GetComponent<Image>();
+        img.color = new Color(0.01f, 0.05f, 0.01f, 0.97f);
+
+        Outline outline = resourceInventoryPanel.AddComponent<Outline>();
+        outline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.9f);
+        outline.effectDistance = new Vector2(3f, -3f);
+
+        // Title label
+        GameObject titleGo = new GameObject("TitleText", typeof(RectTransform), typeof(TextMeshProUGUI));
+        titleGo.transform.SetParent(resourceInventoryPanel.transform, false);
+        RectTransform titleRt = titleGo.GetComponent<RectTransform>();
+        titleRt.anchorMin = new Vector2(0f, 0.88f);
+        titleRt.anchorMax = new Vector2(1f, 0.98f);
+        titleRt.offsetMin = new Vector2(10f, 0f);
+        titleRt.offsetMax = new Vector2(-10f, 0f);
+
+        TextMeshProUGUI titleText = titleGo.GetComponent<TextMeshProUGUI>();
+        titleText.fontSize = 24;
+        titleText.fontStyle = FontStyles.Bold;
+        titleText.color = new Color(0.2f, 1f, 0.2f);
+        titleText.alignment = TextAlignmentOptions.Center;
+        titleText.text = "RESOURCE INVENTORY";
+
+        // Instruction label
+        GameObject instGo = new GameObject("InstructionText", typeof(RectTransform), typeof(TextMeshProUGUI));
+        instGo.transform.SetParent(resourceInventoryPanel.transform, false);
+        RectTransform instRt = instGo.GetComponent<RectTransform>();
+        instRt.anchorMin = new Vector2(0f, 0.72f);
+        instRt.anchorMax = new Vector2(1f, 0.88f);
+        instRt.offsetMin = new Vector2(10f, 0f);
+        instRt.offsetMax = new Vector2(-10f, 0f);
+
+        TextMeshProUGUI instText = instGo.GetComponent<TextMeshProUGUI>();
+        instText.fontSize = 18;
+        instText.color = new Color(0.2f, 0.8f, 0.2f, 0.8f);
+        instText.alignment = TextAlignmentOptions.Center;
+        instText.enableWordWrapping = true;
+        instText.text = "Drag resources from slot to IDT to fuel reactor or sell items.";
+
+        // Create Grid of 8 Slots (4 columns, 2 rows)
+        ResourceType[] types = (ResourceType[])System.Enum.GetValues(typeof(ResourceType));
+        
+        float startX = 15f;
+        float startY = 180f;
+        float slotW = 60f;
+        float slotH = 80f;
+        float spacingX = 10f;
+        float spacingY = 15f;
+
+        for (int i = 0; i < types.Length; i++)
+        {
+            ResourceType type = types[i];
+            int col = i % 4;
+            int row = i / 4;
+
+            float x = startX + col * (slotW + spacingX);
+            float y = startY - row * (slotH + spacingY);
+
+            // Create Slot Container
+            GameObject slotGo = new GameObject("Slot_" + type.ToString(), typeof(RectTransform), typeof(Image));
+            slotGo.transform.SetParent(resourceInventoryPanel.transform, false);
+            RectTransform slotRt = slotGo.GetComponent<RectTransform>();
+            slotRt.anchorMin = new Vector2(0f, 0f);
+            slotRt.anchorMax = new Vector2(0f, 0f);
+            slotRt.pivot = new Vector2(0f, 0f);
+            slotRt.anchoredPosition = new Vector2(x, y);
+            slotRt.sizeDelta = new Vector2(slotW, slotH);
+
+            Image slotImg = slotGo.GetComponent<Image>();
+            slotImg.color = new Color(0f, 0.02f, 0f, 0.8f);
+
+            Outline slotOutline = slotGo.AddComponent<Outline>();
+            slotOutline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.4f);
+            slotOutline.effectDistance = new Vector2(1f, -1f);
+
+            // Icon Image
+            GameObject iconGo = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+            iconGo.transform.SetParent(slotGo.transform, false);
+            RectTransform iconRt = iconGo.GetComponent<RectTransform>();
+            iconRt.anchorMin = new Vector2(0.5f, 0.5f);
+            iconRt.anchorMax = new Vector2(0.5f, 0.5f);
+            iconRt.pivot = new Vector2(0.5f, 0.5f);
+            iconRt.anchoredPosition = new Vector2(0f, 5f);
+            iconRt.sizeDelta = new Vector2(36f, 36f);
+
+            Image iconImg = iconGo.GetComponent<Image>();
+            iconImg.color = Color.white;
+            iconImg.raycastTarget = true;
+
+            // Count Text (Bottom-right of slot)
+            GameObject countGo = new GameObject("CountText", typeof(RectTransform), typeof(TextMeshProUGUI));
+            countGo.transform.SetParent(slotGo.transform, false);
+            RectTransform countRt = countGo.GetComponent<RectTransform>();
+            countRt.anchorMin = new Vector2(0f, 0f);
+            countRt.anchorMax = new Vector2(1f, 0.3f);
+            countRt.offsetMin = new Vector2(2f, 2f);
+            countRt.offsetMax = new Vector2(-4f, 2f);
+
+            TextMeshProUGUI countText = countGo.GetComponent<TextMeshProUGUI>();
+            countText.fontSize = 14;
+            countText.fontStyle = FontStyles.Bold;
+            countText.color = new Color(0.2f, 1f, 0.2f);
+            countText.alignment = TextAlignmentOptions.BottomRight;
+
+            // Value Text (Top-left of slot)
+            GameObject valGo = new GameObject("ValueText", typeof(RectTransform), typeof(TextMeshProUGUI));
+            valGo.transform.SetParent(slotGo.transform, false);
+            RectTransform valRt = valGo.GetComponent<RectTransform>();
+            valRt.anchorMin = new Vector2(0f, 0.7f);
+            valRt.anchorMax = new Vector2(1f, 1f);
+            valRt.offsetMin = new Vector2(4f, -2f);
+            valRt.offsetMax = new Vector2(-2f, -2f);
+
+            TextMeshProUGUI valText = valGo.GetComponent<TextMeshProUGUI>();
+            valText.fontSize = 12;
+            valText.color = new Color(1f, 0.8f, 0.2f);
+            valText.alignment = TextAlignmentOptions.TopLeft;
+
+            // Add ResourceDragHandler
+            ResourceDragHandler dragHandler = iconGo.AddComponent<ResourceDragHandler>();
+            dragHandler.resourceType = type;
+
+            resourceSlots[type] = slotGo;
+        }
+
+        resourceInventoryPanel.SetActive(false);
+    }
+
+    public Sprite GetResourceSprite(ResourceType type)
+    {
+        if (GameManager.Instance != null && GameManager.Instance.resourceNodeDefinitions != null)
+        {
+            foreach (var def in GameManager.Instance.resourceNodeDefinitions)
+            {
+                if (def != null && def.minedItemPrefab != null)
+                {
+                    ConveyorItem citem = def.minedItemPrefab.GetComponentInChildren<ConveyorItem>();
+                    if (citem != null && citem.resourceType == type)
+                    {
+                        SpriteRenderer sr = def.minedItemPrefab.GetComponentInChildren<SpriteRenderer>();
+                        if (sr != null) return sr.sprite;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public float GetResourceValue(ResourceType type)
+    {
+        if (GameManager.Instance != null && GameManager.Instance.resourceNodeDefinitions != null)
+        {
+            foreach (var def in GameManager.Instance.resourceNodeDefinitions)
+            {
+                if (def != null && def.minedItemPrefab != null)
+                {
+                    ConveyorItem citem = def.minedItemPrefab.GetComponentInChildren<ConveyorItem>();
+                    if (citem != null && citem.resourceType == type)
+                    {
+                        return citem.value;
+                    }
+                }
+            }
+        }
+        switch (type)
+        {
+            case ResourceType.Ston: return 5f;
+            case ResourceType.Copper: return 10f;
+            case ResourceType.Iron: return 15f;
+            case ResourceType.Quartz: return 20f;
+            case ResourceType.Titanium: return 30f;
+            case ResourceType.Diamond: return 50f;
+            case ResourceType.Coal: return 4f;
+            case ResourceType.Uranium: return 100f;
+            default: return 10f;
+        }
+    }
+
+    public void RefreshResourceInventoryPanel()
+    {
+        if (resourceInventoryPanel == null || !resourceInventoryPanel.activeSelf) return;
+
+        foreach (var pair in resourceSlots)
+        {
+            ResourceType type = pair.Key;
+            GameObject slotGo = pair.Value;
+
+            Image iconImg = slotGo.transform.Find("Icon").GetComponent<Image>();
+            TextMeshProUGUI countText = slotGo.transform.Find("CountText").GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI valText = slotGo.transform.Find("ValueText").GetComponent<TextMeshProUGUI>();
+            ResourceDragHandler dragHandler = iconImg.GetComponent<ResourceDragHandler>();
+
+            int count = GetResourceCount(type);
+            float value = GetResourceValue(type);
+            Sprite sprite = GetResourceSprite(type);
+
+            bool isDiscovered = discoveredResources.Contains(type);
+
+            if (isDiscovered)
+            {
+                iconImg.sprite = sprite;
+                iconImg.enabled = sprite != null;
+                dragHandler.iconSprite = sprite;
+                valText.text = $"${value}";
+                countText.text = count > 0 ? count.ToString() : "0";
+
+                if (count > 0)
+                {
+                    iconImg.color = Color.white;
+                    countText.color = new Color(0.2f, 1f, 0.2f);
+                    valText.color = new Color(1f, 0.8f, 0.2f);
+                }
+                else
+                {
+                    iconImg.color = new Color(1f, 1f, 1f, 0.25f);
+                    countText.color = new Color(0.2f, 1f, 0.2f, 0.25f);
+                    valText.color = new Color(1f, 0.8f, 0.2f, 0.25f);
+                }
+            }
+            else
+            {
+                iconImg.enabled = false;
+                dragHandler.iconSprite = null;
+                valText.text = "???";
+                countText.text = "0";
+
+                iconImg.color = new Color(1f, 1f, 1f, 0.1f);
+                countText.color = new Color(0.2f, 1f, 0.2f, 0.1f);
+                valText.color = new Color(1f, 0.8f, 0.2f, 0.1f);
+            }
+        }
+    }
+
+    public bool IsMouseOverBuildingPanel(Vector2 screenPosition)
+    {
+        if (buildingPanel == null) return false;
+        RectTransform rt = buildingPanel.GetComponent<RectTransform>();
+        return RectTransformUtility.RectangleContainsScreenPoint(rt, screenPosition, null);
+    }
+
+    public void HandleResourceDropped(ResourceType type)
+    {
+        int count = GetResourceCount(type);
+        if (count <= 0) return;
+
+        if (currentOpenBuilding is InterDimensionalTransporter seller)
+        {
+            if (type == ResourceType.Coal)
+            {
+                if (RemoveResource(type, count))
+                {
+                    seller.fuelRemaining = Mathf.Min(seller.maxFuel, seller.fuelRemaining + 20f * count);
+                    if (UiManager.HasInstance)
+                    {
+                        UiManager.Instance.ShowGeneralAlert($"REACTOR FUELED: +{20f * count}s", new Color(0.2f, 1f, 0.2f));
+                    }
+
+                    if (TutorialManager.HasInstance)
+                    {
+                        var method = typeof(TutorialManager).GetMethod("HandleFuelAdded", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+                        if (method != null)
+                        {
+                            for (int i = 0; i < count; i++)
+                            {
+                                method.Invoke(TutorialManager.Instance, new object[] { ResourceType.Coal });
+                            }
+                        }
+                    }
+                }
+            }
+            else if (type == ResourceType.Uranium)
+            {
+                if (RemoveResource(type, count))
+                {
+                    seller.fuelRemaining = Mathf.Min(seller.maxFuel, seller.fuelRemaining + 60f * count);
+                    seller.isUraniumBoosted = true;
+                    seller.uraniumBoostDuration = Mathf.Min(120f, seller.uraniumBoostDuration + 30f * count);
+                    if (UiManager.HasInstance)
+                    {
+                        UiManager.Instance.ShowGeneralAlert($"REACTOR BOOSTED: +{60f * count}s", new Color(0.3f, 1f, 1f));
+                    }
+
+                    if (TutorialManager.HasInstance)
+                    {
+                        var method = typeof(TutorialManager).GetMethod("HandleFuelAdded", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+                        if (method != null)
+                        {
+                            for (int i = 0; i < count; i++)
+                            {
+                                method.Invoke(TutorialManager.Instance, new object[] { ResourceType.Uranium });
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                float val = GetResourceValue(type);
+                float mult = seller.isUraniumBoosted ? 2f : 1f;
+                float finalEarnings = count * val * mult;
+
+                if (RemoveResource(type, count))
+                {
+                    CurrencyManager.Instance.AddCurrency(finalEarnings);
+                    if (UiManager.HasInstance)
+                    {
+                        UiManager.Instance.ShowGeneralAlert($"ORES SOLD: +${finalEarnings:F0}", new Color(0.2f, 1f, 0.2f));
+                    }
+                }
+            }
+
+            RefreshBuildingPanel();
+            RefreshResourceInventoryPanel();
+        }
+    }
+
     #endregion
 
     #region Panel Control (Open/Close/Interact)
@@ -418,6 +756,22 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         currentOpenBuilding = building;
         buildingPanel.SetActive(true);
         RefreshBuildingPanel();
+
+        if (building is InterDimensionalTransporter)
+        {
+            if (resourceInventoryPanel != null)
+            {
+                resourceInventoryPanel.SetActive(true);
+                RefreshResourceInventoryPanel();
+            }
+        }
+        else
+        {
+            if (resourceInventoryPanel != null)
+            {
+                resourceInventoryPanel.SetActive(false);
+            }
+        }
 
         if (PlayerController.Instance != null)
         {
@@ -431,6 +785,11 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
 
         buildingPanel.SetActive(false);
         currentOpenBuilding = null;
+
+        if (resourceInventoryPanel != null)
+        {
+            resourceInventoryPanel.SetActive(false);
+        }
 
         if (PlayerController.Instance != null && PlayerController.Instance.StateMachine.CurrentState == PlayerController.Instance.StateMachine.buildingUiState)
         {
@@ -456,100 +815,27 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         actionButton1.onClick.RemoveAllListeners();
         actionButton2.onClick.RemoveAllListeners();
 
-        // 1. Seller (Reactor) UI
-        if (currentOpenBuilding is Seller seller)
+        // 1. InterDimensionalTransporter (Reactor) UI
+        if (currentOpenBuilding is InterDimensionalTransporter seller)
         {
             buildingTitleText.text = "IDT REACTOR MODULE";
             
             string statusStr = seller.fuelRemaining > 0f ? "OPERATIONAL" : "OFFLINE (COAL REQUIRED)";
             if (seller.isUraniumBoosted) statusStr = "BOOSTED // URANIUM ACTIVE (2X VALUE)";
             
-            buildingDetailText.text = $"Reactor Status: {statusStr}\n" +
-                                      $"Intake Coal: {GetResourceCount(ResourceType.Coal)} available\n" +
-                                      $"Intake Uranium: {GetResourceCount(ResourceType.Uranium)} available";
+            buildingDetailText.text = $"Reactor Status: {statusStr}\n\n" +
+                                      $"[DRAG COAL HERE TO FUEL REACTOR (+20s)]\n" +
+                                      $"[DRAG URANIUM HERE TO BOOST REACTOR (+60s)]\n" +
+                                      $"[DRAG OTHER ORES HERE TO SELL THEM]";
 
             fuelBarContainer.SetActive(true);
             float fuelPct = seller.fuelRemaining / seller.maxFuel;
             fuelBarFillImage.rectTransform.anchorMax = new Vector2(fuelPct, 1f);
             fuelBarText.text = $"Reactor Fuel: {Mathf.CeilToInt(seller.fuelRemaining)}s / {Mathf.CeilToInt(seller.maxFuel)}s";
 
-            // Fuel with Coal
-            actionButton1Text.text = "INSERT COAL (+20s)";
-            actionButton1.interactable = GetResourceCount(ResourceType.Coal) > 0;
-            actionButton1.onClick.AddListener(() => {
-                if (RemoveResource(ResourceType.Coal, 1))
-                {
-                    seller.fuelRemaining = Mathf.Min(seller.maxFuel, seller.fuelRemaining + 20f);
-                    if (UiManager.HasInstance) UiManager.Instance.ShowGeneralAlert("REACTOR FUELED: COAL (+20s)", new Color(0.3f, 0.9f, 0.3f));
-                    
-                    // Trigger tutorial fuel count directly
-                    if (TutorialManager.HasInstance)
-                    {
-                        var method = typeof(TutorialManager).GetMethod("HandleFuelAdded", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                        if (method != null) method.Invoke(TutorialManager.Instance, new object[] { ResourceType.Coal });
-                    }
-                    RefreshBuildingPanel();
-                }
-            });
-
-            // Sell carried ores OR insert Uranium
-            int copperCount = GetResourceCount(ResourceType.Copper);
-            int ironCount = GetResourceCount(ResourceType.Iron);
-            int stonCount = GetResourceCount(ResourceType.Ston);
-            int diamondCount = GetResourceCount(ResourceType.Diamond);
-            int titaniumCount = GetResourceCount(ResourceType.Titanium);
-            int quartzCount = GetResourceCount(ResourceType.Quartz);
-            int totalOres = copperCount + ironCount + stonCount + diamondCount + titaniumCount + quartzCount;
-
-            if (GetResourceCount(ResourceType.Uranium) > 0)
-            {
-                actionButton2Text.text = "INSERT URANIUM (+60s)";
-                actionButton2.interactable = true;
-                actionButton2.onClick.AddListener(() => {
-                    if (RemoveResource(ResourceType.Uranium, 1))
-                    {
-                        seller.fuelRemaining = Mathf.Min(seller.maxFuel, seller.fuelRemaining + 60f);
-                        seller.isUraniumBoosted = true;
-                        seller.uraniumBoostDuration = 30f;
-                        if (UiManager.HasInstance) UiManager.Instance.ShowGeneralAlert("REACTOR BOOSTED: URANIUM (+60s)", new Color(0.3f, 1f, 1f));
-                        
-                        if (TutorialManager.HasInstance)
-                        {
-                            var method = typeof(TutorialManager).GetMethod("HandleFuelAdded", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                            if (method != null) method.Invoke(TutorialManager.Instance, new object[] { ResourceType.Uranium });
-                        }
-                        RefreshBuildingPanel();
-                    }
-                });
-            }
-            else
-            {
-                // Calculate total earnings based on ore values
-                float estimatedEarnings = stonCount * 5f + copperCount * 10f + ironCount * 15f + quartzCount * 20f + titaniumCount * 30f + diamondCount * 50f;
-                float multiplier = seller.isUraniumBoosted ? 2f : 1f;
-                float finalEarnings = estimatedEarnings * multiplier;
-
-                actionButton2Text.text = totalOres > 0 ? $"SELL CARRIED ORES (+${finalEarnings:F0})" : "SELL CARRIED ORES";
-                actionButton2.interactable = totalOres > 0 && seller.fuelRemaining > 0f;
-                actionButton2.onClick.AddListener(() => {
-                    if (totalOres > 0)
-                    {
-                        RemoveResource(ResourceType.Copper, copperCount);
-                        RemoveResource(ResourceType.Iron, ironCount);
-                        RemoveResource(ResourceType.Ston, stonCount);
-                        RemoveResource(ResourceType.Diamond, diamondCount);
-                        RemoveResource(ResourceType.Titanium, titaniumCount);
-                        RemoveResource(ResourceType.Quartz, quartzCount);
-
-                        CurrencyManager.Instance.AddCurrency(finalEarnings);
-                        if (UiManager.HasInstance)
-                        {
-                            UiManager.Instance.ShowGeneralAlert($"ORES SOLD: +${finalEarnings:F0}", new Color(0.2f, 1f, 0.2f));
-                        }
-                        RefreshBuildingPanel();
-                    }
-                });
-            }
+            // Hide the buttons as drag & drop is used
+            actionButton1Go.SetActive(false);
+            actionButton2Go.SetActive(false);
         }
         // 2. Miner UI
         else if (currentOpenBuilding is MinerLogic miner)
@@ -855,7 +1141,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
             {
                 promptStr = "[E] Open Configuration Interface";
                 
-                if (HoveredBuilding is Seller seller)
+                if (HoveredBuilding is InterDimensionalTransporter seller)
                 {
                     statusStr = seller.fuelRemaining > 0f ? $"IDT Active // Fuel: {Mathf.CeilToInt(seller.fuelRemaining)}s" : "IDT Reactor Offline // Coal Required";
                     if (seller.isUraniumBoosted) statusStr = $"REACTOR BOOSTED // Uranium remaining: {Mathf.CeilToInt(seller.uraniumBoostDuration)}s";

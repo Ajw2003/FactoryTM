@@ -106,9 +106,9 @@ public class TutorialManager : SingletonBase<TutorialManager>
             PlayerController.Instance.OnPlayerDodge -= HandlePlayerDodge;
         }
 
-        if (Seller.Instance != null && isAutomaticSaleSubscribed)
+        if (InterDimensionalTransporter.Instance != null && isAutomaticSaleSubscribed)
         {
-            Seller.Instance.OnItemSold -= HandleAutomaticSale;
+            InterDimensionalTransporter.Instance.OnItemSold -= HandleAutomaticSale;
         }
 
         Code.Scripts.EventSystems.EventManager.Instance?.Unsubscribe<EnemyOutpostClearedEvent>(this);
@@ -181,7 +181,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
         switch (currentState)
         {
             case TutorialState.BriefIntro:
-                if (BuildingUiManager.Instance != null && BuildingUiManager.Instance.CurrentOpenBuilding is Seller)
+                if (BuildingUiManager.Instance != null && BuildingUiManager.Instance.CurrentOpenBuilding is InterDimensionalTransporter)
                 {
                     currentState = TutorialState.MineCoalManually;
                     UpdateObjectiveText();
@@ -268,9 +268,9 @@ public class TutorialManager : SingletonBase<TutorialManager>
 
             case TutorialState.SetupAutomation:
                 // Ensure automated sale listener is active
-                if (Seller.Instance != null && !isAutomaticSaleSubscribed)
+                if (InterDimensionalTransporter.Instance != null && !isAutomaticSaleSubscribed)
                 {
-                    Seller.Instance.OnItemSold += HandleAutomaticSale;
+                    InterDimensionalTransporter.Instance.OnItemSold += HandleAutomaticSale;
                     isAutomaticSaleSubscribed = true;
                 }
 
