@@ -733,7 +733,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         for (int i = 0; i <= charactersCount; i++)
         {
             string currentLineText = line.Substring(0, i);
-            terminalLogText.text = baseText + currentLineText + (cursorVisible ? cursorChar : "");
+            terminalLogText.text = baseText + currentLineText + (cursorVisible ? cursorChar : "<color=#00000000>" + cursorChar + "</color>");
             
             // Auto scroll to bottom
             Canvas.ForceUpdateCanvases();
@@ -747,7 +747,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         if (activeLogs.Count > 25) activeLogs.RemoveAt(0);
         
         isTypingLog = false;
-        UpdateLogDisplay();
+        UpdateLogDisplay(true);
     }
     
     public void LogCommand(string cmd)
@@ -790,17 +790,20 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         }
         isProcessingQueue = false;
     }
-        private void UpdateLogDisplay()
+    private void UpdateLogDisplay(bool forceScroll = false)
     {
         if (isTypingLog) return;
         
         string baseText = string.Join("\n", activeLogs);
         if (activeLogs.Count > 0) baseText += "\n";
-        terminalLogText.text = baseText + (cursorVisible ? cursorChar : "");
+        terminalLogText.text = baseText + (cursorVisible ? cursorChar : "<color=#00000000>" + cursorChar + "</color>");
         
-        // Keep scroll at bottom
-        Canvas.ForceUpdateCanvases();
-        if (terminalScroll != null) terminalScroll.verticalNormalizedPosition = 0f;
+        if (forceScroll)
+        {
+            // Keep scroll at bottom
+            Canvas.ForceUpdateCanvases();
+            if (terminalScroll != null) terminalScroll.verticalNormalizedPosition = 0f;
+        }
     }
     
     private void CreatePaginationControls()
