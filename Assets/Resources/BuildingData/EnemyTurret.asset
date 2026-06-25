@@ -21,9 +21,15 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6316e05974588eb4a80b99aad73220e7, type: 2}
   - {fileID: 11400000, guid: f3785938b0304644bb05f2f035f86ddb, type: 2}
   proccessingSpeed: 2
-  itemPrefab: {fileID: 2593228396439306384, guid: 97248a7b002af664b9e829c2b7292ca3, type: 3}
+  itemPrefab: {fileID: 2593228396439306384, guid: 2b7b7e16093c7cd418fb297d584faf33, type: 3}
   cost: 50
   type: 6
   maxHealth: 80
   size: {x: 1, y: 1}
+  damage: 2
+  bulletSpeed: 15
+  spawnLimit: 0
+  spawnCooldown: 0
+  maxConcurrentEnemies: 0
+  activationRange: 0
   unlockConditions: []

@@ -26,4 +26,10 @@ MonoBehaviour:
   type: 4
   maxHealth: 120
   size: {x: 1, y: 1}
+  damage: 0
+  bulletSpeed: 0
+  spawnLimit: 5
+  spawnCooldown: 8
+  maxConcurrentEnemies: 3
+  activationRange: 9
   unlockConditions: []
