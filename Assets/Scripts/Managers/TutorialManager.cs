@@ -33,6 +33,10 @@ public class TutorialManager : SingletonBase<TutorialManager>
     [SerializeField] private bool hasDodgeRolled = false;
     private bool isSubscribed = false;
 
+    [Header("Objective UI")]
+    private GameObject objectivePanel;
+    private TMP_Text objectiveText;
+
     protected override void Awake()
     {
         persistBetweenScenes = false;
@@ -52,7 +56,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
             return;
         }
 
-        InitializeDialogues();
+        // InitializeDialogues(); // Bypassed: we are using objective HUD instead
         SubscribeEvents();
         StartCoroutine(StartTutorialRoutine());
     }
@@ -183,8 +187,9 @@ public class TutorialManager : SingletonBase<TutorialManager>
         // Grant starting miner and conveyors
         GrantStartingItems();
 
+        CreateObjectiveUI(); // Create the programmatic objective HUD
         currentState = TutorialState.CrashLandIntro;
-        PlayDialogue(introDialogue);
+        UpdateObjectiveText();
     }
 
     private void GrantStartingItems()
@@ -217,32 +222,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
     {
         if (currentState == TutorialState.Completed) return;
 
-        if (DialogueManager.Instance != null && DialogueManager.Instance.IsDialogueActive)
-        {
-            currentDialogueIndex = DialogueManager.Instance.currentDialogueIndex;
-        }
-
-        // Handle dynamic dialogue position
         bool isStoreOpen = UiManager.Instance != null && UiManager.Instance.StorePanel != null && UiManager.Instance.StorePanel.activeSelf;
-        DialoguePositionMode targetMode = DialoguePositionMode.DefaultBottom;
-
-        if (isStoreOpen)
-        {
-            targetMode = DialoguePositionMode.ShopLeftTop;
-        }
-        else if (currentState == TutorialState.CrashLandIntro && currentDialogueIndex >= 2)
-        {
-            targetMode = DialoguePositionMode.AboveHotbar;
-        }
-        else if (currentState == TutorialState.PoweringUpIDT)
-        {
-            targetMode = DialoguePositionMode.PlacementTop;
-        }
-
-        if (DialogueManager.Instance != null)
-        {
-            DialogueManager.Instance.SetPositionMode(targetMode);
-        }
 
         // Core Tutorial State Transitions
         switch (currentState)
@@ -251,31 +231,26 @@ public class TutorialManager : SingletonBase<TutorialManager>
                 // Check if they toggled to Building mode
                 if (PlayerController.Instance != null && PlayerController.Instance.currentMode == PlayerController.PlayerMode.Building)
                 {
-                    if (currentDialogueIndex == 3 && DialogueManager.Instance != null)
+                    currentState = TutorialState.PoweringUpIDT;
+                    UpdateObjectiveText();
+
+                    // Subscribe to IDT fueling
+                    if (Seller.Instance != null)
                     {
-                        // Allow them to advance or auto-advance
-                        AdvanceToDialogueIndex(3); // refresh display
-                        currentState = TutorialState.PoweringUpIDT;
-                        
-                        // Close dialogue box to let them build, show HUD prompt
-                        DialogueManager.Instance.ToggleUi(false);
+                        Seller.Instance.OnFuelAdded += HandleFuelAdded;
+                    }
 
-                        // Subscribe to IDT fueling
-                        if (Seller.Instance != null)
-                        {
-                            Seller.Instance.OnFuelAdded += HandleFuelAdded;
-                        }
-
-                        if (UiManager.HasInstance)
-                        {
-                            UiManager.Instance.ShowGeneralAlert("IDT OUT OF FUEL: COAL REQUIRED", new Color(1f, 0.5f, 0f));
-                        }
+                    if (UiManager.HasInstance)
+                    {
+                        UiManager.Instance.ShowGeneralAlert("IDT OUT OF FUEL: COAL REQUIRED", new Color(1f, 0.5f, 0f));
                     }
                 }
                 break;
 
             case TutorialState.PoweringUpIDT:
                 // Wait for fuel. Handled via HandleFuelAdded.
+                // But we update objective text in case they mined coal manually
+                UpdateObjectiveText();
                 break;
 
             case TutorialState.IDTOnlineStoreLocked:
@@ -283,10 +258,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
                 if (isStoreOpen)
                 {
                     currentState = TutorialState.RequisitionDefenses;
-                    if (DialogueManager.Instance != null)
-                    {
-                        DialogueManager.Instance.ToggleUi(false);
-                    }
+                    UpdateObjectiveText();
                 }
                 break;
 
@@ -299,6 +271,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
                 if (hasBoughtDefense && !isStoreOpen)
                 {
                     currentState = TutorialState.CombatRaidInitiated;
+                    UpdateObjectiveText();
                     
                     if (PlayerController.Instance != null)
                     {
@@ -309,8 +282,6 @@ public class TutorialManager : SingletonBase<TutorialManager>
                     {
                         RaidManager.Instance.StartCustomRaid(1, 2, 12f);
                     }
-
-                    PlayDialogue(combatDialogue);
                 }
                 break;
 
@@ -323,6 +294,8 @@ public class TutorialManager : SingletonBase<TutorialManager>
                     enemyCount = GameManager.Instance.ActiveEnemies.Count;
                 }
 
+                UpdateObjectiveText();
+
                 if (hasFiredWeapon && hasDodgeRolled && raidDefeated && enemyCount == 0)
                 {
                     currentState = TutorialState.Completed;
@@ -334,80 +307,16 @@ public class TutorialManager : SingletonBase<TutorialManager>
 
     private void PlayDialogue(DialogueSO dialogue)
     {
-        if (dialogue == null) return;
-        var eSet = new DialogueEvent { enabled = true, dialogue = dialogue, index = 0 };
-        EventManager.Instance.Publish(eSet);
+        // Dialogue bypassed: we are using objective HUD instead
     }
 
     private bool CheckCanAdvanceDialogue()
     {
-        if (DialogueManager.Instance == null) return true;
-        int index = DialogueManager.Instance.currentDialogueIndex;
-
-        if (currentState == TutorialState.CrashLandIntro && index == 3)
-        {
-            if (PlayerController.Instance != null && PlayerController.Instance.currentMode != PlayerController.PlayerMode.Building)
-            {
-                if (UiManager.HasInstance)
-                {
-                    UiManager.Instance.ShowGeneralAlert("PRESS TAB TO SWITCH TO BUILDING MODE", new Color(1f, 0.5f, 0f));
-                }
-                return false; // Block until building mode is active
-            }
-        }
-
-        if (currentState == TutorialState.IDTOnlineStoreLocked && index == 2)
-        {
-            bool isStoreOpen = UiManager.Instance != null && UiManager.Instance.StorePanel != null && UiManager.Instance.StorePanel.activeSelf;
-            if (!isStoreOpen)
-            {
-                if (UiManager.HasInstance)
-                {
-                    UiManager.Instance.ShowGeneralAlert("PRESS E TO OPEN COMPANY STORE", new Color(0.3f, 0.9f, 0.3f));
-                }
-                return false; // Block until store opens
-            }
-        }
-
-        if (currentState == TutorialState.CombatRaidInitiated && index == 1)
-        {
-            if (!hasFiredWeapon || !hasDodgeRolled)
-            {
-                if (UiManager.HasInstance)
-                {
-                    string msg = !hasFiredWeapon ? "LEFT CLICK TO SHOOT" : "PRESS SPACE TO DODGE-ROLL";
-                    UiManager.Instance.ShowGeneralAlert(msg, new Color(1f, 0.3f, 0.3f));
-                }
-                return false; // Block until they try controls
-            }
-        }
-
         return true;
     }
 
     private void AdvanceToDialogueIndex(int targetIndex)
     {
-        if (DialogueManager.Instance != null)
-        {
-            DialogueManager.Instance.currentDialogueIndex = targetIndex;
-            var method = typeof(DialogueManager).GetMethod("SetDialogue", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            if (method != null) method.Invoke(DialogueManager.Instance, null);
-            
-            var coroutineMethod = typeof(DialogueManager).GetMethod("DialogueCoroutine", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            if (coroutineMethod != null)
-            {
-                var coroutine = (IEnumerator)coroutineMethod.Invoke(DialogueManager.Instance, null);
-                var coroutineField = typeof(DialogueManager).GetField("_currentCoroutine", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (coroutineField != null)
-                {
-                    Coroutine current = (Coroutine)coroutineField.GetValue(DialogueManager.Instance);
-                    if (current != null) DialogueManager.Instance.StopCoroutine(current);
-                    
-                    Coroutine newCoroutine = DialogueManager.Instance.StartCoroutine(coroutine);
-                    coroutineField.SetValue(DialogueManager.Instance, newCoroutine);
-                }
-            }
-        }
     }
 
     private void HandleDialogueEnded()
@@ -419,6 +328,8 @@ public class TutorialManager : SingletonBase<TutorialManager>
         if (currentState == TutorialState.PoweringUpIDT && type == ResourceType.Coal)
         {
             coalFedCount++;
+            UpdateObjectiveText();
+            
             if (coalFedCount >= 5)
             {
                 if (Seller.Instance != null)
@@ -428,6 +339,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
 
                 // Reboot IDT!
                 currentState = TutorialState.IDTOnlineStoreLocked;
+                UpdateObjectiveText();
                 
                 if (UiManager.HasInstance)
                 {
@@ -438,8 +350,6 @@ public class TutorialManager : SingletonBase<TutorialManager>
                 {
                     CurrencyManager.Instance.AddCurrency(100f); // Startup grant
                 }
-
-                PlayDialogue(idtOnlineDialogue);
             }
         }
     }
@@ -470,6 +380,11 @@ public class TutorialManager : SingletonBase<TutorialManager>
     public void CompleteTutorial(bool showVisual)
     {
         currentState = TutorialState.Completed;
+
+        if (objectivePanel != null)
+        {
+            Destroy(objectivePanel);
+        }
 
         if (showVisual)
         {
@@ -610,5 +525,89 @@ public class TutorialManager : SingletonBase<TutorialManager>
            });
 
         seq.SetUpdate(true);
+    }
+
+    private void CreateObjectiveUI()
+    {
+        GameObject canvasGo = GameObject.Find("HUD Canvas");
+        if (canvasGo == null) canvasGo = GameObject.Find("Canvas");
+        if (canvasGo == null) canvasGo = FindFirstObjectByType<Canvas>()?.gameObject;
+
+        if (canvasGo == null) return;
+
+        objectivePanel = new GameObject("TutorialObjectivePanel", typeof(RectTransform), typeof(Image));
+        objectivePanel.transform.SetParent(canvasGo.transform, false);
+
+        RectTransform panelRt = objectivePanel.GetComponent<RectTransform>();
+        panelRt.anchorMin = new Vector2(0f, 1f);
+        panelRt.anchorMax = new Vector2(0f, 1f);
+        panelRt.pivot = new Vector2(0f, 1f);
+        panelRt.anchoredPosition = new Vector2(20f, -80f);
+        panelRt.sizeDelta = new Vector2(340f, 130f);
+
+        Image img = objectivePanel.GetComponent<Image>();
+        img.color = new Color(0.01f, 0.05f, 0.01f, 0.9f);
+
+        Outline outline = objectivePanel.AddComponent<Outline>();
+        outline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.7f);
+        outline.effectDistance = new Vector2(2f, -2f);
+
+        GameObject textGo = new GameObject("ObjectiveText", typeof(RectTransform), typeof(TextMeshProUGUI));
+        textGo.transform.SetParent(objectivePanel.transform, false);
+
+        RectTransform textRt = textGo.GetComponent<RectTransform>();
+        textRt.anchorMin = Vector2.zero;
+        textRt.anchorMax = Vector2.one;
+        textRt.offsetMin = new Vector2(12f, 12f);
+        textRt.offsetMax = new Vector2(-12f, -12f);
+
+        objectiveText = textGo.GetComponent<TextMeshProUGUI>();
+        objectiveText.fontSize = 20;
+        objectiveText.color = new Color(0.2f, 1f, 0.2f);
+        objectiveText.alignment = TextAlignmentOptions.TopLeft;
+        objectiveText.enableWordWrapping = true;
+        
+        UpdateObjectiveText();
+    }
+
+    public void UpdateObjectiveText()
+    {
+        if (objectiveText == null) return;
+
+        string title = "MISSION OBJECTIVES\n-----------------\n";
+        string body = "";
+
+        switch (currentState)
+        {
+            case TutorialState.CrashLandIntro:
+                body = "- Press [TAB] to enter BUILDING MODE";
+                break;
+            case TutorialState.PoweringUpIDT:
+                int coalInInventory = BuildingUiManager.Instance != null ? BuildingUiManager.Instance.GetResourceCount(ResourceType.Coal) : 0;
+                
+                if (coalFedCount == 0 && coalInInventory == 0)
+                {
+                    body = "- Mine Coal manually:\n  Hover Coal deposit & press [E]";
+                }
+                else
+                {
+                    body = $"- Build Miner on Coal deposit\n- Route conveyors to Reactor intake\n- Fuel Reactor (Coal fed: {coalFedCount}/5)";
+                }
+                break;
+            case TutorialState.IDTOnlineStoreLocked:
+                body = "- Access Ship Store Catalog (Press [E])";
+                break;
+            case TutorialState.RequisitionDefenses:
+                body = "- Purchase defensive tech (Ammo, Turret, or Wall)\n- Close Shop to reboot shield";
+                break;
+            case TutorialState.CombatRaidInitiated:
+                body = "- Press [TAB] to enter COMBAT MODE\n- Left-Click to shoot invaders\n- Space to Dodge-Roll\n- Defeat the landing force!";
+                break;
+            default:
+                body = "Tutorial complete.";
+                break;
+        }
+
+        objectiveText.text = title + body;
     }
 }
