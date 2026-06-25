@@ -163,8 +163,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
     {
         return currentState == TutorialState.BriefIntro || 
                currentState == TutorialState.MineCoalManually || 
-               currentState == TutorialState.FuelDCT || 
-               currentState == TutorialState.SellOtherOres;
+               currentState == TutorialState.FuelDCT;
     }
 
     public bool IsTutorialCompleted()
@@ -409,7 +408,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
         }
     }
 
-    private void HandleFuelAdded(ResourceType type)
+    public void HandleFuelAdded(ResourceType type)
     {
         if (currentState == TutorialState.FuelDCT && type == ResourceType.Coal)
         {
