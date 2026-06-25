@@ -52,9 +52,13 @@ public class PlayerWeapon : BaseWeapon
         if (PlayerController.Instance == null || PlayerController.Instance.currentMode != PlayerController.PlayerMode.Combat) return;
 
         if (cam == null) cam = Camera.main;
-        if (cam == null) return;
-            
-        target = cam.ScreenToWorldPoint(Input.mousePosition);
+        if (cam != null)
+        {
+            target = cam.ScreenToWorldPoint(Input.mousePosition);
+        }
+
+        if (Stats == null) return;
+
         // Manual reload
         if (Input.GetKeyDown(KeyCode.R) && !isReloading && roundsLeft < magazineSize)
         {

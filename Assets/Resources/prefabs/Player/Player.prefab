@@ -134,7 +134,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerWeapon
   target: {x: 0, y: 0}
-  Stats: {fileID: 11400000, guid: 74e3f480c75f2394e85fb99b36db22b9, type: 2}
+  Stats: {fileID: 0}
   firePoint: {fileID: 0}
 --- !u!114 &7797859226847318189
 MonoBehaviour:

@@ -151,6 +151,12 @@ namespace Managers
 
         private void GenerateOutposts()
         {
+            if (TutorialManager.HasInstance && !TutorialManager.Instance.IsTutorialCompleted())
+            {
+                Debug.Log("EnemyOutpostManager: Tutorial is active. Skipping random outpost generation.");
+                return;
+            }
+
             if (GameManager.Instance == null || GameManager.Instance.MainTileMap == null)
             {
                 Debug.LogWarning("EnemyOutpostManager: GameManager or MainTileMap is null. Cannot generate outposts.");

@@ -35,6 +35,15 @@ public class EnemySpawnerLogic : BuildingLogic
 
     public override void PerformAction()
     {
+        // Safety check: do not spawn if tutorial is active but we haven't reached the outpost destruction phase yet
+        if (TutorialManager.HasInstance && !TutorialManager.Instance.IsTutorialCompleted())
+        {
+            if (TutorialManager.Instance.currentState < TutorialState.DestroyEnemyOutpost)
+            {
+                return;
+            }
+        }
+
         // If claimed or deactivated, do not spawn enemies
         if (!isEnemyOwned)
         {
