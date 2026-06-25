@@ -52,9 +52,22 @@ public class PlayerWeapon : BaseWeapon
             
         target = cam.ScreenToWorldPoint(Input.mousePosition);
         // Manual reload
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R) && !isReloading && roundsLeft < magazineSize)
         {
-            StartCoroutine(Reload());
+            int reserve = PlayerController.Instance != null ? PlayerController.Instance.ammoReserve : 0;
+            if (reserve > 0)
+            {
+                StartCoroutine(Reload());
+            }
+            else
+            {
+                Debug.Log("No ammo reserve left to reload!");
+                if (Time.time - lastNoReserveWarningTime > 1.5f)
+                {
+                    lastNoReserveWarningTime = Time.time;
+                    if (UiManager.HasInstance) UiManager.Instance.ShowAmmoAlert("NO RESERVE AMMO!", true);
+                }
+            }
         }
 
         if (weaponType == WeaponType.Automatic)
@@ -75,6 +88,13 @@ public class PlayerWeapon : BaseWeapon
                 UpdateAmmoUI();
             }
         }
+    }
+
+    private void OnDisable()
+    {
+        isReloading = false;
+        canFire = true;
+        if (ammoUI != null) ammoUI.SetReloading(false);
     }
 
     private void CheckAndWarnAmmo()
@@ -100,6 +120,27 @@ public class PlayerWeapon : BaseWeapon
                 }
             }
         }
+    }
+
+    public override void Shoot()
+    {
+        if (isReloading) return;
+
+        if (roundsLeft <= 0)
+        {
+            int reserve = PlayerController.Instance != null ? PlayerController.Instance.ammoReserve : 0;
+            if (reserve <= 0)
+            {
+                canFire = false;
+                return;
+            }
+
+            canFire = false;
+            StartCoroutine(Reload());
+            return;
+        }
+
+        base.Shoot();
     }
 
     protected override IEnumerator Reload()

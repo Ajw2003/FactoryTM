@@ -1,5 +1,5 @@
 
-make sellers way more expensive after the first, or limit them some how so you are forced to use conveyors
+Replace sellers with The IDT central to your operation and must be protected, not only does it process all resources but it is also your transport off world, without it you don't go home.
 
 fix being able to dodge roll through walls and turrets? might leave idk
 
@@ -40,7 +40,6 @@ Unique play styles you want to play like a full rogue like, buy weapon and playe
 add enemy outposts, toy around with raids not starting until you attack them or wait long enough
 
 
-
 better ui contrast, color choices and general style unification.
 
 do minecraft hotbar scroll to view name of item
@@ -58,7 +57,6 @@ ground the ui and design for this change and deprecate the seller, use its logic
 now items are sent home and you are payed by the company per resource and are given a chart of estimated resource value.
 
 look at mindustery 
-
 
 
 BAD: 

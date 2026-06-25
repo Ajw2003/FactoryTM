@@ -585,7 +585,7 @@ public class UiManager : SingletonBase<UiManager>
            rt.anchoredPosition = Vector2.zero;
            
            TextMeshProUGUI tmp = alert.GetComponent<TextMeshProUGUI>();
-           tmp.text = "⚠️ BUILDINGS UNDER ATTACK! ⚠️";
+           tmp.text = "[!] BUILDINGS UNDER ATTACK! [!]";
            tmp.color = Color.red;
            tmp.fontSize = 42;
            tmp.fontStyle = FontStyles.Bold;

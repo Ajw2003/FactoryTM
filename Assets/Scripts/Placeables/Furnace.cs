@@ -36,8 +36,6 @@ public class Furnace : BuildingLogic
             }
         }
         occupiedCells = cells;
-
-        Debug.Log($"Furnace Setup at {myCell}: Initial exportDirection set to {exportDirection}");
     }
 
     private ResourceType lastProcessedResourceType = (ResourceType)(-1);
