@@ -142,7 +142,7 @@ public class GameManager : SingletonBase<GameManager>
 
         if (idtData == null)
         {
-            Debug.LogWarning("GameManager: IDT/Seller building data not found in allBuildings!");
+            Debug.LogWarning("GameManager: IDT/InterDimensionalTransporter building data not found in allBuildings!");
             return;
         }
 

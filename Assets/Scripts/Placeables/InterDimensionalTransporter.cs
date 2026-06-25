@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Seller : BuildingLogic
+public class InterDimensionalTransporter : BuildingLogic
 {
     [Header("Fuel Settings")]
     public float fuelRemaining = 0f;
@@ -12,7 +12,7 @@ public class Seller : BuildingLogic
     private float lastFuelWarningTime = -999f;
     private const float FuelWarningCooldown = 8f;
 
-    public static Seller Instance { get; private set; }
+    public static InterDimensionalTransporter Instance { get; private set; }
 
     public delegate void FuelAddedAction(ResourceType type);
     public event FuelAddedAction OnFuelAdded;
