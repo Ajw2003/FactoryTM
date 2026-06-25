@@ -619,5 +619,66 @@ public class UiManager : SingletonBase<UiManager>
        }
        
        if (alertObj != null) Destroy(alertObj);
-   }
+    }
+
+    public void ShowGeneralAlert(string message, Color color)
+    {
+        GameObject canvas = GameObject.Find("HUD Canvas");
+        if (canvas == null) canvas = GameObject.Find("Canvas");
+        if (canvas != null)
+        {
+            GameObject alert = new GameObject("GeneralAlert", typeof(RectTransform), typeof(TextMeshProUGUI));
+            alert.transform.SetParent(canvas.transform, false);
+            
+            RectTransform rt = alert.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.65f);
+            rt.anchorMax = new Vector2(0.5f, 0.65f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = Vector2.zero;
+            
+            TextMeshProUGUI tmp = alert.GetComponent<TextMeshProUGUI>();
+            tmp.text = message;
+            tmp.color = color;
+            tmp.fontSize = 28;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.alignment = TextAlignmentOptions.Center;
+            
+            StartCoroutine(AnimateGeneralAlert(alert, tmp));
+        }
+    }
+
+    private System.Collections.IEnumerator AnimateGeneralAlert(GameObject alertObj, TextMeshProUGUI tmp)
+    {
+        float duration = 2.0f;
+        float elapsed = 0f;
+        Vector2 startPos = alertObj.GetComponent<RectTransform>().anchoredPosition;
+        
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = elapsed / duration;
+            
+            if (alertObj != null)
+            {
+                alertObj.GetComponent<RectTransform>().anchoredPosition = startPos + new Vector2(0, Mathf.Lerp(0, 40f, t));
+            }
+
+            if (tmp != null)
+            {
+                if (t > 0.6f)
+                {
+                    Color c = tmp.color;
+                    c.a = 1f - ((t - 0.6f) * 2.5f);
+                    tmp.color = c;
+                }
+                yield return null;
+            }
+            else
+            {
+                break;
+            }
+        }
+        
+        if (alertObj != null) Destroy(alertObj);
+    }
 }

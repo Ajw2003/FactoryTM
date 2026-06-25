@@ -28,6 +28,14 @@ public class PlayerController : MonoBehaviour, IHealth
     public int healthPacksCount = 0;
     public int ammoReserve = 90;
 
+    public enum PlayerMode { Combat, Building }
+    [Header("Game Mode")]
+    public PlayerMode currentMode = PlayerMode.Combat;
+    private HotbarUI hotbarUIInstance;
+    public delegate void ModeChangedAction(PlayerMode mode);
+    public event ModeChangedAction OnModeChanged;
+    public event System.Action OnPlayerDodge;
+
     [Header("Stamina Settings")]
     public float maxStamina = 100f;
     public float currentStamina;
@@ -72,6 +80,9 @@ public class PlayerController : MonoBehaviour, IHealth
             spawnCell = GridManager.Instance.center;
         }
 
+        // Shift player 2 cells north of IDT center to prevent overlap
+        spawnCell += new Vector2Int(0, 2);
+
         currentCell = spawnCell;
         if (GridManager.Instance != null)
         {
@@ -87,6 +98,13 @@ public class PlayerController : MonoBehaviour, IHealth
 
         weapon = GetComponentInChildren<PlayerWeapon>();
 
+        // Cache HotbarUI and set to initial mode (Combat Mode = hidden hotbar)
+        hotbarUIInstance = FindFirstObjectByType<HotbarUI>();
+        if (hotbarUIInstance != null)
+        {
+            hotbarUIInstance.gameObject.SetActive(false);
+        }
+
         StateMachine.Initialize(StateMachine.idleState);
     }
 
@@ -99,6 +117,7 @@ public class PlayerController : MonoBehaviour, IHealth
     {
         if (canDodgeRoll && !isDodging && currentStamina >= staminaCostPerDodge)
         {
+            OnPlayerDodge?.Invoke();
             StateMachine.TransitionTo(StateMachine.dodgeState);
         }
     }
@@ -110,6 +129,15 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private void OnOpenStoreInput()
     {
+        if (TutorialManager.HasInstance && TutorialManager.Instance.IsStoreLocked())
+        {
+            if (UiManager.HasInstance)
+            {
+                UiManager.Instance.ShowGeneralAlert("STORE OFFLINE - REBOOT IDT FIRST", new Color(1f, 0.3f, 0.3f));
+            }
+            return;
+        }
+
         if (StateMachine.CurrentState == StateMachine.idleState || StateMachine.CurrentState == StateMachine.walkState)
         {
             StateMachine.TransitionTo(StateMachine.storeState);
@@ -134,6 +162,11 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Tab) && StateMachine.CurrentState != StateMachine.storeState && StateMachine.CurrentState != StateMachine.deadState)
+        {
+            ToggleGameMode();
+        }
+
         // Regenerate stamina
         if (currentStamina < maxStamina)
         {
@@ -158,6 +191,55 @@ public class PlayerController : MonoBehaviour, IHealth
         }
 
         StateMachine.Update();
+    }
+
+    public void ToggleGameMode()
+    {
+        currentMode = (currentMode == PlayerMode.Combat) ? PlayerMode.Building : PlayerMode.Combat;
+
+        if (currentMode == PlayerMode.Combat)
+        {
+            if (PlacementManager.Instance != null)
+            {
+                PlacementManager.Instance.ChangeSelection(null);
+            }
+            if (hotbarUIInstance == null)
+            {
+                hotbarUIInstance = FindFirstObjectByType<HotbarUI>();
+            }
+            if (hotbarUIInstance != null)
+            {
+                hotbarUIInstance.gameObject.SetActive(false);
+            }
+
+            if (UiManager.HasInstance)
+            {
+                UiManager.Instance.ShowGeneralAlert("COMBAT MODE ACTIVE", new Color(1f, 0.3f, 0.3f));
+            }
+        }
+        else
+        {
+            if (hotbarUIInstance == null)
+            {
+                hotbarUIInstance = FindFirstObjectByType<HotbarUI>();
+            }
+            if (hotbarUIInstance != null)
+            {
+                hotbarUIInstance.gameObject.SetActive(true);
+            }
+
+            if (PlacementManager.Instance != null && HotbarManager.Instance != null)
+            {
+                PlacementManager.Instance.ChangeSelection(HotbarManager.Instance.GetSelectedBuilding());
+            }
+
+            if (UiManager.HasInstance)
+            {
+                UiManager.Instance.ShowGeneralAlert("BUILDING MODE ACTIVE", new Color(0.3f, 0.9f, 0.3f));
+            }
+        }
+
+        OnModeChanged?.Invoke(currentMode);
     }
 
     public void SetLastMoveDirection(Vector2Int direction)

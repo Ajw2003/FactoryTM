@@ -118,6 +118,49 @@ public class GameManager : SingletonBase<GameManager>
             }
         }
         UiManager.Instance?.UpdateHp(playerController.Health, playerController.maxHealth);
+        SpawnStartingIDT();
+    }
+
+    private void SpawnStartingIDT()
+    {
+        if (allBuildings == null)
+        {
+            Debug.LogWarning("GameManager: allBuildings is null! Cannot spawn starting IDT.");
+            return;
+        }
+
+        BuildingData idtData = null;
+        foreach (var building in allBuildings)
+        {
+            if (building != null && building.type == BuildingType.Seller)
+            {
+                idtData = building;
+                break;
+            }
+        }
+
+        if (idtData == null)
+        {
+            Debug.LogWarning("GameManager: IDT/Seller building data not found in allBuildings!");
+            return;
+        }
+
+        Vector2Int centerCell = Vector2Int.zero;
+        if (ZoneManager.Instance != null)
+        {
+            Vector2Int zoneSize = ZoneManager.Instance.zoneSizeInTiles;
+            centerCell = new Vector2Int(zoneSize.x / 2, zoneSize.y / 2);
+        }
+        else if (GridManager.Instance != null)
+        {
+            centerCell = GridManager.Instance.center;
+        }
+
+        if (PlacementManager.Instance != null)
+        {
+            PlacementManager.Instance.SpawnSellerProgrammatically(idtData, centerCell, 0);
+            Debug.Log($"GameManager: Programmatically spawned starting IDT at {centerCell}");
+        }
     }
 
     void InitializeData()
