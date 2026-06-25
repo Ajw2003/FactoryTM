@@ -1,4 +1,5 @@
 using System.Collections;
+using Buildings;
 using Managers;
 using TMPro;
 using UnityEngine;
@@ -166,6 +167,11 @@ public class UpgradeShopItem : MonoBehaviour
                 {
                     PlayerController.Instance.healthPacksCount += 1;
                     Debug.Log($"Purchased health pack. Total: {PlayerController.Instance.healthPacksCount}");
+                    
+                    if (TutorialManager.HasInstance)
+                    {
+                        TutorialManager.Instance.HandleHealthPackPurchased();
+                    }
                 }
                 break;
 
@@ -179,6 +185,11 @@ public class UpgradeShopItem : MonoBehaviour
                     if (playerWeapon != null)
                     {
                         playerWeapon.UpdateAmmoUI();
+                    }
+
+                    if (TutorialManager.HasInstance)
+                    {
+                        TutorialManager.Instance.HandleAmmoPurchased();
                     }
                 }
                 break;
@@ -204,14 +215,24 @@ public class UpgradeShopItem : MonoBehaviour
                         playerWeapon.Stats = definition.weaponToUnlock;
                         playerWeapon.ApplyStats();
                     }
+
+                    if (TutorialManager.HasInstance)
+                    {
+                        TutorialManager.Instance.HandleWeaponPurchased(definition);
+                    }
                 }
                 break;
 
             case UpgradeType.Building:
                 if (InventoryManager.HasInstance && definition.buildingToUnlock != null)
                 {
-                    InventoryManager.Instance.AddBuilding(definition.buildingToUnlock, 1);
-                    Debug.Log($"Purchased building: {definition.buildingToUnlock.buildingName}");
+                    int amount = 1;
+                    if (definition.buildingToUnlock.type == BuildingType.Conveyor && TutorialManager.HasInstance && TutorialManager.Instance.currentState == TutorialState.BuyMinerConveyors)
+                    {
+                        amount = 10;
+                    }
+                    InventoryManager.Instance.AddBuilding(definition.buildingToUnlock, amount);
+                    Debug.Log($"Purchased building: {definition.buildingToUnlock.buildingName} x{amount}");
                     
                     // Auto-assign to first empty hotbar slot
                     bool alreadyInHotbar = false;

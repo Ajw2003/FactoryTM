@@ -181,6 +181,16 @@ namespace Managers
                         continue;
                     }
 
+                    // Prevent generating in starting zone (0, 0)
+                    if (ZoneManager.Instance != null)
+                    {
+                        Vector2Int zoneCoords = ZoneManager.Instance.GetZoneCoordsFromTile(new Vector3Int(cell.x, cell.y, 0));
+                        if (zoneCoords == Vector2Int.zero)
+                        {
+                            continue;
+                        }
+                    }
+
                     // Keep starting area clear (within 10 tiles of (0,0) or GridManager center)
                     Vector2Int center = GridManager.Instance != null ? GridManager.Instance.center : Vector2Int.zero;
                     if (Vector2Int.Distance(cell, center) < 12f)
@@ -449,6 +459,81 @@ namespace Managers
             Buildings.BuildingData wallData = Resources.Load<Buildings.BuildingData>("BuildingData/EnemyWall");
             BuildingLogic wall = SpawnEnemyBuilding(cell, wallData, typeof(WallLogic));
             return wall;
+        }
+
+        public EnemyOutpost SpawnTutorialOutpost(Vector2Int startCell, int patchSize)
+        {
+            List<Vector2Int> patchCells = new List<Vector2Int>();
+            Queue<Vector2Int> cellsToProcess = new Queue<Vector2Int>();
+            HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>();
+            
+            cellsToProcess.Enqueue(startCell);
+            occupiedCells.Add(startCell);
+            
+            while (cellsToProcess.Count > 0 && patchCells.Count < patchSize)
+            {
+                Vector2Int currentCell = cellsToProcess.Dequeue();
+                patchCells.Add(currentCell);
+                
+                Vector2Int[] neighbors = new Vector2Int[]
+                {
+                    currentCell + Vector2Int.right,
+                    currentCell + Vector2Int.left,
+                    currentCell + Vector2Int.up,
+                    currentCell + Vector2Int.down
+                };
+                
+                foreach (var neighbor in neighbors)
+                {
+                    Vector3Int tempNeighbor = new Vector3Int(neighbor.x, neighbor.y, 0);
+                    if (!GameManager.Instance.MainTileMap.HasTile(tempNeighbor) || occupiedCells.Contains(neighbor))
+                    {
+                        continue;
+                    }
+                    if (ResourceManager.Instance != null && ResourceManager.Instance.GetNodeAtPosition(neighbor) != null)
+                    {
+                        occupiedCells.Add(neighbor);
+                        continue;
+                    }
+                    if (PlacementManager.HasInstance && PlacementManager.Instance.GetActiveBuildings().ContainsKey(neighbor))
+                    {
+                        occupiedCells.Add(neighbor);
+                        continue;
+                    }
+                    
+                    occupiedCells.Add(neighbor);
+                    cellsToProcess.Enqueue(neighbor);
+                }
+            }
+            
+            if (patchCells.Count > 0)
+            {
+                EnemyOutpost outpost = new EnemyOutpost();
+                activeOutposts.Add(outpost);
+                for (int i = 0; i < patchCells.Count; i++)
+                {
+                    Vector2Int cell = patchCells[i];
+                    if (PlacementManager.HasInstance && PlacementManager.Instance.GetActiveBuildings().ContainsKey(cell)) continue;
+                    
+                    BuildingLogic building = null;
+                    if (i == 0) building = SpawnEnemySpawner(cell);
+                    else if (i % 3 == 0) building = SpawnEnemyTurret(cell);
+                    else
+                    {
+                        float rand = Random.value;
+                        if (rand < 0.6f) building = SpawnEnemyWall(cell);
+                        else building = SpawnEnemyFactoryBlock(cell);
+                    }
+                    
+                    if (building != null)
+                    {
+                        outpost.RegisterBuilding(building);
+                    }
+                }
+                outpostCenters.Add(startCell);
+                return outpost;
+            }
+            return null;
         }
     }
 }

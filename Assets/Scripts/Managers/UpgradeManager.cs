@@ -280,5 +280,10 @@ namespace Managers
             }
             return 1; // Default tier
         }
+
+        public void TriggerUpgradesChanged()
+        {
+            onUpgradesChanged?.Invoke();
+        }
     }
 }

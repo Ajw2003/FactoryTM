@@ -121,6 +121,16 @@ public class ZoneManager : SingletonBase<ZoneManager>
         return false;
     }
 
+    public void ForceUnlockZone(Vector2Int zoneCoords)
+    {
+        if (!unlockedZones.Contains(zoneCoords))
+        {
+            unlockedZones.Add(zoneCoords);
+            onZoneUnlock?.Invoke();
+            Debug.Log($"ZoneManager: Force unlocked zone {zoneCoords}");
+        }
+    }
+
     // Methods for UI Buttons to call directly
     public bool UnlockNorth() => TryUnlockZone(currentZone + Vector2Int.up);
     public bool UnlockSouth() => TryUnlockZone(currentZone + Vector2Int.down);
