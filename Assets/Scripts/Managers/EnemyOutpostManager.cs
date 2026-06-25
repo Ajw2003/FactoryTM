@@ -359,7 +359,7 @@ namespace Managers
             {
                 GameManager.Instance.BuildingTileMap.SetTile(tilePos, buildingData.rotatedTiles[0]);
                 GameManager.Instance.BuildingTileMap.SetTileFlags(tilePos, UnityEngine.Tilemaps.TileFlags.None);
-                GameManager.Instance.BuildingTileMap.SetColor(tilePos, new Color(1f, 0.4f, 0.4f, 1f));
+                // GameManager.Instance.BuildingTileMap.SetColor(tilePos, new Color(1f, 0.4f, 0.4f, 1f));
             }
 
             GameObject buildingObj = new GameObject(buildingData.buildingName + "_Enemy_Logic_" + cell);

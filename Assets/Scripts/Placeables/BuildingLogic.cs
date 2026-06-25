@@ -57,10 +57,10 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
         // Update visual crack overlay
         UpdateCrackVisuals();
         
-        if (PlacementManager.HasInstance)
-        {
-            StartCoroutine(FlashRedTile());
-        }
+        // if (PlacementManager.HasInstance)
+        // {
+        //     StartCoroutine(FlashRedTile());
+        // }
 
         if (BuildingManager.HasInstance && !isEnemyOwned)
         {
@@ -78,19 +78,19 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
         
     }
 
-    private System.Collections.IEnumerator FlashRedTile()
-    {
-        Vector3Int pos3 = new Vector3Int(myCell.x, myCell.y, 0);
-        UnityEngine.Tilemaps.Tilemap map = PlacementManager.Instance.mainTilemap;
-        
-        // Ensure the tile can be tinted
-        map.SetTileFlags(pos3, UnityEngine.Tilemaps.TileFlags.None);
-        
-        Color originalColor = map.GetColor(pos3);
-        map.SetColor(pos3, new Color(1f, 0.3f, 0.3f, 1f));
-        yield return new WaitForSeconds(0.12f);
-        map.SetColor(pos3, originalColor);
-    }
+    // private System.Collections.IEnumerator FlashRedTile()
+    // {
+    //     Vector3Int pos3 = new Vector3Int(myCell.x, myCell.y, 0);
+    //     UnityEngine.Tilemaps.Tilemap map = PlacementManager.Instance.mainTilemap;
+    //     
+    //     // Ensure the tile can be tinted
+    //     map.SetTileFlags(pos3, UnityEngine.Tilemaps.TileFlags.None);
+    //     
+    //     Color originalColor = map.GetColor(pos3);
+    //     map.SetColor(pos3, new Color(1f, 0.3f, 0.3f, 1f));
+    //     yield return new WaitForSeconds(0.12f);
+    //     map.SetColor(pos3, originalColor);
+    // }
 
     public virtual void Die()
     {
