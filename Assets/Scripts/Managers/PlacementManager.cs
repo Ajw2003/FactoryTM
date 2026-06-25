@@ -58,6 +58,12 @@ public class PlacementManager : SingletonBase<PlacementManager>
             return;
         }
 
+        if (PlayerController.Instance == null || PlayerController.Instance.currentMode == PlayerController.PlayerMode.Combat)
+        {
+            if (previewTilemap != null) previewTilemap.ClearAllTiles();
+            return;
+        }
+
         if (activeBuilding == null) return;
 
         Vector2Int cell = GetMouseCell();
@@ -321,6 +327,37 @@ public class PlacementManager : SingletonBase<PlacementManager>
     public void RegisterActiveBuilding(Vector2Int cell, GameObject buildingObj)
     {
         activeBuildings[cell] = buildingObj;
+    }
+
+    public void SpawnSellerProgrammatically(BuildingData building, Vector2Int cell, int rotation = 0)
+    {
+        Vector3Int vector3Cell = new Vector3Int(cell.x, cell.y, 0);
+        if (mainTilemap == null) mainTilemap = GameManager.Instance.BuildingTileMap;
+        mainTilemap.SetTile(vector3Cell, building.rotatedTiles[rotation]);
+
+        BuildingData prevActive = activeBuilding;
+        int prevRotation = rotationIndex;
+
+        activeBuilding = building;
+        rotationIndex = rotation;
+
+        GameObject buildingObj = SpawnSellerLogic(cell);
+        BuildingLogic logic = buildingObj.GetComponent<BuildingLogic>();
+        if (logic != null)
+        {
+            List<Vector2Int> occupiedCells = GetOccupiedCells(cell, building.size, rotation);
+            logic.SetOccupiedCells(occupiedCells);
+            foreach (var occupiedCell in occupiedCells)
+            {
+                if (occupiedCell != cell)
+                {
+                    activeBuildings[occupiedCell] = buildingObj;
+                }
+            }
+        }
+
+        activeBuilding = prevActive;
+        rotationIndex = prevRotation;
     }
 
     private Dictionary<Vector2Int, GameObject> activeBuildings = new Dictionary<Vector2Int, GameObject>();

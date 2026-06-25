@@ -12,6 +12,8 @@ public class PlayerWeapon : BaseWeapon
     private float lastNoAmmoWarningTime = -999f;
     private float lastNoReserveWarningTime = -999f;
 
+    public static event System.Action OnPlayerShoot;
+
     public void UpdateAmmoUI()
     {
         if (ammoUI != null)
@@ -47,6 +49,8 @@ public class PlayerWeapon : BaseWeapon
        
         if (PauseManager.IsPaused) return;
 
+        if (PlayerController.Instance == null || PlayerController.Instance.currentMode != PlayerController.PlayerMode.Combat) return;
+
         if (cam == null) cam = Camera.main;
         if (cam == null) return;
             
@@ -72,7 +76,7 @@ public class PlayerWeapon : BaseWeapon
 
         if (weaponType == WeaponType.Automatic)
         {
-            if (Input.GetMouseButton(2))
+            if (Input.GetMouseButton(0))
             {
                 CheckAndWarnAmmo();
                 Shoot();
@@ -81,7 +85,7 @@ public class PlayerWeapon : BaseWeapon
         }
         else
         {
-            if (Input.GetMouseButtonDown(2))
+            if (Input.GetMouseButtonDown(0))
             {
                 CheckAndWarnAmmo();
                 Shoot();
@@ -141,6 +145,7 @@ public class PlayerWeapon : BaseWeapon
         }
 
         base.Shoot();
+        OnPlayerShoot?.Invoke();
     }
 
     protected override IEnumerator Reload()

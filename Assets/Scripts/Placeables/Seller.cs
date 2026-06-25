@@ -3,22 +3,125 @@ using UnityEngine;
 
 public class Seller : BuildingLogic
 {
+    [Header("Fuel Settings")]
+    public float fuelRemaining = 0f;
+    public float maxFuel = 100f;
+    public bool isUraniumBoosted = false;
+    public float uraniumBoostDuration = 0f;
+
+    private float lastFuelWarningTime = -999f;
+    private const float FuelWarningCooldown = 8f;
+
+    public static Seller Instance { get; private set; }
+
+    public delegate void FuelAddedAction(ResourceType type);
+    public event FuelAddedAction OnFuelAdded;
+
+    public delegate void ItemSoldAction(ConveyorItem item);
+    public event ItemSoldAction OnItemSold;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     public override void Setup(Buildings.BuildingData buildingData, Vector2Int cell)
     {
         base.Setup(buildingData, cell);
+        fuelRemaining = 0f; // Start empty to force tutorial Coal extraction
+    }
+
+    private void Update()
+    {
+        if (PauseManager.IsPaused) return;
+
+        if (fuelRemaining > 0f)
+        {
+            fuelRemaining -= Time.deltaTime;
+            if (fuelRemaining < 0f) fuelRemaining = 0f;
+        }
+
+        if (isUraniumBoosted)
+        {
+            uraniumBoostDuration -= Time.deltaTime;
+            if (uraniumBoostDuration <= 0f)
+            {
+                isUraniumBoosted = false;
+                uraniumBoostDuration = 0f;
+                if (UiManager.HasInstance)
+                {
+                    UiManager.Instance.ShowGeneralAlert("IDT EFFICIENCY BOOST ENDED", new Color(0.5f, 0.5f, 0.5f));
+                }
+            }
+        }
     }
 
     public override void PerformAction()
     {
         List<ConveyorItem> items = ItemTracker.Instance.GetItemsInCell(myCell);
-        if (items != null)
+        if (items == null || items.Count == 0) return;
+
+        bool hasNonFuelItemWaiting = false;
+
+        for (int i = items.Count - 1; i >= 0; i--)
         {
-            for (int i = items.Count - 1; i >= 0; i--)
+            ConveyorItem item = items[i];
+            if (item == null) continue;
+
+            if (!item.IsMoving)
             {
-                ConveyorItem item = items[i];
-                if (!item.IsMoving)
+                if (item.resourceType == ResourceType.Coal)
                 {
-                    GameManager.Instance.ProccessSale(item.gameObject);
+                    fuelRemaining = Mathf.Min(maxFuel, fuelRemaining + 20f);
+                    OnFuelAdded?.Invoke(ResourceType.Coal);
+                    if (UiManager.HasInstance)
+                    {
+                        UiManager.Instance.ShowGeneralAlert("IDT FUELED: COAL (+20s)", new Color(0.3f, 0.9f, 0.3f));
+                    }
+                    Destroy(item.gameObject);
+                }
+                else if (item.resourceType == ResourceType.Uranium)
+                {
+                    fuelRemaining = Mathf.Min(maxFuel, fuelRemaining + 60f);
+                    isUraniumBoosted = true;
+                    uraniumBoostDuration = 30f;
+                    OnFuelAdded?.Invoke(ResourceType.Uranium);
+                    if (UiManager.HasInstance)
+                    {
+                        UiManager.Instance.ShowGeneralAlert("IDT BOOSTED: URANIUM (+60s, 2X OUTPUT)", new Color(0.3f, 1f, 1f));
+                    }
+                    Destroy(item.gameObject);
+                }
+                else
+                {
+                    if (fuelRemaining > 0f)
+                    {
+                        float saleValue = item.value;
+                        if (isUraniumBoosted)
+                        {
+                            saleValue *= 2f;
+                        }
+                        
+                        CurrencyManager.Instance.AddCurrency(saleValue);
+                        OnItemSold?.Invoke(item);
+                        Destroy(item.gameObject);
+                    }
+                    else
+                    {
+                        hasNonFuelItemWaiting = true;
+                    }
+                }
+            }
+        }
+
+        if (hasNonFuelItemWaiting && fuelRemaining <= 0f)
+        {
+            if (Time.time - lastFuelWarningTime >= FuelWarningCooldown)
+            {
+                lastFuelWarningTime = Time.time;
+                if (UiManager.HasInstance)
+                {
+                    UiManager.Instance.ShowGeneralAlert("IDT OFFLINE: COAL FUEL REQUIRED!", new Color(1f, 0.3f, 0.3f));
                 }
             }
         }

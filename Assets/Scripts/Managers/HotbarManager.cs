@@ -20,6 +20,8 @@ public class HotbarManager : SingletonBase<HotbarManager>
     {
         if (PauseManager.IsPaused) return;
 
+        if (PlayerController.Instance == null || PlayerController.Instance.currentMode == PlayerController.PlayerMode.Combat) return;
+
         // Handle slot selection via number keys
         for (int i = 0; i < slotCount; i++)
         {
