@@ -38,6 +38,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
 
     private GameObject resourceInventoryPanel;
     private Dictionary<ResourceType, GameObject> resourceSlots = new Dictionary<ResourceType, GameObject>();
+    private GameObject idtIntakeDropZone;
 
     [Header("State")]
     private BuildingLogic currentOpenBuilding;
@@ -240,7 +241,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         rt.anchorMax = new Vector2(0.5f, 0.5f);
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.anchoredPosition = Vector2.zero;
-        rt.sizeDelta = new Vector2(680f, 440f);
+        rt.sizeDelta = new Vector2(800f, 550f);
 
         Image img = buildingPanel.GetComponent<Image>();
         img.color = new Color(0.01f, 0.05f, 0.01f, 0.97f);
@@ -259,7 +260,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         titleRt.offsetMax = new Vector2(-70f, 0f);
 
         buildingTitleText = titleGo.GetComponent<TextMeshProUGUI>();
-        buildingTitleText.fontSize = 36;
+        buildingTitleText.fontSize = 42;
         buildingTitleText.fontStyle = FontStyles.Bold;
         buildingTitleText.color = new Color(0.2f, 1f, 0.2f);
         buildingTitleText.alignment = TextAlignmentOptions.MidlineLeft;
@@ -307,7 +308,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         detailRt.offsetMax = new Vector2(-30f, 0f);
 
         buildingDetailText = detailGo.GetComponent<TextMeshProUGUI>();
-        buildingDetailText.fontSize = 28;
+        buildingDetailText.fontSize = 32;
         buildingDetailText.color = new Color(0.2f, 0.9f, 0.2f);
         buildingDetailText.alignment = TextAlignmentOptions.TopLeft;
         buildingDetailText.enableWordWrapping = true;
@@ -350,7 +351,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         barTextRt.offsetMin = Vector2.zero;
         barTextRt.offsetMax = Vector2.zero;
         fuelBarText = barTextGo.GetComponent<TextMeshProUGUI>();
-        fuelBarText.fontSize = 24;
+        fuelBarText.fontSize = 28;
         fuelBarText.color = Color.black; // high contrast black on green bar
         fuelBarText.fontStyle = FontStyles.Bold;
         fuelBarText.alignment = TextAlignmentOptions.Center;
@@ -411,6 +412,68 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
 
         actionButton2 = actionButton2Go.GetComponent<Button>();
 
+        // Create IDT Intake Drop Zone
+        idtIntakeDropZone = new GameObject("IdtIntakeDropZone", typeof(RectTransform), typeof(Image));
+        idtIntakeDropZone.transform.SetParent(buildingPanel.transform, false);
+        RectTransform intakeRt = idtIntakeDropZone.GetComponent<RectTransform>();
+        intakeRt.anchorMin = new Vector2(0.52f, 0.08f);
+        intakeRt.anchorMax = new Vector2(0.95f, 0.82f);
+        intakeRt.pivot = new Vector2(0.5f, 0.5f);
+        intakeRt.offsetMin = Vector2.zero;
+        intakeRt.offsetMax = Vector2.zero;
+
+        Image intakeImg = idtIntakeDropZone.GetComponent<Image>();
+        intakeImg.color = new Color(0.01f, 0.08f, 0.01f, 0.9f); // Dark translucent green background
+
+        Outline intakeOutline = idtIntakeDropZone.AddComponent<Outline>();
+        intakeOutline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
+        intakeOutline.effectDistance = new Vector2(2f, -2f);
+
+        // Arrow Symbol
+        GameObject arrowGo = new GameObject("ArrowText", typeof(RectTransform), typeof(TextMeshProUGUI));
+        arrowGo.transform.SetParent(idtIntakeDropZone.transform, false);
+        RectTransform arrowRt = arrowGo.GetComponent<RectTransform>();
+        arrowRt.anchorMin = new Vector2(0f, 0.55f);
+        arrowRt.anchorMax = new Vector2(1f, 0.95f);
+        arrowRt.offsetMin = Vector2.zero;
+        arrowRt.offsetMax = Vector2.zero;
+        TextMeshProUGUI arrowTxt = arrowGo.GetComponent<TextMeshProUGUI>();
+        arrowTxt.text = "▼";
+        arrowTxt.fontSize = 64;
+        arrowTxt.fontStyle = FontStyles.Bold;
+        arrowTxt.color = new Color(0.2f, 1f, 0.2f);
+        arrowTxt.alignment = TextAlignmentOptions.Center;
+
+        // Label: REACTOR INTAKE PORT
+        GameObject labelGo = new GameObject("LabelText", typeof(RectTransform), typeof(TextMeshProUGUI));
+        labelGo.transform.SetParent(idtIntakeDropZone.transform, false);
+        RectTransform labelRt = labelGo.GetComponent<RectTransform>();
+        labelRt.anchorMin = new Vector2(0f, 0.35f);
+        labelRt.anchorMax = new Vector2(1f, 0.55f);
+        labelRt.offsetMin = new Vector2(10f, 0f);
+        labelRt.offsetMax = new Vector2(-10f, 0f);
+        TextMeshProUGUI labelTxt = labelGo.GetComponent<TextMeshProUGUI>();
+        labelTxt.text = "REACTOR INTAKE PORT";
+        labelTxt.fontSize = 24;
+        labelTxt.fontStyle = FontStyles.Bold;
+        labelTxt.color = new Color(0.2f, 1f, 0.2f);
+        labelTxt.alignment = TextAlignmentOptions.Center;
+
+        // Instructions
+        GameObject descGo = new GameObject("DescText", typeof(RectTransform), typeof(TextMeshProUGUI));
+        descGo.transform.SetParent(idtIntakeDropZone.transform, false);
+        RectTransform descRt = descGo.GetComponent<RectTransform>();
+        descRt.anchorMin = new Vector2(0f, 0.05f);
+        descRt.anchorMax = new Vector2(1f, 0.35f);
+        descRt.offsetMin = new Vector2(15f, 0f);
+        descRt.offsetMax = new Vector2(-15f, 0f);
+        TextMeshProUGUI descTxt = descGo.GetComponent<TextMeshProUGUI>();
+        descTxt.text = "Drop Coal/Uranium to fuel\nor other resources to sell";
+        descTxt.fontSize = 18;
+        descTxt.color = new Color(0.2f, 0.8f, 0.2f, 0.85f);
+        descTxt.alignment = TextAlignmentOptions.Center;
+        descTxt.enableWordWrapping = true;
+
         buildingPanel.SetActive(false);
     }
 
@@ -426,8 +489,8 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         rt.anchorMin = new Vector2(0.5f, 0.5f);
         rt.anchorMax = new Vector2(0.5f, 0.5f);
         rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.anchoredPosition = new Vector2(-510f, 0f);
-        rt.sizeDelta = new Vector2(300f, 440f);
+        rt.anchoredPosition = new Vector2(-610f, 0f);
+        rt.sizeDelta = new Vector2(380f, 550f);
 
         Image img = resourceInventoryPanel.GetComponent<Image>();
         img.color = new Color(0.01f, 0.05f, 0.01f, 0.97f);
@@ -446,7 +509,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         titleRt.offsetMax = new Vector2(-10f, 0f);
 
         TextMeshProUGUI titleText = titleGo.GetComponent<TextMeshProUGUI>();
-        titleText.fontSize = 24;
+        titleText.fontSize = 30;
         titleText.fontStyle = FontStyles.Bold;
         titleText.color = new Color(0.2f, 1f, 0.2f);
         titleText.alignment = TextAlignmentOptions.Center;
@@ -462,7 +525,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         instRt.offsetMax = new Vector2(-10f, 0f);
 
         TextMeshProUGUI instText = instGo.GetComponent<TextMeshProUGUI>();
-        instText.fontSize = 18;
+        instText.fontSize = 22;
         instText.color = new Color(0.2f, 0.8f, 0.2f, 0.8f);
         instText.alignment = TextAlignmentOptions.Center;
         instText.enableWordWrapping = true;
@@ -471,12 +534,12 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         // Create Grid of 8 Slots (4 columns, 2 rows)
         ResourceType[] types = (ResourceType[])System.Enum.GetValues(typeof(ResourceType));
         
-        float startX = 15f;
-        float startY = 180f;
-        float slotW = 60f;
-        float slotH = 80f;
-        float spacingX = 10f;
-        float spacingY = 15f;
+        float startX = 17.5f;
+        float startY = 240f;
+        float slotW = 75f;
+        float slotH = 100f;
+        float spacingX = 15f;
+        float spacingY = 25f;
 
         for (int i = 0; i < types.Length; i++)
         {
@@ -512,7 +575,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
             iconRt.anchorMax = new Vector2(0.5f, 0.5f);
             iconRt.pivot = new Vector2(0.5f, 0.5f);
             iconRt.anchoredPosition = new Vector2(0f, 5f);
-            iconRt.sizeDelta = new Vector2(36f, 36f);
+            iconRt.sizeDelta = new Vector2(48f, 48f);
 
             Image iconImg = iconGo.GetComponent<Image>();
             iconImg.color = Color.white;
@@ -528,7 +591,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
             countRt.offsetMax = new Vector2(-4f, 2f);
 
             TextMeshProUGUI countText = countGo.GetComponent<TextMeshProUGUI>();
-            countText.fontSize = 14;
+            countText.fontSize = 18;
             countText.fontStyle = FontStyles.Bold;
             countText.color = new Color(0.2f, 1f, 0.2f);
             countText.alignment = TextAlignmentOptions.BottomRight;
@@ -543,7 +606,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
             valRt.offsetMax = new Vector2(-2f, -2f);
 
             TextMeshProUGUI valText = valGo.GetComponent<TextMeshProUGUI>();
-            valText.fontSize = 12;
+            valText.fontSize = 16;
             valText.color = new Color(1f, 0.8f, 0.2f);
             valText.alignment = TextAlignmentOptions.TopLeft;
 
@@ -667,6 +730,14 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
         if (buildingPanel == null) return false;
         RectTransform rt = buildingPanel.GetComponent<RectTransform>();
         return RectTransformUtility.RectangleContainsScreenPoint(rt, screenPosition, null);
+    }
+
+    public bool IsMouseOverIntakeZone(Vector2 screenPosition)
+    {
+        if (idtIntakeDropZone == null || !idtIntakeDropZone.activeInHierarchy) return false;
+        RectTransform rt = idtIntakeDropZone.GetComponent<RectTransform>();
+        Camera cam = (HUDCanvas != null && HUDCanvas.renderMode == RenderMode.ScreenSpaceOverlay) ? null : Camera.main;
+        return RectTransformUtility.RectangleContainsScreenPoint(rt, screenPosition, cam);
     }
 
     public void HandleResourceDropped(ResourceType type)
@@ -809,6 +880,25 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
     {
         if (currentOpenBuilding == null) return;
 
+        // Default layout reset
+        RectTransform detailRt = buildingDetailText.GetComponent<RectTransform>();
+        detailRt.anchorMin = new Vector2(0f, 0.48f);
+        detailRt.anchorMax = new Vector2(1f, 0.85f);
+        detailRt.offsetMin = new Vector2(30f, 0f);
+        detailRt.offsetMax = new Vector2(-30f, 0f);
+
+        RectTransform fuelBarRt = fuelBarContainer.GetComponent<RectTransform>();
+        fuelBarRt.anchorMin = new Vector2(0.5f, 0.38f);
+        fuelBarRt.anchorMax = new Vector2(0.5f, 0.38f);
+        fuelBarRt.pivot = new Vector2(0.5f, 0.5f);
+        fuelBarRt.anchoredPosition = Vector2.zero;
+        fuelBarRt.sizeDelta = new Vector2(600f, 40f);
+
+        if (idtIntakeDropZone != null)
+        {
+            idtIntakeDropZone.SetActive(false);
+        }
+
         // Default buttons state
         actionButton1Go.SetActive(true);
         actionButton2Go.SetActive(true);
@@ -824,9 +914,9 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
             if (seller.isUraniumBoosted) statusStr = "BOOSTED // URANIUM ACTIVE (2X VALUE)";
             
             buildingDetailText.text = $"Reactor Status: {statusStr}\n\n" +
-                                      $"[DRAG COAL HERE TO FUEL REACTOR (+20s)]\n" +
-                                      $"[DRAG URANIUM HERE TO BOOST REACTOR (+60s)]\n" +
-                                      $"[DRAG OTHER ORES HERE TO SELL THEM]";
+                                      $"[DRAG COAL TO INTAKE PORT TO FUEL (+20s)]\n" +
+                                      $"[DRAG URANIUM TO INTAKE PORT TO BOOST (+60s)]\n" +
+                                      $"[DRAG OTHER ORES TO INTAKE PORT TO SELL]";
 
             fuelBarContainer.SetActive(true);
             float fuelPct = seller.fuelRemaining / seller.maxFuel;
@@ -836,6 +926,22 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
             // Hide the buttons as drag & drop is used
             actionButton1Go.SetActive(false);
             actionButton2Go.SetActive(false);
+
+            // Two-column layout overrides
+            if (idtIntakeDropZone != null)
+            {
+                idtIntakeDropZone.SetActive(true);
+            }
+
+            detailRt.anchorMin = new Vector2(0.05f, 0.32f);
+            detailRt.anchorMax = new Vector2(0.48f, 0.82f);
+            detailRt.offsetMin = Vector2.zero;
+            detailRt.offsetMax = Vector2.zero;
+
+            fuelBarRt.anchorMin = new Vector2(0.05f, 0.08f);
+            fuelBarRt.anchorMax = new Vector2(0.48f, 0.22f);
+            fuelBarRt.offsetMin = Vector2.zero;
+            fuelBarRt.offsetMax = Vector2.zero;
         }
         // 2. Miner UI
         else if (currentOpenBuilding is MinerLogic miner)

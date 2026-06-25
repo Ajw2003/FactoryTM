@@ -25,6 +25,7 @@ public class ResourceDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandle
         // Create a temporary visual clone for the drag icon
         dragVisual = new GameObject("DragVisual_" + resourceType.ToString(), typeof(RectTransform), typeof(Image));
         dragVisual.transform.SetParent(parentCanvas.transform, false);
+        dragVisual.transform.SetAsLastSibling(); // Force render on top of everything!
         
         RectTransform rt = dragVisual.GetComponent<RectTransform>();
         rt.sizeDelta = new Vector2(50f, 50f);
@@ -55,8 +56,8 @@ public class ResourceDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandle
 
         if (BuildingUiManager.Instance != null && BuildingUiManager.Instance.IsPanelOpen)
         {
-            // Check if dropped within the bounds of the IDT/Seller's panel
-            if (BuildingUiManager.Instance.IsMouseOverBuildingPanel(eventData.position))
+            // Check if dropped within the bounds of the IDT Intake Port
+            if (BuildingUiManager.Instance.IsMouseOverIntakeZone(eventData.position))
             {
                 BuildingUiManager.Instance.HandleResourceDropped(resourceType);
             }
