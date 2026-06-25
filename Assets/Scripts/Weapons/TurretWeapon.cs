@@ -9,8 +9,11 @@ public class TurretWeapon : BaseWeapon
     protected override void Update()
     {
         base.Update();
+
+        TurretLogic turret = GetComponentInParent<TurretLogic>();
+        bool hasAmmo = turret == null || turret.isEnemyOwned || turret.ammoRemaining > 0;
         
-        if (hasTarget && canFire && roundsLeft > 0)
+        if (hasTarget && canFire && roundsLeft > 0 && hasAmmo)
         {
             // Rotate towards target
             Vector2 direction = target - (Vector2)transform.position;
@@ -22,6 +25,18 @@ public class TurretWeapon : BaseWeapon
 
             Shoot();
         }
+    }
+
+    protected override void SpawnBullet()
+    {
+        TurretLogic turret = GetComponentInParent<TurretLogic>();
+        if (turret != null && !turret.isEnemyOwned)
+        {
+            if (turret.ammoRemaining <= 0) return;
+            turret.ammoRemaining = Mathf.Max(0, turret.ammoRemaining - 1);
+        }
+
+        base.SpawnBullet();
     }
 
     public void SetupWeapon(GameObject projectilePrefab, float defaultFireRate = 1f, int defaultDamage = 10, float defaultSpeed = 10f, int defaultBulletsFired = 1, float defaultSpread = 0f, WeaponType defaultWeaponType = WeaponType.Automatic)

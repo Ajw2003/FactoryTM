@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Furnace : BuildingLogic
 {
+    [Header("Fuel Settings")]
+    public float fuelRemaining = 30f;
+    public float maxFuel = 100f;
+
     private Vector2Int exportDirection;
     private int rotationIndex;
     private float timer;
@@ -41,8 +45,24 @@ public class Furnace : BuildingLogic
     private ResourceType lastProcessedResourceType = (ResourceType)(-1);
     private HashSet<ConveyorItem> itemsInProcess = new HashSet<ConveyorItem>();
 
+    private void Update()
+    {
+        if (PauseManager.IsPaused) return;
+
+        if (!isEnemyOwned)
+        {
+            if (fuelRemaining > 0f)
+            {
+                fuelRemaining -= Time.deltaTime;
+                if (fuelRemaining < 0f) fuelRemaining = 0f;
+            }
+        }
+    }
+
     public override void PerformAction()
     {
+        if (!isEnemyOwned && fuelRemaining <= 0f) return;
+
         foreach (var occupiedCell in occupiedCells)
         {
             List<ConveyorItem> items = ItemTracker.Instance.GetItemsInCell(occupiedCell);
@@ -63,7 +83,25 @@ public class Furnace : BuildingLogic
     public IEnumerator ProccessItem(ConveyorItem item)
     {
         itemsInProcess.Add(item);
-        yield return new WaitForSeconds(currentCookingSpeed);
+        
+        float cookTimer = 0f;
+        while (cookTimer < currentCookingSpeed)
+        {
+            if (PauseManager.IsPaused)
+            {
+                yield return null;
+                continue;
+            }
+
+            if (!isEnemyOwned && fuelRemaining <= 0f)
+            {
+                yield return null;
+                continue;
+            }
+
+            cookTimer += Time.deltaTime;
+            yield return null;
+        }
         
         if (item == null)
         {

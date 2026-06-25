@@ -3,6 +3,10 @@ using UnityEngine;
 
 public class TurretLogic : BuildingLogic
 {
+    [Header("Ammo Settings")]
+    public int ammoRemaining = 30;
+    public int maxAmmo = 120;
+
     public float targetRange = 10f;
     [SerializeField] private TurretWeapon turretWeapon;
 

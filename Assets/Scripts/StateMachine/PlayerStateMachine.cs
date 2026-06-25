@@ -14,6 +14,7 @@ namespace StateMachine
         public PlayerDeadState deadState;
         public PlayerStoreState storeState;
         public PlayerDodgeState dodgeState;
+        public PlayerBuildingUiState buildingUiState;
 
 
         // event to notify other objects of the state change
@@ -29,6 +30,7 @@ namespace StateMachine
             this.idleState = new PlayerIdleState(player);
             this.storeState = new PlayerStoreState(player);
             this.dodgeState = new PlayerDodgeState(player);
+            this.buildingUiState = new PlayerBuildingUiState(player);
         }
 
 

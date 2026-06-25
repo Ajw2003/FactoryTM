@@ -74,6 +74,7 @@ public class GameManager : SingletonBase<GameManager>
         _ = UpgradeUi.Instance;
         _ = Managers.GameStatsManager.Instance;
         _ = PauseManager.Instance;
+        _ = BuildingUiManager.Instance;
     }
 
     void Start()

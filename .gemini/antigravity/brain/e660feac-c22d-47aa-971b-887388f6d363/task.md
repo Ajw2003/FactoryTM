@@ -1,0 +1,10 @@
+- [x] Create `PlayerBuildingUiState.cs` state class
+- [x] Register the new state in `PlayerStateMachine.cs`
+- [x] Add fuel mechanics to `MinerLogic` in `Miner.cs`
+- [x] Add fuel mechanics to `Furnace` in `Furnace.cs`
+- [x] Add ammo mechanics to `TurretLogic` in `TurretLogic.cs`
+- [x] Add ammo checks and decrementing to `TurretWeapon` in `TurretWeapon.cs`
+- [x] Create the central `BuildingUiManager.cs` to handle Jade HUD, building panels, discovered ores, player resource inventory, and manual interactions
+- [x] Intercept player E key in `PlayerController.cs`'s `OnOpenStoreInput()` method
+- [x] Update `TutorialManager.cs` to remove dialogues, add objective HUD panel, and link conditions to the new inventory/building states
+- [x] Verify everything compiles and test gameplay

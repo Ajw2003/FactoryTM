@@ -129,6 +129,60 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private void OnOpenStoreInput()
     {
+        if (BuildingUiManager.Instance != null)
+        {
+            if (BuildingUiManager.Instance.IsPanelOpen)
+            {
+                BuildingUiManager.Instance.ClosePanel();
+                return;
+            }
+
+            if (BuildingUiManager.Instance.HoveredInteractable != null)
+            {
+                BuildingUiManager.Instance.InteractWithHovered();
+                return;
+            }
+
+            if (BuildingUiManager.Instance.HoveredItem != null)
+            {
+                var item = BuildingUiManager.Instance.HoveredItem;
+                ResourceType rType = item.resourceType;
+                BuildingUiManager.Instance.AddResource(rType, 1);
+
+                GameObject textObj = new GameObject("PickupNumber");
+                FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
+                floatText.Initialize("+1 " + rType.ToString().ToUpper(), new Color(0.2f, 1f, 0.2f), item.transform.position + new Vector3(0, 0.5f, 0));
+
+                Destroy(item.gameObject);
+                return;
+            }
+
+            if (BuildingUiManager.Instance.HoveredNode != null)
+            {
+                var node = BuildingUiManager.Instance.HoveredNode;
+                ResourceType rType = ResourceType.Coal;
+                if (node.minedItemPrefab != null)
+                {
+                    ConveyorItem citem = node.minedItemPrefab.GetComponent<ConveyorItem>();
+                    if (citem != null) rType = citem.resourceType;
+                }
+
+                if (GameManager.Instance != null && GameManager.Instance.finiteOres)
+                {
+                    node.oreCount--;
+                }
+
+                BuildingUiManager.Instance.AddResource(rType, 1);
+
+                Vector3 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                pos.z = 0;
+                GameObject textObj = new GameObject("MineNumber");
+                FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
+                floatText.Initialize("+1 " + rType.ToString().ToUpper(), new Color(0.2f, 1f, 0.2f), pos + new Vector3(0, 0.5f, 0));
+                return;
+            }
+        }
+
         if (TutorialManager.HasInstance && TutorialManager.Instance.IsStoreLocked())
         {
             if (UiManager.HasInstance)

@@ -5,6 +5,10 @@ using UnityEngine.Tilemaps;
 
 public class MinerLogic : BuildingLogic
 {
+    [Header("Fuel Settings")]
+    public float fuelRemaining = 30f;
+    public float maxFuel = 100f;
+
     private Vector2Int exportDirection;
     private int rotationIndex;
     private float timer;
@@ -75,11 +79,29 @@ public class MinerLogic : BuildingLogic
     {
         if (!enabled) return; // Ensure miner is enabled
 
-        timer -= Time.deltaTime;
-        if (timer <= 0)
+        if (!isEnemyOwned)
         {
-            SpawnItem();
-            timer = currentMiningSpeed; // Reset timer with the node's speed
+            if (fuelRemaining > 0f)
+            {
+                fuelRemaining -= Time.deltaTime;
+                if (fuelRemaining < 0f) fuelRemaining = 0f;
+
+                timer -= Time.deltaTime;
+                if (timer <= 0)
+                {
+                    SpawnItem();
+                    timer = currentMiningSpeed; // Reset timer with the node's speed
+                }
+            }
+        }
+        else
+        {
+            timer -= Time.deltaTime;
+            if (timer <= 0)
+            {
+                SpawnItem();
+                timer = currentMiningSpeed;
+            }
         }
     }
 
@@ -136,6 +158,10 @@ public class MinerLogic : BuildingLogic
         }
 
         ConveyorItem itemComp = newItem.GetComponent<ConveyorItem>();
+        if (itemComp != null && !isEnemyOwned && BuildingUiManager.Instance != null)
+        {
+            BuildingUiManager.Instance.DiscoverResource(itemComp.resourceType);
+        }
         if (itemComp != null)
         {
             itemComp.Initialize(targetCell);
