@@ -1,8 +1,4 @@
 
-Replace sellers with The IDT central to your operation and must be protected, not only does it process all resources but it is also your transport off world, without it you don't go home.
-
-fix being able to dodge roll through walls and turrets? might leave idk
-
 Balance prices, ore yeilds, ore sale value, enemy spawns, day lengths and damage for and from player
 
 add logic to change length of days based on certain factors such as money earned, upgrades purchased, days survived ect.
@@ -19,21 +15,11 @@ add section of tutorial for purchasing ammo and purchasing and using health pack
 
 need reason to progress, something to work towards /  a driving force and motivation for your actions
 
-fix not being able to destroy all enemy buildings and make
-
 add difficulty settings 
-
-add end goal 
 
 add achievements 
 
 lower curve to enemy spawn rates in begining, more time between rounds.
-
-make tutorial for walls and turrets
-
-figure out best way to introduce walls and turrets, either through progression or the upgrade system.
-
-Have mile stones to reach, unlocks to gain, and unique ways to progress depending on your play style.
 
 Unique play styles you want to play like a full rogue like, buy weapon and player upgrades and scale into the amount of money earned by killing and looting. you play it like a factory sim where you defend your outpost and maxamize your profit expanding outward and growing your opperation, or any mix of the two.
 
@@ -47,6 +33,28 @@ do minecraft hotbar scroll to view name of item
 better shooting tutorial/ introduction 
 
 enemy wandering and differentiation between raiders and spawned enemies in structures
+
+remove starting items logic in favour of better tutorial logic
+
+add ui to sell other resources in the dct manually 
+
+remove starting weapon from player, and ensure weapon script will not do anything without the weapon stats reference and won't break without one either.
+
+Make starting store menu contain only weapons, ammo and health and then remove all weapons after player has chosen weapon and revert store to previous default state
+
+Fix order of operations for tutorial, land, walk next to and press E to open DCT, objective find and mine coal hover with mouse and press e to mine, 
+walk right near the DCT, press e to open ui and input coal into dct,
+Now that the dct can run mine any other resource and input into machine to sell it, 
+do this until you make 50 dollars then walk away and open store menu
+purchase your first weapon, the others will then lock and removed from the store until unlocked.
+Then navigate the menu and purchase ammo as well as health packs.
+find and destroy an enemy outpost, destroy all buildings to progress.
+Now open store menu and purchase a miner and 10 conveyors
+Select the miner with your scroll or the number keys, rotate to face the output towards the IDT and place on ore node.
+Place conveyors connecting the miner to the IDT and start earning automatically.
+Earn and expand until night and then Finally prepare to defend against your first raid.
+
+
 
 
 Test finite resources removing resource nodes when depleted, you send the items back home through interdimensional transport which you can only have 1 of as they are so expensive to produce, if you die or your interdimensional transport is 

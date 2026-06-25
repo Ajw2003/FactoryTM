@@ -38,6 +38,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
 
     [Header("State")]
     private BuildingLogic currentOpenBuilding;
+    public BuildingLogic CurrentOpenBuilding => currentOpenBuilding;
     private Canvas HUDCanvas;
 
     public bool IsPanelOpen => buildingPanel != null && buildingPanel.activeSelf;
@@ -491,25 +492,64 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
                 }
             });
 
-            // Fuel with Uranium
-            actionButton2Text.text = "INSERT URANIUM (+60s)";
-            actionButton2.interactable = GetResourceCount(ResourceType.Uranium) > 0;
-            actionButton2.onClick.AddListener(() => {
-                if (RemoveResource(ResourceType.Uranium, 1))
-                {
-                    seller.fuelRemaining = Mathf.Min(seller.maxFuel, seller.fuelRemaining + 60f);
-                    seller.isUraniumBoosted = true;
-                    seller.uraniumBoostDuration = 30f;
-                    if (UiManager.HasInstance) UiManager.Instance.ShowGeneralAlert("REACTOR BOOSTED: URANIUM (+60s)", new Color(0.3f, 1f, 1f));
-                    
-                    if (TutorialManager.HasInstance)
+            // Sell carried ores OR insert Uranium
+            int copperCount = GetResourceCount(ResourceType.Copper);
+            int ironCount = GetResourceCount(ResourceType.Iron);
+            int stonCount = GetResourceCount(ResourceType.Ston);
+            int diamondCount = GetResourceCount(ResourceType.Diamond);
+            int titaniumCount = GetResourceCount(ResourceType.Titanium);
+            int quartzCount = GetResourceCount(ResourceType.Quartz);
+            int totalOres = copperCount + ironCount + stonCount + diamondCount + titaniumCount + quartzCount;
+
+            if (GetResourceCount(ResourceType.Uranium) > 0)
+            {
+                actionButton2Text.text = "INSERT URANIUM (+60s)";
+                actionButton2.interactable = true;
+                actionButton2.onClick.AddListener(() => {
+                    if (RemoveResource(ResourceType.Uranium, 1))
                     {
-                        var method = typeof(TutorialManager).GetMethod("HandleFuelAdded", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                        if (method != null) method.Invoke(TutorialManager.Instance, new object[] { ResourceType.Uranium });
+                        seller.fuelRemaining = Mathf.Min(seller.maxFuel, seller.fuelRemaining + 60f);
+                        seller.isUraniumBoosted = true;
+                        seller.uraniumBoostDuration = 30f;
+                        if (UiManager.HasInstance) UiManager.Instance.ShowGeneralAlert("REACTOR BOOSTED: URANIUM (+60s)", new Color(0.3f, 1f, 1f));
+                        
+                        if (TutorialManager.HasInstance)
+                        {
+                            var method = typeof(TutorialManager).GetMethod("HandleFuelAdded", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                            if (method != null) method.Invoke(TutorialManager.Instance, new object[] { ResourceType.Uranium });
+                        }
+                        RefreshBuildingPanel();
                     }
-                    RefreshBuildingPanel();
-                }
-            });
+                });
+            }
+            else
+            {
+                // Calculate total earnings based on ore values
+                float estimatedEarnings = stonCount * 5f + copperCount * 10f + ironCount * 15f + quartzCount * 20f + titaniumCount * 30f + diamondCount * 50f;
+                float multiplier = seller.isUraniumBoosted ? 2f : 1f;
+                float finalEarnings = estimatedEarnings * multiplier;
+
+                actionButton2Text.text = totalOres > 0 ? $"SELL CARRIED ORES (+${finalEarnings:F0})" : "SELL CARRIED ORES";
+                actionButton2.interactable = totalOres > 0 && seller.fuelRemaining > 0f;
+                actionButton2.onClick.AddListener(() => {
+                    if (totalOres > 0)
+                    {
+                        RemoveResource(ResourceType.Copper, copperCount);
+                        RemoveResource(ResourceType.Iron, ironCount);
+                        RemoveResource(ResourceType.Ston, stonCount);
+                        RemoveResource(ResourceType.Diamond, diamondCount);
+                        RemoveResource(ResourceType.Titanium, titaniumCount);
+                        RemoveResource(ResourceType.Quartz, quartzCount);
+
+                        CurrencyManager.Instance.AddCurrency(finalEarnings);
+                        if (UiManager.HasInstance)
+                        {
+                            UiManager.Instance.ShowGeneralAlert($"ORES SOLD: +${finalEarnings:F0}", new Color(0.2f, 1f, 0.2f));
+                        }
+                        RefreshBuildingPanel();
+                    }
+                });
+            }
         }
         // 2. Miner UI
         else if (currentOpenBuilding is MinerLogic miner)
