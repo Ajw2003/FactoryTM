@@ -51,6 +51,13 @@ public class PlayerWeapon : BaseWeapon
 
         if (PlayerController.Instance == null || PlayerController.Instance.currentMode != PlayerController.PlayerMode.Combat) return;
 
+        if (PlayerController.Instance.StateMachine.CurrentState == PlayerController.Instance.StateMachine.storeState ||
+            PlayerController.Instance.StateMachine.CurrentState == PlayerController.Instance.StateMachine.buildingUiState ||
+            PlayerController.Instance.StateMachine.CurrentState == PlayerController.Instance.StateMachine.deadState)
+        {
+            return;
+        }
+
         if (cam == null) cam = Camera.main;
         if (cam != null)
         {

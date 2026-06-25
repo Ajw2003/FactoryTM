@@ -129,14 +129,30 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private void OnOpenStoreInput()
     {
-        if (BuildingUiManager.Instance != null)
+        if (StateMachine.CurrentState == StateMachine.deadState) return;
+
+        if (StateMachine.CurrentState == StateMachine.storeState)
         {
-            if (BuildingUiManager.Instance.IsPanelOpen)
+            StateMachine.TransitionTo(StateMachine.idleState);
+            return;
+        }
+
+        if (StateMachine.CurrentState == StateMachine.buildingUiState)
+        {
+            if (BuildingUiManager.Instance != null && BuildingUiManager.Instance.IsPanelOpen)
             {
                 BuildingUiManager.Instance.ClosePanel();
-                return;
             }
+            return;
+        }
 
+        if (StateMachine.CurrentState != StateMachine.idleState && StateMachine.CurrentState != StateMachine.walkState)
+        {
+            return;
+        }
+
+        if (BuildingUiManager.Instance != null)
+        {
             // Find nearest interactable building within 2 tiles
             BuildingLogic nearest = FindNearestBuildingToPlayer(2f);
             if (nearest != null)
@@ -194,14 +210,7 @@ public class PlayerController : MonoBehaviour, IHealth
             return;
         }
 
-        if (StateMachine.CurrentState == StateMachine.idleState || StateMachine.CurrentState == StateMachine.walkState)
-        {
-            StateMachine.TransitionTo(StateMachine.storeState);
-        }
-        else if (StateMachine.CurrentState == StateMachine.storeState)
-        {
-            StateMachine.TransitionTo(StateMachine.idleState);
-        }
+        StateMachine.TransitionTo(StateMachine.storeState);
     }
 
     public BuildingLogic FindNearestBuildingToPlayer(float maxDistanceInTiles)
@@ -250,7 +259,7 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab) && StateMachine.CurrentState != StateMachine.storeState && StateMachine.CurrentState != StateMachine.deadState)
+        if (Input.GetKeyDown(KeyCode.Tab) && StateMachine.CurrentState != StateMachine.storeState && StateMachine.CurrentState != StateMachine.deadState && StateMachine.CurrentState != StateMachine.buildingUiState)
         {
             ToggleGameMode();
         }
@@ -263,7 +272,7 @@ public class PlayerController : MonoBehaviour, IHealth
         }
 
         // Rotate towards aim target
-        if (StateMachine.CurrentState != StateMachine.deadState && StateMachine.CurrentState != StateMachine.storeState)
+        if (StateMachine.CurrentState != StateMachine.deadState && StateMachine.CurrentState != StateMachine.storeState && StateMachine.CurrentState != StateMachine.buildingUiState)
         {
             if (weapon == null) weapon = GetComponentInChildren<PlayerWeapon>();
             if (weapon != null)

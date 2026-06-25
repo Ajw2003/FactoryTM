@@ -15,7 +15,7 @@ public static class UpgradeAssetGenerator
         // Base upgrades
         CreateUpgrade("armor_mk1", "Heavy Plating Mk1", "Increases damage reduction by 15% and grants +2 Max HP.", UpgradeType.Armor, 80f, true, false, 0.15f, 2);
         CreateUpgrade("armor_mk2", "Titanium Plating Mk2", "Increases damage reduction by 25% and grants +4 Max HP.", UpgradeType.Armor, 160f, true, false, 0.25f, 4);
-        CreateUpgrade("health_pack_upgrade", "Emergency Medkits", "Receive 2 emergency medkits immediately. Allows buying medkits in the shop. Press TAB to heal.", UpgradeType.HealthPack, 30f, true, false, 0, 0);
+        CreateUpgrade("health_pack_upgrade", "Emergency Medkits", "Receive 2 emergency medkits immediately. Allows buying medkits in the shop. Press H to heal.", UpgradeType.HealthPack, 30f, true, false, 0, 0);
         CreateUpgrade("ammo_upgrade", "Ammo Reserves", "Receive 90 spare rounds immediately. Allows purchasing ammo packs (30 rounds) in the shop.", UpgradeType.Ammo, 15f, true, false, 0, 0);
         CreateUpgrade("tax_loophole", "Taxloophole", "Exploit financial technicalities to increase every dollar earned by +25%. (Stackable)", UpgradeType.IncomeBoost, 120f, false, false, 0, 0);
         CreateUpgrade("border_patrol", "BorderPatrol", "Bolster off-screen security to reduce the number of enemies spawned per wave by 2.", UpgradeType.RaidReduction, 150f, false, false, 0, 0);
