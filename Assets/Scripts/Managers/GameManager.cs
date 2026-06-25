@@ -298,6 +298,97 @@ public class GameManager : SingletonBase<GameManager>
         BoundsInt bounds = MainTileMap.cellBounds;
         HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>(); // Keep track of cells where nodes are spawned
 
+        // Find IDT building data and center cell
+        BuildingData idtData = null;
+        if (allBuildings != null)
+        {
+            foreach (var b in allBuildings)
+            {
+                if (b != null && b.type == BuildingType.Seller)
+                {
+                    idtData = b;
+                    break;
+                }
+            }
+        }
+
+        Vector2Int centerCell = Vector2Int.zero;
+        if (ZoneManager.Instance != null)
+        {
+            Vector2Int zoneSize = ZoneManager.Instance.zoneSizeInTiles;
+            centerCell = new Vector2Int(zoneSize.x / 2, zoneSize.y / 2);
+        }
+        else if (GridManager.Instance != null)
+        {
+            centerCell = GridManager.Instance.center;
+        }
+
+        // Protect IDT cells so nodes don't spawn under/on the IDT
+        if (idtData != null)
+        {
+            Vector2Int idtSize = idtData.size;
+            for (int dx = 0; dx < idtSize.x; dx++)
+            {
+                for (int dy = 0; dy < idtSize.y; dy++)
+                {
+                    occupiedCells.Add(centerCell + new Vector2Int(dx, dy));
+                }
+            }
+        }
+
+        // Find Coal definition
+        ResourceNodeDefinition coalDefinition = null;
+        if (resourceNodeDefinitions != null)
+        {
+            foreach (var def in resourceNodeDefinitions)
+            {
+                if (def != null)
+                {
+                    if (def.minedItemPrefab != null && def.minedItemPrefab.name.ToLower().Contains("coal"))
+                    {
+                        coalDefinition = def;
+                        break;
+                    }
+                    if (def.resourceNodePrefab != null && def.resourceNodePrefab.name.ToLower().Contains("coal"))
+                    {
+                        coalDefinition = def;
+                        break;
+                    }
+                }
+            }
+            if (coalDefinition == null && resourceNodeDefinitions.Length > 0)
+            {
+                coalDefinition = resourceNodeDefinitions[0];
+            }
+        }
+
+        // Spawn a guaranteed Coal deposit near IDT
+        if (coalDefinition != null)
+        {
+            Vector2Int coalStartCell = centerCell + new Vector2Int(-5, 0);
+            
+            // Validate starting tile exists on the MainTileMap, otherwise search nearby
+            if (!MainTileMap.HasTile(new Vector3Int(coalStartCell.x, coalStartCell.y, 0)))
+            {
+                Vector2Int[] fallbacks = {
+                    new Vector2Int(-4, 0), new Vector2Int(-5, 1), new Vector2Int(-5, -1),
+                    new Vector2Int(-6, 0), new Vector2Int(-3, 0)
+                };
+                foreach (var offset in fallbacks)
+                {
+                    Vector2Int potential = centerCell + offset;
+                    if (MainTileMap.HasTile(new Vector3Int(potential.x, potential.y, 0)))
+                    {
+                        coalStartCell = potential;
+                        break;
+                    }
+                }
+            }
+
+            SpawnPatch(coalStartCell, 5, coalDefinition, occupiedCells);
+            Debug.Log($"GameManager: Spawned guaranteed Coal starting patch at {coalStartCell}");
+        }
+
         for (int x = bounds.xMin; x < bounds.xMax; x++)
         {
             for (int y = bounds.yMin; y < bounds.yMax; y++)
