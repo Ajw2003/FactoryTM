@@ -77,6 +77,14 @@ namespace Buildings
         public int maxHealth = 100;
         public Vector2Int size = new Vector2Int(1, 1);
 
+        [Header("Combat & Spawner Settings")]
+        public int damage = 10;
+        public float bulletSpeed = 15f;
+        public int spawnLimit = 5;
+        public float spawnCooldown = 8f;
+        public int maxConcurrentEnemies = 3;
+        public float activationRange = 9f;
+
         [Header("Unlock Requirements")]
         public List<BuildingUnlockCondition> unlockConditions = new List<BuildingUnlockCondition>();
 

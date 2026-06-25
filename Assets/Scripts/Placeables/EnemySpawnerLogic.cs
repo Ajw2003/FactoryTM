@@ -19,6 +19,14 @@ public class EnemySpawnerLogic : BuildingLogic
         base.Setup(buildingData, cell);
         Health = data.maxHealth;
 
+        if (data != null)
+        {
+            spawnLimit = data.spawnLimit;
+            spawnCooldown = data.spawnCooldown;
+            maxConcurrentEnemies = data.maxConcurrentEnemies;
+            activationRange = data.activationRange;
+        }
+
         if (enemyPrefab == null)
         {
             enemyPrefab = Resources.Load<GameObject>("prefabs/Npcs/Enemy");
