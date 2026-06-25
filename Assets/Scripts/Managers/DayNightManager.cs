@@ -225,9 +225,9 @@ public class DayNightManager : SingletonBase<DayNightManager>
         if (timerText != null)
         {
             timerText.text = text;
-            currentTime -= Time.deltaTime;
-            currentTime = Math.Clamp(currentTime, 0.1f, dayDuration);
-            sun.intensity = timeRemaining / dayDuration;
+            // currentTime -= Time.deltaTime;
+            // currentTime = Math.Clamp(currentTime, 0.1f, dayDuration);
+            // sun.intensity = timeRemaining / dayDuration;
             
             if (color.HasValue)
             {
