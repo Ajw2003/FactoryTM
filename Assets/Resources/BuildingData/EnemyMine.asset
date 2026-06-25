@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0ca08527901b87418cef1a12919f7ec, type: 3}
+  m_Name: EnemyMine
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingData
+  buildingName: Enemy Miner
+  icon: {fileID: -798344355, guid: 31a78c5981fef90459292a25990a5c4d, type: 3}
+  description: Enemy outpost miner structure
+  rotatedTiles:
+  - {fileID: 11400000, guid: c733c83259c712446989513f5046b76a, type: 2}
+  - {fileID: 11400000, guid: 6e64391efd319d5489b8716c9299a202, type: 2}
+  - {fileID: 11400000, guid: 62f992754ed98f84097a13408f14d469, type: 2}
+  - {fileID: 11400000, guid: e1dfe3a20d102f84e8eefd5dc1946a82, type: 2}
+  proccessingSpeed: 2
+  itemPrefab: {fileID: 4074567141104984735, guid: 7157ec4533272cb4ba1b48e75510c14e, type: 3}
+  cost: 10
+  type: 1
+  maxHealth: 100
+  size: {x: 2, y: 2}
+  unlockConditions: []

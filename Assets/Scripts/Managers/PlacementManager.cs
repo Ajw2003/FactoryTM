@@ -231,8 +231,18 @@ public class PlacementManager : SingletonBase<PlacementManager>
             {
                 if (returnToInventory && logic.data != null)
                 {
+                    Buildings.BuildingData buildingToGive = logic.data;
+                    if (logic.data.name != null && logic.data.name.StartsWith("Enemy"))
+                    {
+                        string standardName = logic.data.name.Substring("Enemy".Length);
+                        Buildings.BuildingData standardData = Resources.Load<Buildings.BuildingData>("BuildingData/" + standardName);
+                        if (standardData != null)
+                        {
+                            buildingToGive = standardData;
+                        }
+                    }
                     // Task 1: Return to Inventory instead of refunding currency
-                    InventoryManager.Instance.AddBuilding(logic.data);
+                    InventoryManager.Instance.AddBuilding(buildingToGive);
                 }
 
                 // Clear all occupied tiles
