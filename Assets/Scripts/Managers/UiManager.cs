@@ -4,6 +4,7 @@ using Singleton;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 public class UiManager : SingletonBase<UiManager>
 {
@@ -21,7 +22,10 @@ public class UiManager : SingletonBase<UiManager>
    [SerializeField] private TMP_Text healthText;
    [SerializeField] private TMP_Text staminaText;
    [SerializeField] private GameObject heartObject;
-   [SerializeField] private GameObject playerStatsUi;
+   [SerializeField] private GameObject playerHeartsContainer;
+   [SerializeField] private GameObject playerStatsPanel;
+   
+   public GameObject PlayerStatsPanel => playerStatsPanel;
 
    public GameObject[] Hearts;
    
@@ -65,7 +69,7 @@ public class UiManager : SingletonBase<UiManager>
       // Create stamina UI dynamically if not found
       if (healthText != null)
       {
-         staminaGo = Instantiate(healthText.gameObject, playerStatsUi.transform.parent);
+         staminaGo = Instantiate(healthText.gameObject, PlayerStatsPanel.transform.parent);
          staminaGo.name = "StaminaText";
          staminaText = staminaGo.GetComponent<TMP_Text>();
          staminaContainer = staminaGo;
@@ -95,7 +99,7 @@ public class UiManager : SingletonBase<UiManager>
          Array.Resize(ref Hearts, maxHp);
          for (int i = oldLength; i < maxHp; i++)
          {
-            Hearts[i] = Instantiate(heartObject, playerStatsUi.transform);
+            Hearts[i] = Instantiate(heartObject, playerHeartsContainer.transform);
             Hearts[i].transform.localScale = new Vector3(150, 150, 0);
          }
       }
@@ -418,12 +422,18 @@ public class UiManager : SingletonBase<UiManager>
       t.localScale = originalScale;
    }
 
-   private void SpawnCurrencyFloatingText(string text, Color color)
-   {
-      if (currentCurrency == null) return;
-      
-      GameObject go = new GameObject("FloatingCurrencyChange", typeof(RectTransform), typeof(TextMeshProUGUI));
-      go.transform.SetParent(currentCurrency.transform.parent, false);
+    private void SpawnCurrencyFloatingText(string text, Color color)
+    {
+       if (currentCurrency == null) return;
+       
+       GameObject go = new GameObject("FloatingCurrencyChange", typeof(RectTransform), typeof(TextMeshProUGUI), typeof(UnityEngine.UI.LayoutElement));
+       go.transform.SetParent(currentCurrency.transform.parent, false);
+
+       UnityEngine.UI.LayoutElement layout = go.GetComponent<UnityEngine.UI.LayoutElement>();
+       if (layout != null)
+       {
+           layout.ignoreLayout = true;
+       }
       
       RectTransform rt = go.GetComponent<RectTransform>();
       RectTransform currencyRt = currentCurrency.GetComponent<RectTransform>();

@@ -13,7 +13,12 @@ MonoBehaviour:
   m_Name: BuyFirstWeapon
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSO
   dialogues:
-  - text: "- Move away from buildings & Press [E] to open Store\n- Purchase your first Weapon Upgrade"
+  - text: '- Move away from buildings & Press [E] to open Store
+
+      -Navigate
+      to page 4
+
+      - Purchase your first Weapon Upgrade'
     sprite: {fileID: 0}
     color: {r: 0, g: 0, b: 0, a: 0}
     type: 0

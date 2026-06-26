@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: DestroyEnemyOutpost
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSO
   dialogues:
-  - text: "- Travel North-East to locate the human outpost\n- Destroy all outpost structures ({0} remaining)"
+  - text: '- Travel North-East to locate the human outpost
+
+      - Destroy all outpost
+      structures ({0} remaining)'
     sprite: {fileID: 0}
     color: {r: 0, g: 0, b: 0, a: 0}
     type: 0
