@@ -2,36 +2,68 @@ using Singleton;
 using UnityEngine;
 using TMPro;
 
-public enum TextCase { Normal, Uppercase, Lowercase }
-
-[CreateAssetMenu(fileName = "NewFloatingTextSettings", menuName = "UI/Floating Text Settings")]
-public class FloatingTextSettings : ScriptableObject
-{
-    [Header("Appearance")]
-    public Color textColor = Color.white;
-    public float fontSize = 5f;
-    public TMP_FontAsset font;
-    public FontStyles fontStyle = FontStyles.Normal;
-    public TextCase textCase = TextCase.Normal;
-
-    [Header("Behavior")]
-    public Vector3 spawnOffset = new Vector3(0, 1f, 0);
-    public float floatSpeed = 2f;
-    public float fadeDuration = 1.5f;
-}
-
-[RequireComponent(typeof(TextMeshPro))]
 public class FloatingText : MonoBehaviour
 {
-    private TextMeshPro textMesh;
+    private TMP_Text textMesh;
+    private bool isCanvasUI;
+    private RectTransform rectTransform;
+    private Vector2 startAnchoredPosition;
+    private float floatDistanceY;
+    private float fadeStartNormalized;
+    private bool usePingPongColor;
+    private Color initialColor;
+    private Color pingPongColorEnd;
+    private float pingPongSpeed;
     private float floatSpeed;
     private float fadeDuration;
-    private float fadeTimer;
-    private Color initialColor;
+    private float elapsed;
 
-    public void Setup(string textContent, FloatingTextSettings settings, Vector3 position)
+    public void Setup(string textContent, FloatingTextSettings settings, Vector3 position, Color? colorOverride = null)
     {
-        textMesh = GetComponent<TextMeshPro>();
+        isCanvasUI = settings.isCanvasUI;
+        floatDistanceY = settings.floatDistanceY;
+        fadeStartNormalized = settings.fadeStartNormalized;
+        usePingPongColor = settings.usePingPongColor;
+        pingPongColorEnd = settings.pingPongColorEnd;
+        pingPongSpeed = settings.pingPongSpeed;
+        floatSpeed = settings.floatSpeed;
+        fadeDuration = settings.fadeDuration;
+        initialColor = colorOverride ?? settings.textColor;
+        elapsed = 0f;
+
+        if (isCanvasUI)
+        {
+            textMesh = GetComponent<TextMeshProUGUI>();
+            if (textMesh == null) textMesh = gameObject.AddComponent<TextMeshProUGUI>();
+            rectTransform = GetComponent<RectTransform>();
+            if (rectTransform == null) rectTransform = gameObject.AddComponent<RectTransform>();
+
+            rectTransform.anchorMin = settings.anchorMin;
+            rectTransform.anchorMax = settings.anchorMax;
+            rectTransform.pivot = settings.pivot;
+            rectTransform.anchoredPosition = settings.anchoredPosition;
+            startAnchoredPosition = settings.anchoredPosition;
+        }
+        else
+        {
+            textMesh = GetComponent<TextMeshPro>();
+            if (textMesh == null) textMesh = gameObject.AddComponent<TextMeshPro>();
+            rectTransform = GetComponent<RectTransform>();
+            if (rectTransform != null)
+            {
+                rectTransform.sizeDelta = new Vector2(5, 2); // Default size to prevent wrapping issues
+            }
+
+            transform.position = position + settings.spawnOffset;
+
+            // Render on top of 2D sprites
+            MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
+            if (meshRenderer != null)
+            {
+                meshRenderer.sortingLayerName = "UI";
+                meshRenderer.sortingOrder = 100;
+            }
+        }
 
         // Apply Text Case
         switch (settings.textCase)
@@ -40,44 +72,50 @@ public class FloatingText : MonoBehaviour
             case TextCase.Lowercase: textContent = textContent.ToLower(); break;
         }
 
-        // Apply Appearance
         textMesh.text = textContent;
-        textMesh.color = settings.textColor;
+        textMesh.color = initialColor;
         textMesh.fontSize = settings.fontSize;
         if (settings.font != null) textMesh.font = settings.font;
         textMesh.fontStyle = settings.fontStyle;
-
-        // Apply Behavior Data
-        transform.position = position + settings.spawnOffset;
-        floatSpeed = settings.floatSpeed;
-        fadeDuration = settings.fadeDuration;
-        
-        initialColor = settings.textColor;
-        fadeTimer = fadeDuration;
-
-        // Render on top of 2D sprites
-        MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
-        if (meshRenderer != null)
-        {
-            meshRenderer.sortingLayerName = "UI";
-            meshRenderer.sortingOrder = 100;
-        }
+        textMesh.alignment = TextAlignmentOptions.Center;
     }
 
     void Update()
     {
-        // Move the text upwards
-        transform.position += Vector3.up * floatSpeed * Time.deltaTime;
+        elapsed += Time.unscaledDeltaTime;
+        float t = Mathf.Clamp01(elapsed / fadeDuration);
 
-        // Calculate fade
-        fadeTimer -= Time.deltaTime;
-        float alpha = Mathf.Clamp01(fadeTimer / fadeDuration);
-        
-        // Apply fading alpha
-        textMesh.color = new Color(initialColor.r, initialColor.g, initialColor.b, alpha);
+        // Ping-pong color
+        if (usePingPongColor)
+        {
+            float pingPong = Mathf.PingPong(elapsed * pingPongSpeed, 1f);
+            textMesh.color = Color.Lerp(initialColor, pingPongColorEnd, pingPong);
+        }
 
-        // Delete when invisible
-        if (fadeTimer <= 0)
+        // Calculate fading alpha
+        float alpha = 1f;
+        if (t > fadeStartNormalized)
+        {
+            float fadeProgress = (t - fadeStartNormalized) / (1f - fadeStartNormalized);
+            alpha = Mathf.Lerp(1f, 0f, fadeProgress);
+        }
+
+        Color curColor = textMesh.color;
+        textMesh.color = new Color(curColor.r, curColor.g, curColor.b, alpha);
+
+        if (isCanvasUI)
+        {
+            // Move on canvas using anchoredPosition
+            rectTransform.anchoredPosition = startAnchoredPosition + new Vector2(0f, Mathf.Lerp(0f, floatDistanceY, t));
+        }
+        else
+        {
+            // Move in 3D world space
+            transform.position += Vector3.up * floatSpeed * Time.unscaledDeltaTime;
+        }
+
+        // Self-destruction
+        if (elapsed >= fadeDuration)
         {
             Destroy(gameObject);
         }
@@ -86,7 +124,7 @@ public class FloatingText : MonoBehaviour
 
 public class FloatingTextManager : SingletonBase<FloatingTextManager>
 {
-    public void Spawn(string text, Vector3 spawnPosition, FloatingTextSettings settings)
+    public void Spawn(string text, Vector3 spawnPosition, FloatingTextSettings settings, Color? colorOverride = null)
     {
         if (settings == null)
         {
@@ -94,26 +132,33 @@ public class FloatingTextManager : SingletonBase<FloatingTextManager>
             return;
         }
 
-        // 1. Create a brand new empty GameObject
+        // 1. Create GameObject and configure its hierarchy
         GameObject textObj = new GameObject("DynamicFloatingText");
-        
-        // 2. Set its initial position
-        textObj.transform.position = spawnPosition;
 
-        // 3. Add the FloatingText script. 
-        // Note: Because of the [RequireComponent] attribute in FloatingText.cs, 
-        // Unity will automatically add the TextMeshPro and RectTransform components for us!
-        FloatingText floatingText = textObj.AddComponent<FloatingText>();
-        
-        // 4. (Optional) Force the RectTransform to center alignment if needed by your setup
-        RectTransform rectTransform = textObj.GetComponent<RectTransform>();
-        if (rectTransform != null)
+        if (settings.isCanvasUI)
         {
-            rectTransform.sizeDelta = new Vector2(5, 2); // Default size to prevent wrapping issues
+            GameObject canvas = null;
+            if (!string.IsNullOrEmpty(settings.canvasName))
+            {
+                canvas = GameObject.Find(settings.canvasName);
+            }
+            if (canvas == null)
+            {
+                canvas = GameObject.Find("Canvas");
+            }
+            if (canvas != null)
+            {
+                textObj.transform.SetParent(canvas.transform, false);
+            }
+        }
+        else
+        {
+            textObj.transform.position = spawnPosition;
         }
 
-        // 5. Initialize the behavior and appearance
-        floatingText.Setup(text, settings, spawnPosition);
+        // 2. Add and initialize script
+        FloatingText floatingText = textObj.AddComponent<FloatingText>();
+        floatingText.Setup(text, settings, spawnPosition, colorOverride);
     }
 }
 
