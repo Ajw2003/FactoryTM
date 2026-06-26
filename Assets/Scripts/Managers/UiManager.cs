@@ -345,7 +345,8 @@ public class UiManager : SingletonBase<UiManager>
          lastCurrencyValue = value;
          if (currentCurrency != null)
          {
-            currentCurrency.text = value.ToString("F1");
+            var dollar = "$";
+            currentCurrency.text = dollar + value.ToString("F1");
          }
          return;
       }
@@ -358,7 +359,7 @@ public class UiManager : SingletonBase<UiManager>
          if (delta < 0)
          {
             // Subtraction! Spawn beautiful red floating text (coral red)
-            SpawnCurrencyFloatingText("-" + Mathf.Abs(delta).ToString("F1"), new Color(1f, 0.36f, 0.36f, 1f));
+            SpawnCurrencyFloatingText("-$" + Mathf.Abs(delta).ToString("F1"), new Color(1f, 0.36f, 0.36f, 1f));
             
             // Pulse/shrink currency text
             if (currencyPulseCoroutine != null) StopCoroutine(currencyPulseCoroutine);
@@ -367,7 +368,7 @@ public class UiManager : SingletonBase<UiManager>
          else
          {
             // Addition! Spawn beautiful green floating text (mint green)
-            SpawnCurrencyFloatingText("+" + delta.ToString("F1"), new Color(0.36f, 1f, 0.36f, 1f));
+            SpawnCurrencyFloatingText("+$" + delta.ToString("F1"), new Color(0.36f, 1f, 0.36f, 1f));
             
             // Pulse/grow currency text
             if (currencyPulseCoroutine != null) StopCoroutine(currencyPulseCoroutine);
@@ -491,14 +492,14 @@ public class UiManager : SingletonBase<UiManager>
          
          if (currentCurrency != null)
          {
-            currentCurrency.text = currentVal.ToString("F1");
+            currentCurrency.text = "$" + currentVal.ToString("F1");
          }
          yield return null;
       }
       
       if (currentCurrency != null)
       {
-         currentCurrency.text = endVal.ToString("F1");
+         currentCurrency.text = "$" + endVal.ToString("F1");
       }
    }
 
