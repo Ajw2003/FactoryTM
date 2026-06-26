@@ -285,9 +285,14 @@ public class CartelMember : MonoBehaviour, IHealth
 
     private void SpawnDamageNumber(int amount, Color color, Vector3 position)
     {
-        GameObject textObj = new GameObject("DamageNumber");
-        FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
-        floatText.Initialize(amount.ToString(), color, position + new Vector3(0, 0.5f, 0));
+        FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
+        settings.textColor = color;
+        settings.fontSize = 4.5f;
+        settings.fontStyle = TMPro.FontStyles.Bold;
+        settings.spawnOffset = new Vector3(0, 0.5f, 0);
+        settings.floatSpeed = 2f;
+        settings.fadeDuration = 1.5f;
+        FloatingTextManager.Instance.Spawn(amount.ToString(), position, settings);
     }
 
     private IEnumerator FlashRed()

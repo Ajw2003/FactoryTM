@@ -205,9 +205,14 @@ public class PlacementManager : SingletonBase<PlacementManager>
                             else
                             {
                                 // Enemies still remain
-                                GameObject textObj = new GameObject("ClaimText");
-                                FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
-                                floatText.Initialize("ENEMIES REMAIN!", Color.red, logic.transform.position + new Vector3(0, 0.5f, 0));
+                                FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
+                                settings.textColor = Color.red;
+                                settings.fontSize = 4.5f;
+                                settings.fontStyle = TMPro.FontStyles.Bold;
+                                settings.spawnOffset = new Vector3(0, 0.5f, 0);
+                                settings.floatSpeed = 2f;
+                                settings.fadeDuration = 1.5f;
+                                FloatingTextManager.Instance.Spawn("ENEMIES REMAIN!", logic.transform.position, settings);
                                 Debug.LogWarning("Cannot claim or destroy this building. Defeat all enemies in the outpost first!");
                             }
                         }
