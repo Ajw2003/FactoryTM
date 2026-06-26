@@ -115,13 +115,7 @@ public class EnemySpawnerLogic : BuildingLogic
             totalSpawnedCount++;
             
             // Spawn float text
-            FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
-            settings.textColor = Color.red;
-            settings.fontSize = 4.5f;
-            settings.fontStyle = TMPro.FontStyles.Bold;
-            settings.spawnOffset = new Vector3(0, 0.7f, 0);
-            settings.floatSpeed = 2f;
-            settings.fadeDuration = 1.5f;
+            FloatingTextSettings settings = Resources.Load<FloatingTextSettings>("FloatingTextSettings/EnemySpawnAlertSettings");
             FloatingTextManager.Instance.Spawn("ALERT!", transform.position, settings);
         }
         else

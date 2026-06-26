@@ -63,13 +63,7 @@ public class EnemyOutpost
             
             if (PlayerController.Instance != null)
             {
-                FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
-                settings.textColor = Color.yellow;
-                settings.fontSize = 4.5f;
-                settings.fontStyle = TMPro.FontStyles.Bold;
-                settings.spawnOffset = new Vector3(0, 1f, 0);
-                settings.floatSpeed = 2f;
-                settings.fadeDuration = 1.5f;
+                FloatingTextSettings settings = Resources.Load<FloatingTextSettings>("FloatingTextSettings/OutpostClearedSettings");
                 FloatingTextManager.Instance.Spawn("OUTPOST CLEARED!", PlayerController.Instance.transform.position, settings);
             }
             
@@ -109,13 +103,7 @@ public class EnemyOutpost
                 }
 
                 // Spawn floating "+CLAIMED!" text
-                FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
-                settings.textColor = Color.green;
-                settings.fontSize = 4.5f;
-                settings.fontStyle = TMPro.FontStyles.Bold;
-                settings.spawnOffset = new Vector3(0, 0.5f, 0);
-                settings.floatSpeed = 2f;
-                settings.fadeDuration = 1.5f;
+                FloatingTextSettings settings = Resources.Load<FloatingTextSettings>("FloatingTextSettings/ClaimedSettings");
                 FloatingTextManager.Instance.Spawn("CLAIMED!", building.transform.position, settings);
             }
         }

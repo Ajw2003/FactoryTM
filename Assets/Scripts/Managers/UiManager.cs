@@ -503,183 +503,37 @@ public class UiManager : SingletonBase<UiManager>
       }
    }
 
-   [Header("Alerts")]
-   public AudioClip buildingDamageAlertSound;
-   public AudioClip outOfAmmoSound;
-   public AudioClip noReserveAmmoSound;
+    [Header("Alerts")]
+    public AudioClip buildingDamageAlertSound;
+    public AudioClip outOfAmmoSound;
+    public AudioClip noReserveAmmoSound;
 
-   public void ShowAmmoAlert(string message, bool isReserve = false)
-   {
-       AudioClip clipToPlay = isReserve ? noReserveAmmoSound : outOfAmmoSound;
-       if (clipToPlay != null && Code.Scripts.Audio.AudioManager.HasInstance)
-       {
-           Code.Scripts.EventSystems.EventManager.Instance?.Publish(new AudioClipEvent { Clip = clipToPlay, Channel = AudioChannel.Sfx, Volume = 1f, Duration = 0f });
-       }
+    public void ShowAmmoAlert(string message, bool isReserve = false)
+    {
+        AudioClip clipToPlay = isReserve ? noReserveAmmoSound : outOfAmmoSound;
+        if (clipToPlay != null && Code.Scripts.Audio.AudioManager.HasInstance)
+        {
+            Code.Scripts.EventSystems.EventManager.Instance?.Publish(new AudioClipEvent { Clip = clipToPlay, Channel = AudioChannel.Sfx, Volume = 1f, Duration = 0f });
+        }
 
-       GameObject canvas = GameObject.Find("Canvas");
-       if (canvas != null)
-       {
-           GameObject alert = new GameObject("AmmoAlert", typeof(RectTransform), typeof(TextMeshProUGUI));
-           alert.transform.SetParent(canvas.transform, false);
-           
-           RectTransform rt = alert.GetComponent<RectTransform>();
-           rt.anchorMin = new Vector2(0.5f, 0.45f);
-           rt.anchorMax = new Vector2(0.5f, 0.45f);
-           rt.pivot = new Vector2(0.5f, 0.5f);
-           rt.anchoredPosition = Vector2.zero;
-           
-           TextMeshProUGUI tmp = alert.GetComponent<TextMeshProUGUI>();
-           tmp.text = message;
-           tmp.color = new Color(1f, 0.2f, 0.2f);
-           tmp.fontSize = 30;
-           tmp.fontStyle = FontStyles.Bold;
-           tmp.alignment = TextAlignmentOptions.Center;
-           
-           StartCoroutine(AnimateAmmoAlert(alert, tmp));
-       }
-   }
+        FloatingTextSettings settings = Resources.Load<FloatingTextSettings>("FloatingTextSettings/UiAmmoAlertSettings");
+        FloatingTextManager.Instance.Spawn(message, Vector3.zero, settings);
+    }
 
-   private System.Collections.IEnumerator AnimateAmmoAlert(GameObject alertObj, TextMeshProUGUI tmp)
-   {
-       float duration = 1.5f;
-       float elapsed = 0f;
-       Vector2 startPos = alertObj.GetComponent<RectTransform>().anchoredPosition;
-       
-       while (elapsed < duration)
-       {
-           elapsed += Time.unscaledDeltaTime;
-           float t = elapsed / duration;
-           
-           alertObj.GetComponent<RectTransform>().anchoredPosition = startPos + new Vector2(0, Mathf.Lerp(0, 30f, t));
+    public void ShowBuildingDamageAlert()
+    {
+        if (buildingDamageAlertSound != null && Code.Scripts.Audio.AudioManager.HasInstance)
+        {
+            Code.Scripts.EventSystems.EventManager.Instance?.Publish(new AudioClipEvent { Clip = buildingDamageAlertSound, Channel = AudioChannel.Sfx, Volume = 1f, Duration = 0f });
+        }
 
-           if (t > 0.5f)
-           {
-               Color c = tmp.color;
-               c.a = 1f - ((t - 0.5f) * 2f);
-               tmp.color = c;
-           }
-           
-           if (tmp != null) yield return null;
-           else break;
-       }
-       
-       if (alertObj != null) Destroy(alertObj);
-   }
-
-   public void ShowBuildingDamageAlert()
-   {
-       if (buildingDamageAlertSound != null && Code.Scripts.Audio.AudioManager.HasInstance)
-       {
-           Code.Scripts.EventSystems.EventManager.Instance?.Publish(new AudioClipEvent { Clip = buildingDamageAlertSound, Channel = AudioChannel.Sfx, Volume = 1f, Duration = 0f });
-       }
-
-       GameObject canvas = GameObject.Find("Canvas");
-       if (canvas != null)
-       {
-           GameObject alert = new GameObject("BuildingDamageAlert", typeof(RectTransform), typeof(TextMeshProUGUI));
-           alert.transform.SetParent(canvas.transform, false);
-           
-           RectTransform rt = alert.GetComponent<RectTransform>();
-           rt.anchorMin = new Vector2(0.5f, 0.8f);
-           rt.anchorMax = new Vector2(0.5f, 0.8f);
-           rt.pivot = new Vector2(0.5f, 0.5f);
-           rt.anchoredPosition = Vector2.zero;
-           
-           TextMeshProUGUI tmp = alert.GetComponent<TextMeshProUGUI>();
-           tmp.text = "[!] BUILDINGS UNDER ATTACK! [!]";
-           tmp.color = Color.red;
-           tmp.fontSize = 42;
-           tmp.fontStyle = FontStyles.Bold;
-           tmp.alignment = TextAlignmentOptions.Center;
-           
-           StartCoroutine(AnimateDamageAlert(alert, tmp));
-       }
-   }
-
-   private System.Collections.IEnumerator AnimateDamageAlert(GameObject alertObj, TextMeshProUGUI tmp)
-   {
-       float duration = 4f;
-       float elapsed = 0f;
-       
-       while (elapsed < duration)
-       {
-           elapsed += Time.unscaledDeltaTime;
-           
-           float pingPong = Mathf.PingPong(elapsed * 5f, 1f);
-           tmp.color = Color.Lerp(Color.red, new Color(1f, 0.5f, 0f), pingPong);
-           
-           if (elapsed > duration - 1f)
-           {
-               Color c = tmp.color;
-               c.a = 1f - (elapsed - (duration - 1f));
-               tmp.color = c;
-           }
-           
-           if (tmp != null) yield return null;
-           else break;
-       }
-       
-       if (alertObj != null) Destroy(alertObj);
+        FloatingTextSettings settings = Resources.Load<FloatingTextSettings>("FloatingTextSettings/UiBuildingDamageAlertSettings");
+        FloatingTextManager.Instance.Spawn("[!] BUILDINGS UNDER ATTACK! [!]", Vector3.zero, settings);
     }
 
     public void ShowGeneralAlert(string message, Color color)
     {
-        GameObject canvas = GameObject.Find("HUD Canvas");
-        if (canvas == null) canvas = GameObject.Find("Canvas");
-        if (canvas != null)
-        {
-            GameObject alert = new GameObject("GeneralAlert", typeof(RectTransform), typeof(TextMeshProUGUI));
-            alert.transform.SetParent(canvas.transform, false);
-            
-            RectTransform rt = alert.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.65f);
-            rt.anchorMax = new Vector2(0.5f, 0.65f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = Vector2.zero;
-            
-            TextMeshProUGUI tmp = alert.GetComponent<TextMeshProUGUI>();
-            tmp.text = message;
-            tmp.color = color;
-            tmp.fontSize = 28;
-            tmp.fontStyle = FontStyles.Bold;
-            tmp.alignment = TextAlignmentOptions.Center;
-            
-            StartCoroutine(AnimateGeneralAlert(alert, tmp));
-        }
-    }
-
-    private System.Collections.IEnumerator AnimateGeneralAlert(GameObject alertObj, TextMeshProUGUI tmp)
-    {
-        float duration = 2.0f;
-        float elapsed = 0f;
-        Vector2 startPos = alertObj.GetComponent<RectTransform>().anchoredPosition;
-        
-        while (elapsed < duration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = elapsed / duration;
-            
-            if (alertObj != null)
-            {
-                alertObj.GetComponent<RectTransform>().anchoredPosition = startPos + new Vector2(0, Mathf.Lerp(0, 40f, t));
-            }
-
-            if (tmp != null)
-            {
-                if (t > 0.6f)
-                {
-                    Color c = tmp.color;
-                    c.a = 1f - ((t - 0.6f) * 2.5f);
-                    tmp.color = c;
-                }
-                yield return null;
-            }
-            else
-            {
-                break;
-            }
-        }
-        
-        if (alertObj != null) Destroy(alertObj);
+        FloatingTextSettings settings = Resources.Load<FloatingTextSettings>("FloatingTextSettings/UiGeneralAlertSettings");
+        FloatingTextManager.Instance.Spawn(message, Vector3.zero, settings, color);
     }
 }

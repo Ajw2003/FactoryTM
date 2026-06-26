@@ -167,13 +167,7 @@ public class PlayerController : MonoBehaviour, IHealth
                 ResourceType rType = item.resourceType;
                 BuildingUiManager.Instance.AddResource(rType, 1);
 
-                FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
-                settings.textColor = new Color(0.2f, 1f, 0.2f);
-                settings.fontSize = 4.5f;
-                settings.fontStyle = TMPro.FontStyles.Bold;
-                settings.spawnOffset = new Vector3(0, 0.5f, 0);
-                settings.floatSpeed = 2f;
-                settings.fadeDuration = 1.5f;
+                FloatingTextSettings settings = Resources.Load<FloatingTextSettings>("FloatingTextSettings/PlayerPickupSettings");
                 FloatingTextManager.Instance.Spawn("+1 " + rType.ToString().ToUpper(), item.transform.position, settings);
 
                 Destroy(item.gameObject);
@@ -199,13 +193,7 @@ public class PlayerController : MonoBehaviour, IHealth
 
                 Vector3 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 pos.z = 0;
-                FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
-                settings.textColor = new Color(0.2f, 1f, 0.2f);
-                settings.fontSize = 4.5f;
-                settings.fontStyle = TMPro.FontStyles.Bold;
-                settings.spawnOffset = new Vector3(0, 0.5f, 0);
-                settings.floatSpeed = 2f;
-                settings.fadeDuration = 1.5f;
+                FloatingTextSettings settings = Resources.Load<FloatingTextSettings>("FloatingTextSettings/PlayerPickupSettings");
                 FloatingTextManager.Instance.Spawn("+1 " + rType.ToString().ToUpper(), pos, settings);
                 return;
             }
@@ -493,13 +481,8 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private void SpawnDamageNumber(int amount, Color color, Vector3 position)
     {
-        FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
-        settings.textColor = color;
-        settings.fontSize = 4.5f;
-        settings.fontStyle = TMPro.FontStyles.Bold;
-        settings.spawnOffset = new Vector3(0, 0.5f, 0);
-        settings.floatSpeed = 2f;
-        settings.fadeDuration = 1.5f;
+        string settingsPath = color == Color.red ? "FloatingTextSettings/PlayerDamageSettings" : "FloatingTextSettings/PlayerHealSettings";
+        FloatingTextSettings settings = Resources.Load<FloatingTextSettings>(settingsPath);
         FloatingTextManager.Instance.Spawn(amount.ToString(), position, settings);
     }
 

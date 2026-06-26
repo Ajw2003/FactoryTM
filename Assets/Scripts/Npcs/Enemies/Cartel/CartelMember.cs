@@ -264,7 +264,8 @@ public class CartelMember : MonoBehaviour, IHealth
         Health -= amount;
 
         // Spawn floating damage text in bright yellow-orange
-        SpawnDamageNumber(amount, new Color(1f, 0.6f, 0f, 1f), transform.position);
+        FloatingTextSettings settings = Resources.Load<FloatingTextSettings>("FloatingTextSettings/CartelDamageSettings");
+        FloatingTextManager.Instance.Spawn(amount.ToString(), transform.position, settings);
 
         // Visual flash feedback
         StartCoroutine(FlashRed());
@@ -281,18 +282,6 @@ public class CartelMember : MonoBehaviour, IHealth
     public void ChangeHealth(int amount, int previous)
     {
         
-    }
-
-    private void SpawnDamageNumber(int amount, Color color, Vector3 position)
-    {
-        FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
-        settings.textColor = color;
-        settings.fontSize = 4.5f;
-        settings.fontStyle = TMPro.FontStyles.Bold;
-        settings.spawnOffset = new Vector3(0, 0.5f, 0);
-        settings.floatSpeed = 2f;
-        settings.fadeDuration = 1.5f;
-        FloatingTextManager.Instance.Spawn(amount.ToString(), position, settings);
     }
 
     private IEnumerator FlashRed()
@@ -316,7 +305,10 @@ public class CartelMember : MonoBehaviour, IHealth
             Managers.GameStatsManager.Instance.IncrementKills();
         }
         CurrencyManager.Instance.AddCurrency(profitFromKill);
-        SpawnDamageNumber(profitFromKill, Color.forestGreen, transform.position);
+        
+        FloatingTextSettings settings = Resources.Load<FloatingTextSettings>("FloatingTextSettings/CartelKillRewardSettings");
+        FloatingTextManager.Instance.Spawn(profitFromKill.ToString(), transform.position, settings);
+
         Destroy(this.gameObject);
     }
 }

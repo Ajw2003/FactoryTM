@@ -49,14 +49,8 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
         Health -= amount;
 
         // Spawn floating damage text!
-        Color textColor = isEnemyOwned ? new Color(1f, 0.7f, 0.2f) : Color.red; // Orange/yellow for enemy, red for player
-        FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
-        settings.textColor = textColor;
-        settings.fontSize = 4.5f;
-        settings.fontStyle = TMPro.FontStyles.Bold;
-        settings.spawnOffset = new Vector3(0, 0.5f, 0);
-        settings.floatSpeed = 2f;
-        settings.fadeDuration = 1.5f;
+        string settingsPath = isEnemyOwned ? "FloatingTextSettings/BuildingDamageEnemySettings" : "FloatingTextSettings/BuildingDamagePlayerSettings";
+        FloatingTextSettings settings = Resources.Load<FloatingTextSettings>(settingsPath);
         FloatingTextManager.Instance.Spawn(amount.ToString(), transform.position, settings);
 
         // Update visual crack overlay
@@ -105,13 +99,7 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
             if (CurrencyManager.Instance != null)
             {
                 CurrencyManager.Instance.AddCurrency(reward);
-                FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
-                settings.textColor = Color.forestGreen;
-                settings.fontSize = 4.5f;
-                settings.fontStyle = TMPro.FontStyles.Bold;
-                settings.spawnOffset = new Vector3(0, 0.5f, 0);
-                settings.floatSpeed = 2f;
-                settings.fadeDuration = 1.5f;
+                FloatingTextSettings settings = Resources.Load<FloatingTextSettings>("FloatingTextSettings/BuildingDestructionRewardSettings");
                 FloatingTextManager.Instance.Spawn(reward.ToString(), transform.position, settings);
             }
             if (outpost != null)
