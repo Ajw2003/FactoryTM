@@ -63,9 +63,14 @@ public class EnemyOutpost
             
             if (PlayerController.Instance != null)
             {
-                GameObject textObj = new GameObject("OutpostClearedText");
-                FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
-                floatText.Initialize("OUTPOST CLEARED!", Color.yellow, PlayerController.Instance.transform.position + new Vector3(0, 1f, 0));
+                FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
+                settings.textColor = Color.yellow;
+                settings.fontSize = 4.5f;
+                settings.fontStyle = TMPro.FontStyles.Bold;
+                settings.spawnOffset = new Vector3(0, 1f, 0);
+                settings.floatSpeed = 2f;
+                settings.fadeDuration = 1.5f;
+                FloatingTextManager.Instance.Spawn("OUTPOST CLEARED!", PlayerController.Instance.transform.position, settings);
             }
             
             Code.Scripts.EventSystems.EventManager.Instance?.Publish(new EnemyOutpostClearedEvent(this));
@@ -104,9 +109,14 @@ public class EnemyOutpost
                 }
 
                 // Spawn floating "+CLAIMED!" text
-                GameObject textObj = new GameObject("ClaimedText");
-                FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
-                floatText.Initialize("CLAIMED!", Color.green, building.transform.position + new Vector3(0, 0.5f, 0));
+                FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
+                settings.textColor = Color.green;
+                settings.fontSize = 4.5f;
+                settings.fontStyle = TMPro.FontStyles.Bold;
+                settings.spawnOffset = new Vector3(0, 0.5f, 0);
+                settings.floatSpeed = 2f;
+                settings.fadeDuration = 1.5f;
+                FloatingTextManager.Instance.Spawn("CLAIMED!", building.transform.position, settings);
             }
         }
 

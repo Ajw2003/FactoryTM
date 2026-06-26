@@ -167,9 +167,14 @@ public class PlayerController : MonoBehaviour, IHealth
                 ResourceType rType = item.resourceType;
                 BuildingUiManager.Instance.AddResource(rType, 1);
 
-                GameObject textObj = new GameObject("PickupNumber");
-                FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
-                floatText.Initialize("+1 " + rType.ToString().ToUpper(), new Color(0.2f, 1f, 0.2f), item.transform.position + new Vector3(0, 0.5f, 0));
+                FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
+                settings.textColor = new Color(0.2f, 1f, 0.2f);
+                settings.fontSize = 4.5f;
+                settings.fontStyle = TMPro.FontStyles.Bold;
+                settings.spawnOffset = new Vector3(0, 0.5f, 0);
+                settings.floatSpeed = 2f;
+                settings.fadeDuration = 1.5f;
+                FloatingTextManager.Instance.Spawn("+1 " + rType.ToString().ToUpper(), item.transform.position, settings);
 
                 Destroy(item.gameObject);
                 return;
@@ -194,9 +199,14 @@ public class PlayerController : MonoBehaviour, IHealth
 
                 Vector3 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 pos.z = 0;
-                GameObject textObj = new GameObject("MineNumber");
-                FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
-                floatText.Initialize("+1 " + rType.ToString().ToUpper(), new Color(0.2f, 1f, 0.2f), pos + new Vector3(0, 0.5f, 0));
+                FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
+                settings.textColor = new Color(0.2f, 1f, 0.2f);
+                settings.fontSize = 4.5f;
+                settings.fontStyle = TMPro.FontStyles.Bold;
+                settings.spawnOffset = new Vector3(0, 0.5f, 0);
+                settings.floatSpeed = 2f;
+                settings.fadeDuration = 1.5f;
+                FloatingTextManager.Instance.Spawn("+1 " + rType.ToString().ToUpper(), pos, settings);
                 return;
             }
         }
@@ -483,9 +493,14 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private void SpawnDamageNumber(int amount, Color color, Vector3 position)
     {
-        GameObject textObj = new GameObject("DamageNumber");
-        FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
-        floatText.Initialize(amount.ToString(), color, position + new Vector3(0, 0.5f, 0));
+        FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
+        settings.textColor = color;
+        settings.fontSize = 4.5f;
+        settings.fontStyle = TMPro.FontStyles.Bold;
+        settings.spawnOffset = new Vector3(0, 0.5f, 0);
+        settings.floatSpeed = 2f;
+        settings.fadeDuration = 1.5f;
+        FloatingTextManager.Instance.Spawn(amount.ToString(), position, settings);
     }
 
     private IEnumerator FlashRed()

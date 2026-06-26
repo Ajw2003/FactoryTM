@@ -115,9 +115,14 @@ public class EnemySpawnerLogic : BuildingLogic
             totalSpawnedCount++;
             
             // Spawn float text
-            GameObject textObj = new GameObject("SpawnAlert");
-            FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
-            floatText.Initialize("ALERT!", Color.red, transform.position + new Vector3(0, 0.7f, 0));
+            FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
+            settings.textColor = Color.red;
+            settings.fontSize = 4.5f;
+            settings.fontStyle = TMPro.FontStyles.Bold;
+            settings.spawnOffset = new Vector3(0, 0.7f, 0);
+            settings.floatSpeed = 2f;
+            settings.fadeDuration = 1.5f;
+            FloatingTextManager.Instance.Spawn("ALERT!", transform.position, settings);
         }
         else
         {

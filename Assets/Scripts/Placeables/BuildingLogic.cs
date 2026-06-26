@@ -49,10 +49,15 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
         Health -= amount;
 
         // Spawn floating damage text!
-        GameObject textObj = new GameObject("DamageNumber");
-        FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
         Color textColor = isEnemyOwned ? new Color(1f, 0.7f, 0.2f) : Color.red; // Orange/yellow for enemy, red for player
-        floatText.Initialize(amount.ToString(), textColor, transform.position + new Vector3(0, 0.5f, 0));
+        FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
+        settings.textColor = textColor;
+        settings.fontSize = 4.5f;
+        settings.fontStyle = TMPro.FontStyles.Bold;
+        settings.spawnOffset = new Vector3(0, 0.5f, 0);
+        settings.floatSpeed = 2f;
+        settings.fadeDuration = 1.5f;
+        FloatingTextManager.Instance.Spawn(amount.ToString(), transform.position, settings);
 
         // Update visual crack overlay
         UpdateCrackVisuals();
@@ -100,9 +105,14 @@ public abstract class BuildingLogic : MonoBehaviour, IHealth
             if (CurrencyManager.Instance != null)
             {
                 CurrencyManager.Instance.AddCurrency(reward);
-                GameObject textObj = new GameObject("DamageNumber");
-                FloatingDamageText floatText = textObj.AddComponent<FloatingDamageText>();
-                floatText.Initialize(reward.ToString(), Color.forestGreen, transform.position + new Vector3(0, 0.5f, 0));
+                FloatingTextSettings settings = ScriptableObject.CreateInstance<FloatingTextSettings>();
+                settings.textColor = Color.forestGreen;
+                settings.fontSize = 4.5f;
+                settings.fontStyle = TMPro.FontStyles.Bold;
+                settings.spawnOffset = new Vector3(0, 0.5f, 0);
+                settings.floatSpeed = 2f;
+                settings.fadeDuration = 1.5f;
+                FloatingTextManager.Instance.Spawn(reward.ToString(), transform.position, settings);
             }
             if (outpost != null)
             {

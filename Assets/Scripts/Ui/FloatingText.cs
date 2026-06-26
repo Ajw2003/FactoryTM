@@ -54,6 +54,14 @@ public class FloatingText : MonoBehaviour
         
         initialColor = settings.textColor;
         fadeTimer = fadeDuration;
+
+        // Render on top of 2D sprites
+        MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
+        if (meshRenderer != null)
+        {
+            meshRenderer.sortingLayerName = "UI";
+            meshRenderer.sortingOrder = 100;
+        }
     }
 
     void Update()
