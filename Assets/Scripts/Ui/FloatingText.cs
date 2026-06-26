@@ -57,11 +57,11 @@ public class FloatingText : MonoBehaviour
             transform.position = position + settings.spawnOffset;
 
             // Render on top of 2D sprites
-            MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
-            if (meshRenderer != null)
+            Renderer rend = GetComponent<Renderer>();
+            if (rend != null)
             {
-                meshRenderer.sortingLayerName = "UI";
-                meshRenderer.sortingOrder = 100;
+                rend.sortingLayerName = "Ui";
+                rend.sortingOrder = 100;
             }
         }
 
@@ -78,6 +78,39 @@ public class FloatingText : MonoBehaviour
         if (settings.font != null) textMesh.font = settings.font;
         textMesh.fontStyle = settings.fontStyle;
         textMesh.alignment = TextAlignmentOptions.Center;
+
+        // Force sorting layer immediately in Setup
+        if (!isCanvasUI)
+        {
+            Renderer rend = GetComponent<Renderer>();
+            if (rend != null)
+            {
+                rend.sortingLayerName = "Ui";
+                rend.sortingOrder = 100;
+            }
+        }
+        else
+        {
+            gameObject.layer = LayerMask.NameToLayer("UI");
+        }
+    }
+
+    void Start()
+    {
+        // Re-enforce sorting layer and object layer in Start to override any TMPro mesh regeneration resets
+        if (!isCanvasUI)
+        {
+            Renderer rend = GetComponent<Renderer>();
+            if (rend != null)
+            {
+                rend.sortingLayerName = "Ui";
+                rend.sortingOrder = 100;
+            }
+        }
+        else
+        {
+            gameObject.layer = LayerMask.NameToLayer("UI");
+        }
     }
 
     void Update()
