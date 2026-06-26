@@ -52,7 +52,9 @@ public class TutorialManager : SingletonBase<TutorialManager>
     private bool outpostSetupDone = false;
     private EnemyOutpost tutorialOutpost;
 
-    // Objective UI fields removed (delegated to DialogueManager)
+    private List<GameObject> activeObjectiveObjects = new List<GameObject>();
+    private List<TextMeshProUGUI> objectiveTexts = new List<TextMeshProUGUI>();
+    private TutorialState lastStateForObjectives = TutorialState.NotStarted;
 
     protected override void Awake()
     {
@@ -450,7 +452,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
     {
         currentState = TutorialState.Completed;
 
-        // Objective UI destruction logic removed
+        ClearObjectives();
 
         if (showVisual)
         {
@@ -484,6 +486,9 @@ public class TutorialManager : SingletonBase<TutorialManager>
     public void RestartTutorial()
     {
         StopAllCoroutines();
+
+        lastStateForObjectives = TutorialState.NotStarted;
+        ClearObjectives();
 
         if (DialogueManager.Instance != null)
         {
@@ -612,36 +617,251 @@ public class TutorialManager : SingletonBase<TutorialManager>
         return dialogue;
     }
 
+    private string GetFormattedObjectiveText(TutorialState state, bool isInitial)
+    {
+        DialogueSO dialogue = LoadDialogueSOForState(state);
+        if (dialogue == null || dialogue.dialogues == null || dialogue.dialogues.Length == 0) return "";
+
+        string template = dialogue.dialogues[0].text;
+
+        switch (state)
+        {
+            case TutorialState.MineCoalManually:
+                int coalCount = isInitial ? 0 : (BuildingUiManager.Instance != null ? BuildingUiManager.Instance.GetResourceCount(ResourceType.Coal) : 0);
+                return string.Format(template, coalCount);
+
+            case TutorialState.FuelDCT:
+                int fuelCount = isInitial ? 0 : coalFedCount;
+                return string.Format(template, fuelCount);
+
+            case TutorialState.SellOtherOres:
+                float currentMoney = isInitial ? 0f : (CurrencyManager.Instance != null ? CurrencyManager.Instance.currentCurrencyValue : 0f);
+                return string.Format(template, currentMoney);
+
+            case TutorialState.BuyAmmoHealth:
+                string ammoStatus = isInitial ? "[ ]" : (hasPurchasedAmmo ? "[x]" : "[ ]");
+                string healthStatus = isInitial ? "[ ]" : (hasPurchasedHealthPack ? "[x]" : "[ ]");
+                return string.Format(template, ammoStatus, healthStatus);
+
+            case TutorialState.DestroyEnemyOutpost:
+                int remainingBuildings = isInitial ? 4 : 0;
+                if (!isInitial && tutorialOutpost != null)
+                {
+                    tutorialOutpost.buildings.RemoveAll(b => b == null);
+                    remainingBuildings = tutorialOutpost.buildings.Count;
+                }
+                return string.Format(template, remainingBuildings);
+
+            case TutorialState.BuyMinerConveyors:
+                int miners = isInitial ? 0 : GetInventoryCount(BuildingType.Miner);
+                int conveyors = isInitial ? 0 : GetInventoryCount(BuildingType.Conveyor);
+                return string.Format(template, miners, conveyors);
+
+            case TutorialState.EarnAndExpand:
+                float time = isInitial ? 25f : (DayNightManager.Instance != null ? DayNightManager.Instance.timeRemaining : 0f);
+                return string.Format(template, Mathf.CeilToInt(time));
+
+            case TutorialState.DefendFirstRaid:
+                int activeEnemies = isInitial ? 0 : (GameManager.Instance != null && GameManager.Instance.ActiveEnemies != null ? GameManager.Instance.ActiveEnemies.Count : 0);
+                return string.Format(template, activeEnemies);
+
+            default:
+                return template;
+        }
+    }
+
     public void UpdateObjectiveText()
     {
         if (DialogueManager.Instance == null) return;
 
-        DialogueSO dialogue = LoadDialogueSOForState(currentState);
-        if (dialogue == null || dialogue.dialogues == null || dialogue.dialogues.Length == 0) return;
+        // 1. Trigger bottom static dialogue only once when transitioning to a new state
+        if (currentState != lastStateForObjectives)
+        {
+            lastStateForObjectives = currentState;
 
-        string template = dialogue.dialogues[0].text;
-        string body = template;
+            DialogueSO dialogue = LoadDialogueSOForState(currentState);
+            if (dialogue != null && dialogue.dialogues != null && dialogue.dialogues.Length > 0)
+            {
+                string initialDialogueText = GetFormattedObjectiveText(currentState, true);
+                DialogueManager.Instance.DisplayTutorialObjective(dialogue, initialDialogueText);
+            }
+
+            // Rebuild the left-side objectives panel list
+            RebuildObjectivesList();
+        }
+
+        // 2. Dynamically update the left-side objectives list checkboxes/values
+        UpdateObjectivesPanelText();
+    }
+
+    private void CreateObjectivesUI()
+    {
+        if (UiManager.Instance == null || UiManager.Instance.PlayerStatsPanel == null) return;
+        CreateObjectiveItem("SYS_OBJECTIVES //", true);
+    }
+
+    private TextMeshProUGUI CreateObjectiveItem(string initialText, bool isHeader = false)
+    {
+        if (UiManager.Instance == null || UiManager.Instance.PlayerStatsPanel == null) return null;
+        Transform parentTransform = UiManager.Instance.PlayerStatsPanel.transform;
+
+        GameObject itemGo = new GameObject(isHeader ? "ObjectiveHeader" : "ObjectiveItem", typeof(RectTransform), typeof(TextMeshProUGUI), typeof(UnityEngine.UI.LayoutElement));
+        itemGo.transform.SetParent(parentTransform, false);
+
+        RectTransform rt = itemGo.GetComponent<RectTransform>();
+        if (rt != null)
+        {
+            rt.sizeDelta = new Vector2(600f, isHeader ? 40f : 30f);
+        }
+
+        UnityEngine.UI.LayoutElement layout = itemGo.GetComponent<UnityEngine.UI.LayoutElement>();
+        if (layout != null)
+        {
+            layout.preferredWidth = 600f;
+            layout.preferredHeight = isHeader ? 40f : 30f;
+        }
+
+        TextMeshProUGUI txt = itemGo.GetComponent<TextMeshProUGUI>();
+        txt.fontSize = isHeader ? 28 : 24;
+        txt.fontStyle = isHeader ? FontStyles.Bold : FontStyles.Normal;
+        txt.color = isHeader ? new Color(0.2f, 1f, 0.2f) : new Color(0.8f, 1f, 0.8f);
+        txt.alignment = TextAlignmentOptions.MidlineLeft;
+        txt.enableWordWrapping = true;
+        txt.text = initialText;
+
+        activeObjectiveObjects.Add(itemGo);
+
+        if (!isHeader)
+        {
+            objectiveTexts.Add(txt);
+        }
+        return txt;
+    }
+
+    private void ClearObjectives()
+    {
+        foreach (var go in activeObjectiveObjects)
+        {
+            if (go != null)
+            {
+                Destroy(go);
+            }
+        }
+        activeObjectiveObjects.Clear();
+        objectiveTexts.Clear();
+    }
+
+    private void RebuildObjectivesList()
+    {
+        ClearObjectives();
+        CreateObjectivesUI();
 
         switch (currentState)
         {
+            case TutorialState.BriefIntro:
+                CreateObjectiveItem("[ ] Walk to the Interdimensional Transceiver (IDT)");
+                CreateObjectiveItem("[ ] Press [E] next to the IDT to open its panel");
+                break;
+
             case TutorialState.MineCoalManually:
-                int coalCount = BuildingUiManager.Instance != null ? BuildingUiManager.Instance.GetResourceCount(ResourceType.Coal) : 0;
-                body = string.Format(template, coalCount);
+                CreateObjectiveItem("[ ] Mine Coal (0/5)");
                 break;
 
             case TutorialState.FuelDCT:
-                body = string.Format(template, coalFedCount);
+                CreateObjectiveItem("[ ] Open the IDT panel");
+                CreateObjectiveItem("[ ] Insert 5 Coal to boot reactor (Coal fed: 0/5)");
+                break;
+
+            case TutorialState.SellOtherOres:
+                CreateObjectiveItem("[ ] Mine Iron and Copper ores");
+                CreateObjectiveItem("[ ] Sell ores at the IDT UI");
+                CreateObjectiveItem("[ ] Earn $50 (Current: $0/$50)");
+                break;
+
+            case TutorialState.BuyFirstWeapon:
+                CreateObjectiveItem("[ ] Move away from structures");
+                CreateObjectiveItem("[ ] Press [E] to open the Ship Store");
+                CreateObjectiveItem("[ ] Purchase your first weapon upgrade");
+                break;
+
+            case TutorialState.BuyAmmoHealth:
+                CreateObjectiveItem("[ ] Purchase Defensive Ammo Pack");
+                CreateObjectiveItem("[ ] Purchase Tactical Health Pack");
+                CreateObjectiveItem("[ ] Close the Store menu");
+                break;
+
+            case TutorialState.DestroyEnemyOutpost:
+                CreateObjectiveItem("[ ] Travel North-East to locate human outpost");
+                CreateObjectiveItem("[ ] Destroy all human outpost structures");
+                break;
+
+            case TutorialState.BuyMinerConveyors:
+                CreateObjectiveItem("[ ] Open the Ship Store");
+                CreateObjectiveItem("[ ] Purchase 1 Miner");
+                CreateObjectiveItem("[ ] Purchase 10 Conveyors");
+                break;
+
+            case TutorialState.SetupAutomation:
+                CreateObjectiveItem("[ ] Place Miner on an ore deposit");
+                CreateObjectiveItem("[ ] Connect Miner to the IDT with Conveyors");
+                CreateObjectiveItem("[ ] Wait for 1 automatic resource sale");
+                break;
+
+            case TutorialState.EarnAndExpand:
+                CreateObjectiveItem("[ ] Automation active!");
+                CreateObjectiveItem("[ ] Earn credits and expand your factory");
+                CreateObjectiveItem("[ ] Prepare for nightfall");
+                break;
+
+            case TutorialState.DefendFirstRaid:
+                CreateObjectiveItem("[ ] Press [TAB] to enter COMBAT MODE");
+                CreateObjectiveItem("[ ] Defend the IDT from invaders!");
+                break;
+        }
+    }
+
+    private void UpdateObjectivesPanelText()
+    {
+        if (objectiveTexts == null || objectiveTexts.Count == 0) return;
+
+        switch (currentState)
+        {
+            case TutorialState.BriefIntro:
+                bool hasIDT = BuildingUiManager.Instance != null && BuildingUiManager.Instance.CurrentOpenBuilding is InterDimensionalTransporter;
+                objectiveTexts[0].text = hasIDT ? "[x] Walk to the Interdimensional Transceiver (IDT)" : "[ ] Walk to the Interdimensional Transceiver (IDT)";
+                objectiveTexts[1].text = hasIDT ? "[x] Press [E] next to the IDT to open its panel" : "[ ] Press [E] next to the IDT to open its panel";
+                break;
+
+            case TutorialState.MineCoalManually:
+                int coalCount = BuildingUiManager.Instance != null ? BuildingUiManager.Instance.GetResourceCount(ResourceType.Coal) : 0;
+                objectiveTexts[0].text = coalCount >= 5 ? $"[x] Mine Coal ({coalCount}/5)" : $"[ ] Mine Coal ({coalCount}/5)";
+                break;
+
+            case TutorialState.FuelDCT:
+                bool hasDCTOpen = BuildingUiManager.Instance != null && BuildingUiManager.Instance.CurrentOpenBuilding is InterDimensionalTransporter;
+                objectiveTexts[0].text = (hasDCTOpen || coalFedCount > 0) ? "[x] Open the IDT panel" : "[ ] Open the IDT panel";
+                objectiveTexts[1].text = coalFedCount >= 5 ? $"[x] Insert 5 Coal to boot reactor (Coal fed: {coalFedCount}/5)" : $"[ ] Insert 5 Coal to boot reactor (Coal fed: {coalFedCount}/5)";
                 break;
 
             case TutorialState.SellOtherOres:
                 float currentMoney = CurrencyManager.Instance != null ? CurrencyManager.Instance.currentCurrencyValue : 0f;
-                body = string.Format(template, currentMoney);
+                objectiveTexts[0].text = currentMoney > 0f ? "[x] Mine Iron and Copper ores" : "[ ] Mine Iron and Copper ores";
+                objectiveTexts[1].text = currentMoney > 0f ? "[x] Sell ores at the IDT UI" : "[ ] Sell ores at the IDT UI";
+                objectiveTexts[2].text = currentMoney >= 50f ? $"[x] Earn $50 (Current: ${currentMoney:F0}/$50)" : $"[ ] Earn $50 (Current: ${currentMoney:F0}/$50)";
+                break;
+
+            case TutorialState.BuyFirstWeapon:
+                bool isStoreOpen = UiManager.Instance != null && UiManager.Instance.StorePanel != null && UiManager.Instance.StorePanel.activeSelf;
+                objectiveTexts[0].text = isStoreOpen ? "[x] Move away from structures" : "[ ] Move away from structures";
+                objectiveTexts[1].text = isStoreOpen ? "[x] Press [E] to open the Ship Store" : "[ ] Press [E] to open the Ship Store";
+                objectiveTexts[2].text = hasPurchasedWeapon ? "[x] Purchase your first weapon upgrade" : "[ ] Purchase your first weapon upgrade";
                 break;
 
             case TutorialState.BuyAmmoHealth:
-                string ammoStatus = hasPurchasedAmmo ? "[x]" : "[ ]";
-                string healthStatus = hasPurchasedHealthPack ? "[x]" : "[ ]";
-                body = string.Format(template, ammoStatus, healthStatus);
+                objectiveTexts[0].text = hasPurchasedAmmo ? "[x] Purchase Defensive Ammo Pack" : "[ ] Purchase Defensive Ammo Pack";
+                objectiveTexts[1].text = hasPurchasedHealthPack ? "[x] Purchase Tactical Health Pack" : "[ ] Purchase Tactical Health Pack";
+                bool isStoreStillOpen = UiManager.Instance != null && UiManager.Instance.StorePanel != null && UiManager.Instance.StorePanel.activeSelf;
+                objectiveTexts[2].text = (!isStoreStillOpen && hasPurchasedAmmo && hasPurchasedHealthPack) ? "[x] Close the Store menu" : "[ ] Close the Store menu";
                 break;
 
             case TutorialState.DestroyEnemyOutpost:
@@ -651,30 +871,37 @@ public class TutorialManager : SingletonBase<TutorialManager>
                     tutorialOutpost.buildings.RemoveAll(b => b == null);
                     remainingBuildings = tutorialOutpost.buildings.Count;
                 }
-                body = string.Format(template, remainingBuildings);
+                objectiveTexts[0].text = "[x] Travel North-East to locate human outpost";
+                objectiveTexts[1].text = remainingBuildings == 0 ? $"[x] Destroy all human outpost structures (0 remaining)" : $"[ ] Destroy all human outpost structures ({remainingBuildings} remaining)";
                 break;
 
             case TutorialState.BuyMinerConveyors:
                 int miners = GetInventoryCount(BuildingType.Miner);
                 int conveyors = GetInventoryCount(BuildingType.Conveyor);
-                body = string.Format(template, miners, conveyors);
+                bool storeOpenForBuy = UiManager.Instance != null && UiManager.Instance.StorePanel != null && UiManager.Instance.StorePanel.activeSelf;
+                objectiveTexts[0].text = storeOpenForBuy ? "[x] Open the Ship Store" : "[ ] Open the Ship Store";
+                objectiveTexts[1].text = miners >= 1 ? $"[x] Purchase 1 Miner ({miners}/1)" : $"[ ] Purchase 1 Miner ({miners}/1)";
+                objectiveTexts[2].text = conveyors >= 10 ? $"[x] Purchase 10 Conveyors ({conveyors}/10)" : $"[ ] Purchase 10 Conveyors ({conveyors}/10)";
+                break;
+
+            case TutorialState.SetupAutomation:
+                objectiveTexts[0].text = hasSoldAutomatically ? "[x] Place Miner on an ore deposit" : "[ ] Place Miner on an ore deposit";
+                objectiveTexts[1].text = hasSoldAutomatically ? "[x] Connect Miner to the IDT with Conveyors" : "[ ] Connect Miner to the IDT with Conveyors";
+                objectiveTexts[2].text = hasSoldAutomatically ? "[x] Wait for 1 automatic resource sale" : "[ ] Wait for 1 automatic resource sale";
                 break;
 
             case TutorialState.EarnAndExpand:
-                float time = DayNightManager.Instance != null ? DayNightManager.Instance.timeRemaining : 0f;
-                body = string.Format(template, Mathf.CeilToInt(time));
+                float timeRemaining = DayNightManager.Instance != null ? DayNightManager.Instance.timeRemaining : 0f;
+                objectiveTexts[0].text = "[x] Automation active!";
+                objectiveTexts[1].text = "[ ] Earn credits and expand your factory";
+                objectiveTexts[2].text = timeRemaining <= 0f ? "[x] Prepare for nightfall" : $"[ ] Prepare for nightfall ({Mathf.CeilToInt(timeRemaining)}s remaining)";
                 break;
 
             case TutorialState.DefendFirstRaid:
-                int activeEnemies = 0;
-                if (GameManager.Instance != null && GameManager.Instance.ActiveEnemies != null)
-                {
-                    activeEnemies = GameManager.Instance.ActiveEnemies.Count;
-                }
-                body = string.Format(template, activeEnemies);
+                int activeEnemies = GameManager.Instance != null && GameManager.Instance.ActiveEnemies != null ? GameManager.Instance.ActiveEnemies.Count : 0;
+                objectiveTexts[0].text = activeEnemies == 0 ? "[x] Press [TAB] to enter COMBAT MODE" : "[ ] Press [TAB] to enter COMBAT MODE";
+                objectiveTexts[1].text = activeEnemies == 0 ? "[x] Defend the IDT from invaders! (0 active hostiles)" : $"[ ] Defend the IDT from invaders! ({activeEnemies} active hostiles)";
                 break;
         }
-
-        DialogueManager.Instance.DisplayTutorialObjective(dialogue, body);
     }
 }

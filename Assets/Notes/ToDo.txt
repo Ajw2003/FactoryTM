@@ -25,6 +25,13 @@ Unique play styles you want to play like a full rogue like, buy weapon and playe
 
 add enemy outposts, toy around with raids not starting until you attack them or wait long enough
 
+make objective text scale to console window when store open 
+
+Make objectives separate from dialogue for objectives i.e. keep the dialogue telling you what to do at the bottom of the screen, but place objectives i.e. 
+Mine 5/0 coal anchored to the left side of the screen with a vertical layout group such that they always appear underneath the money ui.
+make it such that the dialogue is static and not updated once finished but the objectives can actively listen to events and update based on them i.e. updating ore count or kills
+
+
 
 better ui contrast, color choices and general style unification.
 

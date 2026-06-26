@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: BriefIntro
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSO
   dialogues:
-  - text: "- Walk to the Interdimensional Transceiver (IDT)\n- Press [E] next to the IDT to open its panel"
+  - text: 'Welcome to earth, as you are now awake please begin opperation [SCORTCHED
+      EARTH]'
     sprite: {fileID: 0}
     color: {r: 0, g: 0, b: 0, a: 0}
     type: 0

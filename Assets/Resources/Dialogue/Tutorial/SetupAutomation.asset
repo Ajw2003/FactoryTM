@@ -13,7 +13,15 @@ MonoBehaviour:
   m_Name: SetupAutomation
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSO
   dialogues:
-  - text: "- Place Miner on an ore deposit (Press [R] to rotate)\n- Connect Miner to the IDT with Conveyors\n- Wait for 1 automatic resource sale"
+  - text: '- Press TAB to enter building mode
+
+      - Place Miner on an ore deposit
+      (Press [R] to rotate)
+
+      - Connect Miner to the IDT with Conveyors
+
+      -
+      Wait for 1 automatic resource sale'
     sprite: {fileID: 0}
     color: {r: 0, g: 0, b: 0, a: 0}
     type: 0
