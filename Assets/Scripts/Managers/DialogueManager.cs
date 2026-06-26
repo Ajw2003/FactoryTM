@@ -158,6 +158,13 @@ public class DialogueManager : SingletonBase<DialogueManager>
 
         if (isDialogueActive)
         {
+            bool isStoreOpen = StoreUiScript.HasInstance && StoreUiScript.Instance.gameObject.activeInHierarchy;
+            DialoguePositionMode targetMode = isStoreOpen ? DialoguePositionMode.ShopLeftTop : DialoguePositionMode.DefaultBottom;
+            if (currentPositionMode != targetMode)
+            {
+                SetPositionMode(targetMode);
+            }
+
             if (dialogueBox != null)
             {
                 if (!dialogueBox.activeSelf)
@@ -253,11 +260,11 @@ public class DialogueManager : SingletonBase<DialogueManager>
         dialogueBox.transform.SetParent(canvasGo.transform, false);
 
         RectTransform panelRt = dialogueBox.GetComponent<RectTransform>();
-        panelRt.anchorMin = new Vector2(0.15f, 0.05f);
-        panelRt.anchorMax = new Vector2(0.85f, 0.28f);
+        panelRt.anchorMin = new Vector2(0.5f, 0f);
+        panelRt.anchorMax = new Vector2(0.5f, 0f);
         panelRt.pivot = new Vector2(0.5f, 0f);
-        panelRt.offsetMin = Vector2.zero;
-        panelRt.offsetMax = Vector2.zero;
+        panelRt.anchoredPosition = new Vector2(0f, 20f);
+        panelRt.sizeDelta = new Vector2(880f, 180f);
 
         Image panelImg = dialogueBox.GetComponent<Image>();
         panelImg.color = new Color(0.01f, 0.05f, 0.01f, 0.95f);
@@ -362,33 +369,51 @@ public class DialogueManager : SingletonBase<DialogueManager>
         currentPositionMode = mode;
         hasPositionInitialized = true;
 
-        Vector2 targetMin = new Vector2(0.15f, 0.05f);
-        Vector2 targetMax = new Vector2(0.85f, 0.28f);
+        Vector2 targetAnchorMin = new Vector2(0.5f, 0f);
+        Vector2 targetAnchorMax = new Vector2(0.5f, 0f);
+        Vector2 targetPivot = new Vector2(0.5f, 0f);
+        Vector2 targetAnchoredPosition = new Vector2(0f, 20f);
+        Vector2 targetSizeDelta = new Vector2(880f, 180f);
 
         switch (mode)
         {
             case DialoguePositionMode.DefaultBottom:
-                targetMin = new Vector2(0.15f, 0.05f);
-                targetMax = new Vector2(0.85f, 0.28f);
+                targetAnchorMin = new Vector2(0.5f, 0f);
+                targetAnchorMax = new Vector2(0.5f, 0f);
+                targetPivot = new Vector2(0.5f, 0f);
+                targetAnchoredPosition = new Vector2(0f, 20f);
+                targetSizeDelta = new Vector2(880f, 180f);
                 break;
             case DialoguePositionMode.AboveHotbar:
-                targetMin = new Vector2(0.15f, 0.22f);
-                targetMax = new Vector2(0.85f, 0.45f);
+                targetAnchorMin = new Vector2(0.5f, 0f);
+                targetAnchorMax = new Vector2(0.5f, 0f);
+                targetPivot = new Vector2(0.5f, 0f);
+                targetAnchoredPosition = new Vector2(0f, 160f);
+                targetSizeDelta = new Vector2(880f, 180f);
                 break;
             case DialoguePositionMode.PlacementTop:
-                targetMin = new Vector2(0.15f, 0.72f);
-                targetMax = new Vector2(0.85f, 0.95f);
+                targetAnchorMin = new Vector2(0.5f, 1f);
+                targetAnchorMax = new Vector2(0.5f, 1f);
+                targetPivot = new Vector2(0.5f, 1f);
+                targetAnchoredPosition = new Vector2(0f, -20f);
+                targetSizeDelta = new Vector2(880f, 180f);
                 break;
             case DialoguePositionMode.ShopLeftTop:
-                targetMin = new Vector2(0.55f, 0.15f);
-                targetMax = new Vector2(0.96f, 0.81f);
+                targetAnchorMin = new Vector2(0.5f, 0f);
+                targetAnchorMax = new Vector2(0.5f, 0f);
+                targetPivot = new Vector2(0.5f, 0f);
+                targetAnchoredPosition = new Vector2(0f, 20f);
+                targetSizeDelta = new Vector2(880f, 180f);
                 break;
         }
 
         RectTransform rt = dialogueBox.GetComponent<RectTransform>();
         rt.DOComplete();
-        rt.DOAnchorMin(targetMin, 0.35f).SetUpdate(true);
-        rt.DOAnchorMax(targetMax, 0.35f).SetUpdate(true);
+        rt.DOAnchorMin(targetAnchorMin, 0.35f).SetUpdate(true);
+        rt.DOAnchorMax(targetAnchorMax, 0.35f).SetUpdate(true);
+        rt.DOPivot(targetPivot, 0.35f).SetUpdate(true);
+        rt.DOAnchorPos(targetAnchoredPosition, 0.35f).SetUpdate(true);
+        rt.DOSizeDelta(targetSizeDelta, 0.35f).SetUpdate(true);
     }
 
     private IEnumerator BlinkPromptCursor()
@@ -398,10 +423,62 @@ public class DialogueManager : SingletonBase<DialogueManager>
         {
             if (promptText != null)
             {
-                promptText.text = showCursor ? "PRESS SPACE TO CONTINUE [█]" : "PRESS SPACE TO CONTINUE [ ]";
+                if (_canWrite)
+                {
+                    promptText.text = showCursor ? "PRESS SPACE TO CONTINUE [█]" : "PRESS SPACE TO CONTINUE [ ]";
+                }
+                else
+                {
+                    promptText.text = showCursor ? "SYSTEM ACTIVE [█]" : "SYSTEM ACTIVE [ ]";
+                }
             }
             showCursor = !showCursor;
             yield return new WaitForSecondsRealtime(0.4f);
+        }
+    }
+
+    public void DisplayTutorialObjective(DialogueSO dialogueSO, string overrideText)
+    {
+        if (dialogueSO == null) return;
+
+        bool isNewDialogue = (currentDialogue != dialogueSO);
+        currentDialogue = dialogueSO;
+        currentDialogueIndex = 0;
+        currentDialogueText = overrideText;
+
+        if (speakerText != null)
+        {
+            speakerText.text = "MISSION OBJECTIVES //";
+        }
+
+        if (!isDialogueActive)
+        {
+            isDialogueActive = true;
+            if (dialogueBox != null)
+            {
+                dialogueBox.SetActive(true);
+                SetPositionMode(DialoguePositionMode.DefaultBottom, true);
+                
+                // CRT flicker opening effect
+                dialogueBox.transform.localScale = new Vector3(1f, 0.05f, 1f);
+                dialogueBox.transform.DOScaleY(1f, 0.2f).SetUpdate(true);
+            }
+            _canWrite = false;
+            if (_currentCoroutine != null) StopCoroutine(_currentCoroutine);
+            _currentCoroutine = StartCoroutine(DialogueCoroutine());
+        }
+        else
+        {
+            if (isNewDialogue)
+            {
+                _canWrite = false;
+                if (_currentCoroutine != null) StopCoroutine(_currentCoroutine);
+                _currentCoroutine = StartCoroutine(DialogueCoroutine());
+            }
+            else if (!_currentlyWriting)
+            {
+                if (text != null) text.text = overrideText;
+            }
         }
     }
 }
