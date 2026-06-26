@@ -29,7 +29,6 @@ public class DayNightManager : SingletonBase<DayNightManager>
     public int raidEnemyReduction = 0;
 
     [Header("UI Reference")]
-    private TMP_Text timerText;
     public float timeRemaining;
     private bool isRaidStarted = false;
     private bool raidHasBegun = false; // True only once enemies have actually spawned
@@ -56,7 +55,6 @@ public class DayNightManager : SingletonBase<DayNightManager>
         raidHasBegun = false;
         raidSettleTimer = 0f;
         nightVis.intensity = 0f;
-        SetupTimerUI();
     }
 
     private void Update()
@@ -65,14 +63,12 @@ public class DayNightManager : SingletonBase<DayNightManager>
         {
             if (isTutorialActive)
             {
-                UpdateTimerText("TUTORIAL ACTIVE");
                 return;
             }
 
             if (timeRemaining > 0)
             {
                 timeRemaining -= Time.deltaTime;
-                UpdateTimerText($"DAY {currentDay} // SUNSET IN {Mathf.CeilToInt(timeRemaining)}");
             }
             else
             {
@@ -111,10 +107,6 @@ public class DayNightManager : SingletonBase<DayNightManager>
                 TriggerUpgradePhase();
                 Debug.Log("triggerPhase");
             }
-            else
-            {
-                UpdateTimerText($"WARNING: RAID ACTIVE // ENEMIES LEFT: {activeEnemies}", new Color(1f, 0.2f, 0.2f));
-            }
         }
     }
 
@@ -142,7 +134,6 @@ public class DayNightManager : SingletonBase<DayNightManager>
         currentPhase = CyclePhase.UpgradePhase;
         // Pause everything immediately — upgrade selection must be timescale-independent
         Time.timeScale = 0f;
-        UpdateTimerText("RAID REPELLED // RESEARCH INCOMING...", new Color(0.2f, 1f, 0.2f));
 
         // Open the upgrade panel
         if (UpgradeManager.Instance != null)
@@ -168,8 +159,6 @@ public class DayNightManager : SingletonBase<DayNightManager>
         Time.timeScale = 1f;
         sun.intensity = 1f;
 
-        UpdateTimerText($"DAY {currentDay} STARTED");
-        
     }
 
     public void CompleteTutorial()
@@ -177,67 +166,4 @@ public class DayNightManager : SingletonBase<DayNightManager>
         isTutorialActive = false;
     }
 
-    private void SetupTimerUI()
-    {
-        // Try to find if a timer text object already exists
-        GameObject timerGo = GameObject.Find("DayNightTimerText");
-        if (timerGo != null)
-        {
-            timerText = timerGo.GetComponent<TMP_Text>();
-            return;
-        }
-
-        // Dynamically instantiate a retro-looking timer HUD at the top of the canvas
-        GameObject hudCanvas = GameObject.Find("HUD Canvas");
-        if (hudCanvas == null) hudCanvas = GameObject.Find("Canvas");
-        if (hudCanvas == null) hudCanvas = FindFirstObjectByType<Canvas>()?.gameObject;
-
-        if (hudCanvas != null)
-        {
-            timerGo = new GameObject("DayNightTimerText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            timerGo.transform.SetParent(hudCanvas.transform, false);
-
-            RectTransform rt = timerGo.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 1f);
-            rt.anchorMax = new Vector2(0.5f, 1f);
-            rt.pivot = new Vector2(0.5f, 1f);
-            rt.anchoredPosition = new Vector2(0f, -60f);
-            rt.sizeDelta = new Vector2(400f, 50f);
-
-            timerText = timerGo.GetComponent<TextMeshProUGUI>();
-            timerText.fontSize = 36;
-            timerText.fontStyle = FontStyles.Bold;
-            timerText.alignment = TextAlignmentOptions.Center;
-            timerText.color = new Color(0.2f, 0.9f, 0.2f, 1f); // Retro terminal green
-            
-            // Add a subtle scanline overlay or shadow
-            Outline outline = timerGo.AddComponent<Outline>();
-            outline.effectColor = new Color(0f, 0f, 0f, 0.75f);
-            outline.effectDistance = new Vector2(1.5f, -1.5f);
-            Canvas canvas = timerText.GetComponentInParent<Canvas>();
-            
-            canvas.worldCamera = Camera.main; 
-        }
-    }
-
-    private void UpdateTimerText(string text, Color? color = null)
-    {
-        if (timerText != null)
-        {
-            timerText.text = text;
-            // currentTime -= Time.deltaTime;
-            // currentTime = Math.Clamp(currentTime, 0.1f, dayDuration);
-            // sun.intensity = timeRemaining / dayDuration;
-            
-            if (color.HasValue)
-            {
-                timerText.color = color.Value;
-            }
-            else
-            {
-                // Default retro terminal green
-                timerText.color = new Color(0.2f, 0.9f, 0.2f, 1f);
-            }
-        }
-    }
 }
