@@ -71,11 +71,12 @@ public class ConveyorItem : MonoBehaviour
         IsMoving = true;
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         if (ItemTracker.HasInstance && isInitialized)
         {
             ItemTracker.Instance.UnregisterItem(this, currentCell);
+            isInitialized = false;
         }
     }
 }

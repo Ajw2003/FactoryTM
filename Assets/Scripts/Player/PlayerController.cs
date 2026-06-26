@@ -170,7 +170,7 @@ public class PlayerController : MonoBehaviour, IHealth
                 FloatingTextSettings settings = Resources.Load<FloatingTextSettings>("FloatingTextSettings/PlayerPickupSettings");
                 FloatingTextManager.Instance.Spawn("+1 " + rType.ToString().ToUpper(), item.transform.position, settings);
 
-                Destroy(item.gameObject);
+                ObjectPoolManager.Instance.ReturnToPool(item.gameObject);
                 return;
             }
 

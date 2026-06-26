@@ -149,8 +149,8 @@ public class MinerLogic : BuildingLogic
             spawnPos.y = (targetCell.y + 1) * tileSize.y;
         }
 
-        // 2. Instantiate the item
-        GameObject newItem = Instantiate(currentMinedItemPrefab, spawnPos, Quaternion.identity);
+        // 2. Instantiate the item from pool
+        GameObject newItem = ObjectPoolManager.Instance.GetPooledObject(currentMinedItemPrefab, spawnPos, Quaternion.identity);
         
         if (Managers.GameStatsManager.HasInstance)
         {
