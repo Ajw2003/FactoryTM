@@ -43,6 +43,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
     [Header("State")]
     private BuildingLogic currentOpenBuilding;
     public BuildingLogic CurrentOpenBuilding => currentOpenBuilding;
+    private BuildingLogic lastConfiguredBuilding = null;
     private Canvas HUDCanvas;
 
     public bool IsPanelOpen => buildingPanel != null && buildingPanel.activeSelf;
@@ -848,6 +849,7 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
 
         buildingPanel.SetActive(false);
         currentOpenBuilding = null;
+        lastConfiguredBuilding = null;
 
         if (resourceInventoryPanel != null)
         {
@@ -872,36 +874,179 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
     {
         if (currentOpenBuilding == null) return;
 
-        // Default layout reset
+        bool needsLayoutSetup = currentOpenBuilding != lastConfiguredBuilding;
+
         RectTransform detailRt = buildingDetailText.GetComponent<RectTransform>();
-        detailRt.anchorMin = new Vector2(0f, 0.48f);
-        detailRt.anchorMax = new Vector2(1f, 0.85f);
-        detailRt.offsetMin = new Vector2(30f, 0f);
-        detailRt.offsetMax = new Vector2(-30f, 0f);
-
         RectTransform fuelBarRt = fuelBarContainer.GetComponent<RectTransform>();
-        fuelBarRt.anchorMin = new Vector2(0.5f, 0.38f);
-        fuelBarRt.anchorMax = new Vector2(0.5f, 0.38f);
-        fuelBarRt.pivot = new Vector2(0.5f, 0.5f);
-        fuelBarRt.anchoredPosition = Vector2.zero;
-        fuelBarRt.sizeDelta = new Vector2(750f, 50f);
 
-        if (idtIntakeDropZone != null)
+        if (needsLayoutSetup)
         {
-            idtIntakeDropZone.SetActive(false);
+            lastConfiguredBuilding = currentOpenBuilding;
+
+            // Default layout reset
+            detailRt.anchorMin = new Vector2(0f, 0.48f);
+            detailRt.anchorMax = new Vector2(1f, 0.85f);
+            detailRt.offsetMin = new Vector2(30f, 0f);
+            detailRt.offsetMax = new Vector2(-30f, 0f);
+
+            fuelBarRt.anchorMin = new Vector2(0.5f, 0.38f);
+            fuelBarRt.anchorMax = new Vector2(0.5f, 0.38f);
+            fuelBarRt.pivot = new Vector2(0.5f, 0.5f);
+            fuelBarRt.anchoredPosition = Vector2.zero;
+            fuelBarRt.sizeDelta = new Vector2(750f, 50f);
+
+            if (idtIntakeDropZone != null)
+            {
+                idtIntakeDropZone.SetActive(false);
+            }
+
+            // Default buttons state
+            actionButton1Go.SetActive(true);
+            actionButton2Go.SetActive(true);
+            actionButton1.onClick.RemoveAllListeners();
+            actionButton2.onClick.RemoveAllListeners();
+
+            // 1. InterDimensionalTransporter (Reactor) UI Setup
+            if (currentOpenBuilding is InterDimensionalTransporter)
+            {
+                buildingTitleText.text = "IDT REACTOR MODULE";
+                
+                // Hide the buttons as drag & drop is used
+                actionButton1Go.SetActive(false);
+                actionButton2Go.SetActive(false);
+
+                // Two-column layout overrides
+                if (idtIntakeDropZone != null)
+                {
+                    idtIntakeDropZone.SetActive(true);
+                }
+
+                detailRt.anchorMin = new Vector2(0.05f, 0.32f);
+                detailRt.anchorMax = new Vector2(0.48f, 0.82f);
+                detailRt.offsetMin = Vector2.zero;
+                detailRt.offsetMax = Vector2.zero;
+
+                fuelBarRt.anchorMin = new Vector2(0.05f, 0.08f);
+                fuelBarRt.anchorMax = new Vector2(0.48f, 0.22f);
+                fuelBarRt.offsetMin = Vector2.zero;
+                fuelBarRt.offsetMax = Vector2.zero;
+            }
+            // 2. Miner UI Setup
+            else if (currentOpenBuilding is MinerLogic miner)
+            {
+                buildingTitleText.text = miner.data.buildingName.ToUpper();
+                fuelBarContainer.SetActive(true);
+
+                // Add Coal
+                actionButton1Text.text = "LOAD 1 COAL";
+                actionButton1.onClick.AddListener(() => {
+                    if (RemoveResource(ResourceType.Coal, 1))
+                    {
+                        miner.fuelRemaining = Mathf.Min(miner.maxFuel, miner.fuelRemaining + 25f);
+                        RefreshBuildingPanel();
+                    }
+                });
+
+                // Deposit all Coal
+                actionButton2Text.text = "LOAD ALL COAL";
+                actionButton2.onClick.AddListener(() => {
+                    int avail = GetResourceCount(ResourceType.Coal);
+                    int needed = Mathf.CeilToInt((miner.maxFuel - miner.fuelRemaining) / 25f);
+                    int transfer = Mathf.Min(avail, needed);
+                    if (transfer > 0)
+                    {
+                        if (RemoveResource(ResourceType.Coal, transfer))
+                        {
+                            miner.fuelRemaining = Mathf.Min(miner.maxFuel, miner.fuelRemaining + (transfer * 25f));
+                            RefreshBuildingPanel();
+                        }
+                    }
+                });
+            }
+            // 3. Furnace UI Setup
+            else if (currentOpenBuilding is Furnace furnace)
+            {
+                buildingTitleText.text = furnace.data.buildingName.ToUpper();
+                fuelBarContainer.SetActive(true);
+
+                // Add Coal
+                actionButton1Text.text = "LOAD 1 COAL";
+                actionButton1.onClick.AddListener(() => {
+                    if (RemoveResource(ResourceType.Coal, 1))
+                    {
+                        furnace.fuelRemaining = Mathf.Min(furnace.maxFuel, furnace.fuelRemaining + 25f);
+                        RefreshBuildingPanel();
+                    }
+                });
+
+                // Deposit all Coal
+                actionButton2Text.text = "LOAD ALL COAL";
+                actionButton2.onClick.AddListener(() => {
+                    int avail = GetResourceCount(ResourceType.Coal);
+                    int needed = Mathf.CeilToInt((furnace.maxFuel - furnace.fuelRemaining) / 25f);
+                    int transfer = Mathf.Min(avail, needed);
+                    if (transfer > 0)
+                    {
+                        if (RemoveResource(ResourceType.Coal, transfer))
+                        {
+                            furnace.fuelRemaining = Mathf.Min(furnace.maxFuel, furnace.fuelRemaining + (transfer * 25f));
+                            RefreshBuildingPanel();
+                        }
+                    }
+                });
+            }
+            // 4. Turret UI Setup
+            else if (currentOpenBuilding is TurretLogic turret)
+            {
+                buildingTitleText.text = turret.data.buildingName.ToUpper();
+                fuelBarContainer.SetActive(true);
+
+                // Insert 30 Ammo
+                actionButton1Text.text = "INSERT 30 AMMO";
+                actionButton1.onClick.AddListener(() => {
+                    if (PlayerController.Instance != null)
+                    {
+                        int load = Mathf.Min(30, PlayerController.Instance.ammoReserve);
+                        load = Mathf.Min(load, turret.maxAmmo - turret.ammoRemaining);
+                        if (load > 0)
+                        {
+                            PlayerController.Instance.ammoReserve -= load;
+                            turret.ammoRemaining += load;
+                            
+                            // Force weapon UI updates
+                            PlayerWeapon playerWeapon = PlayerController.Instance.GetComponentInChildren<PlayerWeapon>();
+                            if (playerWeapon != null) playerWeapon.UpdateAmmoUI();
+
+                            RefreshBuildingPanel();
+                        }
+                    }
+                });
+
+                // Fully Reload
+                actionButton2Text.text = "FULLY RELOAD";
+                actionButton2.onClick.AddListener(() => {
+                    if (PlayerController.Instance != null)
+                    {
+                        int needed = turret.maxAmmo - turret.ammoRemaining;
+                        int load = Mathf.Min(needed, PlayerController.Instance.ammoReserve);
+                        if (load > 0)
+                        {
+                            PlayerController.Instance.ammoReserve -= load;
+                            turret.ammoRemaining += load;
+
+                            PlayerWeapon playerWeapon = PlayerController.Instance.GetComponentInChildren<PlayerWeapon>();
+                            if (playerWeapon != null) playerWeapon.UpdateAmmoUI();
+
+                            RefreshBuildingPanel();
+                        }
+                    }
+                });
+            }
         }
 
-        // Default buttons state
-        actionButton1Go.SetActive(true);
-        actionButton2Go.SetActive(true);
-        actionButton1.onClick.RemoveAllListeners();
-        actionButton2.onClick.RemoveAllListeners();
-
-        // 1. InterDimensionalTransporter (Reactor) UI
+        // ================= DYNAMIC UPDATES (runs every frame) =================
         if (currentOpenBuilding is InterDimensionalTransporter seller)
         {
-            buildingTitleText.text = "IDT REACTOR MODULE";
-            
             string statusStr = seller.fuelRemaining > 0f ? "OPERATIONAL" : "OFFLINE (COAL REQUIRED)";
             if (seller.isUraniumBoosted) statusStr = "BOOSTED // URANIUM ACTIVE (2X VALUE)";
             
@@ -914,32 +1059,9 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
             float fuelPct = seller.fuelRemaining / seller.maxFuel;
             fuelBarFillImage.rectTransform.anchorMax = new Vector2(fuelPct, 1f);
             fuelBarText.text = $"Reactor Fuel: {Mathf.CeilToInt(seller.fuelRemaining)}s / {Mathf.CeilToInt(seller.maxFuel)}s";
-
-            // Hide the buttons as drag & drop is used
-            actionButton1Go.SetActive(false);
-            actionButton2Go.SetActive(false);
-
-            // Two-column layout overrides
-            if (idtIntakeDropZone != null)
-            {
-                idtIntakeDropZone.SetActive(true);
-            }
-
-            detailRt.anchorMin = new Vector2(0.05f, 0.32f);
-            detailRt.anchorMax = new Vector2(0.48f, 0.82f);
-            detailRt.offsetMin = Vector2.zero;
-            detailRt.offsetMax = Vector2.zero;
-
-            fuelBarRt.anchorMin = new Vector2(0.05f, 0.08f);
-            fuelBarRt.anchorMax = new Vector2(0.48f, 0.22f);
-            fuelBarRt.offsetMin = Vector2.zero;
-            fuelBarRt.offsetMax = Vector2.zero;
         }
-        // 2. Miner UI
         else if (currentOpenBuilding is MinerLogic miner)
         {
-            buildingTitleText.text = miner.data.buildingName.ToUpper();
-            
             string statusStr = miner.fuelRemaining > 0f ? "EXTRACTING" : "OUT OF FUEL (COAL REQUIRED)";
             buildingDetailText.text = $"Machine Status: {statusStr}\n" +
                                       $"Extraction Speed: {miner.data.proccessingSpeed / miner.GetTierMultiplier():F1}s / cycle\n" +
@@ -950,39 +1072,11 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
             fuelBarFillImage.rectTransform.anchorMax = new Vector2(fuelPct, 1f);
             fuelBarText.text = $"Boiler Fuel: {Mathf.CeilToInt(miner.fuelRemaining)}% / 100%";
 
-            // Add Coal
-            actionButton1Text.text = "LOAD 1 COAL";
             actionButton1.interactable = GetResourceCount(ResourceType.Coal) > 0;
-            actionButton1.onClick.AddListener(() => {
-                if (RemoveResource(ResourceType.Coal, 1))
-                {
-                    miner.fuelRemaining = Mathf.Min(miner.maxFuel, miner.fuelRemaining + 25f);
-                    RefreshBuildingPanel();
-                }
-            });
-
-            // Deposit all Coal
-            actionButton2Text.text = "LOAD ALL COAL";
-            int avail = GetResourceCount(ResourceType.Coal);
-            actionButton2.interactable = avail > 0;
-            actionButton2.onClick.AddListener(() => {
-                int needed = Mathf.CeilToInt((miner.maxFuel - miner.fuelRemaining) / 25f);
-                int transfer = Mathf.Min(avail, needed);
-                if (transfer > 0)
-                {
-                    if (RemoveResource(ResourceType.Coal, transfer))
-                    {
-                        miner.fuelRemaining = Mathf.Min(miner.maxFuel, miner.fuelRemaining + (transfer * 25f));
-                        RefreshBuildingPanel();
-                    }
-                }
-            });
+            actionButton2.interactable = GetResourceCount(ResourceType.Coal) > 0;
         }
-        // 3. Furnace UI
         else if (currentOpenBuilding is Furnace furnace)
         {
-            buildingTitleText.text = furnace.data.buildingName.ToUpper();
-            
             string statusStr = furnace.fuelRemaining > 0f ? "SMELTING" : "OUT OF FUEL (COAL REQUIRED)";
             buildingDetailText.text = $"Smelter Status: {statusStr}\n" +
                                       $"Cooking Speed: {furnace.data.proccessingSpeed / furnace.GetTierMultiplier():F1}s / cycle\n" +
@@ -993,41 +1087,13 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
             fuelBarFillImage.rectTransform.anchorMax = new Vector2(fuelPct, 1f);
             fuelBarText.text = $"Furnace Fuel: {Mathf.CeilToInt(furnace.fuelRemaining)}% / 100%";
 
-            // Add Coal
-            actionButton1Text.text = "LOAD 1 COAL";
             actionButton1.interactable = GetResourceCount(ResourceType.Coal) > 0;
-            actionButton1.onClick.AddListener(() => {
-                if (RemoveResource(ResourceType.Coal, 1))
-                {
-                    furnace.fuelRemaining = Mathf.Min(furnace.maxFuel, furnace.fuelRemaining + 25f);
-                    RefreshBuildingPanel();
-                }
-            });
-
-            // Deposit all Coal
-            actionButton2Text.text = "LOAD ALL COAL";
-            int avail = GetResourceCount(ResourceType.Coal);
-            actionButton2.interactable = avail > 0;
-            actionButton2.onClick.AddListener(() => {
-                int needed = Mathf.CeilToInt((furnace.maxFuel - furnace.fuelRemaining) / 25f);
-                int transfer = Mathf.Min(avail, needed);
-                if (transfer > 0)
-                {
-                    if (RemoveResource(ResourceType.Coal, transfer))
-                    {
-                        furnace.fuelRemaining = Mathf.Min(furnace.maxFuel, furnace.fuelRemaining + (transfer * 25f));
-                        RefreshBuildingPanel();
-                    }
-                }
-            });
+            actionButton2.interactable = GetResourceCount(ResourceType.Coal) > 0;
         }
-        // 4. Turret UI
         else if (currentOpenBuilding is TurretLogic turret)
         {
-            buildingTitleText.text = turret.data.buildingName.ToUpper();
-            
-            string statusStr = turret.ammoRemaining > 0 ? "ARMED // SCANNING" : "OUT OF AMMO // DEFENSE SYSTEM HALTED";
             int reserve = PlayerController.Instance != null ? PlayerController.Instance.ammoReserve : 0;
+            string statusStr = turret.ammoRemaining > 0 ? "ARMED // SCANNING" : "OUT OF AMMO // DEFENSE SYSTEM HALTED";
 
             buildingDetailText.text = $"Turret Status: {statusStr}\n" +
                                       $"Targeting Range: {turret.targetRange} tiles\n" +
@@ -1038,48 +1104,8 @@ public class BuildingUiManager : SingletonBase<BuildingUiManager>
             fuelBarFillImage.rectTransform.anchorMax = new Vector2(ammoPct, 1f);
             fuelBarText.text = $"Mag Capacity: {turret.ammoRemaining} / {turret.maxAmmo}";
 
-            // Insert 30 Ammo
-            actionButton1Text.text = "INSERT 30 AMMO";
             actionButton1.interactable = reserve > 0 && turret.ammoRemaining < turret.maxAmmo;
-            actionButton1.onClick.AddListener(() => {
-                if (PlayerController.Instance != null)
-                {
-                    int load = Mathf.Min(30, PlayerController.Instance.ammoReserve);
-                    load = Mathf.Min(load, turret.maxAmmo - turret.ammoRemaining);
-                    if (load > 0)
-                    {
-                        PlayerController.Instance.ammoReserve -= load;
-                        turret.ammoRemaining += load;
-                        
-                        // Force weapon UI updates
-                        PlayerWeapon playerWeapon = PlayerController.Instance.GetComponentInChildren<PlayerWeapon>();
-                        if (playerWeapon != null) playerWeapon.UpdateAmmoUI();
-
-                        RefreshBuildingPanel();
-                    }
-                }
-            });
-
-            // Fully Reload
-            actionButton2Text.text = "FULLY RELOAD";
             actionButton2.interactable = reserve > 0 && turret.ammoRemaining < turret.maxAmmo;
-            actionButton2.onClick.AddListener(() => {
-                if (PlayerController.Instance != null)
-                {
-                    int needed = turret.maxAmmo - turret.ammoRemaining;
-                    int load = Mathf.Min(needed, PlayerController.Instance.ammoReserve);
-                    if (load > 0)
-                    {
-                        PlayerController.Instance.ammoReserve -= load;
-                        turret.ammoRemaining += load;
-
-                        PlayerWeapon playerWeapon = PlayerController.Instance.GetComponentInChildren<PlayerWeapon>();
-                        if (playerWeapon != null) playerWeapon.UpdateAmmoUI();
-
-                        RefreshBuildingPanel();
-                    }
-                }
-            });
         }
     }
 

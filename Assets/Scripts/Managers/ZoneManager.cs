@@ -239,7 +239,7 @@ public class ZoneManager : SingletonBase<ZoneManager>
 
     private System.Collections.IEnumerator SmoothPanAndZoom(Vector3 targetPos, float targetSize)
     {
-        if (pixelPerfectCam != null && currentZoomFactor > 1)
+        if (pixelPerfectCam != null)
         {
             pixelPerfectCam.enabled = false;
         }
