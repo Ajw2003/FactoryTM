@@ -11,9 +11,15 @@ public class BaseProjectile : MonoBehaviour
     public int Damage = 1;
     public bool isEnemy = false;
 
-    public void Start()
+    private void OnEnable()
     {
-        Invoke(nameof(Despawn), despawnTime); 
+        CancelInvoke(nameof(Despawn));
+        Invoke(nameof(Despawn), despawnTime);
+    }
+
+    private void OnDisable()
+    {
+        CancelInvoke(nameof(Despawn));
     }
 
     public void Initialize(Vector2 target, float bulletSpeed, int damage)
@@ -40,7 +46,15 @@ public class BaseProjectile : MonoBehaviour
     
     public void Despawn()
     {
-        Destroy(gameObject);
+        PooledObject pooled = GetComponent<PooledObject>();
+        if (pooled != null)
+        {
+            pooled.ReturnToPool();
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
     
     public virtual void CheckForCollisions()
@@ -65,7 +79,7 @@ public class BaseProjectile : MonoBehaviour
                 if (Rectangle2D.CheckCollision(bulletBox, playerBox))
                 {
                     PlayerController.Instance.TakeDamage(Damage);
-                    Destroy(gameObject);
+                    Despawn();
                     return;
                 }
             }
@@ -91,7 +105,7 @@ public class BaseProjectile : MonoBehaviour
                                     if (Rectangle2D.CheckCollision(bulletBox, cellBox))
                                     {
                                         building.TakeDamage(Damage);
-                                        Destroy(gameObject);
+                                        Despawn();
                                         return;
                                     }
                                 }
@@ -114,7 +128,7 @@ public class BaseProjectile : MonoBehaviour
                 if (Rectangle2D.CheckCollision(bulletBox, enemyBox))
                 {
                     currentEnemy.TakeDamage(Damage);
-                    Destroy(gameObject);
+                    Despawn();
                     return; 
                 }
             }
@@ -140,7 +154,7 @@ public class BaseProjectile : MonoBehaviour
                                     if (Rectangle2D.CheckCollision(bulletBox, cellBox))
                                     {
                                         building.TakeDamage(Damage);
-                                        Destroy(gameObject);
+                                        Despawn();
                                         return;
                                     }
                                 }

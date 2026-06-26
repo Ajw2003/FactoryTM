@@ -78,7 +78,7 @@ public class InterDimensionalTransporter : BuildingLogic
                     {
                         UiManager.Instance.ShowGeneralAlert("IDT FUELED: COAL (+20s)", new Color(0.3f, 0.9f, 0.3f));
                     }
-                    Destroy(item.gameObject);
+                    ObjectPoolManager.Instance.ReturnToPool(item.gameObject);
                 }
                 else if (item.resourceType == ResourceType.Uranium)
                 {
@@ -90,7 +90,7 @@ public class InterDimensionalTransporter : BuildingLogic
                     {
                         UiManager.Instance.ShowGeneralAlert("IDT BOOSTED: URANIUM (+60s, 2X OUTPUT)", new Color(0.3f, 1f, 1f));
                     }
-                    Destroy(item.gameObject);
+                    ObjectPoolManager.Instance.ReturnToPool(item.gameObject);
                 }
                 else
                 {
@@ -104,7 +104,7 @@ public class InterDimensionalTransporter : BuildingLogic
                         
                         CurrencyManager.Instance.AddCurrency(saleValue);
                         OnItemSold?.Invoke(item);
-                        Destroy(item.gameObject);
+                        ObjectPoolManager.Instance.ReturnToPool(item.gameObject);
                     }
                     else
                     {

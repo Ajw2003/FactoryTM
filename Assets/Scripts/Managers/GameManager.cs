@@ -200,7 +200,7 @@ public class GameManager : SingletonBase<GameManager>
     public void ProccessSale(GameObject item)
     {
         item.TryGetComponent(out ConveyorItem citem);
-        Destroy(item.gameObject);
+        ObjectPoolManager.Instance.ReturnToPool(item);
         CurrencyManager.Instance.AddCurrency(citem.value);
     }
     

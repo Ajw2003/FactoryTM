@@ -150,13 +150,23 @@ public class FloatingText : MonoBehaviour
         // Self-destruction
         if (elapsed >= fadeDuration)
         {
-            Destroy(gameObject);
+            if (FloatingTextManager.HasInstance)
+            {
+                FloatingTextManager.Instance.ReturnToPool(gameObject, isCanvasUI);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }
 
 public class FloatingTextManager : SingletonBase<FloatingTextManager>
 {
+    private Queue<GameObject> canvasTextPool = new Queue<GameObject>();
+    private Queue<GameObject> worldTextPool = new Queue<GameObject>();
+
     public void Spawn(string text, Vector3 spawnPosition, FloatingTextSettings settings, Color? colorOverride = null)
     {
         if (settings == null)
@@ -165,8 +175,24 @@ public class FloatingTextManager : SingletonBase<FloatingTextManager>
             return;
         }
 
-        // 1. Create GameObject and configure its hierarchy
-        GameObject textObj = new GameObject("DynamicFloatingText");
+        GameObject textObj = null;
+        Queue<GameObject> pool = settings.isCanvasUI ? canvasTextPool : worldTextPool;
+
+        while (pool.Count > 0)
+        {
+            GameObject pooled = pool.Dequeue();
+            if (pooled != null)
+            {
+                textObj = pooled;
+                textObj.SetActive(true);
+                break;
+            }
+        }
+
+        if (textObj == null)
+        {
+            textObj = new GameObject("DynamicFloatingText");
+        }
 
         if (settings.isCanvasUI)
         {
@@ -189,9 +215,23 @@ public class FloatingTextManager : SingletonBase<FloatingTextManager>
             textObj.transform.position = spawnPosition;
         }
 
-        // 2. Add and initialize script
-        FloatingText floatingText = textObj.AddComponent<FloatingText>();
+        FloatingText floatingText = textObj.GetComponent<FloatingText>();
+        if (floatingText == null)
+        {
+            floatingText = textObj.AddComponent<FloatingText>();
+        }
         floatingText.Setup(text, settings, spawnPosition, colorOverride);
+    }
+
+    public void ReturnToPool(GameObject obj, bool isCanvas)
+    {
+        if (obj == null) return;
+        obj.SetActive(false);
+        Queue<GameObject> pool = isCanvas ? canvasTextPool : worldTextPool;
+        if (!pool.Contains(obj))
+        {
+            pool.Enqueue(obj);
+        }
     }
 }
 

@@ -132,7 +132,7 @@ public class BaseWeapon : MonoBehaviour
         for (int i = 0; i < bulletsFired; i++)
         {
             Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position;
-            GameObject bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity);
+            GameObject bullet = ObjectPoolManager.Instance.GetPooledObject(bulletPrefab, spawnPos, Quaternion.identity);
         
             if (bullet.TryGetComponent<BaseProjectile>(out var projectile))
             { 

@@ -133,7 +133,7 @@ public class Furnace : BuildingLogic
         if (platePrefab != null)
         {
             CookItem(platePrefab);
-            Destroy(item.gameObject);
+            ObjectPoolManager.Instance.ReturnToPool(item.gameObject);
         }
         
         itemsInProcess.Remove(item);
@@ -162,8 +162,8 @@ public class Furnace : BuildingLogic
         Vector2 spawnPos = GridManager.Instance.CellToWorldConversion(targetCell);
         
 
-        // 2. Instantiate the item
-        GameObject newItem = Instantiate(currentItemPrefab.gameObject, spawnPos, Quaternion.identity);
+        // 2. Instantiate the item from pool
+        GameObject newItem = ObjectPoolManager.Instance.GetPooledObject(currentItemPrefab.gameObject, spawnPos, Quaternion.identity);
         ConveyorItem itemComp = newItem.GetComponent<ConveyorItem>();
         if (itemComp != null)
         {
