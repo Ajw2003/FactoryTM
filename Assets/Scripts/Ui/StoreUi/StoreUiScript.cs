@@ -44,6 +44,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
 
     // Dynamically created upgrade shop buttons (from UpgradeManager)
     private List<GameObject> dynamicUpgradeButtons = new List<GameObject>();
+    private GameObject[] cachedMapCells = null;
     
 
     
@@ -735,8 +736,6 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
             string currentLineText = line.Substring(0, i);
             terminalLogText.text = baseText + currentLineText + (cursorVisible ? cursorChar : "<color=#00000000>" + cursorChar + "</color>");
             
-            // Auto scroll to bottom
-            Canvas.ForceUpdateCanvases();
             if (terminalScroll != null) terminalScroll.verticalNormalizedPosition = 0f;
             
             yield return new WaitForSecondsRealtime(typeSpeed);
@@ -745,6 +744,10 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         activeLogs.Add(line);
         // Keep logs compact
         if (activeLogs.Count > 25) activeLogs.RemoveAt(0);
+
+        // Auto scroll to bottom only once after the entire line is typed
+        Canvas.ForceUpdateCanvases();
+        if (terminalScroll != null) terminalScroll.verticalNormalizedPosition = 0f;
         
         isTypingLog = false;
         UpdateLogDisplay(true);
@@ -1171,10 +1174,15 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         if (mapGridPanel == null) return;
         if (ZoneManager.Instance == null) return;
 
-        // Clear old children in mapGridPanel
-        foreach (Transform child in mapGridPanel.transform)
+        // Initialize cached cells array if needed
+        if (cachedMapCells == null || cachedMapCells.Length != 25)
         {
-            Destroy(child.gameObject);
+            // Clear any stray children just in case
+            foreach (Transform child in mapGridPanel.transform)
+            {
+                Destroy(child.gameObject);
+            }
+            cachedMapCells = new GameObject[25];
         }
 
         Vector2Int centerZone = ZoneManager.Instance.GetCurrentZone();
@@ -1189,12 +1197,13 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
                 int zoneY = centerZone.y + (2 - row);
                 Vector2Int zoneCoords = new Vector2Int(zoneX, zoneY);
 
-                CreateGridCell(col, row, zoneCoords, cellMargin, cellSize);
+                int cellIndex = row * 5 + col;
+                CreateOrUpdateGridCell(cellIndex, col, row, zoneCoords, cellMargin, cellSize);
             }
         }
     }
 
-    private void CreateGridCell(int col, int row, Vector2Int zoneCoords, float margin, float size)
+    private void CreateOrUpdateGridCell(int cellIndex, int col, int row, Vector2Int zoneCoords, float margin, float size)
     {
         bool isUnlocked = ZoneManager.Instance.IsZoneUnlocked(zoneCoords);
         bool isCurrent = (zoneCoords == ZoneManager.Instance.GetCurrentZone());
@@ -1219,35 +1228,57 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
             }
         }
 
-        // Create the cell GameObject
-        GameObject cellGo = new GameObject($"Cell_{zoneCoords.x}_{zoneCoords.y}", typeof(RectTransform), typeof(Image), typeof(Button));
-        cellGo.transform.SetParent(mapGridPanel.transform, false);
+        GameObject cellGo = cachedMapCells[cellIndex];
+        Image img;
+        Button btn;
+        Outline outline;
+        TextMeshProUGUI txt;
 
-        RectTransform rt = cellGo.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(col * size + margin, (4 - row) * size + margin);
-        rt.anchorMax = new Vector2((col + 1) * size - margin, (4 - row + 1) * size - margin);
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
+        if (cellGo == null)
+        {
+            // Create the cell GameObject
+            cellGo = new GameObject($"Cell_{cellIndex}", typeof(RectTransform), typeof(Image), typeof(Button));
+            cellGo.transform.SetParent(mapGridPanel.transform, false);
 
-        Image img = cellGo.GetComponent<Image>();
-        Button btn = cellGo.GetComponent<Button>();
-        Outline outline = cellGo.AddComponent<Outline>();
-        outline.effectColor = new Color(0.1f, 0.8f, 0.1f, 0.5f);
-        outline.effectDistance = new Vector2(2f, 2f);
+            RectTransform rt = cellGo.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(col * size + margin, (4 - row) * size + margin);
+            rt.anchorMax = new Vector2((col + 1) * size - margin, (4 - row + 1) * size - margin);
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
 
-        // Text display on cell
-        GameObject txtGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
-        txtGo.transform.SetParent(cellGo.transform, false);
-        RectTransform txtRt = txtGo.GetComponent<RectTransform>();
-        txtRt.anchorMin = Vector2.zero;
-        txtRt.anchorMax = Vector2.one;
-        txtRt.offsetMin = new Vector2(5f, 5f);
-        txtRt.offsetMax = new Vector2(-5f, -5f);
-        TextMeshProUGUI txt = txtGo.GetComponent<TextMeshProUGUI>();
-        txt.alignment = TextAlignmentOptions.Center;
-        txt.textWrappingMode = TextWrappingModes.Normal;
-        txt.fontSize = 28;
-        txt.fontStyle = FontStyles.Bold;
+            img = cellGo.GetComponent<Image>();
+            btn = cellGo.GetComponent<Button>();
+            outline = cellGo.AddComponent<Outline>();
+            outline.effectColor = new Color(0.1f, 0.8f, 0.1f, 0.5f);
+            outline.effectDistance = new Vector2(2f, 2f);
+
+            // Text display on cell
+            GameObject txtGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+            txtGo.transform.SetParent(cellGo.transform, false);
+            RectTransform txtRt = txtGo.GetComponent<RectTransform>();
+            txtRt.anchorMin = Vector2.zero;
+            txtRt.anchorMax = Vector2.one;
+            txtRt.offsetMin = new Vector2(5f, 5f);
+            txtRt.offsetMax = new Vector2(-5f, -5f);
+            txt = txtGo.GetComponent<TextMeshProUGUI>();
+            txt.alignment = TextAlignmentOptions.Center;
+            txt.textWrappingMode = TextWrappingModes.Normal;
+            txt.fontSize = 28;
+            txt.fontStyle = FontStyles.Bold;
+
+            cachedMapCells[cellIndex] = cellGo;
+        }
+        else
+        {
+            cellGo.name = $"Cell_{zoneCoords.x}_{zoneCoords.y}";
+            img = cellGo.GetComponent<Image>();
+            btn = cellGo.GetComponent<Button>();
+            outline = cellGo.GetComponent<Outline>();
+            txt = cellGo.GetComponentInChildren<TextMeshProUGUI>();
+        }
+
+        // Clean up previous listeners
+        btn.onClick.RemoveAllListeners();
 
         if (isUnlocked)
         {
@@ -1273,6 +1304,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         else if (isAdjacent)
         {
             // Available to purchase
+            btn.interactable = true;
             img.color = new Color(0.08f, 0.18f, 0.08f, 0.85f);
             outline.effectColor = new Color(0.2f, 0.8f, 0.2f, 0.5f);
             float cost = ZoneManager.Instance.GetUnlockCost();
@@ -1289,6 +1321,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
         else
         {
             // Obscured / Locked zone (out of range)
+            btn.interactable = true;
             img.color = new Color(0.01f, 0.05f, 0.01f, 0.95f);
             outline.effectColor = new Color(0.05f, 0.2f, 0.05f, 0.3f);
             txt.text = "[ ??? ]\nOFFLINE";
@@ -1321,6 +1354,7 @@ public class StoreUiScript: SingletonBase<StoreUiScript>
     private void AddCellHoverEffect(Button btn, TextMeshProUGUI txt, Image img, Outline outline, string origText, bool isPurchasable)
     {
         EventTrigger trigger = btn.gameObject.GetComponent<EventTrigger>() ?? btn.gameObject.AddComponent<EventTrigger>();
+        trigger.triggers.Clear();
 
         EventTrigger.Entry entryEnter = new EventTrigger.Entry();
         entryEnter.eventID = EventTriggerType.PointerEnter;

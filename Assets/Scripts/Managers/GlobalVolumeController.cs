@@ -43,7 +43,7 @@ namespace Managers
         {
             if (globalVolume == null) yield return null;
 
-            while (globalVolume.weight < targetWeight + _tolerance || globalVolume.weight > targetWeight - _tolerance)
+            while (Mathf.Abs(globalVolume.weight - targetWeight) > _tolerance)
             {
                 globalVolume.weight = Mathf.Lerp(globalVolume.weight, targetWeight, fadeIncrement);
                 yield return new WaitForSeconds(fadeIncrement);
