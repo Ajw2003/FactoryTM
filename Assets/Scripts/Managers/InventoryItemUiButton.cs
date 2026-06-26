@@ -177,7 +177,6 @@ public class UiItemButton : MonoBehaviour
             // Visual feedback for successful purchase
             StopActiveCoroutine();
             feedbackCoroutine = StartCoroutine(PunchScaleAndColor());
-            SpawnFloatingText("+1", new Color(0.2f, 0.9f, 0.2f, 1f));
         }
         else
         {
@@ -186,59 +185,6 @@ public class UiItemButton : MonoBehaviour
             StopActiveCoroutine();
             feedbackCoroutine = StartCoroutine(ShakeAndRedFlash());
         }
-    }
-
-    private void SpawnFloatingText(string text, Color color)
-    {
-        // Create a new GameObject for the floating text under this button
-        GameObject floatGo = new GameObject("FloatingText", typeof(RectTransform), typeof(TextMeshProUGUI));
-        floatGo.transform.SetParent(this.transform, false);
-        
-        TextMeshProUGUI tmp = floatGo.GetComponent<TextMeshProUGUI>();
-        tmp.text = text;
-        tmp.color = color;
-        tmp.fontSize = 28;
-        tmp.fontStyle = FontStyles.Bold;
-        tmp.alignment = TextAlignmentOptions.Center;
-        
-        // Copy font if available in countText or priceText
-        if (countText != null) tmp.font = countText.font;
-        else if (priceText != null) tmp.font = priceText.font;
-        
-        // Start floating coroutine
-        StartCoroutine(AnimateFloatingText(floatGo.GetComponent<RectTransform>(), tmp));
-    }
-
-    private System.Collections.IEnumerator AnimateFloatingText(RectTransform rect, TextMeshProUGUI textComp)
-    {
-        float duration = 0.6f;
-        float elapsed = 0f;
-        Vector2 startPos = Vector2.zero; // Local center of the button
-        Vector2 endPos = startPos + new Vector2(0f, 60f); // Float up 60 pixels
-        
-        rect.anchoredPosition = startPos;
-        
-        while (elapsed < duration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = elapsed / duration;
-            
-            // Ease out quad for movement
-            float tEase = t * (2f - t);
-            rect.anchoredPosition = Vector2.Lerp(startPos, endPos, tEase);
-            
-            // Fade out
-            Color c = textComp.color;
-            c.a = Mathf.Lerp(1f, 0f, t);
-            textComp.color = c;
-            
-            // Scale pulse
-            rect.localScale = Vector3.Lerp(Vector3.one * 1.3f, Vector3.one * 0.8f, t);
-            
-            yield return null;
-        }
-        
-        Destroy(rect.gameObject);
     }
 
     private System.Collections.IEnumerator PunchScaleAndColor()
