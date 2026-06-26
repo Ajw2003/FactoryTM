@@ -69,8 +69,9 @@ public class UiManager : SingletonBase<UiManager>
       // Create stamina UI dynamically if not found
       if (healthText != null)
       {
-         staminaGo = Instantiate(healthText.gameObject, PlayerStatsPanel.transform.parent);
+         staminaGo = Instantiate(healthText.gameObject, PlayerStatsPanel.transform);
          staminaGo.name = "StaminaText";
+         staminaGo.transform.SetParent(PlayerStatsPanel.transform);
          staminaText = staminaGo.GetComponent<TMP_Text>();
          staminaContainer = staminaGo;
          

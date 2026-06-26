@@ -26,40 +26,84 @@ public enum TutorialState
     Completed
 }
 
-public class TutorialManager : SingletonBase<TutorialManager>
+public class TutorialManager : StateMachine.BaseStateMachine
 {
+    public static TutorialManager Instance { get; private set; }
+    public static bool HasInstance => Instance != null;
+
     [Header("Dialogue Assets (Bypassed)")]
     public DialogueSO introDialogue;
     public DialogueSO combatDialogue;
 
     [Header("State (ReadOnly)")]
-    public TutorialState currentState = TutorialState.NotStarted;
-    [SerializeField] private int coalFedCount = 0;
-    [SerializeField] private bool hasFiredWeapon = false;
-    [SerializeField] private bool hasDodgeRolled = false;
-    private bool isSubscribed = false;
-
-    // Progression variables
-    [SerializeField] private bool hasOpenedIDT = false;
-    [SerializeField] private bool hasPurchasedWeapon = false;
-    [SerializeField] private bool hasPurchasedAmmo = false;
-    [SerializeField] private bool hasPurchasedHealthPack = false;
-    [SerializeField] private bool hasClearedOutpost = false;
-    [SerializeField] private bool hasSoldAutomatically = false;
+    public TutorialState currentState => (CurrentState as StateMachine.BaseTutorialState)?.StateId ?? TutorialState.NotStarted;
     
-    private bool weaponsUnlockedInShop = false;
-    private bool isAutomaticSaleSubscribed = false;
-    private bool outpostSetupDone = false;
-    private EnemyOutpost tutorialOutpost;
+    [Header("Progression Variables")]
+    public int coalFedCount = 0;
+    public bool hasFiredWeapon = false;
+    public bool hasDodgeRolled = false;
+    public bool isSubscribed = false;
+
+    public bool hasOpenedIDT = false;
+    public bool hasPurchasedWeapon = false;
+    public bool hasPurchasedAmmo = false;
+    public bool hasPurchasedHealthPack = false;
+    public bool hasClearedOutpost = false;
+    public bool hasSoldAutomatically = false;
+    
+    public bool weaponsUnlockedInShop = false;
+    public bool isAutomaticSaleSubscribed = false;
+    public bool outpostSetupDone = false;
+    public EnemyOutpost tutorialOutpost;
 
     private List<GameObject> activeObjectiveObjects = new List<GameObject>();
     private List<TextMeshProUGUI> objectiveTexts = new List<TextMeshProUGUI>();
     private TutorialState lastStateForObjectives = TutorialState.NotStarted;
 
-    protected override void Awake()
+    // State instances
+    public StateMachine.NotStartedTutorialState notStartedState { get; private set; }
+    public StateMachine.BriefIntroTutorialState briefIntroState { get; private set; }
+    public StateMachine.MineCoalManuallyTutorialState mineCoalState { get; private set; }
+    public StateMachine.FuelDCTTutorialState fuelDCTState { get; private set; }
+    public StateMachine.SellOtherOresTutorialState sellOtherOresState { get; private set; }
+    public StateMachine.BuyFirstWeaponTutorialState buyFirstWeaponState { get; private set; }
+    public StateMachine.BuyAmmoHealthTutorialState buyAmmoHealthState { get; private set; }
+    public StateMachine.DestroyEnemyOutpostTutorialState destroyOutpostState { get; private set; }
+    public StateMachine.BuyMinerConveyorsTutorialState buyMinerConveyorsState { get; private set; }
+    public StateMachine.SetupAutomationTutorialState setupAutomationState { get; private set; }
+    public StateMachine.EarnAndExpandTutorialState earnAndExpandState { get; private set; }
+    public StateMachine.DefendFirstRaidTutorialState defendFirstRaidState { get; private set; }
+    public StateMachine.CompletedTutorialState completedState { get; private set; }
+
+    protected void Awake()
     {
-        persistBetweenScenes = false;
-        base.Awake();
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        if (transform.parent != null)
+        {
+            transform.SetParent(null);
+        }
+
+        // Initialize state objects
+        notStartedState = new StateMachine.NotStartedTutorialState(this);
+        briefIntroState = new StateMachine.BriefIntroTutorialState(this);
+        mineCoalState = new StateMachine.MineCoalManuallyTutorialState(this);
+        fuelDCTState = new StateMachine.FuelDCTTutorialState(this);
+        sellOtherOresState = new StateMachine.SellOtherOresTutorialState(this);
+        buyFirstWeaponState = new StateMachine.BuyFirstWeaponTutorialState(this);
+        buyAmmoHealthState = new StateMachine.BuyAmmoHealthTutorialState(this);
+        destroyOutpostState = new StateMachine.DestroyEnemyOutpostTutorialState(this);
+        buyMinerConveyorsState = new StateMachine.BuyMinerConveyorsTutorialState(this);
+        setupAutomationState = new StateMachine.SetupAutomationTutorialState(this);
+        earnAndExpandState = new StateMachine.EarnAndExpandTutorialState(this);
+        defendFirstRaidState = new StateMachine.DefendFirstRaidTutorialState(this);
+        completedState = new StateMachine.CompletedTutorialState(this);
+
+        ChangeState(notStartedState);
     }
 
     private void Start()
@@ -67,7 +111,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
         bool playTutorial = PlayerPrefs.GetInt("PlayTutorial", 1) == 1;
         if (!playTutorial)
         {
-            currentState = TutorialState.Completed;
+            ChangeState(completedState);
             if (DayNightManager.Instance != null)
             {
                 DayNightManager.Instance.isTutorialActive = false;
@@ -114,9 +158,12 @@ public class TutorialManager : SingletonBase<TutorialManager>
         Code.Scripts.EventSystems.EventManager.Instance?.Unsubscribe<EnemyOutpostClearedEvent>(this);
     }
 
-    protected override void OnDestroy()
+    private void OnDestroy()
     {
-        base.OnDestroy();
+        if (Instance == this)
+        {
+            Instance = null;
+        }
         UnsubscribeEvents();
     }
 
@@ -154,8 +201,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
             UiManager.Instance?.UpdateCurrency(0f);
         }
 
-        currentState = TutorialState.BriefIntro;
-        UpdateObjectiveText();
+        ChangeState(briefIntroState);
     }
 
     public bool IsStoreLocked()
@@ -170,142 +216,15 @@ public class TutorialManager : SingletonBase<TutorialManager>
         return currentState == TutorialState.Completed;
     }
 
-    private void Update()
+    public void CheckTransitions()
     {
-        if (currentState == TutorialState.Completed) return;
-
-        bool isStoreOpen = UiManager.Instance != null && UiManager.Instance.StorePanel != null && UiManager.Instance.StorePanel.activeSelf;
-
-        switch (currentState)
+        if (CurrentState is StateMachine.BaseTutorialState tutorialState)
         {
-            case TutorialState.BriefIntro:
-                if (BuildingUiManager.Instance != null && BuildingUiManager.Instance.CurrentOpenBuilding is InterDimensionalTransporter)
-                {
-                    currentState = TutorialState.MineCoalManually;
-                    UpdateObjectiveText();
-                }
-                break;
-
-            case TutorialState.MineCoalManually:
-                int coalCount = BuildingUiManager.Instance != null ? BuildingUiManager.Instance.GetResourceCount(ResourceType.Coal) : 0;
-                if (coalCount >= 5)
-                {
-                    currentState = TutorialState.FuelDCT;
-                    UpdateObjectiveText();
-                }
-                break;
-
-            case TutorialState.FuelDCT:
-                if (coalFedCount >= 5)
-                {
-                    currentState = TutorialState.SellOtherOres;
-                    UpdateObjectiveText();
-                    
-                    if (UiManager.HasInstance)
-                    {
-                        UiManager.Instance.ShowGeneralAlert("IDT ONLINE - COMMERCIAL PORT ONLINE", new Color(0.2f, 1f, 0.2f));
-                    }
-                }
-                break;
-
-            case TutorialState.SellOtherOres:
-                float currentMoney = CurrencyManager.Instance != null ? CurrencyManager.Instance.currentCurrencyValue : 0f;
-                if (currentMoney >= 50f)
-                {
-                    currentState = TutorialState.BuyFirstWeapon;
-                    UpdateObjectiveText();
-                }
-                break;
-
-            case TutorialState.BuyFirstWeapon:
-                UnlockWeaponsInShop();
-                if (hasPurchasedWeapon)
-                {
-                    currentState = TutorialState.BuyAmmoHealth;
-                    UpdateObjectiveText();
-                }
-                break;
-
-            case TutorialState.BuyAmmoHealth:
-                if (hasPurchasedAmmo && hasPurchasedHealthPack && !isStoreOpen)
-                {
-                    currentState = TutorialState.DestroyEnemyOutpost;
-                    UpdateObjectiveText();
-                }
-                break;
-
-            case TutorialState.DestroyEnemyOutpost:
-                SetupOutpostPhase();
-                
-                // Track outpost destruction
-                if (tutorialOutpost != null)
-                {
-                    tutorialOutpost.buildings.RemoveAll(b => b == null);
-                    if (tutorialOutpost.buildings.Count == 0)
-                    {
-                        hasClearedOutpost = true;
-                    }
-                }
-
-                if (hasClearedOutpost)
-                {
-                    currentState = TutorialState.BuyMinerConveyors;
-                    UpdateObjectiveText();
-                }
-                break;
-
-            case TutorialState.BuyMinerConveyors:
-                int minerCount = GetInventoryCount(BuildingType.Miner);
-                int conveyorCount = GetInventoryCount(BuildingType.Conveyor);
-                if (minerCount >= 1 && conveyorCount >= 10 && !isStoreOpen)
-                {
-                    currentState = TutorialState.SetupAutomation;
-                    UpdateObjectiveText();
-                }
-                break;
-
-            case TutorialState.SetupAutomation:
-                // Ensure automated sale listener is active
-                if (InterDimensionalTransporter.Instance != null && !isAutomaticSaleSubscribed)
-                {
-                    InterDimensionalTransporter.Instance.OnItemSold += HandleAutomaticSale;
-                    isAutomaticSaleSubscribed = true;
-                }
-
-                if (hasSoldAutomatically)
-                {
-                    currentState = TutorialState.EarnAndExpand;
-                    UpdateObjectiveText();
-
-                    // Start evening countdown
-                    if (DayNightManager.Instance != null)
-                    {
-                        DayNightManager.Instance.isTutorialActive = false;
-                        DayNightManager.Instance.timeRemaining = 25f; // Night in 25s
-                    }
-                }
-                break;
-
-            case TutorialState.EarnAndExpand:
-                if (DayNightManager.Instance != null && DayNightManager.Instance.currentPhase == CyclePhase.Evening)
-                {
-                    currentState = TutorialState.DefendFirstRaid;
-                    UpdateObjectiveText();
-                }
-                break;
-
-            case TutorialState.DefendFirstRaid:
-                UpdateObjectiveText();
-                if (DayNightManager.Instance != null && DayNightManager.Instance.currentPhase == CyclePhase.UpgradePhase)
-                {
-                    currentState = TutorialState.Completed;
-                    CompleteTutorial(true);
-                }
-                break;
+            tutorialState.CheckTransitions();
         }
     }
 
-    private void SetupOutpostPhase()
+    public void SetupOutpostPhase()
     {
         if (outpostSetupDone) return;
         outpostSetupDone = true;
@@ -335,7 +254,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
         }
     }
 
-    private void UnlockWeaponsInShop()
+    public void UnlockWeaponsInShop()
     {
         if (weaponsUnlockedInShop || UpgradeManager.Instance == null) return;
         weaponsUnlockedInShop = true;
@@ -377,6 +296,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
                 UpgradeManager.Instance.TriggerUpgradesChanged();
             }
             UpdateObjectiveText();
+            CheckTransitions();
         }
     }
 
@@ -386,6 +306,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
         {
             hasPurchasedAmmo = true;
             UpdateObjectiveText();
+            CheckTransitions();
         }
     }
 
@@ -395,15 +316,17 @@ public class TutorialManager : SingletonBase<TutorialManager>
         {
             hasPurchasedHealthPack = true;
             UpdateObjectiveText();
+            CheckTransitions();
         }
     }
 
-    private void HandleAutomaticSale(ConveyorItem item)
+    public void HandleAutomaticSale(ConveyorItem item)
     {
         if (currentState == TutorialState.SetupAutomation)
         {
             hasSoldAutomatically = true;
             UpdateObjectiveText();
+            CheckTransitions();
         }
     }
 
@@ -413,22 +336,25 @@ public class TutorialManager : SingletonBase<TutorialManager>
         {
             coalFedCount++;
             UpdateObjectiveText();
+            CheckTransitions();
         }
     }
 
-    private void HandlePlayerShoot()
+    public void HandlePlayerShoot()
     {
         if (currentState == TutorialState.DefendFirstRaid)
         {
             hasFiredWeapon = true;
+            CheckTransitions();
         }
     }
 
-    private void HandlePlayerDodge()
+    public void HandlePlayerDodge()
     {
         if (currentState == TutorialState.DefendFirstRaid)
         {
             hasDodgeRolled = true;
+            CheckTransitions();
         }
     }
 
@@ -438,10 +364,11 @@ public class TutorialManager : SingletonBase<TutorialManager>
         {
             hasClearedOutpost = true;
             UpdateObjectiveText();
+            CheckTransitions();
         }
     }
 
-    private int GetInventoryCount(BuildingType type)
+    public int GetInventoryCount(BuildingType type)
     {
         if (InventoryManager.Instance == null || InventoryManager.Instance.items == null) return 0;
         var item = InventoryManager.Instance.items.Find(i => i.data != null && i.data.type == type);
@@ -450,7 +377,10 @@ public class TutorialManager : SingletonBase<TutorialManager>
 
     public void CompleteTutorial(bool showVisual)
     {
-        currentState = TutorialState.Completed;
+        if (currentState != TutorialState.Completed)
+        {
+            ChangeState(completedState);
+        }
 
         ClearObjectives();
 
@@ -495,7 +425,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
             DialogueManager.Instance.ToggleUi(false);
         }
 
-        currentState = TutorialState.BriefIntro;
+        ChangeState(notStartedState);
         coalFedCount = 0;
         hasFiredWeapon = false;
         hasDodgeRolled = false;
