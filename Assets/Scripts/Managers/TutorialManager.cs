@@ -52,9 +52,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
     private bool outpostSetupDone = false;
     private EnemyOutpost tutorialOutpost;
 
-    [Header("Objective UI")]
-    private GameObject objectivePanel;
-    private TMP_Text objectiveText;
+    // Objective UI fields removed (delegated to DialogueManager)
 
     protected override void Awake()
     {
@@ -154,7 +152,6 @@ public class TutorialManager : SingletonBase<TutorialManager>
             UiManager.Instance?.UpdateCurrency(0f);
         }
 
-        CreateObjectiveUI(); // Create the programmatic objective HUD
         currentState = TutorialState.BriefIntro;
         UpdateObjectiveText();
     }
@@ -453,10 +450,7 @@ public class TutorialManager : SingletonBase<TutorialManager>
     {
         currentState = TutorialState.Completed;
 
-        if (objectivePanel != null)
-        {
-            Destroy(objectivePanel);
-        }
+        // Objective UI destruction logic removed
 
         if (showVisual)
         {
@@ -607,80 +601,49 @@ public class TutorialManager : SingletonBase<TutorialManager>
         seq.SetUpdate(true);
     }
 
-    private void CreateObjectiveUI()
+    private DialogueSO LoadDialogueSOForState(TutorialState state)
     {
-        GameObject canvasGo = GameObject.Find("HUD Canvas");
-        if (canvasGo == null) canvasGo = GameObject.Find("Canvas");
-        if (canvasGo == null) canvasGo = FindFirstObjectByType<Canvas>()?.gameObject;
-
-        if (canvasGo == null) return;
-
-        objectivePanel = new GameObject("TutorialObjectivePanel", typeof(RectTransform), typeof(Image));
-        objectivePanel.transform.SetParent(canvasGo.transform, false);
-
-        RectTransform panelRt = objectivePanel.GetComponent<RectTransform>();
-        panelRt.anchorMin = new Vector2(1f, 0f);
-        panelRt.anchorMax = new Vector2(1f, 0f);
-        panelRt.pivot = new Vector2(1f, 0f);
-        panelRt.anchoredPosition = new Vector2(-20f, 20f);
-        panelRt.sizeDelta = new Vector2(440f, 180f);
-
-        Image img = objectivePanel.GetComponent<Image>();
-        img.color = new Color(0.01f, 0.05f, 0.01f, 0.9f);
-
-        Outline outline = objectivePanel.AddComponent<Outline>();
-        outline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.7f);
-        outline.effectDistance = new Vector2(2f, -2f);
-
-        GameObject textGo = new GameObject("ObjectiveText", typeof(RectTransform), typeof(TextMeshProUGUI));
-        textGo.transform.SetParent(objectivePanel.transform, false);
-
-        RectTransform textRt = textGo.GetComponent<RectTransform>();
-        textRt.anchorMin = Vector2.zero;
-        textRt.anchorMax = Vector2.one;
-        textRt.offsetMin = new Vector2(15f, 15f);
-        textRt.offsetMax = new Vector2(-15f, -15f);
-
-        objectiveText = textGo.GetComponent<TextMeshProUGUI>();
-        objectiveText.fontSize = 26;
-        objectiveText.color = new Color(0.2f, 1f, 0.2f);
-        objectiveText.alignment = TextAlignmentOptions.TopLeft;
-        objectiveText.enableWordWrapping = true;
-        
-        UpdateObjectiveText();
+        string path = $"Dialogue/Tutorial/{state}";
+        DialogueSO dialogue = Resources.Load<DialogueSO>(path);
+        if (dialogue == null)
+        {
+            Debug.LogError($"TutorialManager: DialogueSO not found at Resources/{path}");
+        }
+        return dialogue;
     }
 
     public void UpdateObjectiveText()
     {
-        if (objectiveText == null) return;
+        if (DialogueManager.Instance == null) return;
 
-        string title = "MISSION OBJECTIVES\n-----------------\n";
-        string body = "";
+        DialogueSO dialogue = LoadDialogueSOForState(currentState);
+        if (dialogue == null || dialogue.dialogues == null || dialogue.dialogues.Length == 0) return;
+
+        string template = dialogue.dialogues[0].text;
+        string body = template;
 
         switch (currentState)
         {
-            case TutorialState.BriefIntro:
-                body = "- Walk to the Interdimensional Transceiver (IDT)\n- Press [E] next to the IDT to open its panel";
-                break;
             case TutorialState.MineCoalManually:
                 int coalCount = BuildingUiManager.Instance != null ? BuildingUiManager.Instance.GetResourceCount(ResourceType.Coal) : 0;
-                body = $"- Hover Coal deposits and hold [E] to mine\n- Mine Coal ({coalCount}/5)";
+                body = string.Format(template, coalCount);
                 break;
+
             case TutorialState.FuelDCT:
-                body = $"- Open the IDT panel (Press [E] next to it)\n- Insert 5 Coal to boot reactor (Coal fed: {coalFedCount}/5)";
+                body = string.Format(template, coalFedCount);
                 break;
+
             case TutorialState.SellOtherOres:
                 float currentMoney = CurrencyManager.Instance != null ? CurrencyManager.Instance.currentCurrencyValue : 0f;
-                body = $"- Manually mine other resources (Iron, Copper)\n- Open the IDT UI & Sell Carried Ores\n- Earn $50 (Current: ${currentMoney:F0}/$50)";
+                body = string.Format(template, currentMoney);
                 break;
-            case TutorialState.BuyFirstWeapon:
-                body = "- Move away from buildings & Press [E] to open Store\n- Purchase your first Weapon Upgrade";
-                break;
+
             case TutorialState.BuyAmmoHealth:
                 string ammoStatus = hasPurchasedAmmo ? "[x]" : "[ ]";
                 string healthStatus = hasPurchasedHealthPack ? "[x]" : "[ ]";
-                body = $"- Navigate the Store and purchase:\n  {ammoStatus} Defensive Ammo Pack\n  {healthStatus} Tactical Health Pack\n- Close the Store menu to progress";
+                body = string.Format(template, ammoStatus, healthStatus);
                 break;
+
             case TutorialState.DestroyEnemyOutpost:
                 int remainingBuildings = 0;
                 if (tutorialOutpost != null)
@@ -688,33 +651,30 @@ public class TutorialManager : SingletonBase<TutorialManager>
                     tutorialOutpost.buildings.RemoveAll(b => b == null);
                     remainingBuildings = tutorialOutpost.buildings.Count;
                 }
-                body = $"- Travel North-East to locate the human outpost\n- Destroy all outpost structures ({remainingBuildings} remaining)";
+                body = string.Format(template, remainingBuildings);
                 break;
+
             case TutorialState.BuyMinerConveyors:
                 int miners = GetInventoryCount(BuildingType.Miner);
                 int conveyors = GetInventoryCount(BuildingType.Conveyor);
-                body = $"- Open the Ship Store catalog (Press [E])\n- Purchase 1 Miner ({miners}/1)\n- Purchase 10 Conveyors ({conveyors}/10)";
+                body = string.Format(template, miners, conveyors);
                 break;
-            case TutorialState.SetupAutomation:
-                body = "- Place Miner on an ore deposit (Press [R] to rotate)\n- Connect Miner to the IDT with Conveyors\n- Wait for 1 automatic resource sale";
-                break;
+
             case TutorialState.EarnAndExpand:
                 float time = DayNightManager.Instance != null ? DayNightManager.Instance.timeRemaining : 0f;
-                body = $"- Automation established!\n- Earn credits and expand your factory\n- Prepare for nightfall ({Mathf.CeilToInt(time)}s remaining)";
+                body = string.Format(template, Mathf.CeilToInt(time));
                 break;
+
             case TutorialState.DefendFirstRaid:
                 int activeEnemies = 0;
                 if (GameManager.Instance != null && GameManager.Instance.ActiveEnemies != null)
                 {
                     activeEnemies = GameManager.Instance.ActiveEnemies.Count;
                 }
-                body = $"- Press [TAB] to enter COMBAT MODE\n- Defend the IDT from invaders!\n- Active Hostiles: {activeEnemies}";
-                break;
-            default:
-                body = "Tutorial complete.";
+                body = string.Format(template, activeEnemies);
                 break;
         }
 
-        objectiveText.text = title + body;
+        DialogueManager.Instance.DisplayTutorialObjective(dialogue, body);
     }
 }
