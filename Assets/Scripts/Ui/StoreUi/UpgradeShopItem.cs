@@ -89,7 +89,6 @@ public class UpgradeShopItem : MonoBehaviour
             case UpgradeType.Building: return definition.buildingToUnlock != null
                 ? definition.buildingToUnlock.buildingName
                 : definition.upgradeName;
-            case UpgradeType.ZoneExpansion: return "EXPAND " + definition.zoneDirection.ToString().ToUpper();
             default: return definition.upgradeName;
         }
     }
@@ -129,27 +128,6 @@ public class UpgradeShopItem : MonoBehaviour
             if (feedbackCoroutine != null) StopCoroutine(feedbackCoroutine);
             feedbackCoroutine = StartCoroutine(ShakeAndRedFlash());
             return;
-        }
-
-        // Check if Zone is already unlocked so we don't charge them for nothing
-        if (definition.type == UpgradeType.ZoneExpansion && ZoneManager.HasInstance)
-        {
-            Vector2Int current = ZoneManager.Instance.GetCurrentZone();
-            Vector2Int target = current;
-            switch (definition.zoneDirection)
-            {
-                case UiZoneButton.Direction.North: target += Vector2Int.up; break;
-                case UiZoneButton.Direction.South: target += Vector2Int.down; break;
-                case UiZoneButton.Direction.East: target += Vector2Int.right; break;
-                case UiZoneButton.Direction.West: target += Vector2Int.left; break;
-            }
-            if (ZoneManager.Instance.IsZoneUnlocked(target))
-            {
-                Debug.Log($"Zone {definition.zoneDirection} is already unlocked!");
-                if (feedbackCoroutine != null) StopCoroutine(feedbackCoroutine);
-                feedbackCoroutine = StartCoroutine(ShakeAndRedFlash());
-                return;
-            }
         }
 
         CurrencyManager.Instance.RemoveCurrency(cost);
@@ -250,21 +228,6 @@ public class UpgradeShopItem : MonoBehaviour
                             HotbarManager.Instance.AssignToSlot(emptySlot, definition.buildingToUnlock);
                         }
                     }
-                }
-                break;
-
-            case UpgradeType.ZoneExpansion:
-                if (ZoneManager.HasInstance)
-                {
-                    bool success = false;
-                    switch (definition.zoneDirection)
-                    {
-                        case UiZoneButton.Direction.North: success = ZoneManager.Instance.UnlockNorth(); break;
-                        case UiZoneButton.Direction.South: success = ZoneManager.Instance.UnlockSouth(); break;
-                        case UiZoneButton.Direction.East: success = ZoneManager.Instance.UnlockEast(); break;
-                        case UiZoneButton.Direction.West: success = ZoneManager.Instance.UnlockWest(); break;
-                    }
-                    if (success) Debug.Log($"Unlocked Zone {definition.zoneDirection}!");
                 }
                 break;
         }
