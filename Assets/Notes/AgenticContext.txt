@@ -1,0 +1,28 @@
+It is great that you have already started using .md files for your game summaries and phase documentation. Establishing a clear, text-based source of truth is the biggest hurdle most developers face when moving to an agent-first workflow. Because you already have that foundation, transitioning to Skills and Subagents in Google Antigravity is absolutely the logical next step.
+
+Moving from passive documentation to active orchestration will shift your workflow from just "asking an AI to write code" to managing a parallel development team. Since you are using Rider and Unity 6, your goal should be to let Antigravity handle the architecture, testing, and pipeline toil in the background while you focus on the core gameplay loop.
+
+Here is a practical roadmap to leverage Skills and Subagents in your current setup.
+
+1. Upgrade Your .md Files into Antigravity "Skills"
+Right now, your markdown files are passive context. By formalizing them into Antigravity Skills, they become active Standard Operating Procedures (SOPs) that govern how your agents behave.
+
+The Architecture Skill: Create a skill specifically for your C# standards. Explicitly instruct the agent to adhere to SOLID principles, use Unity 6's UI Toolkit, and favor composition over inheritance. This is critical: without strict constraints, AI agents are notorious for generating 5,000-line monolithic "spaghetti" scripts that become impossible to debug.
+
+The GDD (Game Design Document) Skill: Map a skill to your gamesummary.md. When you are ready to build a new feature, the agent will cross-reference this skill to ensure the new mechanic actually aligns with your game's core loop and scope.
+
+The Documentation Skill: Create a routine where an agent automatically reads your phases.md and updates your current task lists, git commit logs, or bug trackers after every successful build.
+
+2. Define Specialized Subagents
+Instead of relying on a single orchestrator agent to do everything (and subsequently blowing up its context window), Antigravity allows you to spin up dynamic, specialized subagents to tackle parallel tasks.
+
+The Code Reviewer / Refactoring Subagent: While you are writing logic in Rider, you can have a subagent monitor your code diffs in the background. Its sole job is to review the code against your Architecture Skill and suggest refactors before technical debt accumulates.
+
+The QA Subagent: Game logic can get messy quickly. Spin up a dedicated testing subagent to automatically write NUnit or PlayMode tests for your C# scripts as soon as you finalize a feature.
+
+The Asset Orchestrator: If your game requires external assets, a dedicated subagent can parse your game summary and generate structured prompts for 3D models, 2D UI elements, or sound effects, keeping your Assets/ folder highly organized.
+
+3. Connect to Unity via MCP
+To truly bridge the gap between Antigravity and your Unity 6 / Rider environment, you should integrate MCP (Model Context Protocol) servers.
+
+By connecting Antigravity to an MCP server, your subagents can interact directly with the Unity Editor. Instead of just giving you text instructions, a subagent could potentially trigger editor scripts, run profiling tools, or manipulate scene blueprints dynamically based on the goals you set.

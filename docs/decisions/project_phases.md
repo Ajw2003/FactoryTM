@@ -5,14 +5,15 @@ This document contains the categorized breakdown of the To-Do list for FactoryTM
 ## Phase 1: Critical Bug Fixes & Refactors
 *These tasks fix broken logic or simplify systems that other features rely on. They should be done first to ensure a stable foundation.*
 
-- [ ] **Fix tile placement with items / conveyors moving items to empty spaces**
+- [x] **Fix tile placement with items / conveyors moving items to empty spaces**
   - *How*: Update `Conveyor.cs` item movement logic to check for a valid receiver. Update `PlayerBuildingUiState` to detect loose items on the target grid and block placement or destroy/refund them.
-- [ ] **Deprecate the seller building**
+- [x] **Deprecate the seller building**
   - *How*: Remove from `BuildingManager` purchasable list and `UpgradeManager`. Mark class as `[Obsolete]` and ensure IDT handles all exporting.
-- [ ] **Make objectives and current dialogue scale to fit inside the console window**
+- [x] **Make objectives and current dialogue scale to fit inside the console window**
   - *How*: Adjust UI Canvas using `ContentSizeFitter` and `VerticalLayoutGroup`, or dynamically resize bounds via `EventManager` when Store UI opens.
-- [ ] **Fix objectives not being large enough / copy-pastes**
+- [x] **Fix objectives not being large enough / copy-pastes**
   - *How*: Update Tutorial `ScriptableObject` data with a `ShortObjectiveText` string. Update the HUD to display this short string instead of full dialogue.
+
 
 ## Phase 2: Core Mechanics & UI Polish
 *With bugs fixed, implement missing core mechanics and improve the visual experience.*

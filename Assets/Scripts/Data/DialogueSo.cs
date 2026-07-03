@@ -14,6 +14,7 @@ using UnityEngine;
 public class DialogueSO : ScriptableObject
 {
     public Dialogue[] dialogues;
+    [TextArea(1, 3)] public string shortObjectiveText;
 }
 
 [Serializable]
@@ -33,4 +34,3 @@ public enum DialogueType
     Announcer,
     Npc
 }
-

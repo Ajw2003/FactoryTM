@@ -34,7 +34,32 @@ namespace Placeables
                     ConveyorItem item = items[i];
                     if (!item.IsMoving)
                     {
-                        item.SetTarget(myCell + direction, moveSpeed);
+                        Vector2Int targetCell = myCell + direction;
+                        bool isValidReceiver = false;
+
+                        if (Managers.PlacementManager.HasInstance)
+                        {
+                            var activeBuildings = Managers.PlacementManager.Instance.GetActiveBuildings();
+                            if (activeBuildings.TryGetValue(targetCell, out GameObject targetObj))
+                            {
+                                BuildingLogic targetLogic = targetObj.GetComponent<BuildingLogic>();
+                                if (targetLogic != null && targetLogic.data != null)
+                                {
+                                    Buildings.BuildingType type = targetLogic.data.type;
+                                    if (type == Buildings.BuildingType.Conveyor || 
+                                        type == Buildings.BuildingType.Furnace || 
+                                        type == Buildings.BuildingType.Seller)
+                                    {
+                                        isValidReceiver = true;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (isValidReceiver)
+                        {
+                            item.SetTarget(targetCell, moveSpeed);
+                        }
                     }
                 }
             }

@@ -409,11 +409,11 @@ namespace Managers
                     targetSizeDelta = new Vector2(880f, 180f);
                     break;
                 case DialoguePositionMode.ShopLeftTop:
-                    targetAnchorMin = new Vector2(0.5f, 0f);
-                    targetAnchorMax = new Vector2(0.5f, 0f);
-                    targetPivot = new Vector2(0.5f, 0f);
-                    targetAnchoredPosition = new Vector2(0f, 20f);
-                    targetSizeDelta = new Vector2(880f, 180f);
+                    targetAnchorMin = new Vector2(0f, 0.5f);
+                    targetAnchorMax = new Vector2(0f, 0.5f);
+                    targetPivot = new Vector2(0f, 0.5f);
+                    targetAnchoredPosition = new Vector2(20f, 0f);
+                    targetSizeDelta = new Vector2(500f, 180f);
                     break;
             }
     
@@ -454,7 +454,7 @@ namespace Managers
             bool isNewDialogue = (currentDialogue != dialogueSO);
             currentDialogue = dialogueSO;
             currentDialogueIndex = 0;
-            currentDialogueText = overrideText;
+            currentDialogueText = !string.IsNullOrEmpty(dialogueSO.shortObjectiveText) ? dialogueSO.shortObjectiveText : overrideText;
     
             if (speakerText != null)
             {
@@ -494,5 +494,6 @@ namespace Managers
     }
     
 }
+
 
 

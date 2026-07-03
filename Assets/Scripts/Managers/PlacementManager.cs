@@ -144,6 +144,40 @@ namespace Managers
                     Debug.Log("Don't have " + activeBuilding.buildingName + " in inventory!");
                     return;
                 }
+
+                // Pick up loose items on the tile before placing the building
+                foreach (var occupiedCell in occupiedCells)
+                {
+                    if (ItemTracker.HasInstance)
+                    {
+                        List<ConveyorItem> itemsInCell = ItemTracker.Instance.GetItemsInCell(occupiedCell);
+                        if (itemsInCell != null && itemsInCell.Count > 0)
+                        {
+                            // Copy the list because destroying/pooling the item will modify the original list
+                            List<ConveyorItem> itemsToPickup = new List<ConveyorItem>(itemsInCell);
+                            foreach (var item in itemsToPickup)
+                            {
+                                if (BuildingUiManager.HasInstance)
+                                {
+                                    BuildingUiManager.Instance.AddResource(item.resourceType, 1);
+                                    if (UiManager.HasInstance)
+                                    {
+                                        UiManager.Instance.ShowGeneralAlert($"PICKED UP {item.resourceType.ToString().ToUpper()}", Color.yellow);
+                                    }
+                                }
+                                
+                                if (ObjectPoolManager.HasInstance)
+                                {
+                                    ObjectPoolManager.Instance.ReturnToPool(item.gameObject);
+                                }
+                                else
+                                {
+                                    Destroy(item.gameObject);
+                                }
+                            }
+                        }
+                    }
+                }
     
                 mainTilemap.SetTile(vector3Cell, activeBuilding.rotatedTiles[rotationIndex]);
                 GameObject buildingObj = null;

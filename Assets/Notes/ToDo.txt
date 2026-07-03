@@ -7,11 +7,11 @@
 
 ## ⚙️ Mechanics & Gameplay
 - [ ] Make essential upgrades appear first in upgrade selection (turrets, walls, health packs).
-- [ ] Fix not being able to place a tile on valid empty space with items on it, OR make conveyors not move items onto empty spaces.
+- [x] Fix not being able to place a tile on valid empty space with items on it, OR make conveyors not move items onto empty spaces.
 - [ ] Fully implement finite resources: remove resource nodes when depleted, make the jade/HUD UI correctly display the current value of the ore left.
 - [ ] Implement enemy wandering and differentiation between raiders and spawned enemies in structures.
 - [ ] Make the starting store menu contain only the weapons page and consumables pages (ammo and health), then remove all weapons after player has chosen a weapon and revert store to previous default state.
-- [ ] Deprecate the seller building: ground the UI/design for this change, retain its logic but make it no longer purchasable or an upgrade.
+- [x] Deprecate the seller building: ground the UI/design for this change, retain its logic but make it no longer purchasable or an upgrade.
 
 ## 📖 Story & Narrative
 - [ ] Expand the story: Give the player a reason to progress and a driving motivation. (e.g., sending resources to your home world, but why? Why is your species okay with wiping out Earth?)
@@ -22,12 +22,12 @@
 - [ ] Add a tutorial section for land expansion and explanation of ore value.
 - [ ] Add a tutorial section for purchasing ammo and using health packs (trigger when ammo reserve or health is low).
 - [ ] Create a better shooting tutorial/introduction.
-- [ ] Fix objectives not being large enough / just being copy-pastes of the existing tutorial text; make objectives a quick 1-3 word synopsis of the task.
+- [x] Fix objectives not being large enough / just being copy-pastes of the existing tutorial text; make objectives a quick 1-3 word synopsis of the task.
 - [ ] Make objectives an itemized list that can be listened to, where completion of each individual objective (and all objectives in a given state) fires an event.
 - [ ] Make completing all objectives able to trigger actions (e.g., closing the store UI after all upgrades are purchased).
 
 ## 🎨 UI/UX & Aesthetics
-- [ ] Make objectives and current dialogue scale to fit inside the console window when the store UI window is open.
+- [x] Make objectives and current dialogue scale to fit inside the console window when the store UI window is open.
 - [ ] Make all text larger and ignore blur or chromatic aberration post-process effects.
 - [ ] Improve UI contrast, color choices, and general style unification.
 - [ ] Adjust existing hotbar ui to become a Minecraft-style hotbar UI with scrolling to view the name of a given item.
