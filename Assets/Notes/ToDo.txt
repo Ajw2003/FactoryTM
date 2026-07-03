@@ -63,7 +63,7 @@ Earn and expand until night and then Finally prepare to defend against your firs
 
 
 
-Fully implement finite resources: remove resource nodes when depleted, make the jade/hud ui correctly display the current value of the ore left
+    Fully implement finite resources: remove resource nodes when depleted, make the jade/hud ui correctly display the current value of the ore left
 
 
 Refactor the tutorial into a story with an Ai like cortana breifs you on your mission and teaches you when you get stuck
