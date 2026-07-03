@@ -17,6 +17,8 @@ need reason to progress, something to work towards /  a driving force and motiva
 
 add difficulty settings 
 
+fix objectives not being large enough / just being copypastes of the existing tutorial, make objectives quick a 1-3 word synopsis of the task
+
 add achievements 
 
 lower curve to enemy spawn rates in begining, more time between rounds.
@@ -61,12 +63,16 @@ Earn and expand until night and then Finally prepare to defend against your firs
 
 
 
-Test finite resources removing resource nodes when depleted, you send the items back home through interdimensional transport which you can only have 1 of as they are so expensive to produce, if you die or your interdimensional transport is 
-broken then you lose. 
+Fully implement finite resources: remove resource nodes when depleted, make the jade/hud ui correctly display the current value of the ore left
+
+
+Refactor the tutorial into a story with an Ai like cortana breifs you on your mission and teaches you when you get stuck
+Add a section of the tutorial dictating You send the items back home through interdimensional transport which you can only have 1 of as they are so expensive to produce, 
+if you die or your interdimensional transport is broken then you lose. 
 
 ground the ui and design for this change and deprecate the seller, use its logic but make it no longer purchasable or an upgrade and start the player with one and only 1.
 
-now items are sent home and you are payed by the company per resource and are given a chart of estimated resource value.
+Now items are sent home and you are payed by the company per resource and are given a chart of estimated resource value.
 
 look at mindustery 
 
