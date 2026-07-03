@@ -37,3 +37,7 @@
 - **De-coupling:** Do not directly link gameplay scripts to UI or other unrelated systems. Use the `EventManager` to broadcast changes and allow listeners to react.
 - **Unity 6+ features:** Keep code modern, clean, and optimized, utilizing performance-efficient patterns (e.g., object pooling for conveyors, items, and projectiles via `ObjectPoolManager`).
 - **Clean Code:** Retain file headers, keep methods small, and write explanatory comments for complex game logic.
+
+## Project Memory & Context Retrieval
+- **Read Summary First:** At the start of any conversation or task, you MUST read the master summary file: [project_summary.md](file:///c:/Users/aj/Desktop/GameDev/Projects/FactoryTM/docs/decisions/project_summary.md).
+- **Consult Decision History:** Refer to the session logs under [docs/decisions/](file:///c:/Users/aj/Desktop/GameDev/Projects/FactoryTM/docs/decisions/) to understand past design choices, feature updates, and historical implementations.
