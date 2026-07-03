@@ -1,82 +1,37 @@
+# FactoryTM To-Do List
 
-Balance prices, ore yeilds, ore sale value, enemy spawns, day lengths and damage for and from player
+## ⚖️ Game Balance & Tuning
+- [ ] Balance prices, ore yields, ore sale value, enemy spawns, day lengths, and damage for and from player.
+- [ ] Add logic to change length of days based on certain factors (money earned, upgrades purchased, days survived, etc.). Default the first day to 90 seconds, and subsequent days can be shorter or longer.
+- [ ] Lower the curve for enemy spawn rates in the beginning; add more time between rounds.
 
-add logic to change length of days based on certain factors such as money earned, upgrades purchased, days survived ect.
+## ⚙️ Mechanics & Gameplay
+- [ ] Make essential upgrades appear first in upgrade selection (turrets, walls, health packs).
+- [ ] Fix not being able to place a tile on valid empty space with items on it, OR make conveyors not move items onto empty spaces.
+- [ ] Fully implement finite resources: remove resource nodes when depleted, make the jade/HUD UI correctly display the current value of the ore left.
+- [ ] Implement enemy wandering and differentiation between raiders and spawned enemies in structures.
+- [ ] Make the starting store menu contain only the weapons page and consumables pages (ammo and health), then remove all weapons after player has chosen a weapon and revert store to previous default state.
+- [ ] Deprecate the seller building: ground the UI/design for this change, retain its logic but make it no longer purchasable or an upgrade.
 
-default make the first day 90 seconds and then subsequent days can be shorter or longer depending on various factors. test first day 90, second day 30
+## 📖 Story & Narrative
+- [ ] Expand the story: Give the player a reason to progress and a driving motivation. (e.g., sending resources to your home world, but why? Why is your species okay with wiping out Earth?)
+- [ ] Refactor the tutorial into a story with an AI (like Cortana) that briefs you on your mission and teaches you when you get stuck.
+- [ ] Add a tutorial section dictating that you send items back home through the interdimensional transport (which you can only have 1 of). If you die or your IDT is broken, you lose.
 
-make essential upgrades apear first in upgrade selection, turrets, walls, health packs
+## 🎓 Tutorial System Improvements
+- [ ] Add a tutorial section for land expansion and explanation of ore value.
+- [ ] Add a tutorial section for purchasing ammo and using health packs (trigger when ammo reserve or health is low).
+- [ ] Create a better shooting tutorial/introduction.
+- [ ] Fix objectives not being large enough / just being copy-pastes of the existing tutorial text; make objectives a quick 1-3 word synopsis of the task.
+- [ ] Make objectives an itemized list that can be listened to, where completion of each individual objective (and all objectives in a given state) fires an event.
+- [ ] Make completing all objectives able to trigger actions (e.g., closing the store UI after all upgrades are purchased).
 
-fix not being able to place tile on valid empty space with items on it. or make conveyors not move items onto empty spaces 
+## 🎨 UI/UX & Aesthetics
+- [ ] Make objectives and current dialogue scale to fit inside the console window when the store UI window is open.
+- [ ] Make all text larger and ignore blur or chromatic aberration post-process effects.
+- [ ] Improve UI contrast, color choices, and general style unification.
+- [ ] Add Minecraft-style hotbar UI with scrolling to view the name of a given item.
 
-add section of tutorial for land expansion, as well as explaination of ore value.
-
-add section of tutorial for purchasing ammo and purchasing and using health packs. make it trigger when ammo reserve is low for the ammo tutorial and when health is low for the health packs
-
-need reason to progress, something to work towards /  a driving force and motivation for your actions
-
-add difficulty settings 
-
-fix objectives not being large enough / just being copypastes of the existing tutorial, make objectives quick a 1-3 word synopsis of the task
-
-add achievements 
-
-lower curve to enemy spawn rates in begining, more time between rounds.
-
-Unique play styles you want to play like a full rogue like, buy weapon and player upgrades and scale into the amount of money earned by killing and looting. you play it like a factory sim where you defend your outpost and maxamize your profit expanding outward and growing your opperation, or any mix of the two.
-
-add enemy outposts, toy around with raids not starting until you attack them or wait long enough
-
-make objective text scale to console window when store open 
-
-make all text larger and ignore blur
-
-
-better ui contrast, color choices and general style unification.
-
-do minecraft hotbar scroll to view name of item
-
-better shooting tutorial/ introduction 
-
-enemy wandering and differentiation between raiders and spawned enemies in structures
-
-remove starting items logic in favour of better tutorial logic
-
-add ui to sell other resources in the dct manually 
-
-remove starting weapon from player, and ensure weapon script will not do anything without the weapon stats reference and won't break without one either.
-
-Make starting store menu contain only weapons, ammo and health and then remove all weapons after player has chosen weapon and revert store to previous default state
-
-Fix order of operations for tutorial, land, walk next to and press E to open DCT, objective find and mine coal hover with mouse and press e to mine, 
-walk right near the DCT, press e to open ui and input coal into dct,
-Now that the dct can run mine any other resource and input into machine to sell it, 
-do this until you make 50 dollars then walk away and open store menu
-purchase your first weapon, the others will then lock and removed from the store until unlocked.
-Then navigate the menu and purchase ammo as well as health packs.
-find and destroy an enemy outpost, destroy all buildings to progress.
-Now open store menu and purchase a miner and 10 conveyors
-Select the miner with your scroll or the number keys, rotate to face the output towards the IDT and place on ore node.
-Place conveyors connecting the miner to the IDT and start earning automatically.
-Earn and expand until night and then Finally prepare to defend against your first raid.
-
-
-
-
-    Fully implement finite resources: remove resource nodes when depleted, make the jade/hud ui correctly display the current value of the ore left
-
-
-Refactor the tutorial into a story with an Ai like cortana breifs you on your mission and teaches you when you get stuck
-Add a section of the tutorial dictating You send the items back home through interdimensional transport which you can only have 1 of as they are so expensive to produce, 
-if you die or your interdimensional transport is broken then you lose. 
-
-ground the ui and design for this change and deprecate the seller, use its logic but make it no longer purchasable or an upgrade and start the player with one and only 1.
-
-Now items are sent home and you are payed by the company per resource and are given a chart of estimated resource value.
-
-look at mindustery 
-
-
-BAD: 
-
-I will optimize the collision check in CartelMember.cs to query only the grid cells the enemy overlaps rather than iterating through all buildings in the scene.
+## 🏆 Progression & Meta
+- [ ] Add difficulty settings.
+- [ ] Add achievements.

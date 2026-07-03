@@ -1,5 +1,8 @@
-You are an alien who has crashlanded here on earth and your job is to extract all of the worth from the planet, fight off human combatants, and protect your IDT (InterDimensionalTransport) at all costs.
+You are an alien who has crash landed here on earth and your job is to extract all of the worth from the planet, fight off human combatants, and protect your IDT (InterDimensionalTransport) at all costs.
 
-purchase technology from your company provided device and have it instantly transported into your inventory through the IDT, and feed resources into the IDT to be sent home and to recive your earnings. 
+purchase technology from your company provided device and have it instantly transported into your inventory through the IDT, and feed resources into the IDT to be sent home and to receive your earnings. 
 
 The company back home pays more or less depending on the resource mined and its value, your device will be provided with a chart to estimate ore value.
+
+Unique play styles you want to play like a full rogue like, buy weapon and player upgrades and scale into the amount of money earned by killing and looting. 
+You can play it like a factory sim where you defend your outpost and maximize your profit expanding outward and growing your operation, or any mix of the two.
