@@ -35,3 +35,10 @@
 ## 🏆 Progression & Meta
 - [ ] Add difficulty settings.
 - [ ] Add achievements.
+
+## 🧹 Code Architecture & Cleanup
+- [ ] Fix Namespace Discrepancies: Ensure all scripts in Managers, Weapons, Placeables, Ui, and Nodes have proper namespaces.
+- [ ] Fix Event Namespaces: Standardize all event namespaces to EventTypes.* or Code.Scripts.Interfaces.EventTypes.
+- [ ] Fix Singleton Discrepancies: Make ZoneUiManager inherit from SingletonBase<ZoneUiManager> instead of MonoBehaviour.
+- [ ] Fix StateMachine Discrepancies: Refactor PlayerStateMachine to inherit from StateMachine.BaseStateMachine.
+- [ ] Fix ScriptableObject Placement: Move ResourceNodeDefinition.cs, FloatingTextSettings.cs, and WeaponStats.cs into Assets/Scripts/Data/.

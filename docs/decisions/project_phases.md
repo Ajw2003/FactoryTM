@@ -61,3 +61,17 @@ This document contains the categorized breakdown of the To-Do list for FactoryTM
   - *How*: Create `DifficultyManager` singleton with multipliers for enemy health, damage, and spawn rates.
 - [ ] **Add achievements**
   - *How*: Create `AchievementManager` listening to thresholds (e.g., `EnemiesKilledEvent`). Trigger UI toast and save.
+
+## Phase 6: Code Architecture & Cleanup
+*These tasks resolve discrepancies with the established project conventions to maintain code hygiene and organization.*
+
+- [ ] **Fix Namespace Discrepancies**
+  - *How*: Add appropriate namespaces (e.g., `Managers`, `Weapons`, `Ui`) to all scripts currently lacking them.
+- [ ] **Fix Event Namespaces**
+  - *How*: Standardize event script namespaces (like `InputToggleEvent.cs` and `AudioClipEvent.cs`) to use `EventTypes.*` or `Code.Scripts.Interfaces.EventTypes`.
+- [ ] **Fix Singleton Discrepancies**
+  - *How*: Update `ZoneUiManager.cs` to inherit from `SingletonBase<ZoneUiManager>` instead of `MonoBehaviour`.
+- [ ] **Fix StateMachine Discrepancies**
+  - *How*: Refactor `PlayerStateMachine.cs` to inherit from `StateMachine.BaseStateMachine`.
+- [ ] **Fix ScriptableObject Placement**
+  - *How*: Move `ResourceNodeDefinition.cs`, `FloatingTextSettings.cs`, and `WeaponStats.cs` into the `Assets/Scripts/Data/` folder and update any references.
