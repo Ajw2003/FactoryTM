@@ -1,3 +1,11 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using StateMachine;
 
 namespace StateMachine
@@ -30,3 +38,4 @@ namespace StateMachine
         public virtual void CheckTransitions() {}
     }
 }
+

@@ -1,3 +1,11 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "NewResourceNodeDefinition", menuName = "FactoryTM/Resource Node Definition")]
@@ -9,3 +17,4 @@ public class ResourceNodeDefinition : ScriptableObject
     public float spawnWeight = 1; // For weighted random selection
     public int oreCount = 1000;
 }
+

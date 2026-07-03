@@ -1,4 +1,12 @@
 using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
+using Managers;
 
 namespace StateMachine
 {
@@ -22,3 +30,4 @@ namespace StateMachine
         }
     }
 }
+

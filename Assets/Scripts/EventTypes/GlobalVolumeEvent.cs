@@ -1,8 +1,22 @@
-using EventSystems;
-using UnityEngine;
-
-public class GlobalVolumeEvent : IEvent
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
+namespace EventTypes
 {
-    public float FadeIncrement;
-    public float Target;
+    using EventSystems;
+    using UnityEngine;
+    
+    public class GlobalVolumeEvent : IEvent
+    {
+        public float FadeIncrement;
+        public float Target;
+    }
+    
 }
+
+

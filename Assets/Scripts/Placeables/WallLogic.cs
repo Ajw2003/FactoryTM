@@ -1,15 +1,29 @@
-using UnityEngine;
-
-public class WallLogic : BuildingLogic
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
+namespace Placeables
 {
-    public override void Setup(Buildings.BuildingData buildingData, Vector2Int cell)
+    using UnityEngine;
+    
+    public class WallLogic : BuildingLogic
     {
-        base.Setup(buildingData, cell);
-        Health = Mathf.RoundToInt(data.maxHealth * GetTierMultiplier());
+        public override void Setup(Buildings.BuildingData buildingData, Vector2Int cell)
+        {
+            base.Setup(buildingData, cell);
+            Health = Mathf.RoundToInt(data.maxHealth * GetTierMultiplier());
+        }
+    
+        public override void PerformAction()
+        {
+            // Walls don't perform actions, they just stand there and take damage.
+        }
     }
-
-    public override void PerformAction()
-    {
-        // Walls don't perform actions, they just stand there and take damage.
-    }
+    
 }
+
+

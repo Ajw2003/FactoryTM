@@ -1,3 +1,11 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using System;
 using UnityEngine;
 
@@ -31,3 +39,4 @@ namespace StateMachine
         
     }
 }
+

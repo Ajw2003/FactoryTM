@@ -1,11 +1,25 @@
-using UnityEngine;
-
-public class EnemyWeapon : BaseWeapon
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
+namespace Weapons
 {
-    public float Accuracy;
-
-    public override void Shoot()
+    using UnityEngine;
+    
+    public class EnemyWeapon : BaseWeapon
     {
-        base.Shoot();
+        public float Accuracy;
+    
+        public override void Shoot()
+        {
+            base.Shoot();
+        }
     }
+    
 }
+
+

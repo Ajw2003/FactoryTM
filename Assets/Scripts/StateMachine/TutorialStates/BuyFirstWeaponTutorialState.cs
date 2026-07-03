@@ -1,3 +1,11 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 namespace StateMachine
 {
     public class BuyFirstWeaponTutorialState : BaseTutorialState
@@ -22,3 +30,4 @@ namespace StateMachine
         }
     }
 }
+

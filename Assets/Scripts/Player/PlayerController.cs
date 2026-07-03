@@ -1,3 +1,11 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using System.Collections;
 using Code.Scripts.EventSystems;
 using Code.Scripts.Interfaces.EventTypes;
@@ -59,7 +67,8 @@ public class PlayerController : MonoBehaviour, IHealth
             Instance = this;
         }
 
-        StateMachine = new StateMachine.PlayerStateMachine(this);
+        StateMachine = gameObject.AddComponent<StateMachine.PlayerStateMachine>();
+        StateMachine.Initialize(this);
     }
 
     private void Start()
@@ -105,7 +114,7 @@ public class PlayerController : MonoBehaviour, IHealth
             hotbarUIInstance.gameObject.SetActive(false);
         }
 
-        StateMachine.Initialize(StateMachine.idleState);
+        StateMachine.ChangeState(StateMachine.idleState);
     }
 
     private void OnMoveInput(Vector2 input)
@@ -118,7 +127,7 @@ public class PlayerController : MonoBehaviour, IHealth
         if (canDodgeRoll && !isDodging && currentStamina >= staminaCostPerDodge)
         {
             OnPlayerDodge?.Invoke();
-            StateMachine.TransitionTo(StateMachine.dodgeState);
+            StateMachine.ChangeState(StateMachine.dodgeState);
         }
     }
 
@@ -133,7 +142,7 @@ public class PlayerController : MonoBehaviour, IHealth
 
         if (StateMachine.CurrentState == StateMachine.storeState)
         {
-            StateMachine.TransitionTo(StateMachine.idleState);
+            StateMachine.ChangeState(StateMachine.idleState);
             return;
         }
 
@@ -208,7 +217,7 @@ public class PlayerController : MonoBehaviour, IHealth
             return;
         }
 
-        StateMachine.TransitionTo(StateMachine.storeState);
+        StateMachine.ChangeState(StateMachine.storeState);
     }
 
     public BuildingLogic FindNearestBuildingToPlayer(float maxDistanceInTiles)
@@ -285,7 +294,6 @@ public class PlayerController : MonoBehaviour, IHealth
             }
         }
 
-        StateMachine.Update();
     }
 
     public void ToggleGameMode()
@@ -503,7 +511,7 @@ public class PlayerController : MonoBehaviour, IHealth
     public void Die()
     {
         Debug.Log("die");
-        StateMachine.TransitionTo(StateMachine.deadState);
+        StateMachine.ChangeState(StateMachine.deadState);
         UiManager.Instance.ShowGameOver();
     }
 
@@ -515,3 +523,4 @@ public class PlayerController : MonoBehaviour, IHealth
         }
     }
 }
+

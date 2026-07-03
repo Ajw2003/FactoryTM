@@ -1,6 +1,14 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using EventSystems;
 
-namespace Code.Scripts.EventSystems.EventTypes.InputEvents
+namespace EventTypes.InputEvents
 {
     public class InputToggleEvent : IEvent
     {
@@ -8,3 +16,4 @@ namespace Code.Scripts.EventSystems.EventTypes.InputEvents
         public bool Enable { get; set; }
     }
 }
+

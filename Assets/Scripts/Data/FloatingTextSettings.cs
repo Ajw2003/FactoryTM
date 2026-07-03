@@ -1,3 +1,11 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using UnityEngine;
 using TMPro;
 
@@ -33,3 +41,4 @@ public class FloatingTextSettings : ScriptableObject
     public float floatDistanceY = 0f;
     public float fadeStartNormalized = 0.5f;
 }
+

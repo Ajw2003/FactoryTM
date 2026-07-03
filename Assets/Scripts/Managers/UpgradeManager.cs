@@ -1,3 +1,11 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using System.Collections.Generic;
 using Buildings;
 using Singleton;
@@ -287,3 +295,4 @@ namespace Managers
         }
     }
 }
+

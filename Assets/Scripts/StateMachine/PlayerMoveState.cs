@@ -1,3 +1,11 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using UnityEngine;
 
 namespace StateMachine
@@ -24,7 +32,7 @@ namespace StateMachine
 
             if (inputDirection == Vector2Int.zero)
             {
-                player.StateMachine.TransitionTo(player.StateMachine.idleState);
+                player.StateMachine.ChangeState(player.StateMachine.idleState);
                 return;
             }
 
@@ -95,3 +103,5 @@ namespace StateMachine
         }
     }
 }
+
+

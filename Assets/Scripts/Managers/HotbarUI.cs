@@ -1,56 +1,70 @@
-using TMPro;
-using UnityEngine;
-using UnityEngine.UI;
-
-public class HotbarUI : MonoBehaviour
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
+namespace Managers
 {
-    public GameObject slotPrefab;
-    public Transform slotContainer;
+    using TMPro;
+    using UnityEngine;
+    using UnityEngine.UI;
     
-    private HotbarSlotUI[] slots;
-
-    private void Awake()
+    public class HotbarUI : MonoBehaviour
     {
-        if (slotContainer == null) slotContainer = transform.Find("SlotContainer");
-        if (slotContainer == null) slotContainer = transform; // Fallback to self
-
-        if (slotPrefab == null)
-        {
-            slotPrefab = Resources.Load<GameObject>("prefabs/Ui/HotbarSlot");
-        }
-    }
-
-    private void Start()
-    {
-        InitializeHotbar();
-        if (HotbarManager.Instance != null)
-        {
-            HotbarManager.Instance.onHotbarChange += UpdateUI;
-        }
-    }
-
-    private void InitializeHotbar()
-    {
-        int count = HotbarManager.Instance.slotCount;
-        slots = new HotbarSlotUI[count];
+        public GameObject slotPrefab;
+        public Transform slotContainer;
         
-        for (int i = 0; i < count; i++)
+        private HotbarSlotUI[] slots;
+    
+        private void Awake()
         {
-            GameObject go = Instantiate(slotPrefab, slotContainer);
-            slots[i] = go.GetComponent<HotbarSlotUI>();
-            slots[i].SetSlotIndex(i);
+            if (slotContainer == null) slotContainer = transform.Find("SlotContainer");
+            if (slotContainer == null) slotContainer = transform; // Fallback to self
+    
+            if (slotPrefab == null)
+            {
+                slotPrefab = Resources.Load<GameObject>("prefabs/Ui/HotbarSlot");
+            }
         }
-        UpdateUI();
-    }
-
-    private void UpdateUI()
-    {
-        var hotbarSlots = HotbarManager.Instance.Slots;
-        int selected = HotbarManager.Instance.SelectedSlot;
-        
-        for (int i = 0; i < slots.Length; i++)
+    
+        private void Start()
         {
-            slots[i].UpdateSlot(hotbarSlots[i], i == selected);
+            InitializeHotbar();
+            if (HotbarManager.Instance != null)
+            {
+                HotbarManager.Instance.onHotbarChange += UpdateUI;
+            }
+        }
+    
+        private void InitializeHotbar()
+        {
+            int count = HotbarManager.Instance.slotCount;
+            slots = new HotbarSlotUI[count];
+            
+            for (int i = 0; i < count; i++)
+            {
+                GameObject go = Instantiate(slotPrefab, slotContainer);
+                slots[i] = go.GetComponent<HotbarSlotUI>();
+                slots[i].SetSlotIndex(i);
+            }
+            UpdateUI();
+        }
+    
+        private void UpdateUI()
+        {
+            var hotbarSlots = HotbarManager.Instance.Slots;
+            int selected = HotbarManager.Instance.SelectedSlot;
+            
+            for (int i = 0; i < slots.Length; i++)
+            {
+                slots[i].UpdateSlot(hotbarSlots[i], i == selected);
+            }
         }
     }
+    
 }
+
+

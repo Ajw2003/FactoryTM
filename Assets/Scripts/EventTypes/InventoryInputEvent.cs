@@ -1,7 +1,21 @@
-using EventSystems;
-using UnityEngine;
-
-public class InventoryInputEvent : IEvent
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
+namespace EventTypes
 {
-    public bool IsEnabled;
+    using EventSystems;
+    using UnityEngine;
+    
+    public class InventoryInputEvent : IEvent
+    {
+        public bool IsEnabled;
+    }
+    
 }
+
+

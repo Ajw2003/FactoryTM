@@ -1,3 +1,11 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using System;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -25,3 +33,4 @@ public enum DialogueType
     Announcer,
     Npc
 }
+

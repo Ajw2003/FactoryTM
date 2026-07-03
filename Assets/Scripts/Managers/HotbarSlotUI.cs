@@ -1,75 +1,89 @@
-using Buildings;
-using TMPro;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
-
-public class HotbarSlotUI : MonoBehaviour, IPointerClickHandler
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
+namespace Managers
 {
-    public Image iconImage;
-    public TMP_Text countText;
-    public Image highlightFrame;
-
-    private int slotIndex;
-    private BuildingData currentData;
+    using Buildings;
+    using TMPro;
+    using UnityEngine;
+    using UnityEngine.UI;
+    using UnityEngine.EventSystems;
     
-    private BuildingData lastData;
-    private int lastCount = -1;
-
-    public void SetSlotIndex(int index)
+    public class HotbarSlotUI : MonoBehaviour, IPointerClickHandler
     {
-        slotIndex = index;
-    }
-
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        if (HotbarManager.Instance != null)
+        public Image iconImage;
+        public TMP_Text countText;
+        public Image highlightFrame;
+    
+        private int slotIndex;
+        private BuildingData currentData;
+        
+        private BuildingData lastData;
+        private int lastCount = -1;
+    
+        public void SetSlotIndex(int index)
         {
-            HotbarManager.Instance.SelectSlot(slotIndex);
+            slotIndex = index;
         }
-    }
-
-    public void UpdateSlot(BuildingData data, bool isSelected)
-    {
-        // Calculate new count
-        int newCount = 0;
-        if (data != null)
+    
+        public void OnPointerClick(PointerEventData eventData)
         {
-            var item = InventoryManager.Instance.items.Find(i => i.data == data);
-            newCount = item != null ? item.count : 0;
-        }
-
-        // Detect if item is newly added or count increased
-        bool newlyAdded = (data != null && lastData == null);
-        bool countIncreased = (data != null && lastData == data && newCount > lastCount);
-
-        currentData = data;
-        if (highlightFrame != null) highlightFrame.enabled = isSelected;
-
-        if (data != null)
-        {
-            if (iconImage != null)
+            if (HotbarManager.Instance != null)
             {
-                iconImage.sprite = data.icon;
-                iconImage.enabled = data.icon != null;
+                HotbarManager.Instance.SelectSlot(slotIndex);
             }
-            
-            if (countText != null)
-            {
-                countText.text = newCount.ToString();
-            }
-
-
         }
-        else
+    
+        public void UpdateSlot(BuildingData data, bool isSelected)
         {
-            if (iconImage != null) iconImage.enabled = false;
-            if (countText != null) countText.text = "";
+            // Calculate new count
+            int newCount = 0;
+            if (data != null)
+            {
+                var item = InventoryManager.Instance.items.Find(i => i.data == data);
+                newCount = item != null ? item.count : 0;
+            }
+    
+            // Detect if item is newly added or count increased
+            bool newlyAdded = (data != null && lastData == null);
+            bool countIncreased = (data != null && lastData == data && newCount > lastCount);
+    
+            currentData = data;
+            if (highlightFrame != null) highlightFrame.enabled = isSelected;
+    
+            if (data != null)
+            {
+                if (iconImage != null)
+                {
+                    iconImage.sprite = data.icon;
+                    iconImage.enabled = data.icon != null;
+                }
+                
+                if (countText != null)
+                {
+                    countText.text = newCount.ToString();
+                }
+    
+    
+            }
+            else
+            {
+                if (iconImage != null) iconImage.enabled = false;
+                if (countText != null) countText.text = "";
+            }
+    
+            // Cache for next comparison
+            lastData = data;
+            lastCount = newCount;
         }
-
-        // Cache for next comparison
-        lastData = data;
-        lastCount = newCount;
+    
     }
-
+    
 }
+
+

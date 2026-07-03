@@ -1,13 +1,17 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using System;
 
 namespace StateMachine
 {
-    [Serializable]
-    public class PlayerStateMachine
+    public class PlayerStateMachine : StateMachine.BaseStateMachine
     {
-        public IState CurrentState { get; private set; }
-
-
         // reference to the state objects
         public PlayerMoveState walkState;
         public PlayerIdleState idleState;
@@ -21,8 +25,8 @@ namespace StateMachine
         public event Action<IState> stateChanged;
 
 
-        // pass in necessary parameters into constructor 
-        public PlayerStateMachine(PlayerController player)
+        // pass in necessary parameters into Initialize 
+        public void Initialize(PlayerController player)
         {
             // create an instance for each state and pass in PlayerController
             this.walkState = new PlayerMoveState(player);
@@ -39,7 +43,7 @@ namespace StateMachine
         {
             CurrentState = state;
             state.Enter();
-
+            currentStateName = CurrentState?.ToString();
 
             // notify other objects that state has changed
             stateChanged?.Invoke(state);
@@ -47,26 +51,14 @@ namespace StateMachine
 
 
         // exit this state and enter another
-        public void TransitionTo(IState nextState)
+        public override void ChangeState(IState nextState)
         {
-            CurrentState.Exit();
-            CurrentState = nextState;
-            nextState.Enter();
-
+            base.ChangeState(nextState);
 
             // notify other objects that state has changed
             stateChanged?.Invoke(nextState);
         }
-
-
-        // allow the StateMachine to update this state
-        public void Update()
-        {
-            if (CurrentState != null)
-            {
-                CurrentState.Update();
-            }
-        }
     }
 }
+
 

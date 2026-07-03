@@ -1,3 +1,11 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using UnityEngine;
 
 namespace Singleton
@@ -38,6 +46,7 @@ namespace Singleton
       }    
 
         [SerializeField] protected bool persistBetweenScenes = false;
+        [SerializeField] protected bool detachFromParent = true;
 
         // Protected METHODS: -----------------------------------------------------------------------                
         protected virtual void Awake()        
@@ -53,7 +62,7 @@ namespace Singleton
             _instance = this as T;              
             
             // If the object has a parent, detach it to prevent it from being destroyed with its parent
-            if (transform.parent != null) 
+            if (detachFromParent && transform.parent != null) 
             {
                 transform.SetParent(null);
             }                

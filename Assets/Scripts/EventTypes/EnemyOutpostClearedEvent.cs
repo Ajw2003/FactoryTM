@@ -1,11 +1,25 @@
-using EventSystems;
-
-public class EnemyOutpostClearedEvent : IEvent
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
+namespace EventTypes
 {
-    public EnemyOutpost Outpost { get; }
-
-    public EnemyOutpostClearedEvent(EnemyOutpost outpost)
+    using EventSystems;
+    
+    public class EnemyOutpostClearedEvent : IEvent
     {
-        Outpost = outpost;
+        public EnemyOutpost Outpost { get; }
+    
+        public EnemyOutpostClearedEvent(EnemyOutpost outpost)
+        {
+            Outpost = outpost;
+        }
     }
+    
 }
+
+
