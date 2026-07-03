@@ -30,7 +30,7 @@
 - [ ] Make objectives and current dialogue scale to fit inside the console window when the store UI window is open.
 - [ ] Make all text larger and ignore blur or chromatic aberration post-process effects.
 - [ ] Improve UI contrast, color choices, and general style unification.
-- [ ] Add Minecraft-style hotbar UI with scrolling to view the name of a given item.
+- [ ] Adjust existing hotbar ui to become a Minecraft-style hotbar UI with scrolling to view the name of a given item.
 
 ## 🏆 Progression & Meta
 - [ ] Add difficulty settings.
