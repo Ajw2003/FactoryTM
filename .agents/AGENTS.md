@@ -39,5 +39,6 @@
 - **Clean Code:** Retain file headers, keep methods small, and write explanatory comments for complex game logic.
 
 ## Project Memory & Context Retrieval
-- **Read Summary First:** At the start of any conversation or task, you MUST read the master summary file: [project_summary.md](file:///c:/Users/aj/Desktop/GameDev/Projects/FactoryTM/docs/decisions/project_summary.md).
+- **Read Context First:** At the start of any conversation or task, you MUST read the master summary file: [project_summary.md](file:///c:/Users/aj/Desktop/GameDev/Projects/FactoryTM/docs/decisions/project_summary.md) and the phase task list: [project_phases.md](file:///c:/Users/aj/Desktop/GameDev/Projects/FactoryTM/docs/decisions/project_phases.md).
+- **Update Documentation on Task Completion:** Each time a task is finished, you MUST check that `project_summary.md` and `project_phases.md` are correctly updated with the changes made in the given session.
 - **Consult Decision History:** Refer to the session logs under [docs/decisions/](file:///c:/Users/aj/Desktop/GameDev/Projects/FactoryTM/docs/decisions/) to understand past design choices, feature updates, and historical implementations.
