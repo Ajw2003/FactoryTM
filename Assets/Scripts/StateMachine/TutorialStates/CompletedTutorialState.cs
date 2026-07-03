@@ -1,3 +1,11 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 namespace StateMachine
 {
     public class CompletedTutorialState : BaseTutorialState
@@ -7,3 +15,4 @@ namespace StateMachine
         public CompletedTutorialState(TutorialManager manager) : base(manager) {}
     }
 }
+

@@ -1,26 +1,40 @@
-using UnityEngine;
-
-public class ResourceNode : MonoBehaviour
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
+namespace Nodes
 {
-    public GameObject minedItemPrefab;
-    public float miningSpeed = 1f; // Items per second
-    public int oreCount;
-    public Vector2Int myCell { get; private set; }
-
-    public void Setup(Vector2Int cell)
+    using UnityEngine;
+    
+    public class ResourceNode : MonoBehaviour
     {
-        myCell = cell;
-        if (ResourceManager.Instance != null)
+        public GameObject minedItemPrefab;
+        public float miningSpeed = 1f; // Items per second
+        public int oreCount;
+        public Vector2Int myCell { get; private set; }
+    
+        public void Setup(Vector2Int cell)
         {
-            ResourceManager.Instance.RegisterNode(myCell, this);
+            myCell = cell;
+            if (ResourceManager.Instance != null)
+            {
+                ResourceManager.Instance.RegisterNode(myCell, this);
+            }
+        }
+    
+        private void OnDestroy()
+        {
+            if (ResourceManager.Instance != null)
+            {
+                ResourceManager.Instance.DeregisterNode(myCell);
+            }
         }
     }
-
-    private void OnDestroy()
-    {
-        if (ResourceManager.Instance != null)
-        {
-            ResourceManager.Instance.DeregisterNode(myCell);
-        }
-    }
+    
 }
+
+

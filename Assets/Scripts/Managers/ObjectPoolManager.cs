@@ -1,76 +1,90 @@
-using System.Collections.Generic;
-using UnityEngine;
-using Singleton;
-
-public class ObjectPoolManager : SingletonBase<ObjectPoolManager>
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
+namespace Managers
 {
-    private Dictionary<int, Queue<GameObject>> poolDictionary = new Dictionary<int, Queue<GameObject>>();
-
-    protected override void Awake()
+    using System.Collections.Generic;
+    using UnityEngine;
+    using Singleton;
+    
+    public class ObjectPoolManager : SingletonBase<ObjectPoolManager>
     {
-        persistBetweenScenes = false;
-        base.Awake();
-    }
-
-    public GameObject GetPooledObject(GameObject prefab, Vector3 position, Quaternion rotation)
-    {
-        if (prefab == null) return null;
-
-        int key = prefab.GetInstanceID();
-        if (!poolDictionary.TryGetValue(key, out Queue<GameObject> queue))
+        private Dictionary<int, Queue<GameObject>> poolDictionary = new Dictionary<int, Queue<GameObject>>();
+    
+        protected override void Awake()
         {
-            queue = new Queue<GameObject>();
-            poolDictionary[key] = queue;
+            persistBetweenScenes = false;
+            base.Awake();
         }
-
-        GameObject obj = null;
-        while (queue.Count > 0)
+    
+        public GameObject GetPooledObject(GameObject prefab, Vector3 position, Quaternion rotation)
         {
-            GameObject dequeued = queue.Dequeue();
-            if (dequeued != null)
-            {
-                obj = dequeued;
-                obj.transform.position = position;
-                obj.transform.rotation = rotation;
-                obj.SetActive(true);
-                break;
-            }
-        }
-
-        if (obj == null)
-        {
-            obj = Instantiate(prefab, position, rotation);
-            PooledObject pooledScript = obj.GetComponent<PooledObject>();
-            if (pooledScript == null) pooledScript = obj.AddComponent<PooledObject>();
-            pooledScript.prefabKey = key;
-        }
-
-        return obj;
-    }
-
-    public void ReturnToPool(GameObject obj)
-    {
-        if (obj == null) return;
-
-        PooledObject pooledScript = obj.GetComponent<PooledObject>();
-        if (pooledScript != null)
-        {
-            int key = pooledScript.prefabKey;
+            if (prefab == null) return null;
+    
+            int key = prefab.GetInstanceID();
             if (!poolDictionary.TryGetValue(key, out Queue<GameObject> queue))
             {
                 queue = new Queue<GameObject>();
                 poolDictionary[key] = queue;
             }
-
-            obj.SetActive(false);
-            if (!queue.Contains(obj))
+    
+            GameObject obj = null;
+            while (queue.Count > 0)
             {
-                queue.Enqueue(obj);
+                GameObject dequeued = queue.Dequeue();
+                if (dequeued != null)
+                {
+                    obj = dequeued;
+                    obj.transform.position = position;
+                    obj.transform.rotation = rotation;
+                    obj.SetActive(true);
+                    break;
+                }
+            }
+    
+            if (obj == null)
+            {
+                obj = Instantiate(prefab, position, rotation);
+                PooledObject pooledScript = obj.GetComponent<PooledObject>();
+                if (pooledScript == null) pooledScript = obj.AddComponent<PooledObject>();
+                pooledScript.prefabKey = key;
+            }
+    
+            return obj;
+        }
+    
+        public void ReturnToPool(GameObject obj)
+        {
+            if (obj == null) return;
+    
+            PooledObject pooledScript = obj.GetComponent<PooledObject>();
+            if (pooledScript != null)
+            {
+                int key = pooledScript.prefabKey;
+                if (!poolDictionary.TryGetValue(key, out Queue<GameObject> queue))
+                {
+                    queue = new Queue<GameObject>();
+                    poolDictionary[key] = queue;
+                }
+    
+                obj.SetActive(false);
+                if (!queue.Contains(obj))
+                {
+                    queue.Enqueue(obj);
+                }
+            }
+            else
+            {
+                Destroy(obj); // Fallback if not instantiated via object pooling
             }
         }
-        else
-        {
-            Destroy(obj); // Fallback if not instantiated via object pooling
-        }
     }
+    
 }
+
+

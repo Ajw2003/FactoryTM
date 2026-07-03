@@ -1,40 +1,54 @@
-using TMPro;
-using UnityEngine;
-
-public class AmmoUI : MonoBehaviour
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
+namespace Ui
 {
-    [SerializeField] private TMP_Text ammoText;
-    [SerializeField] private GameObject reloadingText;
-
-    private void Awake()
+    using TMPro;
+    using UnityEngine;
+    
+    public class AmmoUI : MonoBehaviour
     {
-        if (ammoText == null)
+        [SerializeField] private TMP_Text ammoText;
+        [SerializeField] private GameObject reloadingText;
+    
+        private void Awake()
         {
-            Transform t = transform.Find("AmmoText");
-            if (t == null) t = transform.Find("Text");
-            if (t != null) ammoText = t.GetComponent<TMP_Text>();
+            if (ammoText == null)
+            {
+                Transform t = transform.Find("AmmoText");
+                if (t == null) t = transform.Find("Text");
+                if (t != null) ammoText = t.GetComponent<TMP_Text>();
+            }
+    
+            if (reloadingText == null)
+            {
+                Transform t = transform.Find("ReloadingText");
+                if (t != null) reloadingText = t.gameObject;
+            }
         }
-
-        if (reloadingText == null)
+    
+        public void UpdateAmmo(int current, int max, int reserve)
         {
-            Transform t = transform.Find("ReloadingText");
-            if (t != null) reloadingText = t.gameObject;
+            if (ammoText != null)
+            {
+                ammoText.text = $"{current} / {max} [{reserve}]";
+            }
+        }
+    
+        public void SetReloading(bool isReloading)
+        {
+            if (reloadingText != null)
+            {
+                reloadingText.SetActive(isReloading);
+            }
         }
     }
-
-    public void UpdateAmmo(int current, int max, int reserve)
-    {
-        if (ammoText != null)
-        {
-            ammoText.text = $"{current} / {max} [{reserve}]";
-        }
-    }
-
-    public void SetReloading(bool isReloading)
-    {
-        if (reloadingText != null)
-        {
-            reloadingText.SetActive(isReloading);
-        }
-    }
+    
 }
+
+

@@ -1,3 +1,11 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using Code.Scripts.EventSystems;
 using UnityEngine;
 
@@ -33,8 +41,10 @@ namespace StateMachine
             if (inputDirection != Vector2Int.zero)
             {
                 player.SetLastMoveDirection(inputDirection);
-                player.StateMachine.TransitionTo(player.StateMachine.walkState);
+                player.StateMachine.ChangeState(player.StateMachine.walkState);
             }
         }
     }
 }
+
+

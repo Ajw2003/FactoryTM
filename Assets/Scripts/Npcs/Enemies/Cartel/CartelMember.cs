@@ -1,3 +1,11 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -312,3 +320,4 @@ public class CartelMember : MonoBehaviour, IHealth
         Destroy(this.gameObject);
     }
 }
+

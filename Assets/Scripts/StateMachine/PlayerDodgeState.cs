@@ -1,3 +1,11 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using Code.Scripts.EventSystems;
 using UnityEngine;
 
@@ -28,7 +36,7 @@ namespace StateMachine
         {
             if (!player.IsDodging())
             {
-                player.StateMachine.TransitionTo(player.StateMachine.idleState);
+                player.StateMachine.ChangeState(player.StateMachine.idleState);
             }
         }
 
@@ -41,3 +49,5 @@ namespace StateMachine
         }
     }
 }
+
+

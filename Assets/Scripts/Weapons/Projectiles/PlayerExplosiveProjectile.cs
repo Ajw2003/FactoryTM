@@ -1,142 +1,156 @@
-using System.Collections.Generic;
-using UnityEngine;
-
-public class PlayerExplosiveProjectile : BaseProjectile
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
+namespace Weapons
 {
-    public float ExplosionRadius = 2f;
-
-    public override void InitializeExplosive(float radius)
+    using System.Collections.Generic;
+    using UnityEngine;
+    
+    public class PlayerExplosiveProjectile : BaseProjectile
     {
-        ExplosionRadius = radius;
-    }
-
-    public override void CheckForCollisions()
-    {
-        float angleRadians = transform.eulerAngles.z * Mathf.Deg2Rad;
-        Rectangle2D bulletBox = TwoDCollision.CreateFromRotated(
-            transform.position.x, transform.position.y, width, height, angleRadians);
-
-        bool hit = false;
-        
-        // Check active enemies (Cartel members)
-        for (int i = GameManager.Instance.ActiveEnemies.Count - 1; i >= 0; i--)
+        public float ExplosionRadius = 2f;
+    
+        public override void InitializeExplosive(float radius)
         {
-            CartelMember currentEnemy = GameManager.Instance.ActiveEnemies[i];
-            if (currentEnemy == null) continue;
-            Rectangle2D enemyBox = currentEnemy.GetBoundingBox();
-
-            if (Rectangle2D.CheckCollision(bulletBox, enemyBox))
+            ExplosionRadius = radius;
+        }
+    
+        public override void CheckForCollisions()
+        {
+            float angleRadians = transform.eulerAngles.z * Mathf.Deg2Rad;
+            Rectangle2D bulletBox = TwoDCollision.CreateFromRotated(
+                transform.position.x, transform.position.y, width, height, angleRadians);
+    
+            bool hit = false;
+            
+            // Check active enemies (Cartel members)
+            for (int i = GameManager.Instance.ActiveEnemies.Count - 1; i >= 0; i--)
             {
-                hit = true;
-                break; 
+                CartelMember currentEnemy = GameManager.Instance.ActiveEnemies[i];
+                if (currentEnemy == null) continue;
+                Rectangle2D enemyBox = currentEnemy.GetBoundingBox();
+    
+                if (Rectangle2D.CheckCollision(bulletBox, enemyBox))
+                {
+                    hit = true;
+                    break; 
+                }
+            }
+    
+            // Check enemy-owned buildings
+            if (!hit && PlacementManager.HasInstance && GridManager.Instance != null)
+            {
+                Vector2 tileSize = GridManager.Instance.tileSize;
+                int minX = Mathf.FloorToInt((transform.position.x - width / 2f) / tileSize.x);
+                int maxX = Mathf.FloorToInt((transform.position.x + width / 2f) / tileSize.x);
+                int minY = Mathf.FloorToInt((transform.position.y - height / 2f) / tileSize.y);
+                int maxY = Mathf.FloorToInt((transform.position.y + height / 2f) / tileSize.y);
+    
+                var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
+                for (int x = minX; x <= maxX; x++)
+                {
+                    for (int y = minY; y <= maxY; y++)
+                    {
+                        Vector2Int cell = new Vector2Int(x, y);
+                        if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
+                        {
+                            if (buildingObj != null)
+                            {
+                                BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
+                                if (building != null && building.Health > 0 && building.isEnemyOwned)
+                                {
+                                    Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
+                                    Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
+                                    if (Rectangle2D.CheckCollision(bulletBox, cellBox))
+                                    {
+                                        hit = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (hit) break;
+                }
+            }
+            
+            if (hit)
+            {
+                Explode();
             }
         }
-
-        // Check enemy-owned buildings
-        if (!hit && PlacementManager.HasInstance && GridManager.Instance != null)
+    
+        private void Explode()
         {
-            Vector2 tileSize = GridManager.Instance.tileSize;
-            int minX = Mathf.FloorToInt((transform.position.x - width / 2f) / tileSize.x);
-            int maxX = Mathf.FloorToInt((transform.position.x + width / 2f) / tileSize.x);
-            int minY = Mathf.FloorToInt((transform.position.y - height / 2f) / tileSize.y);
-            int maxY = Mathf.FloorToInt((transform.position.y + height / 2f) / tileSize.y);
-
-            var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
-            for (int x = minX; x <= maxX; x++)
+            // Deal damage to all enemies within ExplosionRadius
+            for (int i = GameManager.Instance.ActiveEnemies.Count - 1; i >= 0; i--)
             {
-                for (int y = minY; y <= maxY; y++)
+                CartelMember enemy = GameManager.Instance.ActiveEnemies[i];
+                if (enemy == null) continue;
+                
+                float dist = Vector2.Distance(transform.position, enemy.transform.position);
+                if (dist <= ExplosionRadius)
                 {
-                    Vector2Int cell = new Vector2Int(x, y);
-                    if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
+                    enemy.TakeDamage(Damage);
+                }
+            }
+    
+            // Deal damage to all enemy-owned buildings within ExplosionRadius
+            if (PlacementManager.HasInstance && GridManager.Instance != null)
+            {
+                Vector2 tileSize = GridManager.Instance.tileSize;
+                int minX = Mathf.FloorToInt((transform.position.x - ExplosionRadius) / tileSize.x);
+                int maxX = Mathf.FloorToInt((transform.position.x + ExplosionRadius) / tileSize.x);
+                int minY = Mathf.FloorToInt((transform.position.y - ExplosionRadius) / tileSize.y);
+                int maxY = Mathf.FloorToInt((transform.position.y + ExplosionRadius) / tileSize.y);
+    
+                HashSet<BuildingLogic> damagedBuildings = new HashSet<BuildingLogic>();
+                var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
+    
+                for (int x = minX; x <= maxX; x++)
+                {
+                    for (int y = minY; y <= maxY; y++)
                     {
-                        if (buildingObj != null)
+                        Vector2Int cell = new Vector2Int(x, y);
+                        if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
                         {
-                            BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
-                            if (building != null && building.Health > 0 && building.isEnemyOwned)
+                            if (buildingObj != null)
                             {
-                                Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
-                                Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
-                                if (Rectangle2D.CheckCollision(bulletBox, cellBox))
+                                BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
+                                if (building != null && building.Health > 0 && building.isEnemyOwned)
                                 {
-                                    hit = true;
-                                    break;
+                                    damagedBuildings.Add(building);
                                 }
                             }
                         }
                     }
                 }
-                if (hit) break;
-            }
-        }
-        
-        if (hit)
-        {
-            Explode();
-        }
-    }
-
-    private void Explode()
-    {
-        // Deal damage to all enemies within ExplosionRadius
-        for (int i = GameManager.Instance.ActiveEnemies.Count - 1; i >= 0; i--)
-        {
-            CartelMember enemy = GameManager.Instance.ActiveEnemies[i];
-            if (enemy == null) continue;
-            
-            float dist = Vector2.Distance(transform.position, enemy.transform.position);
-            if (dist <= ExplosionRadius)
-            {
-                enemy.TakeDamage(Damage);
-            }
-        }
-
-        // Deal damage to all enemy-owned buildings within ExplosionRadius
-        if (PlacementManager.HasInstance && GridManager.Instance != null)
-        {
-            Vector2 tileSize = GridManager.Instance.tileSize;
-            int minX = Mathf.FloorToInt((transform.position.x - ExplosionRadius) / tileSize.x);
-            int maxX = Mathf.FloorToInt((transform.position.x + ExplosionRadius) / tileSize.x);
-            int minY = Mathf.FloorToInt((transform.position.y - ExplosionRadius) / tileSize.y);
-            int maxY = Mathf.FloorToInt((transform.position.y + ExplosionRadius) / tileSize.y);
-
-            HashSet<BuildingLogic> damagedBuildings = new HashSet<BuildingLogic>();
-            var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
-
-            for (int x = minX; x <= maxX; x++)
-            {
-                for (int y = minY; y <= maxY; y++)
+    
+                foreach (var building in damagedBuildings)
                 {
-                    Vector2Int cell = new Vector2Int(x, y);
-                    if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
+                    float dist = Vector2.Distance(transform.position, building.transform.position);
+                    if (dist <= ExplosionRadius)
                     {
-                        if (buildingObj != null)
-                        {
-                            BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
-                            if (building != null && building.Health > 0 && building.isEnemyOwned)
-                            {
-                                damagedBuildings.Add(building);
-                            }
-                        }
+                        building.TakeDamage(Damage);
                     }
                 }
             }
-
-            foreach (var building in damagedBuildings)
-            {
-                float dist = Vector2.Distance(transform.position, building.transform.position);
-                if (dist <= ExplosionRadius)
-                {
-                    building.TakeDamage(Damage);
-                }
-            }
+            
+            // Spawn Visual Effect
+            GameObject visualObj = new GameObject("ExplosionVisual");
+            visualObj.transform.position = transform.position;
+            ExplosionVisual visual = visualObj.AddComponent<ExplosionVisual>();
+            visual.Initialize(ExplosionRadius, new Color(1f, 0.5f, 0f)); // Orange for player
+    
+            Destroy(gameObject);
         }
-        
-        // Spawn Visual Effect
-        GameObject visualObj = new GameObject("ExplosionVisual");
-        visualObj.transform.position = transform.position;
-        ExplosionVisual visual = visualObj.AddComponent<ExplosionVisual>();
-        visual.Initialize(ExplosionRadius, new Color(1f, 0.5f, 0f)); // Orange for player
-
-        Destroy(gameObject);
     }
+    
 }
+
+

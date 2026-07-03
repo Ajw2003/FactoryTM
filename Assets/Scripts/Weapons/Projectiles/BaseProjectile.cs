@@ -1,112 +1,123 @@
-using System;
-using UnityEngine;
-
-public class BaseProjectile : MonoBehaviour
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
+namespace Weapons
 {
-    private Vector2 direction;
-    private float speed;
-    public float despawnTime = 2f;
-    public float width = 0.2f;
-    public float height = 0.5f;
-    public int Damage = 1;
-    public bool isEnemy = false;
-
-    private void OnEnable()
+    using System;
+    using UnityEngine;
+    
+    public class BaseProjectile : MonoBehaviour
     {
-        CancelInvoke(nameof(Despawn));
-        Invoke(nameof(Despawn), despawnTime);
-    }
-
-    private void OnDisable()
-    {
-        CancelInvoke(nameof(Despawn));
-    }
-
-    public void Initialize(Vector2 target, float bulletSpeed, int damage)
-    {
-        speed = bulletSpeed;
-        direction = (target - (Vector2)transform.position).normalized;
-        Damage = damage;
+        private Vector2 direction;
+        private float speed;
+        public float despawnTime = 2f;
+        public float width = 0.2f;
+        public float height = 0.5f;
+        public int Damage = 1;
+        public bool isEnemy = false;
+    
+        private void OnEnable()
+        {
+            CancelInvoke(nameof(Despawn));
+            Invoke(nameof(Despawn), despawnTime);
+        }
+    
+        private void OnDisable()
+        {
+            CancelInvoke(nameof(Despawn));
+        }
+    
+        public void Initialize(Vector2 target, float bulletSpeed, int damage)
+        {
+            speed = bulletSpeed;
+            direction = (target - (Vector2)transform.position).normalized;
+            Damage = damage;
+            
+            // Optional: Rotate the bullet to face the target
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        }
+    
+        public virtual void InitializeExplosive(float radius)
+        {
+            // Overridden by explosive projectiles
+        }
+    
+        private void Update()
+        {
+            transform.Translate(direction * (speed * Time.deltaTime), Space.World);
+            CheckForCollisions();
+        }
         
-        // Optional: Rotate the bullet to face the target
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-    }
-
-    public virtual void InitializeExplosive(float radius)
-    {
-        // Overridden by explosive projectiles
-    }
-
-    private void Update()
-    {
-        transform.Translate(direction * (speed * Time.deltaTime), Space.World);
-        CheckForCollisions();
-    }
-    
-    public void Despawn()
-    {
-        PooledObject pooled = GetComponent<PooledObject>();
-        if (pooled != null)
+        public void Despawn()
         {
-            pooled.ReturnToPool();
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
-    
-    public virtual void CheckForCollisions()
-    {
-        float angleRadians = transform.eulerAngles.z * Mathf.Deg2Rad;
-        Rectangle2D bulletBox = TwoDCollision.CreateFromRotated(
-            transform.position.x, transform.position.y, width, height, angleRadians);
-
-        if (GridManager.Instance == null) return;
-        Vector2 tileSize = GridManager.Instance.tileSize;
-        int minX = Mathf.FloorToInt((transform.position.x - width / 2f) / tileSize.x);
-        int maxX = Mathf.FloorToInt((transform.position.x + width / 2f) / tileSize.x);
-        int minY = Mathf.FloorToInt((transform.position.y - height / 2f) / tileSize.y);
-        int maxY = Mathf.FloorToInt((transform.position.y + height / 2f) / tileSize.y);
-
-        if (isEnemy)
-        {
-            // Collide with player
-            if (PlayerController.Instance != null && PlayerController.Instance.gameObject.activeInHierarchy)
+            PooledObject pooled = GetComponent<PooledObject>();
+            if (pooled != null)
             {
-                Rectangle2D playerBox = PlayerController.Instance.GetBoundingBox();
-                if (Rectangle2D.CheckCollision(bulletBox, playerBox))
-                {
-                    PlayerController.Instance.TakeDamage(Damage);
-                    Despawn();
-                    return;
-                }
+                pooled.ReturnToPool();
             }
-
-            // Collide with player-owned buildings (where !building.isEnemyOwned and not conveyor)
-            if (PlacementManager.HasInstance)
+            else
             {
-                var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
-                for (int x = minX; x <= maxX; x++)
+                Destroy(gameObject);
+            }
+        }
+        
+        public virtual void CheckForCollisions()
+        {
+            float angleRadians = transform.eulerAngles.z * Mathf.Deg2Rad;
+            Rectangle2D bulletBox = TwoDCollision.CreateFromRotated(
+                transform.position.x, transform.position.y, width, height, angleRadians);
+    
+            if (GridManager.Instance == null) return;
+            Vector2 tileSize = GridManager.Instance.tileSize;
+            int minX = Mathf.FloorToInt((transform.position.x - width / 2f) / tileSize.x);
+            int maxX = Mathf.FloorToInt((transform.position.x + width / 2f) / tileSize.x);
+            int minY = Mathf.FloorToInt((transform.position.y - height / 2f) / tileSize.y);
+            int maxY = Mathf.FloorToInt((transform.position.y + height / 2f) / tileSize.y);
+    
+            if (isEnemy)
+            {
+                // Collide with player
+                if (PlayerController.Instance != null && PlayerController.Instance.gameObject.activeInHierarchy)
                 {
-                    for (int y = minY; y <= maxY; y++)
+                    Rectangle2D playerBox = PlayerController.Instance.GetBoundingBox();
+                    if (Rectangle2D.CheckCollision(bulletBox, playerBox))
                     {
-                        Vector2Int cell = new Vector2Int(x, y);
-                        if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
+                        PlayerController.Instance.TakeDamage(Damage);
+                        Despawn();
+                        return;
+                    }
+                }
+    
+                // Collide with player-owned buildings (where !building.isEnemyOwned and not conveyor)
+                if (PlacementManager.HasInstance)
+                {
+                    var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
+                    for (int x = minX; x <= maxX; x++)
+                    {
+                        for (int y = minY; y <= maxY; y++)
                         {
-                            if (buildingObj != null)
+                            Vector2Int cell = new Vector2Int(x, y);
+                            if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
                             {
-                                BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
-                                if (building != null && building.Health > 0 && !building.isEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
+                                if (buildingObj != null)
                                 {
-                                    Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
-                                    Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
-                                    if (Rectangle2D.CheckCollision(bulletBox, cellBox))
+                                    BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
+                                    if (building != null && building.Health > 0 && !building.isEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
                                     {
-                                        building.TakeDamage(Damage);
-                                        Despawn();
-                                        return;
+                                        Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
+                                        Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
+                                        if (Rectangle2D.CheckCollision(bulletBox, cellBox))
+                                        {
+                                            building.TakeDamage(Damage);
+                                            Despawn();
+                                            return;
+                                        }
                                     }
                                 }
                             }
@@ -114,48 +125,48 @@ public class BaseProjectile : MonoBehaviour
                     }
                 }
             }
-        }
-        else
-        {
-            // Collide with active enemies (Cartel members)
-            for (int i = GameManager.Instance.ActiveEnemies.Count - 1; i >= 0; i--)
+            else
             {
-                CartelMember currentEnemy = GameManager.Instance.ActiveEnemies[i];
-                if (currentEnemy == null) continue;
-
-                Rectangle2D enemyBox = currentEnemy.GetBoundingBox();
-
-                if (Rectangle2D.CheckCollision(bulletBox, enemyBox))
+                // Collide with active enemies (Cartel members)
+                for (int i = GameManager.Instance.ActiveEnemies.Count - 1; i >= 0; i--)
                 {
-                    currentEnemy.TakeDamage(Damage);
-                    Despawn();
-                    return; 
-                }
-            }
-
-            // Collide with enemy-owned buildings
-            if (PlacementManager.HasInstance)
-            {
-                var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
-                for (int x = minX; x <= maxX; x++)
-                {
-                    for (int y = minY; y <= maxY; y++)
+                    CartelMember currentEnemy = GameManager.Instance.ActiveEnemies[i];
+                    if (currentEnemy == null) continue;
+    
+                    Rectangle2D enemyBox = currentEnemy.GetBoundingBox();
+    
+                    if (Rectangle2D.CheckCollision(bulletBox, enemyBox))
                     {
-                        Vector2Int cell = new Vector2Int(x, y);
-                        if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
+                        currentEnemy.TakeDamage(Damage);
+                        Despawn();
+                        return; 
+                    }
+                }
+    
+                // Collide with enemy-owned buildings
+                if (PlacementManager.HasInstance)
+                {
+                    var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
+                    for (int x = minX; x <= maxX; x++)
+                    {
+                        for (int y = minY; y <= maxY; y++)
                         {
-                            if (buildingObj != null)
+                            Vector2Int cell = new Vector2Int(x, y);
+                            if (activeBuildings.TryGetValue(cell, out GameObject buildingObj))
                             {
-                                BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
-                                if (building != null && building.Health > 0 && building.isEnemyOwned)
+                                if (buildingObj != null)
                                 {
-                                    Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
-                                    Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
-                                    if (Rectangle2D.CheckCollision(bulletBox, cellBox))
+                                    BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
+                                    if (building != null && building.Health > 0 && building.isEnemyOwned)
                                     {
-                                        building.TakeDamage(Damage);
-                                        Despawn();
-                                        return;
+                                        Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
+                                        Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
+                                        if (Rectangle2D.CheckCollision(bulletBox, cellBox))
+                                        {
+                                            building.TakeDamage(Damage);
+                                            Despawn();
+                                            return;
+                                        }
                                     }
                                 }
                             }
@@ -165,4 +176,7 @@ public class BaseProjectile : MonoBehaviour
             }
         }
     }
+    
 }
+
+

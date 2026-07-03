@@ -1,94 +1,108 @@
-using System.Collections.Generic;
-using Buildings;
-using Singleton;
-using UnityEngine;
-
-public class HotbarManager : SingletonBase<HotbarManager>
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
+namespace Managers
 {
-    public int slotCount = 9;
-    private BuildingData[] hotbarSlots;
-    private int selectedSlot = 0;
-
-    protected override void Awake()
+    using System.Collections.Generic;
+    using Buildings;
+    using Singleton;
+    using UnityEngine;
+    
+    public class HotbarManager : SingletonBase<HotbarManager>
     {
-        persistBetweenScenes = false;
-        base.Awake();
-        hotbarSlots = new BuildingData[slotCount];
-    }
-
-    private void Update()
-    {
-        if (PauseManager.IsPaused) return;
-
-        if (PlayerController.Instance == null || PlayerController.Instance.currentMode == PlayerController.PlayerMode.Combat) return;
-
-        // Handle slot selection via number keys
-        for (int i = 0; i < slotCount; i++)
+        public int slotCount = 9;
+        private BuildingData[] hotbarSlots;
+        private int selectedSlot = 0;
+    
+        protected override void Awake()
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+            persistBetweenScenes = false;
+            base.Awake();
+            hotbarSlots = new BuildingData[slotCount];
+        }
+    
+        private void Update()
+        {
+            if (PauseManager.IsPaused) return;
+    
+            if (PlayerController.Instance == null || PlayerController.Instance.currentMode == PlayerController.PlayerMode.Combat) return;
+    
+            // Handle slot selection via number keys
+            for (int i = 0; i < slotCount; i++)
             {
-                SelectSlot(i);
+                if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+                {
+                    SelectSlot(i);
+                }
+            }
+            
+            // Scroll wheel selection
+            float scroll = Input.GetAxis("Mouse ScrollWheel");
+            if (scroll > 0f) SelectSlot((selectedSlot + 1) % slotCount);
+            else if (scroll < 0f) SelectSlot((selectedSlot - 1 + slotCount) % slotCount);
+        }
+    
+        private void Start()
+        {
+            if (InventoryManager.Instance != null)
+            {
+                InventoryManager.Instance.onInventoryChange += RefreshUI;
             }
         }
-        
-        // Scroll wheel selection
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (scroll > 0f) SelectSlot((selectedSlot + 1) % slotCount);
-        else if (scroll < 0f) SelectSlot((selectedSlot - 1 + slotCount) % slotCount);
-    }
-
-    private void Start()
-    {
-        if (InventoryManager.Instance != null)
+    
+        protected override void OnDestroy()
         {
-            InventoryManager.Instance.onInventoryChange += RefreshUI;
+            base.OnDestroy();
+            if (InventoryManager.HasInstance)
+            {
+                InventoryManager.Instance.onInventoryChange -= RefreshUI;
+            }
+        }
+    
+        public void SelectSlot(int index)
+        {
+            if (index < 0 || index >= slotCount) return;
+            selectedSlot = index;
+            
+            // Update PlacementManager
+            if (PlacementManager.Instance != null)
+            {
+                PlacementManager.Instance.ChangeSelection(hotbarSlots[selectedSlot]);
+            }
+            
+            RefreshUI();
+        }
+    
+        public void AssignToSlot(int slotIndex, BuildingData data)
+        {
+            if (slotIndex < 0 || slotIndex >= slotCount) return;
+            hotbarSlots[slotIndex] = data;
+            
+            RefreshUI();
+        }
+    
+        public BuildingData GetSelectedBuilding()
+        {
+            return hotbarSlots[selectedSlot];
+        }
+    
+        public int SelectedSlot => selectedSlot;
+        public BuildingData[] Slots => hotbarSlots;
+    
+        public delegate void OnHotbarChange();
+        public event OnHotbarChange onHotbarChange;
+    
+        private void RefreshUI()
+        {
+            onHotbarChange?.Invoke();
         }
     }
-
-    protected override void OnDestroy()
-    {
-        base.OnDestroy();
-        if (InventoryManager.HasInstance)
-        {
-            InventoryManager.Instance.onInventoryChange -= RefreshUI;
-        }
-    }
-
-    public void SelectSlot(int index)
-    {
-        if (index < 0 || index >= slotCount) return;
-        selectedSlot = index;
-        
-        // Update PlacementManager
-        if (PlacementManager.Instance != null)
-        {
-            PlacementManager.Instance.ChangeSelection(hotbarSlots[selectedSlot]);
-        }
-        
-        RefreshUI();
-    }
-
-    public void AssignToSlot(int slotIndex, BuildingData data)
-    {
-        if (slotIndex < 0 || slotIndex >= slotCount) return;
-        hotbarSlots[slotIndex] = data;
-        
-        RefreshUI();
-    }
-
-    public BuildingData GetSelectedBuilding()
-    {
-        return hotbarSlots[selectedSlot];
-    }
-
-    public int SelectedSlot => selectedSlot;
-    public BuildingData[] Slots => hotbarSlots;
-
-    public delegate void OnHotbarChange();
-    public event OnHotbarChange onHotbarChange;
-
-    private void RefreshUI()
-    {
-        onHotbarChange?.Invoke();
-    }
+    
 }
+
+

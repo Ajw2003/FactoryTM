@@ -1,7 +1,21 @@
-using EventSystems;
-using UnityEngine;
-
-public class RespawnPlayerEvent : IEvent
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
+namespace EventTypes
 {
-    public Transform Destination;
+    using EventSystems;
+    using UnityEngine;
+    
+    public class RespawnPlayerEvent : IEvent
+    {
+        public Transform Destination;
+    }
+    
 }
+
+

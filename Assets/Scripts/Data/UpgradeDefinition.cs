@@ -1,3 +1,11 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using UnityEngine;
 using Buildings;
 
@@ -47,3 +55,4 @@ public class UpgradeDefinition : ScriptableObject
     [Header("Status (Runtime Only)")]
     public bool isResearched = false;
 }
+

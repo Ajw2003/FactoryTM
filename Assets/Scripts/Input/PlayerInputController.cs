@@ -1,6 +1,14 @@
+using Managers;
+using Placeables;
+using Ui;
+using Weapons;
+using Nodes;
+using EventTypes;
+using EventTypes.InventoryEvents;
+using EventTypes.InputEvents;
 using System;
 using Code.Scripts.EventSystems;
-using Code.Scripts.EventSystems.EventTypes.InputEvents;
+using EventTypes.InputEvents;
 using Code.Scripts.Interfaces.EventTypes;
 using NUnit.Framework.Internal.Execution;
 using StateMachine;
