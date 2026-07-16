@@ -343,7 +343,7 @@ namespace Managers
             text.fontSize = 36;
             text.color = new Color(0.2f, 0.9f, 0.2f, 1f);
             text.alignment = TextAlignmentOptions.TopLeft;
-            text.enableWordWrapping = true;
+            text.textWrappingMode = TextWrappingModes.Normal;
             text.text = "";
             text.raycastTarget = false;
     

@@ -40,7 +40,7 @@ namespace Managers
     
         [Header("UI Reference")]
         public float timeRemaining;
-        private bool isRaidStarted = false;
+
         private bool raidHasBegun = false; // True only once enemies have actually spawned
         private float raidSettleTimer = 0f;
         private const float RaidSettleDelay = 3f; // Wait at least this many seconds after raid start before checking completion
@@ -61,7 +61,7 @@ namespace Managers
             currentTime = dayDuration;
             currentPhase = CyclePhase.Day;
             timeRemaining = dayDuration;
-            isRaidStarted = false;
+
             raidHasBegun = false;
             raidSettleTimer = 0f;
             nightVis.intensity = 0f;
@@ -124,7 +124,7 @@ namespace Managers
         {
             nightVis.intensity = 5.0f;
             currentPhase = CyclePhase.Evening;
-            isRaidStarted = true;
+
             raidHasBegun = false;
             raidSettleTimer = 0f;
     
@@ -163,7 +163,7 @@ namespace Managers
             nightVis.intensity = 0f;
             currentPhase = CyclePhase.Day;
             timeRemaining = dayDuration;
-            isRaidStarted = false;
+
             raidHasBegun = false;
             raidSettleTimer = 0f;
             Time.timeScale = 1f;

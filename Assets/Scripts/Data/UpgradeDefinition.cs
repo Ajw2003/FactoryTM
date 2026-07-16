@@ -20,7 +20,6 @@ public enum UpgradeType
     RaidReduction,
     DodgeRoll,
     StaminaBoost,
-    ZoneExpansion,
     BuildingTierUp
 }
 

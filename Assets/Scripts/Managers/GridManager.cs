@@ -43,6 +43,9 @@ namespace Managers
         
         
     
+        [Header("Grid Configuration")]
+        public Vector2Int baseChunkSize = new Vector2Int(30, 15);
+        
         public void Start()
         {
             if (GameManager.Instance != null && GameManager.Instance.MainTileMap != null)
@@ -57,12 +60,8 @@ namespace Managers
                 Debug.LogWarning("GridManager: GameManager or MainTileMap is null in Start.");
             }
     
-            // Dynamically center on the center of the starting zone (0, 0) if ZoneManager is present
-            if (ZoneManager.Instance != null)
-            {
-                Vector2Int zoneSize = ZoneManager.Instance.zoneSizeInTiles;
-                center = new Vector2Int(zoneSize.x / 2, zoneSize.y / 2);
-            }
+            // Set center to the middle of the initial chunk area
+            center = new Vector2Int(baseChunkSize.x / 2, baseChunkSize.y / 2);
         }
     }
     

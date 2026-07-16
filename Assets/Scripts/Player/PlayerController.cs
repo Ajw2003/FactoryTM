@@ -79,12 +79,7 @@ public class PlayerController : MonoBehaviour, IHealth
         UiManager.Instance.UpdateStamina(currentStamina, maxStamina);
 
         Vector2Int spawnCell = Vector2Int.zero;
-        if (ZoneManager.Instance != null)
-        {
-            Vector2Int zoneSize = ZoneManager.Instance.zoneSizeInTiles;
-            spawnCell = new Vector2Int(zoneSize.x / 2, zoneSize.y / 2);
-        }
-        else if (GridManager.Instance != null)
+        if (GridManager.Instance != null)
         {
             spawnCell = GridManager.Instance.center;
         }
@@ -404,24 +399,7 @@ public class PlayerController : MonoBehaviour, IHealth
         // Dodge 2 tiles
         Vector2Int targetCell = currentCell + (direction * (int)dodgeDistance);
         
-        // Basic boundary check - don't dodge into locked zones or off-screen
-        // For simplicity, we'll just check if the final destination is valid
-        Vector3Int targetCellV3 = new Vector3Int(targetCell.x, targetCell.y, 0);
-        Vector2Int targetZone = ZoneManager.Instance.GetZoneCoordsFromTile(targetCellV3);
-        
-        if (!ZoneManager.Instance.IsZoneUnlocked(targetZone))
-        {
-            // If 2 tiles is too far, try 1 tile
-            targetCell = currentCell + direction;
-            targetCellV3 = new Vector3Int(targetCell.x, targetCell.y, 0);
-            targetZone = ZoneManager.Instance.GetZoneCoordsFromTile(targetCellV3);
-            if (!ZoneManager.Instance.IsZoneUnlocked(targetZone))
-            {
-                isMoving = false;
-                isDodging = false;
-                yield break;
-            }
-        }
+
 
         currentCell = targetCell;
         targetPosition = GridManager.Instance.CellToWorldConversion(currentCell);

@@ -42,10 +42,7 @@ namespace Managers
             {
                 CurrencyManager.Instance.onCurrencyChange += RefreshUI;
             }
-            if (ZoneManager.Instance != null)
-            {
-                ZoneManager.Instance.onZoneUnlock += RefreshUI;
-            }
+
         }
     
         private void OnDisable()
@@ -58,10 +55,7 @@ namespace Managers
             {
                 CurrencyManager.Instance.onCurrencyChange -= RefreshUI;
             }
-            if (ZoneManager.HasInstance)
-            {
-                ZoneManager.Instance.onZoneUnlock -= RefreshUI;
-            }
+
         }
     
         private void Start()

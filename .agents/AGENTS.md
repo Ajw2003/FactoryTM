@@ -1,4 +1,14 @@
-# FactoryTM Project Rules & Context
+# FactoryTM Project Rules, Context, Requirements
+
+## Requirments
+
+- Always follow the bellow guidelines 
+- Ensure solution compiles and project compiles before finishing a task.
+
+## Global Pipeline Respect
+- **Global Agentic Pipeline:** You MUST read and respect the rules in the `global-agentic-pipeline` skill (located in the global skills directory) for every action. Do not ignore its constraints and guidelines.
+
+
 
 ## Project Overview
 - FactoryTM is a Unity-based factory automation game.
@@ -38,7 +48,4 @@
 - **Unity 6+ features:** Keep code modern, clean, and optimized, utilizing performance-efficient patterns (e.g., object pooling for conveyors, items, and projectiles via `ObjectPoolManager`).
 - **Clean Code:** Retain file headers, keep methods small, and write explanatory comments for complex game logic.
 
-## Project Memory & Context Retrieval
-- **Read Context First:** At the start of any conversation or task, you MUST read the master summary file: [project_summary.md](file:///c:/Users/aj/Desktop/GameDev/Projects/FactoryTM/docs/decisions/project_summary.md) and the phase task list: [project_phases.md](file:///c:/Users/aj/Desktop/GameDev/Projects/FactoryTM/docs/decisions/project_phases.md).
-- **Update Documentation on Task Completion:** Each time a task is finished, you MUST check that `project_summary.md` and `project_phases.md` are correctly updated with the changes made in the given session.
-- **Consult Decision History:** Refer to the session logs under [docs/decisions/](file:///c:/Users/aj/Desktop/GameDev/Projects/FactoryTM/docs/decisions/) to understand past design choices, feature updates, and historical implementations.
+

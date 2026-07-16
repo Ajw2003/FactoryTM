@@ -115,7 +115,7 @@ namespace Weapons
             }
         }
     
-        private void OnDisable()
+        protected override void OnDisable()
         {
             isReloading = false;
             canFire = true;

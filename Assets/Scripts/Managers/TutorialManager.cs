@@ -239,13 +239,7 @@ namespace Managers
             if (outpostSetupDone) return;
             outpostSetupDone = true;
     
-            // 1. Force unlock the North, East, and North-East zones so camera can follow
-            if (ZoneManager.Instance != null)
-            {
-                ZoneManager.Instance.ForceUnlockZone(new Vector2Int(1, 0));
-                ZoneManager.Instance.ForceUnlockZone(new Vector2Int(0, 1));
-                ZoneManager.Instance.ForceUnlockZone(new Vector2Int(1, 1));
-            }
+
     
             // 2. Spawn tutorial outpost
             if (EnemyOutpostManager.Instance != null)
@@ -666,7 +660,7 @@ namespace Managers
             txt.fontStyle = isHeader ? FontStyles.Bold : FontStyles.Normal;
             txt.color = isHeader ? new Color(0.2f, 1f, 0.2f) : new Color(0.8f, 1f, 0.8f);
             txt.alignment = TextAlignmentOptions.MidlineLeft;
-            txt.enableWordWrapping = true;
+            txt.textWrappingMode = TextWrappingModes.Normal;
             txt.text = initialText;
     
             activeObjectiveObjects.Add(itemGo);

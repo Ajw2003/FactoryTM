@@ -193,19 +193,9 @@ namespace Managers
                         continue;
                     }
 
-                    // Prevent generating in starting zone (0, 0)
-                    if (ZoneManager.Instance != null)
-                    {
-                        Vector2Int zoneCoords = ZoneManager.Instance.GetZoneCoordsFromTile(new Vector3Int(cell.x, cell.y, 0));
-                        if (zoneCoords == Vector2Int.zero)
-                        {
-                            continue;
-                        }
-                    }
-
-                    // Keep starting area clear (within 10 tiles of (0,0) or GridManager center)
+                    // Keep starting area clear (configurable radius from center)
                     Vector2Int center = GridManager.Instance != null ? GridManager.Instance.center : Vector2Int.zero;
-                    if (Vector2Int.Distance(cell, center) < 12f)
+                    if (Vector2Int.Distance(cell, center) < 25f)
                     {
                         continue;
                     }

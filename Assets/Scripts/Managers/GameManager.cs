@@ -54,6 +54,10 @@ namespace Managers
             base.Awake();
             playerController = FindFirstObjectByType<PlayerController>();
             mainCamera = FindFirstObjectByType<Camera>();
+            if (mainCamera != null && mainCamera.GetComponent<global::CameraFollow>() == null)
+            {
+                mainCamera.gameObject.AddComponent<global::CameraFollow>();
+            }
     
             if (MainTileMap == null)
             {
@@ -157,12 +161,7 @@ namespace Managers
             }
     
             Vector2Int centerCell = Vector2Int.zero;
-            if (ZoneManager.Instance != null)
-            {
-                Vector2Int zoneSize = ZoneManager.Instance.zoneSizeInTiles;
-                centerCell = new Vector2Int(zoneSize.x / 2, zoneSize.y / 2);
-            }
-            else if (GridManager.Instance != null)
+            if (GridManager.Instance != null)
             {
                 centerCell = GridManager.Instance.center;
             }
@@ -323,12 +322,7 @@ namespace Managers
             }
     
             Vector2Int centerCell = Vector2Int.zero;
-            if (ZoneManager.Instance != null)
-            {
-                Vector2Int zoneSize = ZoneManager.Instance.zoneSizeInTiles;
-                centerCell = new Vector2Int(zoneSize.x / 2, zoneSize.y / 2);
-            }
-            else if (GridManager.Instance != null)
+            if (GridManager.Instance != null)
             {
                 centerCell = GridManager.Instance.center;
             }

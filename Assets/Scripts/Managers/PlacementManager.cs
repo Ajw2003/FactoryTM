@@ -110,8 +110,7 @@ namespace Managers
             
             foreach (var occupiedCell in occupiedCells)
             {
-                Vector3Int pos3 = new Vector3Int(occupiedCell.x, occupiedCell.y, 0);
-                if (!ZoneManager.Instance.IsTileInsideUnlockedZone(pos3) || !isWithinDistance || activeBuildings.ContainsKey(occupiedCell))
+                if (!isWithinDistance || activeBuildings.ContainsKey(occupiedCell))
                 {
                     canPlace = false;
                     // Optional: show red preview?
@@ -134,7 +133,7 @@ namespace Managers
     
                 if (!canPlace)
                 {
-                    Debug.Log("Cannot place here (blocked or outside zone)!");
+                    Debug.Log("Cannot place here (blocked)!");
                     return;
                 }
     

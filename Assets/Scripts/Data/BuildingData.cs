@@ -19,7 +19,6 @@ namespace Buildings
         {
             None,
             CurrencyReached,
-            TotalZonesUnlocked,
             BuildingOwnedCount,
             BuildingPlacedCount
         }
@@ -41,12 +40,6 @@ namespace Buildings
                     }
                     return false;
 
-                case ConditionType.TotalZonesUnlocked:
-                    if (ZoneManager.Instance != null)
-                    {
-                        return ZoneManager.Instance.UnlockedZonesCount >= targetValue;
-                    }
-                    return false;
 
                 case ConditionType.BuildingOwnedCount:
                     if (InventoryManager.Instance != null && requiredBuilding != null)
@@ -167,8 +160,7 @@ namespace Buildings
             {
                 case BuildingUnlockCondition.ConditionType.CurrencyReached:
                     return $"Reach ${condition.targetValue}";
-                case BuildingUnlockCondition.ConditionType.TotalZonesUnlocked:
-                    return $"Unlock {condition.targetValue} zones";
+
                 case BuildingUnlockCondition.ConditionType.BuildingOwnedCount:
                     return $"Own {condition.targetValue}x {condition.requiredBuilding.buildingName}";
                 case BuildingUnlockCondition.ConditionType.BuildingPlacedCount:

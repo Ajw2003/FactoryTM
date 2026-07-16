@@ -322,7 +322,7 @@ namespace Managers
             buildingDetailText.fontSize = 40;
             buildingDetailText.color = new Color(0.2f, 0.9f, 0.2f);
             buildingDetailText.alignment = TextAlignmentOptions.TopLeft;
-            buildingDetailText.enableWordWrapping = true;
+            buildingDetailText.textWrappingMode = TextWrappingModes.Normal;
     
             // Progress / Fuel Bar Container
             fuelBarContainer = new GameObject("FuelBarContainer", typeof(RectTransform), typeof(Image));
@@ -483,7 +483,7 @@ namespace Managers
             descTxt.fontSize = 22;
             descTxt.color = new Color(0.2f, 0.8f, 0.2f, 0.85f);
             descTxt.alignment = TextAlignmentOptions.Center;
-            descTxt.enableWordWrapping = true;
+            descTxt.textWrappingMode = TextWrappingModes.Normal;
     
             buildingPanel.SetActive(false);
         }
@@ -539,7 +539,7 @@ namespace Managers
             instText.fontSize = 28;
             instText.color = new Color(0.2f, 0.8f, 0.2f, 0.8f);
             instText.alignment = TextAlignmentOptions.Center;
-            instText.enableWordWrapping = true;
+            instText.textWrappingMode = TextWrappingModes.Normal;
             instText.text = "Drag resources from slot to IDT to fuel reactor or sell items.";
     
             // Create Grid of 8 Slots (4 columns, 2 rows)
@@ -1186,10 +1186,7 @@ namespace Managers
                             hoveredUiDesc = shopItem.Definition.description;
                             
                             float cost = shopItem.Definition.costInShop;
-                            if (shopItem.Definition.type == UpgradeType.ZoneExpansion && ZoneManager.HasInstance)
-                            {
-                                cost = ZoneManager.Instance.GetUnlockCost();
-                            }
+
                             hoveredUiExtra = $"Type: {shopItem.GetTypeString()} // Cost: ${cost:F0}";
                             break;
                         }

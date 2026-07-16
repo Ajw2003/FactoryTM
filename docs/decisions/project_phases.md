@@ -13,6 +13,8 @@ This document contains the categorized breakdown of the To-Do list for FactoryTM
   - *How*: Adjust UI Canvas using `ContentSizeFitter` and `VerticalLayoutGroup`, or dynamically resize bounds via `EventManager` when Store UI opens.
 - [x] **Fix objectives not being large enough / copy-pastes**
   - *How*: Update Tutorial `ScriptableObject` data with a `ShortObjectiveText` string. Update the HUD to display this short string instead of full dialogue.
+- [x] **Remove Zone System entirely and replace with 30x15 Grid system**
+  - *How*: Removed `ZoneManager`, `ZoneUiManager`, and `UiZoneButton`. Refactored `GridManager`, `PlacementManager`, `PlayerController`, and enemy spawning to use a dynamic chunk-based grid logic (30x15 units). Removed Map tab from `StoreUiScript`.
 
 
 ## Phase 2: Core Mechanics & UI Polish

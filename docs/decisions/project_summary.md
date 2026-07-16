@@ -44,6 +44,11 @@ FactoryTM blends factory automation with a challenging roguelike progression str
 * Promotes modular, self-contained state code instead of massive `switch` blocks.
 * Includes `PlayerBuildingUiState.cs` to freeze player movements while operating machines.
 
+### Grid Architecture (`GridManager.cs`)
+* The game world utilizes a continuous grid system instead of locked zones.
+* Based on an adjustable chunk size (default `30x15` tiles) which maintains a fixed aspect ratio suitable for screen sizes.
+* Calculations for distances, spawns, and enemy outposts use absolute radius checks and dynamic tile scaling based on the base grid configuration.
+
 ### Generic Singletons (`SingletonBase.cs`)
 * Managers inherit from `SingletonBase<T>` to guarantee a single lifecycle, with custom control over cross-scene persistence (`persistBetweenScenes`).
 

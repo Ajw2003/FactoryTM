@@ -79,14 +79,7 @@ namespace Ui
     
             if (priceLabel != null)
             {
-                if (definition.type == UpgradeType.ZoneExpansion && ZoneManager.HasInstance)
-                {
-                    priceLabel.text = "$" + ZoneManager.Instance.GetUnlockCost().ToString("F0");
-                }
-                else
-                {
-                    priceLabel.text = "$" + definition.costInShop;
-                }
+                priceLabel.text = "$" + definition.costInShop;
             }
         }
     
@@ -112,7 +105,7 @@ namespace Ui
                 case UpgradeType.Weapon: return "WEAPON";
                 case UpgradeType.Building: return "BUILDING";
                 case UpgradeType.Armor: return "ARMOR";
-                case UpgradeType.ZoneExpansion: return "EXPANSION";
+
                 default: return "UPGRADE";
             }
         }
@@ -128,9 +121,7 @@ namespace Ui
         {
             if (definition == null) return;
     
-            float cost = definition.type == UpgradeType.ZoneExpansion && ZoneManager.HasInstance 
-                ? ZoneManager.Instance.GetUnlockCost() 
-                : definition.costInShop;
+            float cost = definition.costInShop;
     
             if (!CurrencyManager.HasInstance || CurrencyManager.Instance.currentCurrencyValue < cost)
             {

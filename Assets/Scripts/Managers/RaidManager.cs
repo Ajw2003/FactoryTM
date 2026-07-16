@@ -179,13 +179,10 @@ namespace Managers
             {
                 center = GameManager.Instance.playerController.transform.position;
             }
-            else if (ZoneManager.Instance != null)
+            else if (GridManager.Instance != null)
             {
-                Vector2Int zoneCoords = ZoneManager.Instance.GetCurrentZone();
-                Vector2Int zoneSize = ZoneManager.Instance.zoneSizeInTiles;
-                float centerX = (zoneCoords.x * zoneSize.x) + (zoneSize.x / 2f);
-                float centerY = (zoneCoords.y * zoneSize.y) + (zoneSize.y / 2f);
-                center = new Vector3(centerX, centerY, 0);
+                Vector2Int centerCell = GridManager.Instance.center;
+                center = GridManager.Instance.CellToWorldConversion(centerCell);
             }
     
             float angle = Random.Range(0f, 2f * Mathf.PI);

@@ -8,7 +8,7 @@ using EventTypes.InventoryEvents;
 using EventTypes.InputEvents;
 using System;
 using Code.Scripts.EventSystems;
-using EventTypes.InputEvents;
+
 using Code.Scripts.Interfaces.EventTypes;
 using NUnit.Framework.Internal.Execution;
 using StateMachine;
@@ -99,15 +99,7 @@ public class PlayerInputController : MonoBehaviour
 
     void InventoryInputs(bool isEnabled)
     {
-        switch (isEnabled)
-        {
-            // case true:
-            //     _playerInputs.Player.Inventory.performed += OnInventoryPerformed;
-            //     break;
-            // case false:
-            //     _playerInputs.Player.Inventory.performed -= OnInventoryPerformed;
-            //     break;
-        }
+        // To be implemented
     }
 
     #region ActionHandling
