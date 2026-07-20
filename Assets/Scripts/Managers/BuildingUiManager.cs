@@ -623,7 +623,12 @@ namespace Managers
                     iconImg.sprite = sprite;
                     iconImg.enabled = sprite != null;
                     dragHandler.iconSprite = sprite;
-                    valText.text = $"${value}";
+                    float totalVal = value * count;
+                    if (totalVal >= 1000f) {
+                        valText.text = $"${totalVal / 1000f:F1}k";
+                    } else {
+                        valText.text = $"${totalVal:F0}";
+                    }
                     countText.text = count > 0 ? count.ToString() : "0";
     
                     if (count > 0)
