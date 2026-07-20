@@ -10,11 +10,15 @@ namespace Placeables
 {
     using System.Collections.Generic;
     using UnityEngine;
+    using Buildings;
     
     public class ConveyorLogic : BuildingLogic
     {
         private Vector2Int direction;
         private float moveSpeed = 2f;
+        private int lastEvaluatedPlacementVersion = -1;
+        private BuildingLogic cachedReceiver = null;
+        private bool isReceiverValid = false;
     
         public void Setup(Buildings.BuildingData buildingData, Vector2Int cell, Vector2Int dir, float speed)
         {
@@ -26,15 +30,53 @@ namespace Placeables
     
         public override void PerformAction()
         {
-            List<ConveyorItem> items = ItemTracker.Instance.GetItemsInCell(myCell);
-            if (items != null)
+            if (lastEvaluatedPlacementVersion != PlacementManager.PlacementVersion)
             {
-                for (int i = items.Count - 1; i >= 0; i--)
+                lastEvaluatedPlacementVersion = PlacementManager.PlacementVersion;
+                cachedReceiver = null;
+                isReceiverValid = false;
+                Vector2Int targetCell = myCell + direction;
+                if (PlacementManager.Instance != null)
                 {
-                    ConveyorItem item = items[i];
-                    if (!item.IsMoving)
+                    var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
+                    if (activeBuildings != null && activeBuildings.TryGetValue(targetCell, out GameObject targetBuildingObj))
                     {
-                        item.SetTarget(myCell + direction, moveSpeed);
+                        if (targetBuildingObj != null)
+                        {
+                            BuildingLogic targetLogic = targetBuildingObj.GetComponent<BuildingLogic>();
+                            if (targetLogic != null && targetLogic.data != null)
+                            {
+                                BuildingType type = targetLogic.data.type;
+                                if (type == BuildingType.Conveyor || type == BuildingType.Furnace || type == BuildingType.Seller)
+                                {
+                                    cachedReceiver = targetLogic;
+                                    isReceiverValid = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (isReceiverValid)
+            {
+                Vector2Int targetCell = myCell + direction;
+                List<ConveyorItem> itemsInTarget = ItemTracker.Instance != null ? ItemTracker.Instance.GetItemsInCell(targetCell) : null;
+                bool isTargetOccupied = itemsInTarget != null && itemsInTarget.Count > 0;
+                
+                if (!isTargetOccupied)
+                {
+                    List<ConveyorItem> items = ItemTracker.Instance != null ? ItemTracker.Instance.GetItemsInCell(myCell) : null;
+                    if (items != null)
+                    {
+                        for (int i = items.Count - 1; i >= 0; i--)
+                        {
+                            ConveyorItem item = items[i];
+                            if (item != null && !item.IsMoving)
+                            {
+                                item.SetTarget(targetCell, moveSpeed);
+                            }
+                        }
                     }
                 }
             }

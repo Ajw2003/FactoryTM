@@ -17,6 +17,8 @@ namespace Managers
     
     public class PlacementManager : SingletonBase<PlacementManager>
     {
+        public static int PlacementVersion { get; private set; } = 0;
+
         public Tilemap mainTilemap;
         public Tilemap previewTilemap;
         
@@ -145,6 +147,42 @@ namespace Managers
                     return;
                 }
     
+                foreach (var occupiedCell in occupiedCells)
+                {
+                    if (ItemTracker.Instance != null)
+                    {
+                        List<ConveyorItem> itemsInCell = ItemTracker.Instance.GetItemsInCell(occupiedCell);
+                        if (itemsInCell != null)
+                        {
+                            for (int i = itemsInCell.Count - 1; i >= 0; i--)
+                            {
+                                ConveyorItem item = itemsInCell[i];
+                                if (item != null)
+                                {
+                                    ResourceType rType = item.resourceType;
+                                    if (BuildingUiManager.Instance != null)
+                                    {
+                                        BuildingUiManager.Instance.AddResource(rType, 1);
+                                    }
+                                    FloatingTextSettings settings = Resources.Load<FloatingTextSettings>("FloatingTextSettings/PlayerPickupSettings");
+                                    if (FloatingTextManager.Instance != null && settings != null)
+                                    {
+                                        FloatingTextManager.Instance.Spawn("+1 " + rType.ToString().ToUpper(), item.transform.position, settings);
+                                    }
+                                    if (ObjectPoolManager.Instance != null)
+                                    {
+                                        ObjectPoolManager.Instance.ReturnToPool(item.gameObject);
+                                    }
+                                    else
+                                    {
+                                        Destroy(item.gameObject);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+    
                 mainTilemap.SetTile(vector3Cell, activeBuilding.rotatedTiles[rotationIndex]);
                 GameObject buildingObj = null;
                 switch (activeBuilding.type)
@@ -244,6 +282,7 @@ namespace Managers
                 
                 if (logic != null)
                 {
+                    PlacementVersion++;
                     if (returnToInventory && logic.data != null)
                     {
                         Buildings.BuildingData buildingToGive = logic.data;
@@ -340,6 +379,7 @@ namespace Managers
     
         public void SpawnSellerProgrammatically(BuildingData building, Vector2Int cell, int rotation = 0)
         {
+            PlacementVersion++;
             Vector3Int vector3Cell = new Vector3Int(cell.x, cell.y, 0);
             if (mainTilemap == null) mainTilemap = GameManager.Instance.BuildingTileMap;
             mainTilemap.SetTile(vector3Cell, building.rotatedTiles[rotation]);
@@ -373,6 +413,7 @@ namespace Managers
     
         GameObject SpawnMinerLogic(Vector2Int cell)
         {
+            PlacementVersion++;
             // Create the logic object
             GameObject MinerObj = new GameObject("Miner_Logic_" + cell);
             MinerObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
@@ -386,6 +427,7 @@ namespace Managers
     
         GameObject SpawnFurnaceLogic(Vector2Int cell)
         {
+            PlacementVersion++;
             GameObject FurnaceObj = new GameObject("Furnace_Logic_" + cell);
             FurnaceObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
             Furnace furnace = FurnaceObj.AddComponent<Furnace>();
@@ -396,6 +438,7 @@ namespace Managers
     
         GameObject SpawnSellerLogic(Vector2Int cell)
         {
+            PlacementVersion++;
             GameObject sellerObj = new GameObject("Seller_Logic_" + cell);
             sellerObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
             InterDimensionalTransporter interDimensionalTransporter = sellerObj.AddComponent<InterDimensionalTransporter>();
@@ -406,6 +449,7 @@ namespace Managers
     
         GameObject SpawnBeltLogic(Vector2Int cell)
         {
+            PlacementVersion++;
             GameObject beltObj = new GameObject("Belt_Logic_" + cell);
             beltObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
             
@@ -419,6 +463,7 @@ namespace Managers
     
         GameObject SpawnWallLogic(Vector2Int cell)
         {
+            PlacementVersion++;
             GameObject wallObj = new GameObject("Wall_Logic_" + cell);
             wallObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
             WallLogic logic = wallObj.AddComponent<WallLogic>();
@@ -430,6 +475,7 @@ namespace Managers
     
         GameObject SpawnTurretLogic(Vector2Int cell)
         {
+            PlacementVersion++;
             GameObject turretObj = new GameObject("Turret_Logic_" + cell);
             turretObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
             TurretLogic logic = turretObj.AddComponent<TurretLogic>();

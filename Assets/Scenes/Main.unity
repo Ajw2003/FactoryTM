@@ -404,6 +404,18 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2748507126018403982, guid: 4239595360184ce46828e64aeb892d8b, type: 3}
+      propertyPath: m_RenderMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2748507126018403982, guid: 4239595360184ce46828e64aeb892d8b, type: 3}
+      propertyPath: m_VertexColorAlwaysGammaSpace
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4170387465296929963, guid: 4239595360184ce46828e64aeb892d8b, type: 3}
+      propertyPath: Stats
+      value: 
+      objectReference: {fileID: 11400000, guid: 74e3f480c75f2394e85fb99b36db22b9, type: 2}
     - target: {fileID: 7795709768602931660, guid: 4239595360184ce46828e64aeb892d8b, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

@@ -5,7 +5,7 @@ This document contains the categorized breakdown of the To-Do list for FactoryTM
 ## Phase 1: Critical Bug Fixes & Refactors
 *These tasks fix broken logic or simplify systems that other features rely on. They should be done first to ensure a stable foundation.*
 
-- [ ] **Fix tile placement with items / conveyors moving items to empty spaces**
+- [/] **Fix tile placement with items / conveyors moving items to empty spaces**
   - *How*: Update `Conveyor.cs` item movement logic to check for a valid receiver. Update `PlayerBuildingUiState` to detect loose items on the target grid and block placement or destroy/refund them.
 - [ ] **Deprecate the seller building**
   - *How*: Remove from `BuildingManager` purchasable list and `UpgradeManager`. Mark class as `[Obsolete]` and ensure IDT handles all exporting.

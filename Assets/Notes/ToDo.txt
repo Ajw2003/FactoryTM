@@ -7,7 +7,7 @@
 
 ## ⚙️ Mechanics & Gameplay
 - [ ] Make essential upgrades appear first in upgrade selection (turrets, walls, health packs).
-- [ ] Fix not being able to place a tile on valid empty space with items on it, OR make conveyors not move items onto empty spaces.
+- [/] Fix not being able to place a tile on valid empty space with items on it, OR make conveyors not move items onto empty spaces.
 - [ ] Fully implement finite resources: remove resource nodes when depleted (and update grid cell data/visuals).
 - [ ] Implement enemy wandering and differentiation between raiders and spawned enemies in structures.
 - [ ] Make the starting store menu contain only the weapons page and consumables pages (ammo and health), then remove all weapons after player has chosen a weapon and revert store to previous default state.
@@ -20,7 +20,7 @@
 
 ## 🎓 Tutorial System Improvements
 - [ ] Add a tutorial section for land expansion and explanation of ore value.
-- [ ] Add a tutorial section for purchasing ammo and using health packs (trigger when ammo reserve or health is low).
+- [ ] Add a tutorial section for purchasing ammo and using health packs (trigger when ammo reserve or health is low and deprecate the section from where it lies currently).
 - [ ] Create a better shooting tutorial/introduction.
 - [ ] Fix objectives not being large enough / just being copy-pastes of the existing tutorial text; make objectives a quick 1-3 word synopsis of the task.
 - [ ] Make objectives an itemized list that can be listened to, where completion of each individual objective (and all objectives in a given state) fires an event.
@@ -30,7 +30,8 @@
 - [ ] Make objectives and current dialogue scale to fit inside the console window when the store UI window is open.
 - [ ] Make all text larger and ignore blur or chromatic aberration post-process effects.
 - [ ] Improve UI contrast, color choices, and general style unification.
-- [ ] Adjust existing hotbar ui to become a Minecraft-style hotbar UI with scrolling to view the name of a given item.
+-     make objectives ui more appealing
+- [ ] Adjust existing hotbar ui and IDT inventory slots ui to become a Minecraft-style hotbar UI with scrolling or hovering mouse over a given slot to view the name of a given item.
 
 ## 🏆 Progression & Meta
 - [ ] Add difficulty settings.
@@ -38,8 +39,10 @@
 - [ ] Add random weapon modifiers and build weapons like noita 
 
 ## 🧹 Code Architecture & Cleanup
-- [x] Fix Namespace Discrepancies: Ensure all scripts in Managers, Weapons, Placeables, Ui, and Nodes have proper namespaces.
-- [x] Fix Event Namespaces: Standardize all event namespaces to EventTypes.* or Code.Scripts.Interfaces.EventTypes.
-- [x] Fix Singleton Discrepancies: Make ZoneUiManager inherit from SingletonBase<ZoneUiManager> instead of MonoBehaviour.
-- [x] Fix StateMachine Discrepancies: Refactor PlayerStateMachine to inherit from StateMachine.BaseStateMachine.
-- [x] Fix ScriptableObject Placement: Move ResourceNodeDefinition.cs, FloatingTextSettings.cs, and WeaponStats.cs into Assets/Scripts/Data/.
+
+## Fixes
+- [/] fix rendering of bullets rendering wrong and dark instead of properly
+- fix placement of the objectives ui 
+- ensure the objectives ui updates properly when actions are completed even in menus which it seems to ignore until closed
+- ensure all ui is adequately spaced at all times and apply a standard spacing to all ui elements in the project to uphold this rule.
+- make resources inventory show value of total items in a given slot instead of the individual price of a single item
