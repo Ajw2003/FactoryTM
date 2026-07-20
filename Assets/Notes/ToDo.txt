@@ -8,7 +8,7 @@
 ## ⚙️ Mechanics & Gameplay
 - [ ] Make essential upgrades appear first in upgrade selection (turrets, walls, health packs).
 - [ ] Fix not being able to place a tile on valid empty space with items on it, OR make conveyors not move items onto empty spaces.
-- [ ] Fully implement finite resources: remove resource nodes when depleted, make the jade/HUD UI correctly display the current value of the ore left.
+- [ ] Fully implement finite resources: remove resource nodes when depleted (and update grid cell data/visuals).
 - [ ] Implement enemy wandering and differentiation between raiders and spawned enemies in structures.
 - [ ] Make the starting store menu contain only the weapons page and consumables pages (ammo and health), then remove all weapons after player has chosen a weapon and revert store to previous default state.
 - [ ] Deprecate the seller building: ground the UI/design for this change, retain its logic but make it no longer purchasable or an upgrade.
@@ -35,6 +35,7 @@
 ## 🏆 Progression & Meta
 - [ ] Add difficulty settings.
 - [ ] Add achievements.
+- [ ] Add random weapon modifiers and build weapons like noita 
 
 ## 🧹 Code Architecture & Cleanup
 - [x] Fix Namespace Discrepancies: Ensure all scripts in Managers, Weapons, Placeables, Ui, and Nodes have proper namespaces.
