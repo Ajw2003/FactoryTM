@@ -171,11 +171,25 @@ namespace Managers
                 bool isStoreOpen = StoreUiScript.HasInstance && StoreUiScript.Instance.gameObject.activeInHierarchy;
                 bool isBuildingOpen = BuildingUiManager.HasInstance && BuildingUiManager.Instance.IsPanelOpen;
                 
-                if (isStoreOpen)
+                if (isStoreOpen || isBuildingOpen)
                 {
-                    if (dialogueBox != null && dialogueBox.activeSelf)
+                    DialoguePositionMode targetMode = isStoreOpen ? DialoguePositionMode.ShopLeftTop : DialoguePositionMode.PlacementTop;
+                    if (dialogueBox != null && !dialogueBox.activeSelf)
                     {
-                        dialogueBox.SetActive(false);
+                        dialogueBox.SetActive(true);
+                        SetPositionMode(targetMode, true);
+                        ReplayCurrentDialogue();
+                    }
+                    else
+                    {
+                        if (currentPositionMode != targetMode)
+                        {
+                            SetPositionMode(targetMode);
+                        }
+                        if (dialogueBox != null)
+                        {
+                            dialogueBox.transform.SetAsLastSibling();
+                        }
                     }
                 }
                 else
@@ -183,17 +197,15 @@ namespace Managers
                     if (dialogueBox != null && !dialogueBox.activeSelf)
                     {
                         dialogueBox.SetActive(true);
-                        SetPositionMode(isBuildingOpen ? DialoguePositionMode.PlacementTop : DialoguePositionMode.DefaultBottom, true);
+                        SetPositionMode(DialoguePositionMode.DefaultBottom, true);
                         ReplayCurrentDialogue();
                     }
                     else
                     {
-                        DialoguePositionMode targetMode = isBuildingOpen ? DialoguePositionMode.PlacementTop : DialoguePositionMode.DefaultBottom;
-                        if (currentPositionMode != targetMode)
+                        if (currentPositionMode != DialoguePositionMode.DefaultBottom)
                         {
-                            SetPositionMode(targetMode);
+                            SetPositionMode(DialoguePositionMode.DefaultBottom);
                         }
-                        
                         if (dialogueBox != null)
                         {
                             dialogueBox.transform.SetAsLastSibling();
@@ -234,19 +246,20 @@ namespace Managers
                     bool isBuildingOpen = BuildingUiManager.HasInstance && BuildingUiManager.Instance.IsPanelOpen;
                     bool wasActive = dialogueBox.activeSelf;
                     
-                    if (isStoreOpen)
+                    DialoguePositionMode mode = DialoguePositionMode.DefaultBottom;
+                    if (isStoreOpen) mode = DialoguePositionMode.ShopLeftTop;
+                    else if (isBuildingOpen) mode = DialoguePositionMode.PlacementTop;
+                    
+                    dialogueBox.SetActive(true);
+                    if (!wasActive)
                     {
-                        dialogueBox.SetActive(false);
+                        SetPositionMode(mode, true);
+                        dialogueBox.transform.localScale = new Vector3(1f, 0.05f, 1f);
+                        dialogueBox.transform.DOScaleY(1f, 0.2f).SetUpdate(true);
                     }
-                    else
+                    else 
                     {
-                        dialogueBox.SetActive(true);
-                        if (!wasActive)
-                        {
-                            SetPositionMode(isBuildingOpen ? DialoguePositionMode.PlacementTop : DialoguePositionMode.DefaultBottom, true);
-                            dialogueBox.transform.localScale = new Vector3(1f, 0.05f, 1f);
-                            dialogueBox.transform.DOScaleY(1f, 0.2f).SetUpdate(true);
-                        }
+                        SetPositionMode(mode);
                     }
                     if (_currentCoroutine != null) StopCoroutine(_currentCoroutine);
                     _currentCoroutine = StartCoroutine(DialogueCoroutine());

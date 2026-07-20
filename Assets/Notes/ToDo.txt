@@ -42,7 +42,7 @@
 ## 🧹 Code Architecture & Cleanup
 
 ## Fixes
-- [/] fix rendering of bullets rendering wrong and dark instead of properly
+- [x] fix rendering of bullets rendering wrong and dark instead of properly
 - [/] fix placement of the objectives ui 
 - [/] ensure the objectives ui updates properly when actions are completed even in menus which it seems to ignore until closed
 - fix dodge roll being obtained before upgrade is unlocked, player should have to obtain dodge roll upgrade to use

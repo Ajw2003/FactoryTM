@@ -284,11 +284,8 @@ namespace Managers
                 tutorialOutpost = EnemyOutpostManager.Instance.SpawnTutorialOutpost(spawnPos, 4);
             }
     
-            // 3. Unlock dodge roll for tutorial
-            if (PlayerController.Instance != null)
-            {
-                PlayerController.Instance.canDodgeRoll = true;
-            }
+            // 3. (Dodge roll unlock moved to UpgradeManager)
+            // Removed: PlayerController.Instance.canDodgeRoll = true;
         }
     
         public void UnlockWeaponsInShop()
@@ -611,13 +608,25 @@ namespace Managers
                     return string.Format(template, ammoStatus, healthStatus);
     
                 case TutorialState.DestroyEnemyOutpost:
-                    int remainingBuildings = isInitial ? 4 : 0;
+                    int currentHP = 0;
+                    int maxHP = 0;
                     if (!isInitial && tutorialOutpost != null)
                     {
                         tutorialOutpost.buildings.RemoveAll(b => b == null);
-                        remainingBuildings = tutorialOutpost.buildings.Count;
+                        foreach(var b in tutorialOutpost.buildings) {
+                            if (b != null) {
+                                currentHP += b.Health;
+                                maxHP += (b.data != null ? b.data.maxHealth : b.Health);
+                            }
+                        }
                     }
-                    return string.Format(template, remainingBuildings);
+                    else if (isInitial)
+                    {
+                        currentHP = 100;
+                        maxHP = 100;
+                    }
+                    int percent = maxHP > 0 ? Mathf.CeilToInt(((float)currentHP / maxHP) * 100f) : 0;
+                    return string.Format(template, percent);
     
                 case TutorialState.BuyMinerConveyors:
                     int miners = isInitial ? 0 : GetInventoryCount(BuildingType.Miner);
@@ -655,6 +664,15 @@ namespace Managers
     
                 // Rebuild the left-side objectives panel list
                 RebuildObjectivesList();
+            }
+            else
+            {
+                DialogueSO dialogue = LoadDialogueSOForState(currentState);
+                if (dialogue != null && dialogue.dialogues != null && dialogue.dialogues.Length > 0)
+                {
+                    string updatedDialogueText = GetFormattedObjectiveText(currentState, false);
+                    DialogueManager.Instance.DisplayTutorialObjective(dialogue, updatedDialogueText);
+                }
             }
     
             // 2. Dynamically update the left-side objectives list checkboxes/values
@@ -832,14 +850,21 @@ namespace Managers
                     break;
     
                 case TutorialState.DestroyEnemyOutpost:
-                    int remainingBuildings = 0;
+                    int currentOutpostHP = 0;
+                    int maxOutpostHP = 0;
                     if (tutorialOutpost != null)
                     {
                         tutorialOutpost.buildings.RemoveAll(b => b == null);
-                        remainingBuildings = tutorialOutpost.buildings.Count;
+                        foreach(var b in tutorialOutpost.buildings) {
+                            if (b != null) {
+                                currentOutpostHP += b.Health;
+                                maxOutpostHP += (b.data != null ? b.data.maxHealth : b.Health);
+                            }
+                        }
                     }
+                    int hpPercent = maxOutpostHP > 0 ? Mathf.CeilToInt(((float)currentOutpostHP / maxOutpostHP) * 100f) : 0;
                     objectiveTexts[0].text = "[x] Travel North-East to locate human outpost";
-                    objectiveTexts[1].text = remainingBuildings == 0 ? $"[x] Destroy all human outpost structures (0 remaining)" : $"[ ] Destroy all human outpost structures ({remainingBuildings} remaining)";
+                    objectiveTexts[1].text = hpPercent <= 0 ? $"[x] Destroy all human outpost structures (0% remaining)" : $"[ ] Destroy all human outpost structures ({hpPercent}% remaining)";
                     break;
     
                 case TutorialState.BuyMinerConveyors:
