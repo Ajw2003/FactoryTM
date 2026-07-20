@@ -38,6 +38,7 @@ FactoryTM blends factory automation with a challenging roguelike progression str
 * **Contextual Interaction Raycasting (`BuildingUiManager.cs`):** Performs screen-to-world raycasting to identify hovered cells, conveyor items, and structures. Other systems (such as `PlayerController`) read these hover properties to handle manual actions like mining, item pickup, or building interaction. The visual "Jade HUD" overlay has been decommissioned.
 * **Bespoke Building Panels:** Walking up to a machine and pressing `E` displays a custom, context-sensitive overlay (e.g., fuel bars and smelting queues for Furnaces, fuel timers for the IDT, and ammo levels for Turrets).
 * **Inventory Panel:** A dynamic slot grid that displays current player inventory items, supporting drag-and-drop actions to feed fuel or sell raw ores.
+* **Dynamic Dialogue and Objectives UI Integration:** Hooks tutorial objectives directly to inventory and currency updates. Automatically hides the dialogue box when the Store storefront is open, and dynamically shifts its position to `DialoguePositionMode.PlacementTop` when machine configuration panels are open to avoid visual overlaps.
 
 ### Base State Machine (`BaseStateMachine.cs` & `IState.cs`)
 * Used for clean flow control on characters (idle, move, dodge, combat states) and UI systems.

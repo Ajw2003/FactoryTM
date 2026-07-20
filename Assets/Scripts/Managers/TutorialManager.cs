@@ -132,6 +132,15 @@ namespace Managers
             SubscribeEvents();
             StartCoroutine(StartTutorialRoutine());
         }
+
+        public override void Update()
+        {
+            base.Update();
+            if (currentState == TutorialState.EarnAndExpand || currentState == TutorialState.DefendFirstRaid)
+            {
+                UpdateObjectivesPanelText();
+            }
+        }
     
         private void SubscribeEvents()
         {
@@ -146,6 +155,15 @@ namespace Managers
             }
     
             Code.Scripts.EventSystems.EventManager.Instance?.Subscribe<EnemyOutpostClearedEvent>(this, HandleOutpostCleared);
+
+            if (InventoryManager.Instance != null)
+            {
+                InventoryManager.Instance.onInventoryChange += UpdateObjectiveText;
+            }
+            if (CurrencyManager.Instance != null)
+            {
+                CurrencyManager.Instance.onCurrencyChange += UpdateObjectiveText;
+            }
         }
     
         private void UnsubscribeEvents()
@@ -166,6 +184,15 @@ namespace Managers
             }
     
             Code.Scripts.EventSystems.EventManager.Instance?.Unsubscribe<EnemyOutpostClearedEvent>(this);
+
+            if (InventoryManager.Instance != null)
+            {
+                InventoryManager.Instance.onInventoryChange -= UpdateObjectiveText;
+            }
+            if (CurrencyManager.Instance != null)
+            {
+                CurrencyManager.Instance.onCurrencyChange -= UpdateObjectiveText;
+            }
         }
     
         private void OnDestroy()

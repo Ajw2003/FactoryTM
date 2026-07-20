@@ -169,23 +169,35 @@ namespace Managers
             if (isDialogueActive)
             {
                 bool isStoreOpen = StoreUiScript.HasInstance && StoreUiScript.Instance.gameObject.activeInHierarchy;
-                DialoguePositionMode targetMode = isStoreOpen ? DialoguePositionMode.ShopLeftTop : DialoguePositionMode.DefaultBottom;
-                if (currentPositionMode != targetMode)
+                bool isBuildingOpen = BuildingUiManager.HasInstance && BuildingUiManager.Instance.IsPanelOpen;
+                
+                if (isStoreOpen)
                 {
-                    SetPositionMode(targetMode);
+                    if (dialogueBox != null && dialogueBox.activeSelf)
+                    {
+                        dialogueBox.SetActive(false);
+                    }
                 }
-    
-                if (dialogueBox != null)
+                else
                 {
-                    if (!dialogueBox.activeSelf)
+                    if (dialogueBox != null && !dialogueBox.activeSelf)
                     {
                         dialogueBox.SetActive(true);
-                        SetPositionMode(currentPositionMode, true);
+                        SetPositionMode(isBuildingOpen ? DialoguePositionMode.PlacementTop : DialoguePositionMode.DefaultBottom, true);
                         ReplayCurrentDialogue();
                     }
                     else
                     {
-                        dialogueBox.transform.SetAsLastSibling();
+                        DialoguePositionMode targetMode = isBuildingOpen ? DialoguePositionMode.PlacementTop : DialoguePositionMode.DefaultBottom;
+                        if (currentPositionMode != targetMode)
+                        {
+                            SetPositionMode(targetMode);
+                        }
+                        
+                        if (dialogueBox != null)
+                        {
+                            dialogueBox.transform.SetAsLastSibling();
+                        }
                     }
                 }
             }
@@ -219,21 +231,19 @@ namespace Managers
                     SetDialogue();
                     
                     bool isStoreOpen = StoreUiScript.HasInstance && StoreUiScript.Instance.gameObject.activeInHierarchy;
+                    bool isBuildingOpen = BuildingUiManager.HasInstance && BuildingUiManager.Instance.IsPanelOpen;
                     bool wasActive = dialogueBox.activeSelf;
                     
                     if (isStoreOpen)
                     {
-                        dialogueBox.SetActive(true);
-                        SetPositionMode(DialoguePositionMode.ShopLeftTop, true);
+                        dialogueBox.SetActive(false);
                     }
                     else
                     {
                         dialogueBox.SetActive(true);
                         if (!wasActive)
                         {
-                            // Reset position to bottom on initial opening
-                            SetPositionMode(DialoguePositionMode.DefaultBottom, true);
-                            // CRT flicker opening effect
+                            SetPositionMode(isBuildingOpen ? DialoguePositionMode.PlacementTop : DialoguePositionMode.DefaultBottom, true);
                             dialogueBox.transform.localScale = new Vector3(1f, 0.05f, 1f);
                             dialogueBox.transform.DOScaleY(1f, 0.2f).SetUpdate(true);
                         }
