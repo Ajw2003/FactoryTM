@@ -541,6 +541,11 @@ namespace Ui
         {
             temporarilyDisabledUiElements.Clear();
             
+            if (UiManager.Instance != null && UiManager.Instance.PlayerStatsPanel != null)
+            {
+                UiManager.Instance.PlayerStatsPanel.SetActive(false);
+            }
+            
             // Find the canvas containing StorePanel, or fallback canvas
             Transform canvasTransform = transform.parent;
             if (canvasTransform == null)
@@ -628,6 +633,11 @@ namespace Ui
                 }
             }
             temporarilyDisabledUiElements.Clear();
+
+            if (UiManager.Instance != null && UiManager.Instance.PlayerStatsPanel != null)
+            {
+                UiManager.Instance.PlayerStatsPanel.SetActive(true);
+            }
         }
     
         public void OpenStore()

@@ -9,8 +9,8 @@ This document contains the categorized breakdown of the To-Do list for FactoryTM
   - *How*: Update `Conveyor.cs` item movement logic to check for a valid receiver. Update `PlayerBuildingUiState` to detect loose items on the target grid and block placement or destroy/refund them.
 - [ ] **Deprecate the seller building**
   - *How*: Remove from `BuildingManager` purchasable list and `UpgradeManager`. Mark class as `[Obsolete]` and ensure IDT handles all exporting.
-- [ ] **Make objectives and current dialogue scale to fit inside the console window**
-  - *How*: Adjust UI Canvas using `ContentSizeFitter` and `VerticalLayoutGroup`, or dynamically resize bounds via `EventManager` when Store UI opens.
+- [x] **Make objectives and current dialogue scale/position correctly and update dynamically**
+  - *How*: Hook `TutorialManager` to inventory and currency events, hide the dialogue box when Store UI is open, and shift the dialogue box to the top when Building configuration UI is open.
 - [ ] **Fix objectives not being large enough / copy-pastes**
   - *How*: Update Tutorial `ScriptableObject` data with a `ShortObjectiveText` string. Update the HUD to display this short string instead of full dialogue.
 
@@ -75,3 +75,5 @@ This document contains the categorized breakdown of the To-Do list for FactoryTM
   - *How*: Refactor `PlayerStateMachine.cs` to inherit from `StateMachine.BaseStateMachine`.
 - [x] **Fix ScriptableObject Placement**
   - *How*: Move `ResourceNodeDefinition.cs`, `FloatingTextSettings.cs`, and `WeaponStats.cs` into the `Assets/Scripts/Data/` folder and update any references.
+- [x] **Decommission Jade System & Refactor BuildingUiManager**
+  - *How*: Remove legacy Jade HUD rendering and UI methods while retaining the core screen-to-world raycasting needed for core interactions (e.g. mining, pickup).

@@ -31,6 +31,7 @@
 - [ ] Make all text larger and ignore blur or chromatic aberration post-process effects.
 - [ ] Improve UI contrast, color choices, and general style unification.
 -     make objectives ui more appealing
+- fix store not dynamically changing layout based on tutorial stages properly, if looking for weapons to purchase or ammo and health only show those items in the store until that stage of tutorial is over 
 - [ ] Adjust existing hotbar ui and IDT inventory slots ui to become a Minecraft-style hotbar UI with scrolling or hovering mouse over a given slot to view the name of a given item.
 
 ## 🏆 Progression & Meta
@@ -42,7 +43,10 @@
 
 ## Fixes
 - [/] fix rendering of bullets rendering wrong and dark instead of properly
-- fix placement of the objectives ui 
-- ensure the objectives ui updates properly when actions are completed even in menus which it seems to ignore until closed
+- [/] fix placement of the objectives ui 
+- [/] ensure the objectives ui updates properly when actions are completed even in menus which it seems to ignore until closed
+- fix dodge roll being obtained before upgrade is unlocked, player should have to obtain dodge roll upgrade to use
+- fix dialogue ui not updating but showing ui like the objectives ui that would suggest it should.
+- fix destroying enemy outpost section of the tutorial and objectives ui as it states 4 remaining without updating, instead it should say the %of hp the spawner has left
 - ensure all ui is adequately spaced at all times and apply a standard spacing to all ui elements in the project to uphold this rule.
 - make resources inventory show value of total items in a given slot instead of the individual price of a single item
