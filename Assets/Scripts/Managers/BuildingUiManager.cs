@@ -26,10 +26,6 @@ namespace Managers
         private Dictionary<ResourceType, int> playerResources = new Dictionary<ResourceType, int>();
     
         [Header("UI Panels")]
-        private GameObject jadePanel;
-        private TMP_Text jadeTitleText;
-        private TMP_Text jadeDetailText;
-        private TMP_Text jadePromptText;
     
         private GameObject buildingPanel;
         private TMP_Text buildingTitleText;
@@ -62,13 +58,7 @@ namespace Managers
         public ResourceNode HoveredNode { get; private set; }
         public ConveyorItem HoveredItem { get; private set; }
         public BuildingLogic HoveredInteractable { get; private set; }
-    
-        // Hover UI Info
-        private string hoveredUiName = "";
-        private string hoveredUiDesc = "";
-        private string hoveredUiExtra = "";
-        private bool isHoveringUi = false;
-    
+        
         protected override void Awake()
         {
             persistBetweenScenes = false;
@@ -78,7 +68,6 @@ namespace Managers
         private void Start()
         {
             FindCanvas();
-            CreateJadePanel();
             CreateBuildingUiPanel();
             CreateResourceInventoryPanel();
             
@@ -164,78 +153,6 @@ namespace Managers
     
         #endregion
     
-        #region Jade Hover HUD Creation
-    
-        private void CreateJadePanel()
-        {
-            if (HUDCanvas == null) return;
-    
-            // Jade Panel Container
-            jadePanel = new GameObject("JadeHoverHUD", typeof(RectTransform), typeof(Image));
-            jadePanel.transform.SetParent(HUDCanvas.transform, false);
-    
-            RectTransform rt = jadePanel.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.96f);
-            rt.anchorMax = new Vector2(0.5f, 0.96f);
-            rt.pivot = new Vector2(0.5f, 1f);
-            rt.anchoredPosition = new Vector2(0f, 0f);
-            rt.sizeDelta = new Vector2(620f, 140f);
-    
-            Image img = jadePanel.GetComponent<Image>();
-            img.color = new Color(0.01f, 0.05f, 0.01f, 0.92f); // CRT translucent green background
-    
-            Outline outline = jadePanel.AddComponent<Outline>();
-            outline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
-            outline.effectDistance = new Vector2(2f, -2f);
-    
-            // Title text
-            GameObject titleGo = new GameObject("TitleText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            titleGo.transform.SetParent(jadePanel.transform, false);
-            RectTransform titleRt = titleGo.GetComponent<RectTransform>();
-            titleRt.anchorMin = new Vector2(0f, 0.65f);
-            titleRt.anchorMax = new Vector2(1f, 0.95f);
-            titleRt.offsetMin = new Vector2(20f, 0f);
-            titleRt.offsetMax = new Vector2(-20f, 0f);
-    
-            jadeTitleText = titleGo.GetComponent<TextMeshProUGUI>();
-            jadeTitleText.fontSize = 30;
-            jadeTitleText.fontStyle = FontStyles.Bold;
-            jadeTitleText.color = new Color(0.2f, 1f, 0.2f);
-            jadeTitleText.alignment = TextAlignmentOptions.Left;
-    
-            // Detail text
-            GameObject detailGo = new GameObject("DetailText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            detailGo.transform.SetParent(jadePanel.transform, false);
-            RectTransform detailRt = detailGo.GetComponent<RectTransform>();
-            detailRt.anchorMin = new Vector2(0f, 0.35f);
-            detailRt.anchorMax = new Vector2(1f, 0.65f);
-            detailRt.offsetMin = new Vector2(20f, 0f);
-            detailRt.offsetMax = new Vector2(-20f, 0f);
-    
-            jadeDetailText = detailGo.GetComponent<TextMeshProUGUI>();
-            jadeDetailText.fontSize = 24;
-            jadeDetailText.color = new Color(0.2f, 0.8f, 0.2f, 0.85f);
-            jadeDetailText.alignment = TextAlignmentOptions.Left;
-    
-            // Action prompt text
-            GameObject promptGo = new GameObject("PromptText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            promptGo.transform.SetParent(jadePanel.transform, false);
-            RectTransform promptRt = promptGo.GetComponent<RectTransform>();
-            promptRt.anchorMin = new Vector2(0f, 0.05f);
-            promptRt.anchorMax = new Vector2(1f, 0.35f);
-            promptRt.offsetMin = new Vector2(20f, 0f);
-            promptRt.offsetMax = new Vector2(-20f, 0f);
-    
-            jadePromptText = promptGo.GetComponent<TextMeshProUGUI>();
-            jadePromptText.fontSize = 22;
-            jadePromptText.fontStyle = FontStyles.Italic;
-            jadePromptText.color = new Color(1f, 0.8f, 0.2f); // gold prompt color
-            jadePromptText.alignment = TextAlignmentOptions.Left;
-    
-            jadePanel.SetActive(false);
-        }
-    
-        #endregion
     
         #region Machine Config Panel Creation
     
@@ -1140,10 +1057,7 @@ namespace Managers
         private void PerformHoverChecks()
         {
             // 1. Check UI Hovering first
-            isHoveringUi = false;
-            hoveredUiName = "";
-            hoveredUiDesc = "";
-            hoveredUiExtra = "";
+            bool isHoveringUi = false;
     
             if (EventSystem.current != null)
             {
@@ -1169,10 +1083,6 @@ namespace Managers
                             if (data != null)
                             {
                                 isHoveringUi = true;
-                                hoveredUiName = data.buildingName;
-                                hoveredUiDesc = data.description;
-                                var item = InventoryManager.Instance.items.Find(i => i.data == data);
-                                hoveredUiExtra = $"In Inventory: {(item != null ? item.count : 0)}";
                                 break;
                             }
                         }
@@ -1182,15 +1092,6 @@ namespace Managers
                         if (shopItem != null && shopItem.Definition != null)
                         {
                             isHoveringUi = true;
-                            hoveredUiName = shopItem.Definition.upgradeName.ToUpper();
-                            hoveredUiDesc = shopItem.Definition.description;
-                            
-                            float cost = shopItem.Definition.costInShop;
-                            if (shopItem.Definition.type == UpgradeType.ZoneExpansion && ZoneManager.HasInstance)
-                            {
-                                cost = ZoneManager.Instance.GetUnlockCost();
-                            }
-                            hoveredUiExtra = $"Type: {shopItem.GetTypeString()} // Cost: ${cost:F0}";
                             break;
                         }
                     }
@@ -1203,11 +1104,6 @@ namespace Managers
                 HoveredNode = null;
                 HoveredItem = null;
                 HoveredInteractable = null;
-    
-                jadePanel.SetActive(true);
-                jadeTitleText.text = hoveredUiName;
-                jadeDetailText.text = hoveredUiDesc;
-                jadePromptText.text = hoveredUiExtra;
                 return;
             }
     
@@ -1255,89 +1151,11 @@ namespace Managers
             {
                 HoveredNode = ResourceManager.Instance.GetNodeAtPosition(cell);
             }
-    
-            // 3. Update Jade HUD contents
-            if (HoveredBuilding != null)
-            {
-                jadePanel.SetActive(true);
-                jadeTitleText.text = HoveredBuilding.data.buildingName.ToUpper();
-                
-                string hpStr = $"Structure Durability: {HoveredBuilding.Health} / {Mathf.RoundToInt(HoveredBuilding.data.maxHealth * HoveredBuilding.GetTierMultiplier())} HP";
-                string statusStr = "";
-                string promptStr = "";
-    
-                if (HoveredBuilding.data.type == BuildingType.Conveyor)
-                {
-                    statusStr = "Conveyor Belt System";
-                    promptStr = ""; // Conveyors need no UI
-                }
-                else
-                {
-                    promptStr = "[E] Open Configuration Interface";
-                    
-                    if (HoveredBuilding is InterDimensionalTransporter seller)
-                    {
-                        statusStr = seller.fuelRemaining > 0f ? $"IDT Active // Fuel: {Mathf.CeilToInt(seller.fuelRemaining)}s" : "IDT Reactor Offline // Coal Required";
-                        if (seller.isUraniumBoosted) statusStr = $"REACTOR BOOSTED // Uranium remaining: {Mathf.CeilToInt(seller.uraniumBoostDuration)}s";
-                    }
-                    else if (HoveredBuilding is MinerLogic miner)
-                    {
-                        statusStr = miner.fuelRemaining > 0f ? $"Operational // Fuel: {Mathf.CeilToInt(miner.fuelRemaining)}%" : "System Halted // Fuel depleted";
-                    }
-                    else if (HoveredBuilding is Furnace furnace)
-                    {
-                        statusStr = furnace.fuelRemaining > 0f ? $"Smelting // Fuel: {Mathf.CeilToInt(furnace.fuelRemaining)}%" : "System Halted // Fuel depleted";
-                    }
-                    else if (HoveredBuilding is TurretLogic turret)
-                    {
-                        statusStr = turret.ammoRemaining > 0 ? $"Defense Active // Ammo: {turret.ammoRemaining} / {turret.maxAmmo}" : "WEAPON OFFLINE // Ammo depleted";
-                    }
-                }
-    
-                jadeDetailText.text = $"{hpStr}\n{statusStr}";
-                jadePromptText.text = promptStr;
-            }
-            else if (HoveredItem != null)
-            {
-                jadePanel.SetActive(true);
-                jadeTitleText.text = $"{HoveredItem.name.Replace("(Clone)", "").Replace("_", " ").ToUpper()}";
-                jadeDetailText.text = $"Raw Material Item // Market Value: ${HoveredItem.value}";
-                jadePromptText.text = "[E] Pick Up Item";
-            }
-            else if (HoveredNode != null)
-            {
-                jadePanel.SetActive(true);
-                
-                ResourceType rType = ResourceType.Coal;
-                if (HoveredNode.minedItemPrefab != null)
-                {
-                    ConveyorItem citem = HoveredNode.minedItemPrefab.GetComponent<ConveyorItem>();
-                    if (citem != null) rType = citem.resourceType;
-                }
-    
-                if (IsResourceDiscovered(rType))
-                {
-                    jadeTitleText.text = $"{rType.ToString().ToUpper()} DEPOSIT";
-                    jadeDetailText.text = $"Extraction Target // Content: {HoveredNode.oreCount} units remaining";
-                }
-                else
-                {
-                    jadeTitleText.text = "UNKNOWN RESOURCE DEPOSIT";
-                    jadeDetailText.text = "Extraction Target // Identity: Undiscovered";
-                }
-    
-                jadePromptText.text = "[E] Mine Manually (+1 Resource)";
-            }
-            else
-            {
-                jadePanel.SetActive(false);
-            }
         }
     
         #endregion
     }
-    
 }
-
+    
 
 

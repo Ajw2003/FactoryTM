@@ -18,7 +18,7 @@ This document contains the categorized breakdown of the To-Do list for FactoryTM
 *With bugs fixed, implement missing core mechanics and improve the visual experience.*
 
 - [ ] **Fully implement finite resources**
-  - *How*: Add `currentYield` to resource nodes. Decrement on extraction. When zero, disable node and publish `OreDepletedEvent`. Jade HUD listens and updates display.
+  - *How*: Add `currentYield` to resource nodes. Decrement on extraction. When zero, disable node and publish `OreDepletedEvent` (and update grid cell logic/visuals).
 - [ ] **Minecraft-style hotbar UI**
   - *How*: Update inventory UI on scroll event. Spawn a temporary floating text UI element showing the active item's name.
 - [ ] **Make all text larger and ignore blur/post-process effects**

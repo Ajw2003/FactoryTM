@@ -35,7 +35,7 @@ FactoryTM blends factory automation with a challenging roguelike progression str
 * State changes (like opening the Store UI or entering dialogue) can publish toggle events to enable/disable specific input actions.
 
 ### UI Architecture
-* **Jade HUD (`BuildingUiManager.cs`):** A contextual hover overlay that displays dynamic info, remaining ore counts, and placement cues when hovering over nodes, buildings, or conveyor items.
+* **Contextual Interaction Raycasting (`BuildingUiManager.cs`):** Performs screen-to-world raycasting to identify hovered cells, conveyor items, and structures. Other systems (such as `PlayerController`) read these hover properties to handle manual actions like mining, item pickup, or building interaction. The visual "Jade HUD" overlay has been decommissioned.
 * **Bespoke Building Panels:** Walking up to a machine and pressing `E` displays a custom, context-sensitive overlay (e.g., fuel bars and smelting queues for Furnaces, fuel timers for the IDT, and ammo levels for Turrets).
 * **Inventory Panel:** A dynamic slot grid that displays current player inventory items, supporting drag-and-drop actions to feed fuel or sell raw ores.
 
