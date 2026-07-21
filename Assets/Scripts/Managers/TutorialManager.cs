@@ -69,7 +69,13 @@ namespace Managers
         private List<GameObject> activeObjectiveObjects = new List<GameObject>();
         private List<TextMeshProUGUI> objectiveTexts = new List<TextMeshProUGUI>();
         private TutorialState lastStateForObjectives = TutorialState.NotStarted;
-    
+        private bool _needsObjectiveUpdate = false;
+
+        private void MarkObjectiveUpdateDirty()
+        {
+            _needsObjectiveUpdate = true;
+        }
+
         // State instances
         public StateMachine.NotStartedTutorialState notStartedState { get; private set; }
         public StateMachine.BriefIntroTutorialState briefIntroState { get; private set; }
@@ -136,7 +142,12 @@ namespace Managers
         public override void Update()
         {
             base.Update();
-            if (currentState == TutorialState.EarnAndExpand || currentState == TutorialState.DefendFirstRaid)
+            if (_needsObjectiveUpdate)
+            {
+                UpdateObjectiveText();
+                _needsObjectiveUpdate = false;
+            }
+            else if (currentState == TutorialState.EarnAndExpand || currentState == TutorialState.DefendFirstRaid)
             {
                 UpdateObjectivesPanelText();
             }
@@ -158,11 +169,11 @@ namespace Managers
 
             if (InventoryManager.Instance != null)
             {
-                InventoryManager.Instance.onInventoryChange += UpdateObjectiveText;
+                InventoryManager.Instance.onInventoryChange += MarkObjectiveUpdateDirty;
             }
             if (CurrencyManager.Instance != null)
             {
-                CurrencyManager.Instance.onCurrencyChange += UpdateObjectiveText;
+                CurrencyManager.Instance.onCurrencyChange += MarkObjectiveUpdateDirty;
             }
         }
     
@@ -187,11 +198,11 @@ namespace Managers
 
             if (InventoryManager.Instance != null)
             {
-                InventoryManager.Instance.onInventoryChange -= UpdateObjectiveText;
+                InventoryManager.Instance.onInventoryChange -= MarkObjectiveUpdateDirty;
             }
             if (CurrencyManager.Instance != null)
             {
-                CurrencyManager.Instance.onCurrencyChange -= UpdateObjectiveText;
+                CurrencyManager.Instance.onCurrencyChange -= MarkObjectiveUpdateDirty;
             }
         }
     

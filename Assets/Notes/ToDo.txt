@@ -38,15 +38,33 @@
 - [ ] Add difficulty settings.
 - [ ] Add achievements.
 - [ ] Add random weapon modifiers and build weapons like noita 
+- add day night cycle where it gradually gets darker but ensuring everything still remains relatively visible until nightfall where night vis kicks in
 
 ## 🧹 Code Architecture & Cleanup
 
 ## Fixes
-- [x] fix rendering of bullets rendering wrong and dark instead of properly
-- [/] fix placement of the objectives ui 
-- [/] ensure the objectives ui updates properly when actions are completed even in menus which it seems to ignore until closed
-- fix dodge roll being obtained before upgrade is unlocked, player should have to obtain dodge roll upgrade to use
-- fix dialogue ui not updating but showing ui like the objectives ui that would suggest it should.
-- fix destroying enemy outpost section of the tutorial and objectives ui as it states 4 remaining without updating, instead it should say the %of hp the spawner has left
-- ensure all ui is adequately spaced at all times and apply a standard spacing to all ui elements in the project to uphold this rule.
-- make resources inventory show value of total items in a given slot instead of the individual price of a single item
+- fix dialogue ui disappearing after pressing space when to close or move to next and then reappearing after any action is completed i.e. an ore being sold or a menu opened
+-fix tutorial complete raid detected ui playing when first wave night cleared by removing this ui instead
+-fix miners not using the same system as the IDT for item insertion, all building uis should contain the same resources ui and click and dragging into a given location for inserting or outputting
+- fix health ui not existing anymore
+
+add intake and output to all buildings both functionally and visually for the sprites.
+
+Ensure the IDT can take input from all 4 sides and that every other building has one input and one output directly oposite eachother
+make items take up less space and sit closer on conveyors
+Fix conveyor sprites from being different speeds and not tiling animations properly
+Fix debugs and remove or disable safely
+
+
+
+
+
+
+
+
+
+
+
+
+
+

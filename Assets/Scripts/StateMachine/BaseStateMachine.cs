@@ -16,15 +16,17 @@ namespace StateMachine
         public IState CurrentState { get; set; }
         public string currentStateName;
 
-        public virtual void ChangeState(IState newState)// Change state with a pass through for the IState Interface 
+        public virtual void ChangeState(IState newState)// Change state with a pass through for the IState Interface
         {
             if (newState == CurrentState)
                 return;
-                
-            CurrentState?.Exit();
+
+            IState oldState = CurrentState;
             CurrentState = newState;
-            CurrentState?.Enter();
             currentStateName = CurrentState?.ToString();
+
+            oldState?.Exit();
+            CurrentState?.Enter();
         }
 
         public virtual void Update()
