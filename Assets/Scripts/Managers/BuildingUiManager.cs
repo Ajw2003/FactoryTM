@@ -366,7 +366,7 @@ namespace Managers
             arrowRt.offsetMin = Vector2.zero;
             arrowRt.offsetMax = Vector2.zero;
             TextMeshProUGUI arrowTxt = arrowGo.GetComponent<TextMeshProUGUI>();
-            arrowTxt.text = "▼";
+            arrowTxt.text = "v";
             arrowTxt.fontSize = 80;
             arrowTxt.fontStyle = FontStyles.Bold;
             arrowTxt.color = new Color(0.2f, 1f, 0.2f);

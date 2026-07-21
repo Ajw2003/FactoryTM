@@ -458,11 +458,11 @@ namespace Managers
                 {
                     if (_canWrite)
                     {
-                        promptText.text = showCursor ? "PRESS SPACE TO CONTINUE [█]" : "PRESS SPACE TO CONTINUE [ ]";
+                        promptText.text = showCursor ? "PRESS SPACE TO CONTINUE [#]" : "PRESS SPACE TO CONTINUE [ ]";
                     }
                     else
                     {
-                        promptText.text = showCursor ? "SYSTEM ACTIVE [█]" : "SYSTEM ACTIVE [ ]";
+                        promptText.text = showCursor ? "SYSTEM ACTIVE [#]" : "SYSTEM ACTIVE [ ]";
                     }
                 }
                 showCursor = !showCursor;

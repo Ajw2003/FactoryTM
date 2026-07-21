@@ -17,7 +17,7 @@ for directory in directories:
         for f in files:
             if f.endswith(".prefab"):
                 path = os.path.join(root, f)
-                with open(path, 'r', encoding='utf-8') as file:
+                with open(path, 'r', encoding='utf-8', newline='') as file:
                     content = file.read()
                 
                 blocks = content.split('--- !u!')
@@ -34,7 +34,7 @@ for directory in directories:
                     new_blocks.append(block)
                 
                 new_content = '--- !u!'.join(new_blocks)
-                with open(path, 'w', encoding='utf-8') as file:
+                with open(path, 'w', encoding='utf-8', newline='') as file:
                     file.write(new_content)
 
 print("Spacing and padding standardized.")
