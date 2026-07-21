@@ -72,7 +72,7 @@ namespace Items
                     slotFilled = true;
                     _currentItem = item;
                     IncreaseCount();
-                    _nameText.text = item.name;
+                    _nameText.text = item.itemName;
                     _image.sprite = item.itemData.sprite;
                     Destroy(item.gameObject);
                 }

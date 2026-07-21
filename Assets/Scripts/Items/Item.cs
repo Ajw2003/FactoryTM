@@ -15,9 +15,9 @@ namespace Items
     
         private Image _image;
 
-        private string _name;
+        public string itemName;
         
-        private string _description;
+        public string description;
         
         private itemType _itemType;
         
@@ -41,8 +41,8 @@ namespace Items
             _rectTransform = gameObject.GetComponent<RectTransform>();
             
             _image.sprite = itemData.sprite;
-            _name = itemData.itemName;
-            _description = itemData.itemDescription;
+            itemName = itemData.itemName;
+            description = itemData.itemDescription;
             _itemType = itemData.itemType;
             _startingTransform = _rectTransform.anchoredPosition;
             
