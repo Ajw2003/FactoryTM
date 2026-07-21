@@ -188,6 +188,7 @@ namespace Managers
                 switch (activeBuilding.type)
                 {
                     case (BuildingType.Chest):
+                        buildingObj = SpawnChestLogic(cell);
                         break;
                     case (BuildingType.Conveyor):
                         buildingObj = SpawnBeltLogic(cell);
@@ -442,9 +443,20 @@ namespace Managers
             GameObject sellerObj = new GameObject("Seller_Logic_" + cell);
             sellerObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
             InterDimensionalTransporter interDimensionalTransporter = sellerObj.AddComponent<InterDimensionalTransporter>();
-            interDimensionalTransporter.Setup(activeBuilding, cell);
+            interDimensionalTransporter.Setup(activeBuilding, cell, rotationIndex);
             activeBuildings.Add(cell, sellerObj);
             return sellerObj;
+        }
+
+        GameObject SpawnChestLogic(Vector2Int cell)
+        {
+            PlacementVersion++;
+            GameObject chestObj = new GameObject("Chest_Logic_" + cell);
+            chestObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
+            Chest logic = chestObj.AddComponent<Chest>();
+            logic.Setup(activeBuilding, cell, rotationIndex);
+            activeBuildings.Add(cell, chestObj);
+            return chestObj;
         }
     
         GameObject SpawnBeltLogic(Vector2Int cell)

@@ -17,39 +17,36 @@ namespace Placeables
         [Header("Fuel Settings")]
         public float fuelRemaining = 30f;
         public float maxFuel = 100f;
-    
-        private Vector2Int exportDirection;
-        private int rotationIndex;
+
         private float timer;
         private ConveyorItem currentItemPrefab;
         private ConveyorItem platePrefab;
         private float currentCookingSpeed;
-        
+
         public override void Setup(Buildings.BuildingData buildingData, Vector2Int cell)
         {
             Setup(buildingData, cell, 0, buildingData != null ? buildingData.proccessingSpeed : 2f);
         }
-    
+
         public void Setup(Buildings.BuildingData furnace, Vector2Int cell, int rotationIndex, float speed)
         {
             base.Setup(furnace, cell);
             this.rotationIndex = rotationIndex;
-            exportDirection = GameManager.Instance.GetDirectionFromRotationIndex(rotationIndex);
             currentCookingSpeed = speed / GetTierMultiplier();
-            
-            // Calculate occupied cells
-            Vector2Int actualSize = data.size;
-            if (rotationIndex % 2 != 0) actualSize = new Vector2Int(data.size.y, data.size.x);
-            
-            List<Vector2Int> cells = new List<Vector2Int>();
-            for (int x = 0; x < actualSize.x; x++)
-            {
-                for (int y = 0; y < actualSize.y; y++)
-                {
-                    cells.Add(myCell + new Vector2Int(x, y));
-                }
-            }
-            occupiedCells = cells;
+
+            occupiedCells = ComputeFootprintCells();
+
+            Vector2Int facing = GetFacingDirection();
+            var outputEdges = GetEdgeCells(facing);
+            var inputEdges = GetEdgeCells(-facing);
+            if (outputEdges.Count > 0) CreatePortIndicator(outputEdges[0], facing, facing, new Color(0.3f, 1f, 0.3f), "Output");
+            if (inputEdges.Count > 0) CreatePortIndicator(inputEdges[0], -facing, facing, new Color(0.3f, 0.8f, 1f), "Input");
+        }
+
+        // Furnaces only accept items entering through their single input side, opposite the output.
+        public override bool CanAcceptInputFrom(Vector2Int incomingDirection)
+        {
+            return incomingDirection == GetFacingDirection();
         }
     
         private ResourceType lastProcessedResourceType = (ResourceType)(-1);
@@ -72,10 +69,10 @@ namespace Placeables
         public override void PerformAction()
         {
             if (!isEnemyOwned && fuelRemaining <= 0f) return;
-    
-            foreach (var occupiedCell in occupiedCells)
+
+            foreach (var inputCell in GetEdgeCells(-GetFacingDirection()))
             {
-                List<ConveyorItem> items = ItemTracker.Instance.GetItemsInCell(occupiedCell);
+                List<ConveyorItem> items = ItemTracker.Instance.GetItemsInCell(inputCell);
                 if (items != null)
                 {
                     for (int i = items.Count - 1; i >= 0; i--)
@@ -157,21 +154,9 @@ namespace Placeables
                 return;
             }
             currentItemPrefab = CookedItemToRecive;
-    
-            // Calculate the target cell based on size and direction
-            Vector2Int actualSize = data.size;
-            if (rotationIndex % 2 != 0) actualSize = new Vector2Int(data.size.y, data.size.x);
-    
-            Vector2Int offset = Vector2Int.zero;
-            if (exportDirection.x > 0) offset = new Vector2Int(actualSize.x, 0); // Right
-            else if (exportDirection.x < 0) offset = new Vector2Int(-1, 0);      // Left
-            else if (exportDirection.y > 0) offset = new Vector2Int(0, actualSize.y); // Up
-            else if (exportDirection.y < 0) offset = new Vector2Int(0, -1);      // Down
-    
-            Vector2Int targetCell = myCell + offset;
-            Vector2 spawnPos = GridManager.Instance.CellToWorldConversion(targetCell);
-            
-    
+
+            Vector2 spawnPos = GetOutputSpawnPosition(GetFacingDirection(), out Vector2Int targetCell);
+
             // 2. Instantiate the item from pool
             GameObject newItem = ObjectPoolManager.Instance.GetPooledObject(currentItemPrefab.gameObject, spawnPos, Quaternion.identity);
             ConveyorItem itemComp = newItem.GetComponent<ConveyorItem>();
