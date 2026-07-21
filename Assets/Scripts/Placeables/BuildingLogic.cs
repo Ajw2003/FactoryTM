@@ -53,6 +53,18 @@ namespace Placeables
             return GameManager.Instance.GetDirectionFromRotationIndex(rotationIndex);
         }
 
+        /// <summary>Footprint cells on this building's single input side (opposite its facing/output direction). Empty if this building has no input side.</summary>
+        public System.Collections.Generic.List<Vector2Int> GetInputCells()
+        {
+            return GetEdgeCells(-GetFacingDirection());
+        }
+
+        /// <summary>Footprint cells on this building's single output side (its facing direction).</summary>
+        public System.Collections.Generic.List<Vector2Int> GetOutputCells()
+        {
+            return GetEdgeCells(GetFacingDirection());
+        }
+
         /// <summary>Building footprint size with width/height swapped for a 90/270 degree rotation.</summary>
         protected Vector2Int GetActualSize()
         {

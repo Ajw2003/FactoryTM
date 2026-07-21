@@ -42,7 +42,9 @@ namespace Placeables
 
             Vector2Int facing = GetFacingDirection();
             var outputEdges = GetEdgeCells(facing);
+            var inputEdges = GetEdgeCells(-facing);
             if (outputEdges.Count > 0) CreatePortIndicator(outputEdges[0], facing, facing, new Color(0.3f, 1f, 0.3f), "Output");
+            if (inputEdges.Count > 0) CreatePortIndicator(inputEdges[0], -facing, facing, new Color(0.3f, 0.8f, 1f), "Input");
 
             // Attempt to find a ResourceNode at any of the miner's positions
             if (ResourceManager.Instance != null)
@@ -70,18 +72,29 @@ namespace Placeables
                 return; // Exit setup early
             }
         }
-    
+
+        // Miners don't process belt items, but they can be auto-fed Coal for their boiler on
+        // their input side - the same fuel a player can otherwise load manually via the panel.
+        public override bool CanAcceptInputFrom(Vector2Int incomingDirection)
+        {
+            return incomingDirection == GetFacingDirection();
+        }
+
+        private const float FuelPerCoal = 25f;
+
         public override void PerformAction()
         {
             if (!enabled) return; // Ensure miner is enabled
-    
+
             if (!isEnemyOwned)
             {
+                TryConsumeCoalFromInput();
+
                 if (fuelRemaining > 0f)
                 {
                     fuelRemaining -= Time.deltaTime;
                     if (fuelRemaining < 0f) fuelRemaining = 0f;
-    
+
                     timer -= Time.deltaTime;
                     if (timer <= 0)
                     {
@@ -97,6 +110,27 @@ namespace Placeables
                 {
                     SpawnItem();
                     timer = currentMiningSpeed;
+                }
+            }
+        }
+
+        private void TryConsumeCoalFromInput()
+        {
+            if (fuelRemaining >= maxFuel) return;
+
+            foreach (var inputCell in GetInputCells())
+            {
+                var items = ItemTracker.Instance != null ? ItemTracker.Instance.GetItemsInCell(inputCell) : null;
+                if (items == null) continue;
+
+                for (int i = items.Count - 1; i >= 0; i--)
+                {
+                    ConveyorItem item = items[i];
+                    if (item != null && !item.IsMoving && item.resourceType == ResourceType.Coal)
+                    {
+                        fuelRemaining = Mathf.Min(maxFuel, fuelRemaining + FuelPerCoal);
+                        ObjectPoolManager.Instance.ReturnToPool(item.gameObject);
+                    }
                 }
             }
         }

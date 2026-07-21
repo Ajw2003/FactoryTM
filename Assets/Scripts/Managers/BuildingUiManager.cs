@@ -45,6 +45,22 @@ namespace Managers
         private GameObject resourceInventoryPanel;
         private Dictionary<ResourceType, GameObject> resourceSlots = new Dictionary<ResourceType, GameObject>();
         private GameObject idtIntakeDropZone;
+
+        private GameObject chestInventoryZone;
+        private Dictionary<ResourceType, GameObject> chestSlots = new Dictionary<ResourceType, GameObject>();
+
+        private GameObject portStatusZone;
+        private GameObject portInputSlot;
+        private GameObject portOutputSlot;
+
+        // Cached so ShowStandaloneResourcePanel/HideStandaloneResourcePanel can restore the panel's
+        // normal floating position after being reparented into the store's Inventory tab.
+        private Transform resourceInventoryPanelDefaultParent;
+        private Vector2 resourceInventoryPanelDefaultAnchorMin;
+        private Vector2 resourceInventoryPanelDefaultAnchorMax;
+        private Vector2 resourceInventoryPanelDefaultPivot;
+        private Vector2 resourceInventoryPanelDefaultAnchoredPos;
+        private Vector2 resourceInventoryPanelDefaultSizeDelta;
     
         [Header("State")]
         private BuildingLogic currentOpenBuilding;
@@ -401,8 +417,155 @@ namespace Managers
             descTxt.color = new Color(0.2f, 0.8f, 0.2f, 0.85f);
             descTxt.alignment = TextAlignmentOptions.Center;
             descTxt.enableWordWrapping = true;
-    
+
+            // Chest inventory zone - occupies the same region as the IDT intake drop zone, but shows
+            // a small multi-slot grid of whatever resource types the chest currently holds.
+            chestInventoryZone = new GameObject("ChestInventoryZone", typeof(RectTransform), typeof(Image));
+            chestInventoryZone.transform.SetParent(buildingPanel.transform, false);
+            RectTransform chestRt = chestInventoryZone.GetComponent<RectTransform>();
+            chestRt.anchorMin = new Vector2(0.52f, 0.08f);
+            chestRt.anchorMax = new Vector2(0.95f, 0.82f);
+            chestRt.pivot = new Vector2(0.5f, 0.5f);
+            chestRt.offsetMin = Vector2.zero;
+            chestRt.offsetMax = Vector2.zero;
+
+            Image chestImg = chestInventoryZone.GetComponent<Image>();
+            chestImg.color = new Color(0.01f, 0.08f, 0.01f, 0.9f);
+            Outline chestOutline = chestInventoryZone.AddComponent<Outline>();
+            chestOutline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
+            chestOutline.effectDistance = new Vector2(2f, -2f);
+
+            CreateChestSlots();
+            chestInventoryZone.SetActive(false);
+
+            // Port status zone - shared by Miner/Furnace, a passive (non-drag) pair of slots showing
+            // whatever item currently sits on the building's input/output edge cell, if any.
+            portStatusZone = new GameObject("PortStatusZone", typeof(RectTransform));
+            portStatusZone.transform.SetParent(buildingPanel.transform, false);
+            RectTransform portZoneRt = portStatusZone.GetComponent<RectTransform>();
+            portZoneRt.anchorMin = new Vector2(0.05f, 0.32f);
+            portZoneRt.anchorMax = new Vector2(0.95f, 0.48f);
+            portZoneRt.offsetMin = Vector2.zero;
+            portZoneRt.offsetMax = Vector2.zero;
+
+            portInputSlot = CreatePortStatusSlot(portStatusZone.transform, "InputSlot", "INPUT", new Vector2(0f, 0f), new Vector2(0.32f, 1f));
+            portOutputSlot = CreatePortStatusSlot(portStatusZone.transform, "OutputSlot", "OUTPUT", new Vector2(0.68f, 0f), new Vector2(1f, 1f));
+            portStatusZone.SetActive(false);
+
             buildingPanel.SetActive(false);
+        }
+
+        private void CreateChestSlots()
+        {
+            ResourceType[] types = (ResourceType[])System.Enum.GetValues(typeof(ResourceType));
+
+            float startX = 12f;
+            float startY = 200f;
+            float slotW = 80f;
+            float slotH = 100f;
+            float spacingX = 14f;
+            float spacingY = 20f;
+
+            for (int i = 0; i < types.Length; i++)
+            {
+                ResourceType type = types[i];
+                int col = i % 4;
+                int row = i / 4;
+                float x = startX + col * (slotW + spacingX);
+                float y = startY - row * (slotH + spacingY);
+
+                GameObject slotGo = new GameObject("ChestSlot_" + type.ToString(), typeof(RectTransform), typeof(Image));
+                slotGo.transform.SetParent(chestInventoryZone.transform, false);
+                RectTransform slotRt = slotGo.GetComponent<RectTransform>();
+                slotRt.anchorMin = new Vector2(0f, 0f);
+                slotRt.anchorMax = new Vector2(0f, 0f);
+                slotRt.pivot = new Vector2(0f, 0f);
+                slotRt.anchoredPosition = new Vector2(x, y);
+                slotRt.sizeDelta = new Vector2(slotW, slotH);
+
+                Image slotImg = slotGo.GetComponent<Image>();
+                slotImg.color = new Color(0f, 0.02f, 0f, 0.8f);
+                Outline slotOutline = slotGo.AddComponent<Outline>();
+                slotOutline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.4f);
+                slotOutline.effectDistance = new Vector2(1f, -1f);
+
+                GameObject iconGo = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+                iconGo.transform.SetParent(slotGo.transform, false);
+                RectTransform iconRt = iconGo.GetComponent<RectTransform>();
+                iconRt.anchorMin = new Vector2(0.5f, 0.5f);
+                iconRt.anchorMax = new Vector2(0.5f, 0.5f);
+                iconRt.pivot = new Vector2(0.5f, 0.5f);
+                iconRt.anchoredPosition = new Vector2(0f, 5f);
+                iconRt.sizeDelta = new Vector2(48f, 48f);
+
+                Image iconImg = iconGo.GetComponent<Image>();
+                iconImg.color = Color.white;
+                iconImg.raycastTarget = true;
+
+                GameObject countGo = new GameObject("CountText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                countGo.transform.SetParent(slotGo.transform, false);
+                RectTransform countRt = countGo.GetComponent<RectTransform>();
+                countRt.anchorMin = new Vector2(0f, 0f);
+                countRt.anchorMax = new Vector2(1f, 0.3f);
+                countRt.offsetMin = new Vector2(2f, 2f);
+                countRt.offsetMax = new Vector2(-4f, 2f);
+
+                TextMeshProUGUI countText = countGo.GetComponent<TextMeshProUGUI>();
+                countText.fontSize = 18;
+                countText.fontStyle = FontStyles.Bold;
+                countText.color = new Color(0.2f, 1f, 0.2f);
+                countText.alignment = TextAlignmentOptions.BottomRight;
+
+                ChestSlotDragHandler dragHandler = iconGo.AddComponent<ChestSlotDragHandler>();
+                dragHandler.resourceType = type;
+
+                chestSlots[type] = slotGo;
+            }
+        }
+
+        private GameObject CreatePortStatusSlot(Transform parent, string name, string label, Vector2 anchorMin, Vector2 anchorMax)
+        {
+            GameObject slotGo = new GameObject(name, typeof(RectTransform), typeof(Image));
+            slotGo.transform.SetParent(parent, false);
+            RectTransform slotRt = slotGo.GetComponent<RectTransform>();
+            slotRt.anchorMin = anchorMin;
+            slotRt.anchorMax = anchorMax;
+            slotRt.offsetMin = Vector2.zero;
+            slotRt.offsetMax = Vector2.zero;
+
+            Image slotImg = slotGo.GetComponent<Image>();
+            slotImg.color = new Color(0f, 0.02f, 0f, 0.8f);
+            Outline slotOutline = slotGo.AddComponent<Outline>();
+            slotOutline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.4f);
+            slotOutline.effectDistance = new Vector2(1f, -1f);
+
+            GameObject iconGo = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+            iconGo.transform.SetParent(slotGo.transform, false);
+            RectTransform iconRt = iconGo.GetComponent<RectTransform>();
+            iconRt.anchorMin = new Vector2(0.5f, 0.55f);
+            iconRt.anchorMax = new Vector2(0.5f, 0.55f);
+            iconRt.pivot = new Vector2(0.5f, 0.5f);
+            iconRt.anchoredPosition = Vector2.zero;
+            iconRt.sizeDelta = new Vector2(40f, 40f);
+            Image iconImg = iconGo.GetComponent<Image>();
+            iconImg.color = Color.white;
+            iconImg.enabled = false;
+
+            GameObject labelGo = new GameObject("LabelText", typeof(RectTransform), typeof(TextMeshProUGUI));
+            labelGo.transform.SetParent(slotGo.transform, false);
+            RectTransform labelRt = labelGo.GetComponent<RectTransform>();
+            labelRt.anchorMin = new Vector2(0f, 0f);
+            labelRt.anchorMax = new Vector2(1f, 0.2f);
+            labelRt.offsetMin = Vector2.zero;
+            labelRt.offsetMax = Vector2.zero;
+            TextMeshProUGUI labelTxt = labelGo.GetComponent<TextMeshProUGUI>();
+            labelTxt.text = label;
+            labelTxt.fontSize = 16;
+            labelTxt.fontStyle = FontStyles.Bold;
+            labelTxt.color = new Color(0.2f, 0.8f, 0.2f, 0.8f);
+            labelTxt.alignment = TextAlignmentOptions.Center;
+
+            return slotGo;
         }
     
         private void CreateResourceInventoryPanel()
@@ -419,7 +582,14 @@ namespace Managers
             rt.pivot = new Vector2(1f, 0.5f);
             rt.anchoredPosition = new Vector2(-1070f, 0f);
             rt.sizeDelta = new Vector2(475f, 688f);
-    
+
+            resourceInventoryPanelDefaultParent = resourceInventoryPanel.transform.parent;
+            resourceInventoryPanelDefaultAnchorMin = rt.anchorMin;
+            resourceInventoryPanelDefaultAnchorMax = rt.anchorMax;
+            resourceInventoryPanelDefaultPivot = rt.pivot;
+            resourceInventoryPanelDefaultAnchoredPos = rt.anchoredPosition;
+            resourceInventoryPanelDefaultSizeDelta = rt.sizeDelta;
+
             Image img = resourceInventoryPanel.GetComponent<Image>();
             img.color = new Color(0.01f, 0.05f, 0.01f, 0.97f);
     
@@ -568,6 +738,26 @@ namespace Managers
             return null;
         }
     
+        /// <summary>The raw-ore item prefab for a resource type, looked up the same way GetResourceSprite finds its icon.</summary>
+        public GameObject GetResourceItemPrefab(ResourceType type)
+        {
+            if (GameManager.Instance != null && GameManager.Instance.resourceNodeDefinitions != null)
+            {
+                foreach (var def in GameManager.Instance.resourceNodeDefinitions)
+                {
+                    if (def != null && def.minedItemPrefab != null)
+                    {
+                        ConveyorItem citem = def.minedItemPrefab.GetComponentInChildren<ConveyorItem>();
+                        if (citem != null && citem.resourceType == type)
+                        {
+                            return def.minedItemPrefab;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
         public float GetResourceValue(ResourceType type)
         {
             if (GameManager.Instance != null && GameManager.Instance.resourceNodeDefinitions != null)
@@ -658,19 +848,138 @@ namespace Managers
             }
         }
     
+        /// <summary>Reparents the player resource panel into a store UI tab container so it can be
+        /// browsed without any building open. Call HideStandaloneResourcePanel to restore it.</summary>
+        public void ShowStandaloneResourcePanel(Transform parent)
+        {
+            if (resourceInventoryPanel == null || parent == null) return;
+
+            resourceInventoryPanel.transform.SetParent(parent, false);
+            RectTransform rt = resourceInventoryPanel.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            resourceInventoryPanel.SetActive(true);
+            RefreshResourceInventoryPanel();
+        }
+
+        public void HideStandaloneResourcePanel()
+        {
+            if (resourceInventoryPanel == null) return;
+
+            // Don't hide/reparent out from under an open building panel that also needs this panel.
+            if (currentOpenBuilding is InterDimensionalTransporter || currentOpenBuilding is Chest) return;
+
+            resourceInventoryPanel.transform.SetParent(resourceInventoryPanelDefaultParent, false);
+            RectTransform rt = resourceInventoryPanel.GetComponent<RectTransform>();
+            rt.anchorMin = resourceInventoryPanelDefaultAnchorMin;
+            rt.anchorMax = resourceInventoryPanelDefaultAnchorMax;
+            rt.pivot = resourceInventoryPanelDefaultPivot;
+            rt.anchoredPosition = resourceInventoryPanelDefaultAnchoredPos;
+            rt.sizeDelta = resourceInventoryPanelDefaultSizeDelta;
+
+            resourceInventoryPanel.SetActive(false);
+        }
+
         public bool IsMouseOverBuildingPanel(Vector2 screenPosition)
         {
             if (buildingPanel == null) return false;
             RectTransform rt = buildingPanel.GetComponent<RectTransform>();
             return RectTransformUtility.RectangleContainsScreenPoint(rt, screenPosition, null);
         }
-    
+
         public bool IsMouseOverIntakeZone(Vector2 screenPosition)
         {
             if (idtIntakeDropZone == null || !idtIntakeDropZone.activeInHierarchy) return false;
             RectTransform rt = idtIntakeDropZone.GetComponent<RectTransform>();
             Camera cam = (HUDCanvas != null && HUDCanvas.renderMode == RenderMode.ScreenSpaceOverlay) ? null : Camera.main;
             return RectTransformUtility.RectangleContainsScreenPoint(rt, screenPosition, cam);
+        }
+
+        public bool IsMouseOverChestZone(Vector2 screenPosition)
+        {
+            if (chestInventoryZone == null || !chestInventoryZone.activeInHierarchy) return false;
+            RectTransform rt = chestInventoryZone.GetComponent<RectTransform>();
+            Camera cam = (HUDCanvas != null && HUDCanvas.renderMode == RenderMode.ScreenSpaceOverlay) ? null : Camera.main;
+            return RectTransformUtility.RectangleContainsScreenPoint(rt, screenPosition, cam);
+        }
+
+        public bool IsMouseOverPlayerInventoryPanel(Vector2 screenPosition)
+        {
+            if (resourceInventoryPanel == null || !resourceInventoryPanel.activeInHierarchy) return false;
+            RectTransform rt = resourceInventoryPanel.GetComponent<RectTransform>();
+            Camera cam = (HUDCanvas != null && HUDCanvas.renderMode == RenderMode.ScreenSpaceOverlay) ? null : Camera.main;
+            return RectTransformUtility.RectangleContainsScreenPoint(rt, screenPosition, cam);
+        }
+
+        /// <summary>Drags the player's whole held stack of `type` into the currently open Chest, up to its remaining capacity.</summary>
+        public void HandleChestDeposit(ResourceType type)
+        {
+            if (!(currentOpenBuilding is Chest chest)) return;
+
+            int count = GetResourceCount(type);
+            if (count <= 0) return;
+
+            int deposited = chest.Deposit(type, count);
+            if (deposited <= 0) return;
+
+            RemoveResource(type, deposited);
+            if (UiManager.HasInstance)
+            {
+                UiManager.Instance.ShowGeneralAlert($"STORED {deposited}x {type.ToString().ToUpper()}", new Color(0.2f, 1f, 0.2f));
+            }
+
+            RefreshBuildingPanel();
+            RefreshResourceInventoryPanel();
+            RefreshChestInventoryPanel();
+        }
+
+        /// <summary>Withdraws all of `type` from the currently open Chest back into the player's resource pool.</summary>
+        public void HandleChestWithdraw(ResourceType type)
+        {
+            if (!(currentOpenBuilding is Chest chest)) return;
+
+            int count = chest.GetStoredCount(type);
+            if (count <= 0) return;
+
+            int withdrawn = chest.Withdraw(type, count);
+            if (withdrawn <= 0) return;
+
+            AddResource(type, withdrawn);
+
+            RefreshBuildingPanel();
+            RefreshResourceInventoryPanel();
+            RefreshChestInventoryPanel();
+        }
+
+        public void RefreshChestInventoryPanel()
+        {
+            if (chestInventoryZone == null || !chestInventoryZone.activeSelf) return;
+            if (!(currentOpenBuilding is Chest chest)) return;
+
+            foreach (var pair in chestSlots)
+            {
+                ResourceType type = pair.Key;
+                GameObject slotGo = pair.Value;
+
+                Image iconImg = slotGo.transform.Find("Icon").GetComponent<Image>();
+                TextMeshProUGUI countText = slotGo.transform.Find("CountText").GetComponent<TextMeshProUGUI>();
+                ChestSlotDragHandler dragHandler = iconImg.GetComponent<ChestSlotDragHandler>();
+
+                int count = chest.GetStoredCount(type);
+                Sprite sprite = GetResourceSprite(type);
+
+                iconImg.sprite = sprite;
+                iconImg.enabled = sprite != null && count > 0;
+                dragHandler.iconSprite = sprite;
+                countText.text = count > 0 ? count.ToString() : "";
+
+                iconImg.color = count > 0 ? Color.white : new Color(1f, 1f, 1f, 0.15f);
+            }
         }
     
         public void HandleResourceDropped(ResourceType type)
@@ -741,8 +1050,42 @@ namespace Managers
             }
         }
     
+        /// <summary>Passive (non-drag) display for Miner/Furnace showing whatever item currently sits on their input/output edge cell, if any.</summary>
+        private void RefreshPortStatusSlots(BuildingLogic building)
+        {
+            if (portInputSlot == null || portOutputSlot == null || building == null) return;
+
+            SetPortStatusIcon(portInputSlot, FindFirstItemInCells(building.GetInputCells()));
+            SetPortStatusIcon(portOutputSlot, FindFirstItemInCells(building.GetOutputCells()));
+        }
+
+        private ConveyorItem FindFirstItemInCells(List<Vector2Int> cells)
+        {
+            if (cells == null || ItemTracker.Instance == null) return null;
+            foreach (var cell in cells)
+            {
+                var items = ItemTracker.Instance.GetItemsInCell(cell);
+                if (items != null && items.Count > 0) return items[0];
+            }
+            return null;
+        }
+
+        private void SetPortStatusIcon(GameObject slotGo, ConveyorItem item)
+        {
+            Image iconImg = slotGo.transform.Find("Icon").GetComponent<Image>();
+            if (item == null)
+            {
+                iconImg.enabled = false;
+                return;
+            }
+
+            Sprite sprite = GetResourceSprite(item.resourceType);
+            iconImg.sprite = sprite;
+            iconImg.enabled = sprite != null;
+        }
+
         #endregion
-    
+
         #region Panel Control (Open/Close/Interact)
     
         public void OpenPanel(BuildingLogic building)
@@ -753,10 +1096,18 @@ namespace Managers
             buildingPanel.SetActive(true);
             RefreshBuildingPanel();
     
-            if (building is InterDimensionalTransporter)
+            if (building is InterDimensionalTransporter || building is Chest)
             {
                 if (resourceInventoryPanel != null)
                 {
+                    resourceInventoryPanel.transform.SetParent(resourceInventoryPanelDefaultParent, false);
+                    RectTransform rrt = resourceInventoryPanel.GetComponent<RectTransform>();
+                    rrt.anchorMin = resourceInventoryPanelDefaultAnchorMin;
+                    rrt.anchorMax = resourceInventoryPanelDefaultAnchorMax;
+                    rrt.pivot = resourceInventoryPanelDefaultPivot;
+                    rrt.anchoredPosition = resourceInventoryPanelDefaultAnchoredPos;
+                    rrt.sizeDelta = resourceInventoryPanelDefaultSizeDelta;
+
                     resourceInventoryPanel.SetActive(true);
                     RefreshResourceInventoryPanel();
                 }
@@ -831,7 +1182,15 @@ namespace Managers
                 {
                     idtIntakeDropZone.SetActive(false);
                 }
-    
+                if (chestInventoryZone != null)
+                {
+                    chestInventoryZone.SetActive(false);
+                }
+                if (portStatusZone != null)
+                {
+                    portStatusZone.SetActive(false);
+                }
+
                 // Default buttons state
                 actionButton1Go.SetActive(true);
                 actionButton2Go.SetActive(true);
@@ -863,12 +1222,41 @@ namespace Managers
                     fuelBarRt.offsetMin = Vector2.zero;
                     fuelBarRt.offsetMax = Vector2.zero;
                 }
-                // 2. Miner UI Setup
+                // 2. Chest UI Setup - multi-slot storage, drag-driven like the IDT intake
+                else if (currentOpenBuilding is Chest)
+                {
+                    buildingTitleText.text = "STORAGE CHEST";
+
+                    actionButton1Go.SetActive(false);
+                    actionButton2Go.SetActive(false);
+                    fuelBarContainer.SetActive(false);
+
+                    if (chestInventoryZone != null)
+                    {
+                        chestInventoryZone.SetActive(true);
+                    }
+
+                    detailRt.anchorMin = new Vector2(0.05f, 0.32f);
+                    detailRt.anchorMax = new Vector2(0.48f, 0.82f);
+                    detailRt.offsetMin = Vector2.zero;
+                    detailRt.offsetMax = Vector2.zero;
+                }
+                // 3. Miner UI Setup
                 else if (currentOpenBuilding is MinerLogic miner)
                 {
                     buildingTitleText.text = miner.data.buildingName.ToUpper();
                     fuelBarContainer.SetActive(true);
-    
+                    if (portStatusZone != null) portStatusZone.SetActive(true);
+
+                    detailRt.anchorMin = new Vector2(0f, 0.60f);
+                    detailRt.anchorMax = new Vector2(1f, 0.85f);
+                    if (portStatusZone != null)
+                    {
+                        RectTransform portZoneRt2 = portStatusZone.GetComponent<RectTransform>();
+                        portZoneRt2.anchorMin = new Vector2(0.05f, 0.44f);
+                        portZoneRt2.anchorMax = new Vector2(0.95f, 0.58f);
+                    }
+
                     // Add Coal
                     actionButton1Text.text = "LOAD 1 COAL";
                     actionButton1.onClick.AddListener(() => {
@@ -900,7 +1288,17 @@ namespace Managers
                 {
                     buildingTitleText.text = furnace.data.buildingName.ToUpper();
                     fuelBarContainer.SetActive(true);
-    
+                    if (portStatusZone != null) portStatusZone.SetActive(true);
+
+                    detailRt.anchorMin = new Vector2(0f, 0.60f);
+                    detailRt.anchorMax = new Vector2(1f, 0.85f);
+                    if (portStatusZone != null)
+                    {
+                        RectTransform portZoneRt2 = portStatusZone.GetComponent<RectTransform>();
+                        portZoneRt2.anchorMin = new Vector2(0.05f, 0.44f);
+                        portZoneRt2.anchorMax = new Vector2(0.95f, 0.58f);
+                    }
+
                     // Add Coal
                     actionButton1Text.text = "LOAD 1 COAL";
                     actionButton1.onClick.AddListener(() => {
@@ -992,20 +1390,29 @@ namespace Managers
                 fuelBarFillImage.rectTransform.anchorMax = new Vector2(fuelPct, 1f);
                 fuelBarText.text = $"Reactor Fuel: {Mathf.CeilToInt(seller.fuelRemaining)}s / {Mathf.CeilToInt(seller.maxFuel)}s";
             }
+            else if (currentOpenBuilding is Chest chest)
+            {
+                buildingDetailText.text = $"Storage: {chest.GetTotalStored()} / {chest.capacity}\n\n" +
+                                          $"[DRAG RESOURCES FROM YOUR INVENTORY\nINTO THIS PANEL TO DEPOSIT]\n" +
+                                          $"[DRAG FROM THIS PANEL INTO YOUR\nINVENTORY TO WITHDRAW]";
+                RefreshChestInventoryPanel();
+            }
             else if (currentOpenBuilding is MinerLogic miner)
             {
                 string statusStr = miner.fuelRemaining > 0f ? "EXTRACTING" : "OUT OF FUEL (COAL REQUIRED)";
                 buildingDetailText.text = $"Machine Status: {statusStr}\n" +
                                           $"Extraction Speed: {miner.data.proccessingSpeed / miner.GetTierMultiplier():F1}s / cycle\n" +
                                           $"Carried Coal: {GetResourceCount(ResourceType.Coal)} available";
-    
+
                 fuelBarContainer.SetActive(true);
                 float fuelPct = miner.fuelRemaining / miner.maxFuel;
                 fuelBarFillImage.rectTransform.anchorMax = new Vector2(fuelPct, 1f);
                 fuelBarText.text = $"Boiler Fuel: {Mathf.CeilToInt(miner.fuelRemaining)}% / 100%";
-    
+
                 actionButton1.interactable = GetResourceCount(ResourceType.Coal) > 0;
                 actionButton2.interactable = GetResourceCount(ResourceType.Coal) > 0;
+
+                RefreshPortStatusSlots(miner);
             }
             else if (currentOpenBuilding is Furnace furnace)
             {
@@ -1013,14 +1420,16 @@ namespace Managers
                 buildingDetailText.text = $"Smelter Status: {statusStr}\n" +
                                           $"Cooking Speed: {furnace.data.proccessingSpeed / furnace.GetTierMultiplier():F1}s / cycle\n" +
                                           $"Carried Coal: {GetResourceCount(ResourceType.Coal)} available";
-    
+
                 fuelBarContainer.SetActive(true);
                 float fuelPct = furnace.fuelRemaining / furnace.maxFuel;
                 fuelBarFillImage.rectTransform.anchorMax = new Vector2(fuelPct, 1f);
                 fuelBarText.text = $"Furnace Fuel: {Mathf.CeilToInt(furnace.fuelRemaining)}% / 100%";
-    
+
                 actionButton1.interactable = GetResourceCount(ResourceType.Coal) > 0;
                 actionButton2.interactable = GetResourceCount(ResourceType.Coal) > 0;
+
+                RefreshPortStatusSlots(furnace);
             }
             else if (currentOpenBuilding is TurretLogic turret)
             {

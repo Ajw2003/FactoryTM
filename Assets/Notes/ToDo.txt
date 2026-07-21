@@ -45,7 +45,7 @@
 ## Fixes
 - fix dialogue ui disappearing after pressing space when to close or move to next and then reappearing after any action is completed i.e. an ore being sold or a menu opened
 -fix tutorial complete raid detected ui playing when first wave night cleared by removing this ui instead
--fix miners not using the same system as the IDT for item insertion, all building uis should contain the same resources ui and click and dragging into a given location for inserting or outputting
+[x] fix miners not using the same system as the IDT for item insertion, all building uis should contain the same resources ui and click and dragging into a given location for inserting or outputting (Chest now has real multi-slot storage + drag UI; Miner/Furnace get passive in/out slots; see history log)
 - fix health ui not existing anymore
 
 [x] add intake and output to all buildings both functionally and visually for the sprites. (Furnace/Miner/Chest/Conveyor; Turret & Wall skipped, see history log)
