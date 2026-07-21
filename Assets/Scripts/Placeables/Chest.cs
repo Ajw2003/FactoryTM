@@ -15,7 +15,10 @@ namespace Placeables
     {
         public int capacity = 20;
 
-        private readonly Queue<ConveyorItem> storedItems = new Queue<ConveyorItem>();
+        // Stored as counts per resource type (mirrors the player's abstract resource pool in
+        // BuildingUiManager) rather than live ConveyorItem instances, so the UI can show slot
+        // counts and the player can freely deposit/withdraw without needing a physical item on hand.
+        private readonly Dictionary<ResourceType, int> storedResources = new Dictionary<ResourceType, int>();
 
         public override void Setup(Buildings.BuildingData buildingData, Vector2Int cell)
         {
@@ -42,6 +45,47 @@ namespace Placeables
             return incomingDirection == GetFacingDirection();
         }
 
+        public int GetStoredCount(ResourceType type)
+        {
+            return storedResources.TryGetValue(type, out int count) ? count : 0;
+        }
+
+        public int GetTotalStored()
+        {
+            int total = 0;
+            foreach (var count in storedResources.Values) total += count;
+            return total;
+        }
+
+        public IReadOnlyDictionary<ResourceType, int> GetStoredResources()
+        {
+            return storedResources;
+        }
+
+        /// <summary>Adds up to `count` of `type`, capped by remaining capacity. Returns how many were actually deposited.</summary>
+        public int Deposit(ResourceType type, int count)
+        {
+            int spaceLeft = capacity - GetTotalStored();
+            int actual = Mathf.Min(count, spaceLeft);
+            if (actual <= 0) return 0;
+
+            storedResources[type] = GetStoredCount(type) + actual;
+            return actual;
+        }
+
+        /// <summary>Removes up to `count` of `type`. Returns how many were actually withdrawn.</summary>
+        public int Withdraw(ResourceType type, int count)
+        {
+            int available = GetStoredCount(type);
+            int actual = Mathf.Min(count, available);
+            if (actual <= 0) return 0;
+
+            int remaining = available - actual;
+            if (remaining <= 0) storedResources.Remove(type);
+            else storedResources[type] = remaining;
+            return actual;
+        }
+
         public override void PerformAction()
         {
             TryReleaseItem();
@@ -50,7 +94,7 @@ namespace Placeables
 
         private void TryReleaseItem()
         {
-            if (storedItems.Count == 0) return;
+            if (GetTotalStored() == 0) return;
 
             Vector2Int facing = GetFacingDirection();
             Vector2Int targetCell = GetNeighborCellInDirection(facing);
@@ -58,35 +102,46 @@ namespace Placeables
             List<ConveyorItem> itemsInTarget = ItemTracker.Instance != null ? ItemTracker.Instance.GetItemsInCell(targetCell) : null;
             if (itemsInTarget != null && itemsInTarget.Count > 0) return;
 
-            ConveyorItem item = storedItems.Dequeue();
-            if (item == null) return;
+            ResourceType typeToRelease = default;
+            bool found = false;
+            foreach (var pair in storedResources)
+            {
+                if (pair.Value > 0) { typeToRelease = pair.Key; found = true; break; }
+            }
+            if (!found) return;
+
+            GameObject prefab = BuildingUiManager.HasInstance ? BuildingUiManager.Instance.GetResourceItemPrefab(typeToRelease) : null;
+            if (prefab == null) return;
+
+            Withdraw(typeToRelease, 1);
 
             Vector2 spawnPos = GetEdgeSpawnPosition(targetCell, facing);
-            item.transform.position = spawnPos;
-            item.gameObject.SetActive(true);
-            item.Initialize(targetCell);
+            GameObject newItem = ObjectPoolManager.Instance.GetPooledObject(prefab, spawnPos, Quaternion.identity);
+            ConveyorItem itemComp = newItem.GetComponent<ConveyorItem>();
+            if (itemComp != null)
+            {
+                itemComp.Initialize(targetCell);
+            }
         }
 
         private void TryAbsorbItem()
         {
-            if (storedItems.Count >= capacity) return;
+            if (GetTotalStored() >= capacity) return;
 
-            foreach (var inputCell in GetEdgeCells(-GetFacingDirection()))
+            foreach (var inputCell in GetInputCells())
             {
                 List<ConveyorItem> items = ItemTracker.Instance != null ? ItemTracker.Instance.GetItemsInCell(inputCell) : null;
                 if (items == null) continue;
 
                 for (int i = items.Count - 1; i >= 0; i--)
                 {
-                    if (storedItems.Count >= capacity) return;
+                    if (GetTotalStored() >= capacity) return;
 
                     ConveyorItem item = items[i];
                     if (item != null && !item.IsMoving)
                     {
-                        // Deactivating unregisters it from ItemTracker (see ConveyorItem.OnDisable) without
-                        // returning it to the shared object pool, so it stays reserved for this chest.
-                        item.gameObject.SetActive(false);
-                        storedItems.Enqueue(item);
+                        Deposit(item.resourceType, 1);
+                        ObjectPoolManager.Instance.ReturnToPool(item.gameObject);
                     }
                 }
             }

@@ -72,12 +72,15 @@ namespace Ui
         // Tabs & Map Grid UI panels
         private GameObject upgradesContainer;
         private GameObject mapGridPanel;
+        private GameObject inventoryContainer;
         private Button upgradesTabBtn;
         private Button mapTabBtn;
+        private Button inventoryTabBtn;
         private TMP_Text upgradesTabTxt;
         private TMP_Text mapTabTxt;
-    
-        public enum StoreTab { Upgrades, Map }
+        private TMP_Text inventoryTabTxt;
+
+        public enum StoreTab { Upgrades, Map, Inventory }
         private StoreTab activeTab = StoreTab.Upgrades;
         
         private void Awake()
@@ -391,7 +394,18 @@ namespace Ui
             mgRt.offsetMin = Vector2.zero;
             mgRt.offsetMax = Vector2.zero;
             mapGridPanel.SetActive(false);
-    
+
+            // Create container for player inventory (hosts BuildingUiManager's resource panel while active)
+            inventoryContainer = new GameObject("InventoryContainer", typeof(RectTransform));
+            inventoryContainer.transform.SetParent(transform, false);
+            inventoryContainer.transform.SetSiblingIndex(6);
+            RectTransform icRt = inventoryContainer.GetComponent<RectTransform>();
+            icRt.anchorMin = new Vector2(0.1f, 0.15f);
+            icRt.anchorMax = new Vector2(0.45f, 0.81f);
+            icRt.offsetMin = Vector2.zero;
+            icRt.offsetMax = Vector2.zero;
+            inventoryContainer.SetActive(false);
+
             // Create Tabs Panel
             CreateTabsPanel();
             
@@ -1041,7 +1055,7 @@ namespace Ui
             upgradesTabBtn = upgGo.GetComponent<Button>();
             RectTransform upgRt = upgGo.GetComponent<RectTransform>();
             upgRt.anchorMin = new Vector2(0f, 0f);
-            upgRt.anchorMax = new Vector2(0.48f, 1f);
+            upgRt.anchorMax = new Vector2(0.31f, 1f);
             upgRt.offsetMin = Vector2.zero;
             upgRt.offsetMax = Vector2.zero;
             
@@ -1070,8 +1084,8 @@ namespace Ui
             mapGo.transform.SetParent(tabsPanel.transform, false);
             mapTabBtn = mapGo.GetComponent<Button>();
             RectTransform mapRt = mapGo.GetComponent<RectTransform>();
-            mapRt.anchorMin = new Vector2(0.52f, 0f);
-            mapRt.anchorMax = new Vector2(1f, 1f);
+            mapRt.anchorMin = new Vector2(0.345f, 0f);
+            mapRt.anchorMax = new Vector2(0.655f, 1f);
             mapRt.offsetMin = Vector2.zero;
             mapRt.offsetMax = Vector2.zero;
     
@@ -1094,99 +1108,121 @@ namespace Ui
             mapTabTxt.alignment = TextAlignmentOptions.Center;
             mapTabTxt.fontSize = 32;
             mapTabTxt.fontStyle = FontStyles.Bold;
-    
+
+            // 3. Inventory Tab
+            GameObject invGo = new GameObject("InventoryTabBtn", typeof(RectTransform), typeof(Image), typeof(Button));
+            invGo.transform.SetParent(tabsPanel.transform, false);
+            inventoryTabBtn = invGo.GetComponent<Button>();
+            RectTransform invRt = invGo.GetComponent<RectTransform>();
+            invRt.anchorMin = new Vector2(0.69f, 0f);
+            invRt.anchorMax = new Vector2(1f, 1f);
+            invRt.offsetMin = Vector2.zero;
+            invRt.offsetMax = Vector2.zero;
+
+            Image invImg = invGo.GetComponent<Image>();
+            invImg.color = new Color(0.05f, 0.15f, 0.05f, 0.85f); // Inactive by default
+            Outline invOutline = invGo.AddComponent<Outline>();
+            invOutline.effectColor = new Color(0.1f, 0.8f, 0.1f, 0.5f);
+            invOutline.effectDistance = new Vector2(2f, 2f);
+
+            GameObject invTxtGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+            invTxtGo.transform.SetParent(invGo.transform, false);
+            RectTransform itRt = invTxtGo.GetComponent<RectTransform>();
+            itRt.anchorMin = Vector2.zero;
+            itRt.anchorMax = Vector2.one;
+            itRt.offsetMin = Vector2.zero;
+            itRt.offsetMax = Vector2.zero;
+            inventoryTabTxt = invTxtGo.GetComponent<TextMeshProUGUI>();
+            inventoryTabTxt.text = "INVENTORY";
+            inventoryTabTxt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
+            inventoryTabTxt.alignment = TextAlignmentOptions.Center;
+            inventoryTabTxt.fontSize = 32;
+            inventoryTabTxt.fontStyle = FontStyles.Bold;
+
             // Wire click events
             upgradesTabBtn.onClick.AddListener(() => SwitchTab(StoreTab.Upgrades));
             mapTabBtn.onClick.AddListener(() => SwitchTab(StoreTab.Map));
-    
+            inventoryTabBtn.onClick.AddListener(() => SwitchTab(StoreTab.Inventory));
+
             // Add hover effects for tabs
             AddTabHoverEffect(upgradesTabBtn, upgradesTabTxt, "UPGRADES SHOP", true);
             AddTabHoverEffect(mapTabBtn, mapTabTxt, "SATELLITE MAP", false);
+            AddTabHoverEffect(inventoryTabBtn, inventoryTabTxt, "INVENTORY", false);
         }
-    
+
         private void AddTabHoverEffect(Button btn, TMP_Text txt, string origText, bool startsActive)
         {
             EventTrigger trigger = btn.gameObject.GetComponent<EventTrigger>() ?? btn.gameObject.AddComponent<EventTrigger>();
-    
+
             EventTrigger.Entry entryEnter = new EventTrigger.Entry();
             entryEnter.eventID = EventTriggerType.PointerEnter;
             entryEnter.callback.AddListener((data) => {
-                if (activeTab == StoreTab.Upgrades && btn == upgradesTabBtn) return;
-                if (activeTab == StoreTab.Map && btn == mapTabBtn) return;
-    
+                if (IsActiveTabButton(btn)) return;
+
                 btn.transform.DOScale(1.03f, 0.1f).SetUpdate(true);
                 txt.color = new Color(0.5f, 1f, 0.5f, 1f);
             });
             trigger.triggers.Add(entryEnter);
-    
+
             EventTrigger.Entry entryExit = new EventTrigger.Entry();
             entryExit.eventID = EventTriggerType.PointerExit;
             entryExit.callback.AddListener((data) => {
                 btn.transform.DOScale(1f, 0.1f).SetUpdate(true);
-                if (activeTab == StoreTab.Upgrades && btn == upgradesTabBtn)
-                {
-                    txt.color = new Color(0.02f, 0.04f, 0.02f, 1f);
-                }
-                else if (activeTab == StoreTab.Map && btn == mapTabBtn)
-                {
-                    txt.color = new Color(0.02f, 0.04f, 0.02f, 1f);
-                }
-                else
-                {
-                    txt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
-                }
+                txt.color = IsActiveTabButton(btn) ? new Color(0.02f, 0.04f, 0.02f, 1f) : new Color(0.2f, 0.9f, 0.2f, 1f);
             });
             trigger.triggers.Add(entryExit);
         }
-    
+
+        private bool IsActiveTabButton(Button btn)
+        {
+            return (activeTab == StoreTab.Upgrades && btn == upgradesTabBtn) ||
+                   (activeTab == StoreTab.Map && btn == mapTabBtn) ||
+                   (activeTab == StoreTab.Inventory && btn == inventoryTabBtn);
+        }
+
         public void SwitchTab(StoreTab tab)
         {
             if (activeTab == tab) return;
             activeTab = tab;
-    
-            // Visual feedback on tab buttons
-            if (activeTab == StoreTab.Upgrades)
+
+            SetTabButtonVisual(upgradesTabBtn, upgradesTabTxt, activeTab == StoreTab.Upgrades);
+            SetTabButtonVisual(mapTabBtn, mapTabTxt, activeTab == StoreTab.Map);
+            SetTabButtonVisual(inventoryTabBtn, inventoryTabTxt, activeTab == StoreTab.Inventory);
+
+            if (upgradesContainer != null) upgradesContainer.SetActive(activeTab == StoreTab.Upgrades);
+            if (mapGridPanel != null) mapGridPanel.SetActive(activeTab == StoreTab.Map);
+            if (inventoryContainer != null) inventoryContainer.SetActive(activeTab == StoreTab.Inventory);
+
+            if (activeTab != StoreTab.Inventory && BuildingUiManager.HasInstance)
             {
-                if (upgradesTabBtn != null)
-                {
-                    upgradesTabBtn.GetComponent<Image>().color = new Color(0.1f, 0.35f, 0.1f, 0.95f);
-                    upgradesTabBtn.GetComponent<Outline>().effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
-                }
-                if (upgradesTabTxt != null) upgradesTabTxt.color = new Color(0.02f, 0.04f, 0.02f, 1f);
-    
-                if (mapTabBtn != null)
-                {
-                    mapTabBtn.GetComponent<Image>().color = new Color(0.05f, 0.15f, 0.05f, 0.85f);
-                    mapTabBtn.GetComponent<Outline>().effectColor = new Color(0.1f, 0.8f, 0.1f, 0.5f);
-                }
-                if (mapTabTxt != null) mapTabTxt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
-    
-                if (upgradesContainer != null) upgradesContainer.SetActive(true);
-                if (mapGridPanel != null) mapGridPanel.SetActive(false);
-                LogCommand("NAVIGATED TO UPGRADES SHOP");
+                BuildingUiManager.Instance.HideStandaloneResourcePanel();
             }
-            else
+
+            switch (activeTab)
             {
-                if (mapTabBtn != null)
-                {
-                    mapTabBtn.GetComponent<Image>().color = new Color(0.1f, 0.35f, 0.1f, 0.95f);
-                    mapTabBtn.GetComponent<Outline>().effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
-                }
-                if (mapTabTxt != null) mapTabTxt.color = new Color(0.02f, 0.04f, 0.02f, 1f);
-    
-                if (upgradesTabBtn != null)
-                {
-                    upgradesTabBtn.GetComponent<Image>().color = new Color(0.05f, 0.15f, 0.05f, 0.85f);
-                    upgradesTabBtn.GetComponent<Outline>().effectColor = new Color(0.1f, 0.8f, 0.1f, 0.5f);
-                }
-                if (upgradesTabTxt != null) upgradesTabTxt.color = new Color(0.2f, 0.9f, 0.2f, 1f);
-    
-                if (upgradesContainer != null) upgradesContainer.SetActive(false);
-                if (mapGridPanel != null) mapGridPanel.SetActive(true);
-                LogCommand("INITIALIZING SATELLITE MAP GRID...");
-                
-                RefreshMapGrid();
+                case StoreTab.Upgrades:
+                    LogCommand("NAVIGATED TO UPGRADES SHOP");
+                    break;
+                case StoreTab.Map:
+                    LogCommand("INITIALIZING SATELLITE MAP GRID...");
+                    RefreshMapGrid();
+                    break;
+                case StoreTab.Inventory:
+                    LogCommand("OPENING CARGO INVENTORY...");
+                    if (BuildingUiManager.HasInstance)
+                    {
+                        BuildingUiManager.Instance.ShowStandaloneResourcePanel(inventoryContainer.transform);
+                    }
+                    break;
             }
+        }
+
+        private void SetTabButtonVisual(Button btn, TMP_Text txt, bool active)
+        {
+            if (btn == null) return;
+            btn.GetComponent<Image>().color = active ? new Color(0.1f, 0.35f, 0.1f, 0.95f) : new Color(0.05f, 0.15f, 0.05f, 0.85f);
+            btn.GetComponent<Outline>().effectColor = active ? new Color(0.2f, 0.9f, 0.2f, 0.8f) : new Color(0.1f, 0.8f, 0.1f, 0.5f);
+            if (txt != null) txt.color = active ? new Color(0.02f, 0.04f, 0.02f, 1f) : new Color(0.2f, 0.9f, 0.2f, 1f);
         }
     
         private void RefreshMapGrid()

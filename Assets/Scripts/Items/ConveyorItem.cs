@@ -28,6 +28,7 @@ public class ConveyorItem : MonoBehaviour
     public float moveSpeed = 2f;
     public float value = 10f;
     public ResourceType resourceType;
+    public ItemData _itemData;
 
     public bool IsMoving { get; private set; }
     private bool isInitialized = false;
@@ -43,6 +44,7 @@ public class ConveyorItem : MonoBehaviour
     {
         if (!isInitialized)
         {
+            resourceType = _itemData.resourceType;
             var center = GridManager.Instance.center;
             currentCell = GridManager.Instance.WorldToCellConversion(center);
             transform.position = GridManager.Instance.CellToWorldConversion(currentCell);
