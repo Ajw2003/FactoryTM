@@ -14,30 +14,166 @@ namespace Placeables
     {
         public Buildings.BuildingData data;
         protected Vector2Int myCell;
+        protected int rotationIndex = 0;
         public System.Collections.Generic.List<Vector2Int> occupiedCells = new System.Collections.Generic.List<Vector2Int>();
         public bool isEnemyOwned = false;
         public EnemyOutpost outpost;
-        
+
         public int Health { get; set; }
-    
+
         private Sprite crackSprite;
         private SpriteRenderer crackRenderer;
-    
+        private static Sprite portArrowSprite;
+
         public virtual void Setup(Buildings.BuildingData buildingData, Vector2Int cell)
         {
             data = buildingData;
             myCell = cell;
             Health = data.maxHealth;
         }
-    
+
         public virtual void SetOccupiedCells(System.Collections.Generic.List<Vector2Int> cells)
         {
             occupiedCells = cells;
         }
-    
+
         public Vector2Int GetMyCell()
         {
             return myCell;
+        }
+
+        /// <summary>Whether this building can accept an item arriving from a conveyor moving in the given direction. Default: no input side.</summary>
+        public virtual bool CanAcceptInputFrom(Vector2Int incomingDirection)
+        {
+            return false;
+        }
+
+        public Vector2Int GetFacingDirection()
+        {
+            return GameManager.Instance.GetDirectionFromRotationIndex(rotationIndex);
+        }
+
+        /// <summary>Building footprint size with width/height swapped for a 90/270 degree rotation.</summary>
+        protected Vector2Int GetActualSize()
+        {
+            if (data == null) return Vector2Int.one;
+            return rotationIndex % 2 != 0 ? new Vector2Int(data.size.y, data.size.x) : data.size;
+        }
+
+        /// <summary>All cells in this building's footprint that lie on the given outward-facing edge.</summary>
+        protected System.Collections.Generic.List<Vector2Int> GetEdgeCells(Vector2Int outwardDir)
+        {
+            Vector2Int actualSize = GetActualSize();
+            var result = new System.Collections.Generic.List<Vector2Int>();
+            foreach (var cell in occupiedCells)
+            {
+                Vector2Int local = cell - myCell;
+                bool onEdge =
+                    outwardDir.x > 0 ? local.x == actualSize.x - 1 :
+                    outwardDir.x < 0 ? local.x == 0 :
+                    outwardDir.y > 0 ? local.y == actualSize.y - 1 :
+                    outwardDir.y < 0 ? local.y == 0 : false;
+                if (onEdge) result.Add(cell);
+            }
+            return result;
+        }
+
+        /// <summary>The neighboring cell just outside the footprint in the given direction, from the origin cell.</summary>
+        protected Vector2Int GetNeighborCellInDirection(Vector2Int direction)
+        {
+            Vector2Int actualSize = GetActualSize();
+            Vector2Int offset = Vector2Int.zero;
+            if (direction.x > 0) offset = new Vector2Int(actualSize.x, 0);
+            else if (direction.x < 0) offset = new Vector2Int(-1, 0);
+            else if (direction.y > 0) offset = new Vector2Int(0, actualSize.y);
+            else if (direction.y < 0) offset = new Vector2Int(0, -1);
+            return myCell + offset;
+        }
+
+        /// <summary>World position aligned to the entry boundary of targetCell for an item traveling in the given direction.</summary>
+        protected Vector2 GetEdgeSpawnPosition(Vector2Int targetCell, Vector2Int direction)
+        {
+            Vector2 tileSize = GridManager.Instance.tileSize;
+            if (direction.x > 0) return new Vector2(targetCell.x * tileSize.x, (targetCell.y + 0.5f) * tileSize.y);
+            if (direction.x < 0) return new Vector2((targetCell.x + 1) * tileSize.x, (targetCell.y + 0.5f) * tileSize.y);
+            if (direction.y > 0) return new Vector2((targetCell.x + 0.5f) * tileSize.x, targetCell.y * tileSize.y);
+            return new Vector2((targetCell.x + 0.5f) * tileSize.x, (targetCell.y + 1) * tileSize.y);
+        }
+
+        /// <summary>Combines GetNeighborCellInDirection and GetEdgeSpawnPosition for the common "spawn an output item" case.</summary>
+        protected Vector2 GetOutputSpawnPosition(Vector2Int direction, out Vector2Int targetCell)
+        {
+            targetCell = GetNeighborCellInDirection(direction);
+            return GetEdgeSpawnPosition(targetCell, direction);
+        }
+
+        /// <summary>Computes a rectangular footprint of occupiedCells from myCell using the current rotation-adjusted size.</summary>
+        protected System.Collections.Generic.List<Vector2Int> ComputeFootprintCells()
+        {
+            Vector2Int actualSize = GetActualSize();
+            var cells = new System.Collections.Generic.List<Vector2Int>();
+            for (int x = 0; x < actualSize.x; x++)
+            {
+                for (int y = 0; y < actualSize.y; y++)
+                {
+                    cells.Add(myCell + new Vector2Int(x, y));
+                }
+            }
+            return cells;
+        }
+
+        private static Sprite GetPortArrowSprite()
+        {
+            if (portArrowSprite != null) return portArrowSprite;
+
+            int size = 16;
+            Texture2D tex = new Texture2D(size, size);
+            tex.filterMode = FilterMode.Point;
+            Color clear = new Color(0f, 0f, 0f, 0f);
+            for (int x = 0; x < size; x++)
+                for (int y = 0; y < size; y++)
+                    tex.SetPixel(x, y, clear);
+
+            // Solid triangle, apex at the top, so the sprite reads as an upward-pointing arrow at rotation 0.
+            for (int y = 0; y < size; y++)
+            {
+                float t = y / (float)(size - 1);
+                int halfWidth = Mathf.RoundToInt((1f - t) * (size / 2f));
+                int center = size / 2;
+                for (int x = center - halfWidth; x <= center + halfWidth; x++)
+                {
+                    if (x >= 0 && x < size) tex.SetPixel(x, y, Color.white);
+                }
+            }
+            tex.Apply();
+
+            portArrowSprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 64f);
+            return portArrowSprite;
+        }
+
+        /// <summary>Spawns a small world-space arrow indicator at the outward edge of edgeCell, rotated to point in arrowPointDir.</summary>
+        protected void CreatePortIndicator(Vector2Int edgeCell, Vector2Int edgeOutwardDir, Vector2Int arrowPointDir, Color tint, string label)
+        {
+            GameObject go = new GameObject("PortIndicator_" + label);
+            go.transform.SetParent(transform, false);
+
+            Vector2 cellCenter = GridManager.Instance.CellToWorldConversion(edgeCell);
+            Vector2 tileSize = GridManager.Instance.tileSize;
+            Vector2 edgeOffset = new Vector2(edgeOutwardDir.x * tileSize.x * 0.5f, edgeOutwardDir.y * tileSize.y * 0.5f);
+            go.transform.position = new Vector3(cellCenter.x + edgeOffset.x, cellCenter.y + edgeOffset.y, -0.05f);
+
+            float angle = 0f;
+            if (arrowPointDir.x > 0) angle = -90f;
+            else if (arrowPointDir.x < 0) angle = 90f;
+            else if (arrowPointDir.y < 0) angle = 180f;
+            go.transform.rotation = Quaternion.Euler(0f, 0f, angle);
+            go.transform.localScale = Vector3.one * 0.4f;
+
+            SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = GetPortArrowSprite();
+            sr.color = tint;
+            sr.sortingLayerName = "Buildings";
+            sr.sortingOrder = 15;
         }
     
         protected virtual void OnEnable()

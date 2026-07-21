@@ -27,7 +27,13 @@ namespace Placeables
             // Sync item movement speed to the 8-frame tile animation timing (10 fps / 8 frames = 1.25 units per second)
             moveSpeed = 1.25f;
         }
-    
+
+        // Conveyors can be side-loaded from any direction; the belt itself doesn't gate intake.
+        public override bool CanAcceptInputFrom(Vector2Int incomingDirection)
+        {
+            return true;
+        }
+
         public override void PerformAction()
         {
             if (lastEvaluatedPlacementVersion != PlacementManager.PlacementVersion)
@@ -44,14 +50,10 @@ namespace Placeables
                         if (targetBuildingObj != null)
                         {
                             BuildingLogic targetLogic = targetBuildingObj.GetComponent<BuildingLogic>();
-                            if (targetLogic != null && targetLogic.data != null)
+                            if (targetLogic != null && targetLogic.CanAcceptInputFrom(direction))
                             {
-                                BuildingType type = targetLogic.data.type;
-                                if (type == BuildingType.Conveyor || type == BuildingType.Furnace || type == BuildingType.Seller)
-                                {
-                                    cachedReceiver = targetLogic;
-                                    isReceiverValid = true;
-                                }
+                                cachedReceiver = targetLogic;
+                                isReceiverValid = true;
                             }
                         }
                     }

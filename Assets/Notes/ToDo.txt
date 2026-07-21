@@ -48,9 +48,9 @@
 -fix miners not using the same system as the IDT for item insertion, all building uis should contain the same resources ui and click and dragging into a given location for inserting or outputting
 - fix health ui not existing anymore
 
-add intake and output to all buildings both functionally and visually for the sprites.
+[x] add intake and output to all buildings both functionally and visually for the sprites. (Furnace/Miner/Chest/Conveyor; Turret & Wall skipped, see history log)
 
-Ensure the IDT can take input from all 4 sides and that every other building has one input and one output directly oposite eachother
+[x] Ensure the IDT can take input from all 4 sides and that every other building has one input and one output directly oposite eachother
 make items take up less space and sit closer on conveyors
 Fix conveyor sprites from being different speeds and not tiling animations properly
 Fix debugs and remove or disable safely

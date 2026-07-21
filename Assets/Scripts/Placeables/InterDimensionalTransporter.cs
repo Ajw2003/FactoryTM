@@ -37,8 +37,26 @@ namespace Placeables
     
         public override void Setup(Buildings.BuildingData buildingData, Vector2Int cell)
         {
+            Setup(buildingData, cell, 0);
+        }
+
+        public void Setup(Buildings.BuildingData buildingData, Vector2Int cell, int rotationIndex)
+        {
             base.Setup(buildingData, cell);
+            this.rotationIndex = rotationIndex;
             fuelRemaining = 0f; // Start empty to force tutorial Coal extraction
+
+            Vector2Int[] allDirections = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+            foreach (var dir in allDirections)
+            {
+                CreatePortIndicator(myCell, dir, -dir, new Color(0.3f, 0.8f, 1f), "Input_" + dir);
+            }
+        }
+
+        // The IDT accepts items from any side.
+        public override bool CanAcceptInputFrom(Vector2Int incomingDirection)
+        {
+            return true;
         }
     
         private void Update()
