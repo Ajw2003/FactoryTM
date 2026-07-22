@@ -43,19 +43,24 @@ namespace Managers
         private void Update()
         {
             if (PauseManager.IsPaused) return;
+            if (PlayerController.Instance == null) return;
 
-            if (PlayerController.Instance == null || PlayerController.Instance.currentMode == PlayerController.PlayerMode.Combat) return;
-
-            // Handle slot selection via number keys
-            for (int i = 0; i < slotCount; i++)
+            // Number keys only select in Building mode - actually placing is separately gated there
+            // too, so this just avoids the keys doing anything during combat.
+            if (PlayerController.Instance.currentMode != PlayerController.PlayerMode.Combat)
             {
-                if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+                for (int i = 0; i < slotCount; i++)
                 {
-                    SelectSlot(i);
+                    if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+                    {
+                        SelectSlot(i);
+                    }
                 }
             }
 
-            // Scroll wheel selection
+            // Scrolling to change the selected slot is a single unified action allowed in both
+            // modes - it only ever changes what's highlighted, PlacementManager independently
+            // gates whether that selection can actually be placed.
             float scroll = Input.GetAxis("Mouse ScrollWheel");
             if (scroll > 0f) SelectSlot((selectedSlot + 1) % slotCount);
             else if (scroll < 0f) SelectSlot((selectedSlot - 1 + slotCount) % slotCount);

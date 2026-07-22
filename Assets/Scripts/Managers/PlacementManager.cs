@@ -86,6 +86,15 @@ namespace Managers
                 return;
             }
 
+            // Dragging an inventory item holds the left mouse button down and moves it across the
+            // screen - the same gesture as click-and-drag placement. Don't place buildings out from
+            // under a drag in progress.
+            if (DragLayer.HasInstance && DragLayer.Instance.IsDragging)
+            {
+                if (previewTilemap != null) previewTilemap.ClearAllTiles();
+                return;
+            }
+
             if (activeBuilding == null) return;
     
             Vector2Int cell = GetMouseCell();

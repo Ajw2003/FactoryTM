@@ -67,7 +67,11 @@ namespace Weapons
             {
                 return;
             }
-    
+
+            // Dragging an inventory item holds the same mouse button firing does - don't shoot
+            // out from under a drag in progress.
+            if (DragLayer.HasInstance && DragLayer.Instance.IsDragging) return;
+
             if (cam == null) cam = Camera.main;
             if (cam != null)
             {

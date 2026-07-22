@@ -13,6 +13,11 @@ public class DragLayer : SingletonBase<DragLayer>
     private RectTransform _rectTransform;
     private Item _cursorItem;
 
+    /// <summary>True while an item is actively held/following the cursor. Checked by world-input
+    /// systems (weapon fire, building placement) that would otherwise fight over the same mouse
+    /// button/movement a UI drag is currently using.</summary>
+    public bool IsDragging => _cursorItem != null && _cursorItem.gameObject.activeSelf;
+
     public void BeginDrag(ItemData data, int amount, InventorySlot origin, Vector2 screenPosition)
     {
         EnsureCreated();
