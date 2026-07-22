@@ -58,7 +58,13 @@ Fix debugs and remove or disable safely
 
 
 Migrate all items to new item data system including buildings this means generating itemdata for each and assigning specificItemTypes to each instead of resource types as before.
-Make items mined added to the hotbar instead of the inventory.
+Make all buildings with input or output use the new inventory slots for their systems and hook up input and output to increase and decrease the item count in the respective slots after an operation, i.e. cooking ore in a furnace or selling items to the IDT
+Make rendered items for dragging appear over top of existing ui elements
+make right-clicking grab all of the items in a slot and left-clicking only grab 1 at a time
+make grabbing an item from an inventory slot automatically pick up the item and allow dragging instantly instead of the current spawn then grab logic
+make buildings work with new item logic completely placing and adding to the new inventory slot based hotbar when purchased from the store
+
+
 
 
 
