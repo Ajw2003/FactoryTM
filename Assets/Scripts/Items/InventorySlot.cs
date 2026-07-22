@@ -67,6 +67,14 @@ namespace Items
         {
             itemCount--;
             _countText.text = itemCount.ToString();
+            if (itemCount <= 0)
+            {
+                slotFilled = false;
+                _currentItem = null;
+                _image.sprite = null;
+                _nameText.text = "";
+                _countText.text = "";
+            }
         }
         
         
@@ -135,6 +143,10 @@ namespace Items
                 else
                 {
                     slotFilled = false;
+                    _currentItem = null;
+                    _image.sprite = null;
+                    _nameText.text = "";
+                    
                 }
             }
         }
