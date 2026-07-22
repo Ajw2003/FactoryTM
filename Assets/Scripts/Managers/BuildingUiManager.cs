@@ -52,8 +52,11 @@ namespace Managers
         private GameObject chestInventoryZone;
 
         private GameObject portStatusZone;
-        private GameObject portInputSlot;
-        private GameObject portOutputSlot;
+        private Transform portInputRegion;
+        private Transform portOutputRegion;
+        private Transform idtFuelSlotRegion;
+        private Transform idtSellSlotRegion;
+        private Transform chestSlotGrid;
 
         // Cached so ShowStandaloneResourcePanel/HideStandaloneResourcePanel can restore the panel's
         // normal floating position after being reparented into the store's Inventory tab.
@@ -372,50 +375,25 @@ namespace Managers
             intakeOutline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
             intakeOutline.effectDistance = new Vector2(2f, -2f);
     
-            // Arrow Symbol
-            GameObject arrowGo = new GameObject("ArrowText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            arrowGo.transform.SetParent(idtIntakeDropZone.transform, false);
-            RectTransform arrowRt = arrowGo.GetComponent<RectTransform>();
-            arrowRt.anchorMin = new Vector2(0f, 0.55f);
-            arrowRt.anchorMax = new Vector2(1f, 0.95f);
-            arrowRt.offsetMin = Vector2.zero;
-            arrowRt.offsetMax = Vector2.zero;
-            TextMeshProUGUI arrowTxt = arrowGo.GetComponent<TextMeshProUGUI>();
-            arrowTxt.text = "v";
-            arrowTxt.fontSize = 80;
-            arrowTxt.fontStyle = FontStyles.Bold;
-            arrowTxt.color = new Color(0.2f, 1f, 0.2f);
-            arrowTxt.alignment = TextAlignmentOptions.Center;
-    
-            // Label: REACTOR INTAKE PORT
+            // Zone title
             GameObject labelGo = new GameObject("LabelText", typeof(RectTransform), typeof(TextMeshProUGUI));
             labelGo.transform.SetParent(idtIntakeDropZone.transform, false);
             RectTransform labelRt = labelGo.GetComponent<RectTransform>();
-            labelRt.anchorMin = new Vector2(0f, 0.35f);
-            labelRt.anchorMax = new Vector2(1f, 0.55f);
+            labelRt.anchorMin = new Vector2(0f, 0.86f);
+            labelRt.anchorMax = new Vector2(1f, 0.98f);
             labelRt.offsetMin = new Vector2(10f, 0f);
             labelRt.offsetMax = new Vector2(-10f, 0f);
             TextMeshProUGUI labelTxt = labelGo.GetComponent<TextMeshProUGUI>();
-            labelTxt.text = "REACTOR INTAKE PORT";
-            labelTxt.fontSize = 30;
+            labelTxt.text = "REACTOR INTAKE";
+            labelTxt.fontSize = 26;
             labelTxt.fontStyle = FontStyles.Bold;
             labelTxt.color = new Color(0.2f, 1f, 0.2f);
             labelTxt.alignment = TextAlignmentOptions.Center;
-    
-            // Instructions
-            GameObject descGo = new GameObject("DescText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            descGo.transform.SetParent(idtIntakeDropZone.transform, false);
-            RectTransform descRt = descGo.GetComponent<RectTransform>();
-            descRt.anchorMin = new Vector2(0f, 0.05f);
-            descRt.anchorMax = new Vector2(1f, 0.35f);
-            descRt.offsetMin = new Vector2(15f, 0f);
-            descRt.offsetMax = new Vector2(-15f, 0f);
-            TextMeshProUGUI descTxt = descGo.GetComponent<TextMeshProUGUI>();
-            descTxt.text = "Drop Coal/Uranium to fuel\nor other resources to sell";
-            descTxt.fontSize = 22;
-            descTxt.color = new Color(0.2f, 0.8f, 0.2f, 0.85f);
-            descTxt.alignment = TextAlignmentOptions.Center;
-            descTxt.enableWordWrapping = true;
+
+            // Two regions the IDT's real FuelSlot/SellSlot get reparented into while its panel is
+            // open - drag targets the same way any other InventorySlot is, side by side within the zone.
+            idtFuelSlotRegion = CreatePortStatusRegion(idtIntakeDropZone.transform, "FuelSlot", "FUEL", new Vector2(0.05f, 0.05f), new Vector2(0.48f, 0.8f));
+            idtSellSlotRegion = CreatePortStatusRegion(idtIntakeDropZone.transform, "SellSlot", "SELL", new Vector2(0.52f, 0.05f), new Vector2(0.95f, 0.8f));
 
             // Chest inventory zone - occupies the same region as the IDT intake drop zone, but shows
             // a small multi-slot grid of whatever resource types the chest currently holds.
@@ -433,11 +411,25 @@ namespace Managers
             Outline chestOutline = chestInventoryZone.AddComponent<Outline>();
             chestOutline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
             chestOutline.effectDistance = new Vector2(2f, -2f);
-            
+
+            GameObject chestGridGo = new GameObject("SlotGrid", typeof(RectTransform), typeof(GridLayoutGroup));
+            chestGridGo.transform.SetParent(chestInventoryZone.transform, false);
+            RectTransform chestGridRt = chestGridGo.GetComponent<RectTransform>();
+            chestGridRt.anchorMin = new Vector2(0.05f, 0.05f);
+            chestGridRt.anchorMax = new Vector2(0.95f, 0.95f);
+            chestGridRt.offsetMin = Vector2.zero;
+            chestGridRt.offsetMax = Vector2.zero;
+            GridLayoutGroup chestGridLayout = chestGridGo.GetComponent<GridLayoutGroup>();
+            chestGridLayout.cellSize = new Vector2(100f, 100f);
+            chestGridLayout.spacing = new Vector2(10f, 10f);
+            chestGridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            chestGridLayout.constraintCount = 2;
+            chestSlotGrid = chestGridGo.transform;
+
             chestInventoryZone.SetActive(false);
 
-            // Port status zone - shared by Miner/Furnace, a passive (non-drag) pair of slots showing
-            // whatever item currently sits on the building's input/output edge cell, if any.
+            // Port status zone - shared by Miner/Furnace, hosting whichever of those buildings is
+            // currently open own real input/output InventorySlot(s).
             portStatusZone = new GameObject("PortStatusZone", typeof(RectTransform));
             portStatusZone.transform.SetParent(buildingPanel.transform, false);
             RectTransform portZoneRt = portStatusZone.GetComponent<RectTransform>();
@@ -446,14 +438,16 @@ namespace Managers
             portZoneRt.offsetMin = Vector2.zero;
             portZoneRt.offsetMax = Vector2.zero;
 
-            portInputSlot = CreatePortStatusSlot(portStatusZone.transform, "InputSlot", "INPUT", new Vector2(0f, 0f), new Vector2(0.32f, 1f));
-            portOutputSlot = CreatePortStatusSlot(portStatusZone.transform, "OutputSlot", "OUTPUT", new Vector2(0.68f, 0f), new Vector2(1f, 1f));
+            portInputRegion = CreatePortStatusRegion(portStatusZone.transform, "FuelSlot", "FUEL", new Vector2(0f, 0f), new Vector2(0.32f, 1f));
+            portOutputRegion = CreatePortStatusRegion(portStatusZone.transform, "OutputSlot", "OUTPUT", new Vector2(0.68f, 0f), new Vector2(1f, 1f));
             portStatusZone.SetActive(false);
 
             buildingPanel.SetActive(false);
         }
 
-        private GameObject CreatePortStatusSlot(Transform parent, string name, string label, Vector2 anchorMin, Vector2 anchorMax)
+        /// <summary>Builds the label + background chrome for a Miner/Furnace port slot and returns the
+        /// inner region that the building's own real InventorySlot gets reparented into while open.</summary>
+        private Transform CreatePortStatusRegion(Transform parent, string name, string label, Vector2 anchorMin, Vector2 anchorMax)
         {
             GameObject slotGo = new GameObject(name, typeof(RectTransform), typeof(Image));
             slotGo.transform.SetParent(parent, false);
@@ -469,18 +463,6 @@ namespace Managers
             slotOutline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.4f);
             slotOutline.effectDistance = new Vector2(1f, -1f);
 
-            GameObject iconGo = new GameObject("Icon", typeof(RectTransform), typeof(Image));
-            iconGo.transform.SetParent(slotGo.transform, false);
-            RectTransform iconRt = iconGo.GetComponent<RectTransform>();
-            iconRt.anchorMin = new Vector2(0.5f, 0.55f);
-            iconRt.anchorMax = new Vector2(0.5f, 0.55f);
-            iconRt.pivot = new Vector2(0.5f, 0.5f);
-            iconRt.anchoredPosition = Vector2.zero;
-            iconRt.sizeDelta = new Vector2(40f, 40f);
-            Image iconImg = iconGo.GetComponent<Image>();
-            iconImg.color = Color.white;
-            iconImg.enabled = false;
-
             GameObject labelGo = new GameObject("LabelText", typeof(RectTransform), typeof(TextMeshProUGUI));
             labelGo.transform.SetParent(slotGo.transform, false);
             RectTransform labelRt = labelGo.GetComponent<RectTransform>();
@@ -495,7 +477,15 @@ namespace Managers
             labelTxt.color = new Color(0.2f, 0.8f, 0.2f, 0.8f);
             labelTxt.alignment = TextAlignmentOptions.Center;
 
-            return slotGo;
+            GameObject regionGo = new GameObject("SlotRegion", typeof(RectTransform));
+            regionGo.transform.SetParent(slotGo.transform, false);
+            RectTransform regionRt = regionGo.GetComponent<RectTransform>();
+            regionRt.anchorMin = new Vector2(0.1f, 0.25f);
+            regionRt.anchorMax = new Vector2(0.9f, 0.95f);
+            regionRt.offsetMin = Vector2.zero;
+            regionRt.offsetMax = Vector2.zero;
+
+            return regionGo.transform;
         }
     
         
@@ -606,40 +596,102 @@ namespace Managers
             return RectTransformUtility.RectangleContainsScreenPoint(rt, screenPosition, cam);
         }
 
-        /// <summary>Drags the player's whole held stack of `type` into the currently open Chest, up to its remaining capacity.</summary>
-    
-        
-        private void RefreshPortStatusSlots(BuildingLogic building)
+        /// <summary>Hands whichever real InventorySlot(s) `building` owns back to it (reparented off
+        /// the panel, deactivated) so the panel can display a different building next.</summary>
+        private void HideBuildingSlots(BuildingLogic building)
         {
-            if (portInputSlot == null || portOutputSlot == null || building == null) return;
+            if (building == null) return; // Unity-null: also true if the building was destroyed since it was last configured
 
-            SetPortStatusIcon(portInputSlot, FindFirstItemInCells(building.GetInputCells()));
-            SetPortStatusIcon(portOutputSlot, FindFirstItemInCells(building.GetOutputCells()));
+            if (building is Furnace furnace)
+            {
+                ReturnSlotToOwner(furnace.FuelSlot, furnace.transform);
+                ReturnSlotToOwner(furnace.OutputSlot, furnace.transform);
+            }
+            else if (building is MinerLogic miner)
+            {
+                ReturnSlotToOwner(miner.FuelInputSlot, miner.transform);
+                ReturnSlotToOwner(miner.OutputSlot, miner.transform);
+            }
+            else if (building is InterDimensionalTransporter idt)
+            {
+                ReturnSlotToOwner(idt.FuelSlot, idt.transform);
+                ReturnSlotToOwner(idt.SellSlot, idt.transform);
+            }
+            else if (building is Chest chest && chest.Slots != null)
+            {
+                foreach (var slot in chest.Slots)
+                {
+                    ReturnSlotToOwner(slot, chest.transform);
+                }
+            }
         }
 
-        private ConveyorItem FindFirstItemInCells(List<Vector2Int> cells)
+        /// <summary>Reparents `building`'s own real InventorySlot(s) into this panel's designated
+        /// region(s) and activates the surrounding zone, so this is the only building whose slots
+        /// are currently live/interactable.</summary>
+        private void ShowBuildingSlots(BuildingLogic building)
         {
-            if (cells == null || ItemTracker.Instance == null) return null;
-            foreach (var cell in cells)
+            if (building == null) return;
+
+            if (building is Furnace furnace)
             {
-                var items = ItemTracker.Instance.GetItemsInCell(cell);
-                if (items != null && items.Count > 0) return items[0];
+                portStatusZone.SetActive(true);
+                PlaceSlotInRegion(furnace.FuelSlot, portInputRegion);
+                PlaceSlotInRegion(furnace.OutputSlot, portOutputRegion);
             }
-            return null;
+            else if (building is MinerLogic miner)
+            {
+                portStatusZone.SetActive(true);
+                PlaceSlotInRegion(miner.FuelInputSlot, portInputRegion);
+                PlaceSlotInRegion(miner.OutputSlot, portOutputRegion);
+            }
+            else if (building is InterDimensionalTransporter idt)
+            {
+                idtIntakeDropZone.SetActive(true);
+                PlaceSlotInRegion(idt.FuelSlot, idtFuelSlotRegion);
+                PlaceSlotInRegion(idt.SellSlot, idtSellSlotRegion);
+            }
+            else if (building is Chest chest && chest.Slots != null)
+            {
+                chestInventoryZone.SetActive(true);
+                foreach (var slot in chest.Slots)
+                {
+                    if (slot == null) continue;
+                    slot.transform.SetParent(chestSlotGrid, false);
+                    slot.gameObject.SetActive(true);
+                }
+            }
         }
 
-        private void SetPortStatusIcon(GameObject slotGo, ConveyorItem item)
+        private void ReturnSlotToOwner(InventorySlot slot, Transform owner)
         {
-            Image iconImg = slotGo.transform.Find("Icon").GetComponent<Image>();
-            if (item == null)
-            {
-                iconImg.enabled = false;
-                return;
-            }
+            if (slot == null) return;
+            slot.transform.SetParent(owner, false);
+            slot.gameObject.SetActive(false);
+        }
 
-            Sprite sprite = GetResourceSprite(item.itemType);
-            iconImg.sprite = sprite;
-            iconImg.enabled = sprite != null;
+        // The InventorySlot prefab is authored as a large (200x200) square meant for the hotbar -
+        // stretching it to fill an odd-shaped region distorts it and throws off its internally
+        // positioned name/count text. Center it at a fixed, panel-appropriate size instead.
+        private static readonly Vector2 DefaultSlotSize = new Vector2(72f, 72f);
+
+        private void PlaceSlotInRegion(InventorySlot slot, Transform region)
+        {
+            PlaceSlotInRegion(slot, region, DefaultSlotSize);
+        }
+
+        private void PlaceSlotInRegion(InventorySlot slot, Transform region, Vector2 size)
+        {
+            if (slot == null || region == null) return;
+
+            slot.transform.SetParent(region, false);
+            RectTransform rt = slot.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.sizeDelta = size;
+            slot.gameObject.SetActive(true);
         }
 
         #endregion
@@ -686,8 +738,9 @@ namespace Managers
         public void ClosePanel()
         {
             if (buildingPanel == null || !buildingPanel.activeSelf) return;
-    
+
             buildingPanel.SetActive(false);
+            HideBuildingSlots(lastConfiguredBuilding);
             currentOpenBuilding = null;
             lastConfiguredBuilding = null;
     
@@ -716,24 +769,22 @@ namespace Managers
 
             bool needsLayoutSetup = currentOpenBuilding != lastConfiguredBuilding;
 
-            RectTransform detailRt = buildingDetailText.GetComponent<RectTransform>();
             RectTransform fuelBarRt = fuelBarContainer.GetComponent<RectTransform>();
 
             if (needsLayoutSetup)
             {
+                HideBuildingSlots(lastConfiguredBuilding);
                 lastConfiguredBuilding = currentOpenBuilding;
 
-                // Default layout reset
-                detailRt.anchorMin = new Vector2(0f, 0.48f);
-                detailRt.anchorMax = new Vector2(1f, 0.85f);
-                detailRt.offsetMin = new Vector2(30f, 0f);
-                detailRt.offsetMax = new Vector2(-30f, 0f);
+                buildingTitleText.text = currentOpenBuilding.data != null ? currentOpenBuilding.data.buildingName.ToUpper() : "BUILDING";
 
-                fuelBarRt.anchorMin = new Vector2(0.5f, 0.38f);
-                fuelBarRt.anchorMax = new Vector2(0.5f, 0.38f);
-                fuelBarRt.pivot = new Vector2(0.5f, 0.5f);
-                fuelBarRt.anchoredPosition = Vector2.zero;
-                fuelBarRt.sizeDelta = new Vector2(750f, 50f);
+                // Buttons, the description, and the fuel/progress bar are deprecated on every panel
+                // except the Furnace's cook-progress bar - slots are the primary UI now.
+                buildingDetailText.gameObject.SetActive(false);
+                actionButton1Go.SetActive(false);
+                actionButton2Go.SetActive(false);
+                actionButton1.onClick.RemoveAllListeners();
+                actionButton2.onClick.RemoveAllListeners();
 
                 if (idtIntakeDropZone != null)
                 {
@@ -750,37 +801,23 @@ namespace Managers
                     portStatusZone.SetActive(false);
                 }
 
-                // Default buttons state
-                actionButton1Go.SetActive(true);
-                actionButton2Go.SetActive(true);
-                actionButton1.onClick.RemoveAllListeners();
-                actionButton2.onClick.RemoveAllListeners();
+                bool isFurnace = currentOpenBuilding is Furnace;
+                fuelBarContainer.SetActive(isFurnace);
+                if (isFurnace)
+                {
+                    fuelBarRt.anchorMin = new Vector2(0.5f, 0.2f);
+                    fuelBarRt.anchorMax = new Vector2(0.5f, 0.2f);
+                    fuelBarRt.pivot = new Vector2(0.5f, 0.5f);
+                    fuelBarRt.anchoredPosition = Vector2.zero;
+                    fuelBarRt.sizeDelta = new Vector2(750f, 50f);
+                }
 
-                // 1. InterDimensionalTransporter (Reactor) UI Setup
                 if (currentOpenBuilding is InterDimensionalTransporter)
                 {
                     buildingTitleText.text = "IDT REACTOR MODULE";
-
-                    // Hide the buttons as drag & drop is used
-                    actionButton1Go.SetActive(false);
-                    actionButton2Go.SetActive(false);
-
-                    // Two-column layout overrides
-                    if (idtIntakeDropZone != null)
-                    {
-                        idtIntakeDropZone.SetActive(true);
-                    }
-
-                    detailRt.anchorMin = new Vector2(0.05f, 0.32f);
-                    detailRt.anchorMax = new Vector2(0.48f, 0.82f);
-                    detailRt.offsetMin = Vector2.zero;
-                    detailRt.offsetMax = Vector2.zero;
-
-                    fuelBarRt.anchorMin = new Vector2(0.05f, 0.08f);
-                    fuelBarRt.anchorMax = new Vector2(0.48f, 0.22f);
-                    fuelBarRt.offsetMin = Vector2.zero;
-                    fuelBarRt.offsetMax = Vector2.zero;
                 }
+
+                ShowBuildingSlots(currentOpenBuilding);
             }
         }
 
@@ -870,7 +907,10 @@ namespace Managers
                     if (buildingObj != null)
                     {
                         HoveredBuilding = buildingObj.GetComponent<BuildingLogic>();
-                        if (HoveredBuilding != null && HoveredBuilding.data.type != BuildingType.Conveyor)
+                        if (HoveredBuilding != null
+                            && HoveredBuilding.data.type != BuildingType.Conveyor
+                            && HoveredBuilding.data.type != BuildingType.Wall
+                            && HoveredBuilding.data.type != BuildingType.Turret)
                         {
                             HoveredInteractable = HoveredBuilding;
                         }

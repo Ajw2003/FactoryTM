@@ -75,7 +75,17 @@ namespace Managers
                 if (previewTilemap != null) previewTilemap.ClearAllTiles();
                 return;
             }
-    
+
+            // Placement is only for free-roam (idle/walking) - block it whenever a building panel,
+            // the store, or any other UI has taken over player input, even if that UI happens to be
+            // rendered somewhere the mouse can click "through" onto the world underneath.
+            var playerStateMachine = PlayerController.Instance.StateMachine;
+            if (playerStateMachine.CurrentState != playerStateMachine.idleState && playerStateMachine.CurrentState != playerStateMachine.walkState)
+            {
+                if (previewTilemap != null) previewTilemap.ClearAllTiles();
+                return;
+            }
+
             if (activeBuilding == null) return;
     
             Vector2Int cell = GetMouseCell();
@@ -188,6 +198,7 @@ namespace Managers
                 switch (activeBuilding.type)
                 {
                     case (BuildingType.Chest):
+                        buildingObj = SpawnChestLogic(cell);
                         break;
                     case (BuildingType.Conveyor):
                         buildingObj = SpawnBeltLogic(cell);
@@ -461,6 +472,18 @@ namespace Managers
             return beltObj;
         }
     
+        GameObject SpawnChestLogic(Vector2Int cell)
+        {
+            PlacementVersion++;
+            GameObject chestObj = new GameObject("Chest_Logic_" + cell);
+            chestObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
+            Chest logic = chestObj.AddComponent<Chest>();
+            logic.Setup(activeBuilding, cell, rotationIndex);
+
+            activeBuildings.Add(cell, chestObj);
+            return chestObj;
+        }
+
         GameObject SpawnWallLogic(Vector2Int cell)
         {
             PlacementVersion++;

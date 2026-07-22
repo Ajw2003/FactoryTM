@@ -10,9 +10,10 @@ namespace Placeables
 {
     using System.Collections.Generic;
     using Buildings;
+    using Items;
     using UnityEngine;
     using UnityEngine.Tilemaps;
-    
+
     public class MinerLogic : BuildingLogic
     {
         [Header("Fuel Settings")]
@@ -24,6 +25,11 @@ namespace Placeables
         private GameObject currentMinedItemPrefab;
         private float currentMiningSpeed;
         private bool finiteOres;
+
+        /// <summary>Live counted view backing this Miner's panel - reparented into
+        /// BuildingUiManager's shared port slots while open.</summary>
+        public InventorySlot OutputSlot { get; private set; }
+        public InventorySlot FuelInputSlot { get; private set; }
 
         public override void Setup(Buildings.BuildingData buildingData, Vector2Int cell)
         {
@@ -45,6 +51,10 @@ namespace Placeables
             var inputEdges = GetEdgeCells(-facing);
             if (outputEdges.Count > 0) CreatePortIndicator(outputEdges[0], facing, facing, new Color(0.3f, 1f, 0.3f), "Output");
             if (inputEdges.Count > 0) CreatePortIndicator(inputEdges[0], -facing, facing, new Color(0.3f, 0.8f, 1f), "Input");
+
+            OutputSlot = BuildingSlotFactory.CreateSlot(transform);
+            FuelInputSlot = BuildingSlotFactory.CreateSlot(transform);
+            FuelInputSlot.allowedTypes = new HashSet<specificItemType> { specificItemType.Coal, specificItemType.Uranium };
 
             // Attempt to find a ResourceNode at any of the miner's positions
             if (ResourceManager.Instance != null)
@@ -81,6 +91,7 @@ namespace Placeables
         }
 
         private const float FuelPerCoal = 25f;
+        private const float FuelPerUranium = 75f;
 
         public override void PerformAction()
         {
@@ -88,7 +99,8 @@ namespace Placeables
 
             if (!isEnemyOwned)
             {
-                TryConsumeCoalFromInput();
+                AbsorbFuelFromInput();
+                DrainFuelSlot();
 
                 if (fuelRemaining > 0f)
                 {
@@ -114,9 +126,11 @@ namespace Placeables
             }
         }
 
-        private void TryConsumeCoalFromInput()
+        /// <summary>Absorbs any stationary Coal/Uranium sitting on the input side into FuelInputSlot -
+        /// TryAdd itself rejects anything else via the slot's allowedTypes filter.</summary>
+        private void AbsorbFuelFromInput()
         {
-            if (fuelRemaining >= maxFuel) return;
+            if (FuelInputSlot == null) return;
 
             foreach (var inputCell in GetInputCells())
             {
@@ -126,13 +140,23 @@ namespace Placeables
                 for (int i = items.Count - 1; i >= 0; i--)
                 {
                     ConveyorItem item = items[i];
-                    if (item != null && !item.IsMoving && item.itemType == specificItemType.Coal)
+                    if (item != null && !item.IsMoving && FuelInputSlot.TryAdd(item._itemData, 1))
                     {
-                        fuelRemaining = Mathf.Min(maxFuel, fuelRemaining + FuelPerCoal);
                         ObjectPoolManager.Instance.ReturnToPool(item.gameObject);
                     }
                 }
             }
+        }
+
+        /// <summary>Only pulls from the fuel reserve once the boiler actually runs dry, so the slot's
+        /// count stays visible as a buffer instead of flickering back to empty every frame.</summary>
+        private void DrainFuelSlot()
+        {
+            if (FuelInputSlot == null || !FuelInputSlot.slotFilled || fuelRemaining > 0f) return;
+
+            float amount = FuelInputSlot._itemData.specificItemType == specificItemType.Uranium ? FuelPerUranium : FuelPerCoal;
+            fuelRemaining = Mathf.Min(maxFuel, fuelRemaining + amount);
+            FuelInputSlot.TryRemove(1);
         }
     
         void SpawnItem()
@@ -161,6 +185,7 @@ namespace Placeables
             if (itemComp != null)
             {
                 itemComp.Initialize(targetCell);
+                OutputSlot?.TryAdd(itemComp._itemData, 1);
             }
     
             if (finiteOres)
