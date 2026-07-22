@@ -221,22 +221,12 @@ namespace Ui
                         }
                         InventoryManager.Instance.AddBuilding(definition.buildingToUnlock, amount);
                         Debug.Log($"Purchased building: {definition.buildingToUnlock.buildingName} x{amount}");
-                        
-                        // Auto-assign to first empty hotbar slot
-                        bool alreadyInHotbar = false;
-                        int emptySlot = -1;
-                        if (HotbarManager.HasInstance)
+
+                        // Goes into the same InventorySlot-based hotbar mined resources use - TryAdd
+                        // finds a matching slot or the first empty one, so no manual scan needed here.
+                        if (BuildingUiManager.HasInstance && definition.buildingToUnlock.itemData != null)
                         {
-                            for (int i = 0; i < HotbarManager.Instance.slotCount; i++)
-                            {
-                                if (HotbarManager.Instance.Slots[i] == definition.buildingToUnlock) alreadyInHotbar = true;
-                                if (emptySlot == -1 && HotbarManager.Instance.Slots[i] == null) emptySlot = i;
-                            }
-    
-                            if (!alreadyInHotbar && emptySlot != -1)
-                            {
-                                HotbarManager.Instance.AssignToSlot(emptySlot, definition.buildingToUnlock);
-                            }
+                            BuildingUiManager.Instance.ResourcesToHotBar(definition.buildingToUnlock.itemData, amount);
                         }
                     }
                     break;

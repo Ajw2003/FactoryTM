@@ -167,21 +167,14 @@ namespace Managers
             {
                 CurrencyManager.Instance.RemoveCurrency(buildingData.cost);
                 InventoryManager.Instance.AddBuilding(buildingData, 1);
-                
-                // Auto-assign to first empty hotbar slot if it's the first time buying
-                bool alreadyInHotbar = false;
-                int emptySlot = -1;
-                for (int i = 0; i < HotbarManager.Instance.slotCount; i++)
+
+                // Goes into the same InventorySlot-based hotbar mined resources use - TryAdd finds
+                // a matching slot or the first empty one, so no manual scan needed here.
+                if (BuildingUiManager.HasInstance && buildingData.itemData != null)
                 {
-                    if (HotbarManager.Instance.Slots[i] == buildingData) alreadyInHotbar = true;
-                    if (emptySlot == -1 && HotbarManager.Instance.Slots[i] == null) emptySlot = i;
+                    BuildingUiManager.Instance.ResourcesToHotBar(buildingData.itemData, 1);
                 }
-    
-                if (!alreadyInHotbar && emptySlot != -1)
-                {
-                    HotbarManager.Instance.AssignToSlot(emptySlot, buildingData);
-                }
-    
+
                 RefreshUI();
     
                 // Visual feedback for successful purchase

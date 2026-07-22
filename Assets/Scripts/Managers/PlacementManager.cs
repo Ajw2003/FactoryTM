@@ -238,7 +238,11 @@ namespace Managers
     
                 // Task 1: Consume from Inventory
                 InventoryManager.Instance.RemoveBuilding(activeBuilding);
-                
+                if (HotbarManager.HasInstance)
+                {
+                    HotbarManager.Instance.RemoveFromHotbar(activeBuilding);
+                }
+
                 OnBuildingPlaced?.Invoke(activeBuilding);
             }
                 
@@ -308,6 +312,10 @@ namespace Managers
                         }
                         // Task 1: Return to Inventory instead of refunding currency
                         InventoryManager.Instance.AddBuilding(buildingToGive);
+                        if (BuildingUiManager.HasInstance && buildingToGive.itemData != null)
+                        {
+                            BuildingUiManager.Instance.ResourcesToHotBar(buildingToGive.itemData, 1);
+                        }
                     }
     
                     // Clear all occupied tiles
