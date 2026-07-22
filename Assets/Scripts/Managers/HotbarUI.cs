@@ -6,61 +6,36 @@ using Nodes;
 using EventTypes;
 using EventTypes.InventoryEvents;
 using EventTypes.InputEvents;
+using Items;
+using Singleton;
+
 namespace Managers
 {
     using TMPro;
     using UnityEngine;
     using UnityEngine.UI;
     
-    public class HotbarUI : MonoBehaviour
+    public class HotbarUI : SingletonBase<HotbarUI>
     {
         public GameObject slotPrefab;
         public Transform slotContainer;
         
-        private HotbarSlotUI[] slots;
-    
-        private void Awake()
-        {
-            if (slotContainer == null) slotContainer = transform.Find("SlotContainer");
-            if (slotContainer == null) slotContainer = transform; // Fallback to self
-    
-            if (slotPrefab == null)
-            {
-                slotPrefab = Resources.Load<GameObject>("prefabs/Ui/HotbarSlot");
-            }
-        }
+        public InventorySlot[] slots;
     
         private void Start()
         {
             InitializeHotbar();
-            if (HotbarManager.Instance != null)
-            {
-                HotbarManager.Instance.onHotbarChange += UpdateUI;
-            }
         }
     
         private void InitializeHotbar()
         {
             int count = HotbarManager.Instance.slotCount;
-            slots = new HotbarSlotUI[count];
+            slots = new InventorySlot[count];
             
             for (int i = 0; i < count; i++)
             {
                 GameObject go = Instantiate(slotPrefab, slotContainer);
-                slots[i] = go.GetComponent<HotbarSlotUI>();
-                slots[i].SetSlotIndex(i);
-            }
-            UpdateUI();
-        }
-    
-        private void UpdateUI()
-        {
-            var hotbarSlots = HotbarManager.Instance.Slots;
-            int selected = HotbarManager.Instance.SelectedSlot;
-            
-            for (int i = 0; i < slots.Length; i++)
-            {
-                slots[i].UpdateSlot(hotbarSlots[i], i == selected);
+                slots[i] = go.GetComponent<InventorySlot>();
             }
         }
     }

@@ -10,7 +10,7 @@ namespace Items
     public class InventorySlot : MonoBehaviour,IPointerEnterHandler, IPointerExitHandler, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerClickHandler
     { 
         Item _currentItem;
-        private ItemData _itemData;
+        public ItemData _itemData;
         private Item _tempItem;
         public int itemCount;
         public Image _image;
@@ -57,7 +57,7 @@ namespace Items
             return TwoDCollision.CreateFromRotated(_rectTransform.position.x, _rectTransform.position.y, _rectTransform.sizeDelta.x, _rectTransform.sizeDelta.y, angleRadians);
         }
 
-        private void IncreaseCount()
+        public void IncreaseCount()
         {
             itemCount++;
             _countText.text = itemCount.ToString();
@@ -88,20 +88,32 @@ namespace Items
             {
                 if (slotFilled)
                 {
-                    if (item.resourceType == _currentItem.resourceType) { IncreaseCount(); Destroy(item.gameObject); }
+                    if (item._itemType == _currentItem._itemType) { IncreaseCount(); Destroy(item.gameObject); }
                     else item.ResetPosition();
                 }
                 else
                 {
-                    slotFilled = true;
-                    _currentItem = item;
-                    IncreaseCount();
-                    _itemData = item.itemData;
-                    _nameText.text = item.itemName;
-                    _image.sprite = item.itemData.sprite;
-                    Destroy(item.gameObject);
+                    FillSlot(item);
                 }
             }
+        }
+
+        public void FillSlot(Item item)
+        {
+            slotFilled = true;
+            _currentItem = item;
+            IncreaseCount();
+            _itemData = item.itemData;
+            _nameText.text = item.itemName;
+            _image.sprite = item.itemData.sprite;
+            Destroy(item.gameObject);
+        }
+
+        public void FillSlotItemData(ItemData itemData)
+        {
+            slotFilled = true;
+            _itemData = itemData;
+            IncreaseCount();
         }
 
         public void OnPointerExit(PointerEventData eventData)

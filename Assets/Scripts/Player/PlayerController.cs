@@ -9,6 +9,7 @@ using EventTypes.InputEvents;
 using System.Collections;
 using Code.Scripts.EventSystems;
 using Code.Scripts.Interfaces.EventTypes;
+using Items;
 using Singleton;
 using UnityEngine;
 
@@ -173,7 +174,7 @@ public class PlayerController : MonoBehaviour, IHealth
             if (BuildingUiManager.Instance.HoveredItem != null)
             {
                 var item = BuildingUiManager.Instance.HoveredItem;
-                ResourceType rType = item.resourceType;
+                ItemData rType = item._itemData;
                 BuildingUiManager.Instance.AddResource(rType, 1);
 
                 FloatingTextSettings settings = Resources.Load<FloatingTextSettings>("FloatingTextSettings/PlayerPickupSettings");
@@ -186,11 +187,11 @@ public class PlayerController : MonoBehaviour, IHealth
             if (BuildingUiManager.Instance.HoveredNode != null)
             {
                 var node = BuildingUiManager.Instance.HoveredNode;
-                ResourceType rType = ResourceType.Coal;
+                ItemData rType = node.minedItemPrefab.GetComponent<ConveyorItem>()._itemData;
                 if (node.minedItemPrefab != null)
                 {
                     ConveyorItem citem = node.minedItemPrefab.GetComponent<ConveyorItem>();
-                    if (citem != null) rType = citem.resourceType;
+                    if (citem != null) rType = citem._itemData;
                 }
 
                 if (GameManager.Instance != null && GameManager.Instance.finiteOres)

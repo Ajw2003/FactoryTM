@@ -6,6 +6,8 @@ using Nodes;
 using EventTypes;
 using EventTypes.InventoryEvents;
 using EventTypes.InputEvents;
+using Items;
+
 namespace Managers
 {
     using System.Collections;
@@ -20,10 +22,11 @@ namespace Managers
     public class BuildingUiManager : SingletonBase<BuildingUiManager>
     {
         [Header("Discovery Registry")]
-        private HashSet<ResourceType> discoveredResources = new HashSet<ResourceType>();
+        private HashSet<ItemData> discoveredResources = new HashSet<ItemData>();
     
         [Header("Player Resource Inventory")]
-        private Dictionary<ResourceType, int> playerResources = new Dictionary<ResourceType, int>();
+        private Dictionary<ItemData, int> playerResources = new Dictionary<ItemData, int>();
+        private Dictionary<specificItemType, int> playerResourcesByType = new Dictionary<specificItemType, int>();
     
         [Header("UI Panels")]
     
@@ -43,11 +46,10 @@ namespace Managers
         private TMP_Text actionButton2Text;
     
         private GameObject resourceInventoryPanel;
-        private Dictionary<ResourceType, GameObject> resourceSlots = new Dictionary<ResourceType, GameObject>();
+        private Dictionary<specificItemType, GameObject> resourceSlots = new Dictionary<specificItemType, GameObject>();
         private GameObject idtIntakeDropZone;
 
         private GameObject chestInventoryZone;
-        private Dictionary<ResourceType, GameObject> chestSlots = new Dictionary<ResourceType, GameObject>();
 
         private GameObject portStatusZone;
         private GameObject portInputSlot;
@@ -85,7 +87,6 @@ namespace Managers
         {
             FindCanvas();
             CreateBuildingUiPanel();
-            CreateResourceInventoryPanel();
             
             // Start with Stone and Coal as undiscovered, but let player discover them systems-style!
             // We do not pre-register them, so they start as Unknown until mined!
@@ -103,9 +104,9 @@ namespace Managers
             }
         }
     
-        #region Discovery & Inventory API
+        #region Discovery
     
-        public void DiscoverResource(ResourceType type)
+        public void DiscoverResource(ItemData type)
         {
             if (discoveredResources.Add(type))
             {
@@ -116,57 +117,73 @@ namespace Managers
             }
         }
     
-        public bool IsResourceDiscovered(ResourceType type)
+        public bool IsResourceDiscovered(ItemData type)
         {
             return discoveredResources.Contains(type);
         }
     
-        public int GetResourceCount(ResourceType type)
+        public int GetResourceCount(specificItemType type)
         {
-            if (playerResources.TryGetValue(type, out int count))
+            if (playerResourcesByType.TryGetValue(type, out int count))
             {
                 return count;
             }
             return 0;
         }
     
-        public void AddResource(ResourceType type, int count = 1)
+        public void AddResource(ItemData data, int count = 1)
         {
-            if (playerResources.ContainsKey(type))
+            if (playerResources.ContainsKey(data))
             {
-                playerResources[type] += count;
+                ResourcesToHotBar(data);
+                playerResources[data] += count;
+                playerResourcesByType[data.specificItemType] +=  count;
             }
             else
             {
-                playerResources[type] = count;
+                playerResources[data] = count;
+                playerResourcesByType[data.specificItemType] = count;
+                Debug.Log(data.specificItemType);
+                ResourcesToHotBar(data);
             }
     
-            DiscoverResource(type);
+            DiscoverResource(data);
             
             if (TutorialManager.HasInstance)
             {
                 TutorialManager.Instance.UpdateObjectiveText();
             }
-            RefreshResourceInventoryPanel();
         }
-    
-        public bool RemoveResource(ResourceType type, int count = 1)
+
+        public void ResourcesToHotBar(ItemData itemData)
         {
-            if (count <= 0) return true;
-            if (GetResourceCount(type) >= count)
+            foreach (var slot in HotbarUI.Instance.slots)
             {
-                playerResources[type] -= count;
-                
-                if (TutorialManager.HasInstance)
+                if (slot._itemData == null)
                 {
-                    TutorialManager.Instance.UpdateObjectiveText();
+                    var temp = new GameObject ("DragVisual", typeof(Item), typeof(Image));
+                    var tempItem = temp.GetComponent<Item>();
+                    tempItem.itemData = itemData;
+                    tempItem.created = true;
+                    tempItem.Initalize();
+                    slot.FillSlot(tempItem);
+                    Debug.Log("AddingNewItem");
+                    break;
                 }
-                RefreshResourceInventoryPanel();
-                return true;
+                else if (slot._itemData.specificItemType == itemData.specificItemType)
+                {
+                    slot.IncreaseCount();
+                    Debug.Log("increasingCount");
+                    break;
+                    
+                }
+                else
+                {
+                    Debug.Log(itemData);
+                }
             }
-            return false;
+
         }
-    
         #endregion
     
     
@@ -434,8 +451,7 @@ namespace Managers
             Outline chestOutline = chestInventoryZone.AddComponent<Outline>();
             chestOutline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.8f);
             chestOutline.effectDistance = new Vector2(2f, -2f);
-
-            CreateChestSlots();
+            
             chestInventoryZone.SetActive(false);
 
             // Port status zone - shared by Miner/Furnace, a passive (non-drag) pair of slots showing
@@ -453,74 +469,6 @@ namespace Managers
             portStatusZone.SetActive(false);
 
             buildingPanel.SetActive(false);
-        }
-
-        private void CreateChestSlots()
-        {
-            ResourceType[] types = (ResourceType[])System.Enum.GetValues(typeof(ResourceType));
-
-            float startX = 12f;
-            float startY = 200f;
-            float slotW = 80f;
-            float slotH = 100f;
-            float spacingX = 14f;
-            float spacingY = 20f;
-
-            for (int i = 0; i < types.Length; i++)
-            {
-                ResourceType type = types[i];
-                int col = i % 4;
-                int row = i / 4;
-                float x = startX + col * (slotW + spacingX);
-                float y = startY - row * (slotH + spacingY);
-
-                GameObject slotGo = new GameObject("ChestSlot_" + type.ToString(), typeof(RectTransform), typeof(Image));
-                slotGo.transform.SetParent(chestInventoryZone.transform, false);
-                RectTransform slotRt = slotGo.GetComponent<RectTransform>();
-                slotRt.anchorMin = new Vector2(0f, 0f);
-                slotRt.anchorMax = new Vector2(0f, 0f);
-                slotRt.pivot = new Vector2(0f, 0f);
-                slotRt.anchoredPosition = new Vector2(x, y);
-                slotRt.sizeDelta = new Vector2(slotW, slotH);
-
-                Image slotImg = slotGo.GetComponent<Image>();
-                slotImg.color = new Color(0f, 0.02f, 0f, 0.8f);
-                Outline slotOutline = slotGo.AddComponent<Outline>();
-                slotOutline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.4f);
-                slotOutline.effectDistance = new Vector2(1f, -1f);
-
-                GameObject iconGo = new GameObject("Icon", typeof(RectTransform), typeof(Image));
-                iconGo.transform.SetParent(slotGo.transform, false);
-                RectTransform iconRt = iconGo.GetComponent<RectTransform>();
-                iconRt.anchorMin = new Vector2(0.5f, 0.5f);
-                iconRt.anchorMax = new Vector2(0.5f, 0.5f);
-                iconRt.pivot = new Vector2(0.5f, 0.5f);
-                iconRt.anchoredPosition = new Vector2(0f, 5f);
-                iconRt.sizeDelta = new Vector2(48f, 48f);
-
-                Image iconImg = iconGo.GetComponent<Image>();
-                iconImg.color = Color.white;
-                iconImg.raycastTarget = true;
-
-                GameObject countGo = new GameObject("CountText", typeof(RectTransform), typeof(TextMeshProUGUI));
-                countGo.transform.SetParent(slotGo.transform, false);
-                RectTransform countRt = countGo.GetComponent<RectTransform>();
-                countRt.anchorMin = new Vector2(0f, 0f);
-                countRt.anchorMax = new Vector2(1f, 0.3f);
-                countRt.offsetMin = new Vector2(2f, 2f);
-                countRt.offsetMax = new Vector2(-4f, 2f);
-
-                TextMeshProUGUI countText = countGo.GetComponent<TextMeshProUGUI>();
-                countText.fontSize = 18;
-                countText.fontStyle = FontStyles.Bold;
-                countText.color = new Color(0.2f, 1f, 0.2f);
-                countText.alignment = TextAlignmentOptions.BottomRight;
-
-                ChestSlotDragHandler dragHandler = iconGo.AddComponent<ChestSlotDragHandler>();
-                dragHandler.resourceType = type;
-
-                chestSlots[type] = slotGo;
-            }
         }
 
         private GameObject CreatePortStatusSlot(Transform parent, string name, string label, Vector2 anchorMin, Vector2 anchorMax)
@@ -568,157 +516,9 @@ namespace Managers
             return slotGo;
         }
     
-        private void CreateResourceInventoryPanel()
-        {
-            if (HUDCanvas == null) return;
+        
     
-            // Resource Inventory main background panel
-            resourceInventoryPanel = new GameObject("ResourceInventoryPanel", typeof(RectTransform), typeof(Image));
-            resourceInventoryPanel.transform.SetParent(HUDCanvas.transform, false);
-    
-            RectTransform rt = resourceInventoryPanel.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(1f, 0.5f);
-            rt.anchorMax = new Vector2(1f, 0.5f);
-            rt.pivot = new Vector2(1f, 0.5f);
-            rt.anchoredPosition = new Vector2(-1070f, 0f);
-            rt.sizeDelta = new Vector2(475f, 688f);
-
-            resourceInventoryPanelDefaultParent = resourceInventoryPanel.transform.parent;
-            resourceInventoryPanelDefaultAnchorMin = rt.anchorMin;
-            resourceInventoryPanelDefaultAnchorMax = rt.anchorMax;
-            resourceInventoryPanelDefaultPivot = rt.pivot;
-            resourceInventoryPanelDefaultAnchoredPos = rt.anchoredPosition;
-            resourceInventoryPanelDefaultSizeDelta = rt.sizeDelta;
-
-            Image img = resourceInventoryPanel.GetComponent<Image>();
-            img.color = new Color(0.01f, 0.05f, 0.01f, 0.97f);
-    
-            Outline outline = resourceInventoryPanel.AddComponent<Outline>();
-            outline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.9f);
-            outline.effectDistance = new Vector2(3f, -3f);
-    
-            // Title label
-            GameObject titleGo = new GameObject("TitleText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            titleGo.transform.SetParent(resourceInventoryPanel.transform, false);
-            RectTransform titleRt = titleGo.GetComponent<RectTransform>();
-            titleRt.anchorMin = new Vector2(0f, 0.88f);
-            titleRt.anchorMax = new Vector2(1f, 0.98f);
-            titleRt.offsetMin = new Vector2(10f, 0f);
-            titleRt.offsetMax = new Vector2(-10f, 0f);
-    
-            TextMeshProUGUI titleText = titleGo.GetComponent<TextMeshProUGUI>();
-            titleText.fontSize = 38;
-            titleText.fontStyle = FontStyles.Bold;
-            titleText.color = new Color(0.2f, 1f, 0.2f);
-            titleText.alignment = TextAlignmentOptions.Center;
-            titleText.text = "RESOURCE INVENTORY";
-    
-            // Instruction label
-            GameObject instGo = new GameObject("InstructionText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            instGo.transform.SetParent(resourceInventoryPanel.transform, false);
-            RectTransform instRt = instGo.GetComponent<RectTransform>();
-            instRt.anchorMin = new Vector2(0f, 0.72f);
-            instRt.anchorMax = new Vector2(1f, 0.88f);
-            instRt.offsetMin = new Vector2(10f, 0f);
-            instRt.offsetMax = new Vector2(-10f, 0f);
-    
-            TextMeshProUGUI instText = instGo.GetComponent<TextMeshProUGUI>();
-            instText.fontSize = 28;
-            instText.color = new Color(0.2f, 0.8f, 0.2f, 0.8f);
-            instText.alignment = TextAlignmentOptions.Center;
-            instText.enableWordWrapping = true;
-            instText.text = "Drag resources from slot to IDT to fuel reactor or sell items.";
-    
-            // Create Grid of 8 Slots (4 columns, 2 rows)
-            ResourceType[] types = (ResourceType[])System.Enum.GetValues(typeof(ResourceType));
-            
-            float startX = 17.5f;
-            float startY = 300f;
-            float slotW = 95f;
-            float slotH = 125f;
-            float spacingX = 20f;
-            float spacingY = 30f;
-    
-            for (int i = 0; i < types.Length; i++)
-            {
-                ResourceType type = types[i];
-                int col = i % 4;
-                int row = i / 4;
-    
-                float x = startX + col * (slotW + spacingX);
-                float y = startY - row * (slotH + spacingY);
-    
-                // Create Slot Container
-                GameObject slotGo = new GameObject("Slot_" + type.ToString(), typeof(RectTransform), typeof(Image));
-                slotGo.transform.SetParent(resourceInventoryPanel.transform, false);
-                RectTransform slotRt = slotGo.GetComponent<RectTransform>();
-                slotRt.anchorMin = new Vector2(0f, 0f);
-                slotRt.anchorMax = new Vector2(0f, 0f);
-                slotRt.pivot = new Vector2(0f, 0f);
-                slotRt.anchoredPosition = new Vector2(x, y);
-                slotRt.sizeDelta = new Vector2(slotW, slotH);
-    
-                Image slotImg = slotGo.GetComponent<Image>();
-                slotImg.color = new Color(0f, 0.02f, 0f, 0.8f);
-    
-                Outline slotOutline = slotGo.AddComponent<Outline>();
-                slotOutline.effectColor = new Color(0.2f, 0.9f, 0.2f, 0.4f);
-                slotOutline.effectDistance = new Vector2(1f, -1f);
-    
-                // Icon Image
-                GameObject iconGo = new GameObject("Icon", typeof(RectTransform), typeof(Image));
-                iconGo.transform.SetParent(slotGo.transform, false);
-                RectTransform iconRt = iconGo.GetComponent<RectTransform>();
-                iconRt.anchorMin = new Vector2(0.5f, 0.5f);
-                iconRt.anchorMax = new Vector2(0.5f, 0.5f);
-                iconRt.pivot = new Vector2(0.5f, 0.5f);
-                iconRt.anchoredPosition = new Vector2(0f, 5f);
-                iconRt.sizeDelta = new Vector2(60f, 60f);
-    
-                Image iconImg = iconGo.GetComponent<Image>();
-                iconImg.color = Color.white;
-                iconImg.raycastTarget = true;
-    
-                // Count Text (Bottom-right of slot)
-                GameObject countGo = new GameObject("CountText", typeof(RectTransform), typeof(TextMeshProUGUI));
-                countGo.transform.SetParent(slotGo.transform, false);
-                RectTransform countRt = countGo.GetComponent<RectTransform>();
-                countRt.anchorMin = new Vector2(0f, 0f);
-                countRt.anchorMax = new Vector2(1f, 0.3f);
-                countRt.offsetMin = new Vector2(2f, 2f);
-                countRt.offsetMax = new Vector2(-4f, 2f);
-    
-                TextMeshProUGUI countText = countGo.GetComponent<TextMeshProUGUI>();
-                countText.fontSize = 22;
-                countText.fontStyle = FontStyles.Bold;
-                countText.color = new Color(0.2f, 1f, 0.2f);
-                countText.alignment = TextAlignmentOptions.BottomRight;
-    
-                // Value Text (Top-left of slot)
-                GameObject valGo = new GameObject("ValueText", typeof(RectTransform), typeof(TextMeshProUGUI));
-                valGo.transform.SetParent(slotGo.transform, false);
-                RectTransform valRt = valGo.GetComponent<RectTransform>();
-                valRt.anchorMin = new Vector2(0f, 0.7f);
-                valRt.anchorMax = new Vector2(1f, 1f);
-                valRt.offsetMin = new Vector2(4f, -2f);
-                valRt.offsetMax = new Vector2(-2f, -2f);
-    
-                TextMeshProUGUI valText = valGo.GetComponent<TextMeshProUGUI>();
-                valText.fontSize = 20;
-                valText.color = new Color(1f, 0.8f, 0.2f);
-                valText.alignment = TextAlignmentOptions.TopLeft;
-    
-                // Add ResourceDragHandler
-                ResourceDragHandler dragHandler = iconGo.AddComponent<ResourceDragHandler>();
-                dragHandler.resourceType = type;
-    
-                resourceSlots[type] = slotGo;
-            }
-    
-            resourceInventoryPanel.SetActive(false);
-        }
-    
-        public Sprite GetResourceSprite(ResourceType type)
+        public Sprite GetResourceSprite(specificItemType type)
         {
             if (GameManager.Instance != null && GameManager.Instance.resourceNodeDefinitions != null)
             {
@@ -727,7 +527,7 @@ namespace Managers
                     if (def != null && def.minedItemPrefab != null)
                     {
                         ConveyorItem citem = def.minedItemPrefab.GetComponentInChildren<ConveyorItem>();
-                        if (citem != null && citem.resourceType == type)
+                        if (citem != null && citem.itemType == type)
                         {
                             SpriteRenderer sr = def.minedItemPrefab.GetComponentInChildren<SpriteRenderer>();
                             if (sr != null) return sr.sprite;
@@ -739,7 +539,7 @@ namespace Managers
         }
     
         /// <summary>The raw-ore item prefab for a resource type, looked up the same way GetResourceSprite finds its icon.</summary>
-        public GameObject GetResourceItemPrefab(ResourceType type)
+        public GameObject GetResourceItemPrefab(specificItemType type)
         {
             if (GameManager.Instance != null && GameManager.Instance.resourceNodeDefinitions != null)
             {
@@ -748,7 +548,7 @@ namespace Managers
                     if (def != null && def.minedItemPrefab != null)
                     {
                         ConveyorItem citem = def.minedItemPrefab.GetComponentInChildren<ConveyorItem>();
-                        if (citem != null && citem.resourceType == type)
+                        if (citem != null && citem.itemType == type)
                         {
                             return def.minedItemPrefab;
                         }
@@ -758,7 +558,7 @@ namespace Managers
             return null;
         }
 
-        public float GetResourceValue(ResourceType type)
+        public float GetResourceValue(specificItemType type)
         {
             if (GameManager.Instance != null && GameManager.Instance.resourceNodeDefinitions != null)
             {
@@ -767,7 +567,7 @@ namespace Managers
                     if (def != null && def.minedItemPrefab != null)
                     {
                         ConveyorItem citem = def.minedItemPrefab.GetComponentInChildren<ConveyorItem>();
-                        if (citem != null && citem.resourceType == type)
+                        if (citem != null && citem.itemType == type)
                         {
                             return citem.value;
                         }
@@ -776,114 +576,22 @@ namespace Managers
             }
             switch (type)
             {
-                case ResourceType.Ston: return 5f;
-                case ResourceType.Copper: return 10f;
-                case ResourceType.Iron: return 15f;
-                case ResourceType.Quartz: return 20f;
-                case ResourceType.Titanium: return 30f;
-                case ResourceType.Diamond: return 50f;
-                case ResourceType.Coal: return 4f;
-                case ResourceType.Uranium: return 100f;
+                case specificItemType.Stone: return 5f;
+                case specificItemType.Copper: return 10f;
+                case specificItemType.Iron: return 15f;
+                case specificItemType.Quartz: return 20f;
+                case specificItemType.Titanium: return 30f;
+                case specificItemType.Diamond: return 50f;
+                case specificItemType.Coal: return 4f;
+                case specificItemType.Uranium: return 100f;
                 default: return 10f;
             }
         }
     
-        public void RefreshResourceInventoryPanel()
-        {
-            if (resourceInventoryPanel == null || !resourceInventoryPanel.activeSelf) return;
-    
-            foreach (var pair in resourceSlots)
-            {
-                ResourceType type = pair.Key;
-                GameObject slotGo = pair.Value;
-    
-                Image iconImg = slotGo.transform.Find("Icon").GetComponent<Image>();
-                TextMeshProUGUI countText = slotGo.transform.Find("CountText").GetComponent<TextMeshProUGUI>();
-                TextMeshProUGUI valText = slotGo.transform.Find("ValueText").GetComponent<TextMeshProUGUI>();
-                ResourceDragHandler dragHandler = iconImg.GetComponent<ResourceDragHandler>();
-    
-                int count = GetResourceCount(type);
-                float value = GetResourceValue(type);
-                Sprite sprite = GetResourceSprite(type);
-    
-                bool isDiscovered = discoveredResources.Contains(type);
-    
-                if (isDiscovered)
-                {
-                    iconImg.sprite = sprite;
-                    iconImg.enabled = sprite != null;
-                    dragHandler.iconSprite = sprite;
-                    float totalVal = value * count;
-                    if (totalVal >= 1000f) {
-                        valText.text = $"${totalVal / 1000f:F1}k";
-                    } else {
-                        valText.text = $"${totalVal:F0}";
-                    }
-                    countText.text = count > 0 ? count.ToString() : "0";
-    
-                    if (count > 0)
-                    {
-                        iconImg.color = Color.white;
-                        countText.color = new Color(0.2f, 1f, 0.2f);
-                        valText.color = new Color(1f, 0.8f, 0.2f);
-                    }
-                    else
-                    {
-                        iconImg.color = new Color(1f, 1f, 1f, 0.25f);
-                        countText.color = new Color(0.2f, 1f, 0.2f, 0.25f);
-                        valText.color = new Color(1f, 0.8f, 0.2f, 0.25f);
-                    }
-                }
-                else
-                {
-                    iconImg.enabled = false;
-                    dragHandler.iconSprite = null;
-                    valText.text = "???";
-                    countText.text = "0";
-    
-                    iconImg.color = new Color(1f, 1f, 1f, 0.1f);
-                    countText.color = new Color(0.2f, 1f, 0.2f, 0.1f);
-                    valText.color = new Color(1f, 0.8f, 0.2f, 0.1f);
-                }
-            }
-        }
+        
     
         /// <summary>Reparents the player resource panel into a store UI tab container so it can be
         /// browsed without any building open. Call HideStandaloneResourcePanel to restore it.</summary>
-        public void ShowStandaloneResourcePanel(Transform parent)
-        {
-            if (resourceInventoryPanel == null || parent == null) return;
-
-            resourceInventoryPanel.transform.SetParent(parent, false);
-            RectTransform rt = resourceInventoryPanel.GetComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = Vector2.zero;
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
-
-            resourceInventoryPanel.SetActive(true);
-            RefreshResourceInventoryPanel();
-        }
-
-        public void HideStandaloneResourcePanel()
-        {
-            if (resourceInventoryPanel == null) return;
-
-            // Don't hide/reparent out from under an open building panel that also needs this panel.
-            if (currentOpenBuilding is InterDimensionalTransporter || currentOpenBuilding is Chest) return;
-
-            resourceInventoryPanel.transform.SetParent(resourceInventoryPanelDefaultParent, false);
-            RectTransform rt = resourceInventoryPanel.GetComponent<RectTransform>();
-            rt.anchorMin = resourceInventoryPanelDefaultAnchorMin;
-            rt.anchorMax = resourceInventoryPanelDefaultAnchorMax;
-            rt.pivot = resourceInventoryPanelDefaultPivot;
-            rt.anchoredPosition = resourceInventoryPanelDefaultAnchoredPos;
-            rt.sizeDelta = resourceInventoryPanelDefaultSizeDelta;
-
-            resourceInventoryPanel.SetActive(false);
-        }
 
         public bool IsMouseOverBuildingPanel(Vector2 screenPosition)
         {
@@ -917,140 +625,8 @@ namespace Managers
         }
 
         /// <summary>Drags the player's whole held stack of `type` into the currently open Chest, up to its remaining capacity.</summary>
-        public void HandleChestDeposit(ResourceType type)
-        {
-            if (!(currentOpenBuilding is Chest chest)) return;
-
-            int count = GetResourceCount(type);
-            if (count <= 0) return;
-
-            int deposited = chest.Deposit(type, count);
-            if (deposited <= 0) return;
-
-            RemoveResource(type, deposited);
-            if (UiManager.HasInstance)
-            {
-                UiManager.Instance.ShowGeneralAlert($"STORED {deposited}x {type.ToString().ToUpper()}", new Color(0.2f, 1f, 0.2f));
-            }
-
-            RefreshBuildingPanel();
-            RefreshResourceInventoryPanel();
-            RefreshChestInventoryPanel();
-        }
-
-        /// <summary>Withdraws all of `type` from the currently open Chest back into the player's resource pool.</summary>
-        public void HandleChestWithdraw(ResourceType type)
-        {
-            if (!(currentOpenBuilding is Chest chest)) return;
-
-            int count = chest.GetStoredCount(type);
-            if (count <= 0) return;
-
-            int withdrawn = chest.Withdraw(type, count);
-            if (withdrawn <= 0) return;
-
-            AddResource(type, withdrawn);
-
-            RefreshBuildingPanel();
-            RefreshResourceInventoryPanel();
-            RefreshChestInventoryPanel();
-        }
-
-        public void RefreshChestInventoryPanel()
-        {
-            if (chestInventoryZone == null || !chestInventoryZone.activeSelf) return;
-            if (!(currentOpenBuilding is Chest chest)) return;
-
-            foreach (var pair in chestSlots)
-            {
-                ResourceType type = pair.Key;
-                GameObject slotGo = pair.Value;
-
-                Image iconImg = slotGo.transform.Find("Icon").GetComponent<Image>();
-                TextMeshProUGUI countText = slotGo.transform.Find("CountText").GetComponent<TextMeshProUGUI>();
-                ChestSlotDragHandler dragHandler = iconImg.GetComponent<ChestSlotDragHandler>();
-
-                int count = chest.GetStoredCount(type);
-                Sprite sprite = GetResourceSprite(type);
-
-                iconImg.sprite = sprite;
-                iconImg.enabled = sprite != null && count > 0;
-                dragHandler.iconSprite = sprite;
-                countText.text = count > 0 ? count.ToString() : "";
-
-                iconImg.color = count > 0 ? Color.white : new Color(1f, 1f, 1f, 0.15f);
-            }
-        }
     
-        public void HandleResourceDropped(ResourceType type)
-        {
-            int count = GetResourceCount(type);
-            if (count <= 0) return;
-    
-            if (currentOpenBuilding is InterDimensionalTransporter seller)
-            {
-                if (type == ResourceType.Coal)
-                {
-                    if (RemoveResource(type, count))
-                    {
-                        seller.fuelRemaining = Mathf.Min(seller.maxFuel, seller.fuelRemaining + 20f * count);
-                        if (UiManager.HasInstance)
-                        {
-                            UiManager.Instance.ShowGeneralAlert($"REACTOR FUELED: +{20f * count}s", new Color(0.2f, 1f, 0.2f));
-                        }
-    
-                        if (TutorialManager.HasInstance)
-                        {
-                            for (int i = 0; i < count; i++)
-                            {
-                                TutorialManager.Instance.HandleFuelAdded(ResourceType.Coal);
-                            }
-                        }
-                    }
-                }
-                else if (type == ResourceType.Uranium)
-                {
-                    if (RemoveResource(type, count))
-                    {
-                        seller.fuelRemaining = Mathf.Min(seller.maxFuel, seller.fuelRemaining + 60f * count);
-                        seller.isUraniumBoosted = true;
-                        seller.uraniumBoostDuration = Mathf.Min(120f, seller.uraniumBoostDuration + 30f * count);
-                        if (UiManager.HasInstance)
-                        {
-                            UiManager.Instance.ShowGeneralAlert($"REACTOR BOOSTED: +{60f * count}s", new Color(0.3f, 1f, 1f));
-                        }
-    
-                        if (TutorialManager.HasInstance)
-                        {
-                            for (int i = 0; i < count; i++)
-                            {
-                                TutorialManager.Instance.HandleFuelAdded(ResourceType.Uranium);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    float val = GetResourceValue(type);
-                    float mult = seller.isUraniumBoosted ? 2f : 1f;
-                    float finalEarnings = count * val * mult;
-    
-                    if (RemoveResource(type, count))
-                    {
-                        CurrencyManager.Instance.AddCurrency(finalEarnings);
-                        if (UiManager.HasInstance)
-                        {
-                            UiManager.Instance.ShowGeneralAlert($"ORES SOLD: +${finalEarnings:F0}", new Color(0.2f, 1f, 0.2f));
-                        }
-                    }
-                }
-    
-                RefreshBuildingPanel();
-                RefreshResourceInventoryPanel();
-            }
-        }
-    
-        /// <summary>Passive (non-drag) display for Miner/Furnace showing whatever item currently sits on their input/output edge cell, if any.</summary>
+        
         private void RefreshPortStatusSlots(BuildingLogic building)
         {
             if (portInputSlot == null || portOutputSlot == null || building == null) return;
@@ -1079,7 +655,7 @@ namespace Managers
                 return;
             }
 
-            Sprite sprite = GetResourceSprite(item.resourceType);
+            Sprite sprite = GetResourceSprite(item.itemType);
             iconImg.sprite = sprite;
             iconImg.enabled = sprite != null;
         }
@@ -1096,7 +672,7 @@ namespace Managers
             buildingPanel.SetActive(true);
             RefreshBuildingPanel();
     
-            if (building is InterDimensionalTransporter || building is Chest)
+            if (building is InterDimensionalTransporter)
             {
                 if (resourceInventoryPanel != null)
                 {
@@ -1109,7 +685,6 @@ namespace Managers
                     rrt.sizeDelta = resourceInventoryPanelDefaultSizeDelta;
 
                     resourceInventoryPanel.SetActive(true);
-                    RefreshResourceInventoryPanel();
                 }
             }
             else
@@ -1152,40 +727,42 @@ namespace Managers
                 OpenPanel(HoveredInteractable);
             }
         }
-    
+
         public void RefreshBuildingPanel()
         {
             if (currentOpenBuilding == null) return;
-    
+
             bool needsLayoutSetup = currentOpenBuilding != lastConfiguredBuilding;
-    
+
             RectTransform detailRt = buildingDetailText.GetComponent<RectTransform>();
             RectTransform fuelBarRt = fuelBarContainer.GetComponent<RectTransform>();
-    
+
             if (needsLayoutSetup)
             {
                 lastConfiguredBuilding = currentOpenBuilding;
-    
+
                 // Default layout reset
                 detailRt.anchorMin = new Vector2(0f, 0.48f);
                 detailRt.anchorMax = new Vector2(1f, 0.85f);
                 detailRt.offsetMin = new Vector2(30f, 0f);
                 detailRt.offsetMax = new Vector2(-30f, 0f);
-    
+
                 fuelBarRt.anchorMin = new Vector2(0.5f, 0.38f);
                 fuelBarRt.anchorMax = new Vector2(0.5f, 0.38f);
                 fuelBarRt.pivot = new Vector2(0.5f, 0.5f);
                 fuelBarRt.anchoredPosition = Vector2.zero;
                 fuelBarRt.sizeDelta = new Vector2(750f, 50f);
-    
+
                 if (idtIntakeDropZone != null)
                 {
                     idtIntakeDropZone.SetActive(false);
                 }
+
                 if (chestInventoryZone != null)
                 {
                     chestInventoryZone.SetActive(false);
                 }
+
                 if (portStatusZone != null)
                 {
                     portStatusZone.SetActive(false);
@@ -1196,264 +773,36 @@ namespace Managers
                 actionButton2Go.SetActive(true);
                 actionButton1.onClick.RemoveAllListeners();
                 actionButton2.onClick.RemoveAllListeners();
-    
+
                 // 1. InterDimensionalTransporter (Reactor) UI Setup
                 if (currentOpenBuilding is InterDimensionalTransporter)
                 {
                     buildingTitleText.text = "IDT REACTOR MODULE";
-                    
+
                     // Hide the buttons as drag & drop is used
                     actionButton1Go.SetActive(false);
                     actionButton2Go.SetActive(false);
-    
+
                     // Two-column layout overrides
                     if (idtIntakeDropZone != null)
                     {
                         idtIntakeDropZone.SetActive(true);
                     }
-    
+
                     detailRt.anchorMin = new Vector2(0.05f, 0.32f);
                     detailRt.anchorMax = new Vector2(0.48f, 0.82f);
                     detailRt.offsetMin = Vector2.zero;
                     detailRt.offsetMax = Vector2.zero;
-    
+
                     fuelBarRt.anchorMin = new Vector2(0.05f, 0.08f);
                     fuelBarRt.anchorMax = new Vector2(0.48f, 0.22f);
                     fuelBarRt.offsetMin = Vector2.zero;
                     fuelBarRt.offsetMax = Vector2.zero;
                 }
-                // 2. Chest UI Setup - multi-slot storage, drag-driven like the IDT intake
-                else if (currentOpenBuilding is Chest)
-                {
-                    buildingTitleText.text = "STORAGE CHEST";
-
-                    actionButton1Go.SetActive(false);
-                    actionButton2Go.SetActive(false);
-                    fuelBarContainer.SetActive(false);
-
-                    if (chestInventoryZone != null)
-                    {
-                        chestInventoryZone.SetActive(true);
-                    }
-
-                    detailRt.anchorMin = new Vector2(0.05f, 0.32f);
-                    detailRt.anchorMax = new Vector2(0.48f, 0.82f);
-                    detailRt.offsetMin = Vector2.zero;
-                    detailRt.offsetMax = Vector2.zero;
-                }
-                // 3. Miner UI Setup
-                else if (currentOpenBuilding is MinerLogic miner)
-                {
-                    buildingTitleText.text = miner.data.buildingName.ToUpper();
-                    fuelBarContainer.SetActive(true);
-                    if (portStatusZone != null) portStatusZone.SetActive(true);
-
-                    detailRt.anchorMin = new Vector2(0f, 0.60f);
-                    detailRt.anchorMax = new Vector2(1f, 0.85f);
-                    if (portStatusZone != null)
-                    {
-                        RectTransform portZoneRt2 = portStatusZone.GetComponent<RectTransform>();
-                        portZoneRt2.anchorMin = new Vector2(0.05f, 0.44f);
-                        portZoneRt2.anchorMax = new Vector2(0.95f, 0.58f);
-                    }
-
-                    // Add Coal
-                    actionButton1Text.text = "LOAD 1 COAL";
-                    actionButton1.onClick.AddListener(() => {
-                        if (RemoveResource(ResourceType.Coal, 1))
-                        {
-                            miner.fuelRemaining = Mathf.Min(miner.maxFuel, miner.fuelRemaining + 25f);
-                            RefreshBuildingPanel();
-                        }
-                    });
-    
-                    // Deposit all Coal
-                    actionButton2Text.text = "LOAD ALL COAL";
-                    actionButton2.onClick.AddListener(() => {
-                        int avail = GetResourceCount(ResourceType.Coal);
-                        int needed = Mathf.CeilToInt((miner.maxFuel - miner.fuelRemaining) / 25f);
-                        int transfer = Mathf.Min(avail, needed);
-                        if (transfer > 0)
-                        {
-                            if (RemoveResource(ResourceType.Coal, transfer))
-                            {
-                                miner.fuelRemaining = Mathf.Min(miner.maxFuel, miner.fuelRemaining + (transfer * 25f));
-                                RefreshBuildingPanel();
-                            }
-                        }
-                    });
-                }
-                // 3. Furnace UI Setup
-                else if (currentOpenBuilding is Furnace furnace)
-                {
-                    buildingTitleText.text = furnace.data.buildingName.ToUpper();
-                    fuelBarContainer.SetActive(true);
-                    if (portStatusZone != null) portStatusZone.SetActive(true);
-
-                    detailRt.anchorMin = new Vector2(0f, 0.60f);
-                    detailRt.anchorMax = new Vector2(1f, 0.85f);
-                    if (portStatusZone != null)
-                    {
-                        RectTransform portZoneRt2 = portStatusZone.GetComponent<RectTransform>();
-                        portZoneRt2.anchorMin = new Vector2(0.05f, 0.44f);
-                        portZoneRt2.anchorMax = new Vector2(0.95f, 0.58f);
-                    }
-
-                    // Add Coal
-                    actionButton1Text.text = "LOAD 1 COAL";
-                    actionButton1.onClick.AddListener(() => {
-                        if (RemoveResource(ResourceType.Coal, 1))
-                        {
-                            furnace.fuelRemaining = Mathf.Min(furnace.maxFuel, furnace.fuelRemaining + 25f);
-                            RefreshBuildingPanel();
-                        }
-                    });
-    
-                    // Deposit all Coal
-                    actionButton2Text.text = "LOAD ALL COAL";
-                    actionButton2.onClick.AddListener(() => {
-                        int avail = GetResourceCount(ResourceType.Coal);
-                        int needed = Mathf.CeilToInt((furnace.maxFuel - furnace.fuelRemaining) / 25f);
-                        int transfer = Mathf.Min(avail, needed);
-                        if (transfer > 0)
-                        {
-                            if (RemoveResource(ResourceType.Coal, transfer))
-                            {
-                                furnace.fuelRemaining = Mathf.Min(furnace.maxFuel, furnace.fuelRemaining + (transfer * 25f));
-                                RefreshBuildingPanel();
-                            }
-                        }
-                    });
-                }
-                // 4. Turret UI Setup
-                else if (currentOpenBuilding is TurretLogic turret)
-                {
-                    buildingTitleText.text = turret.data.buildingName.ToUpper();
-                    fuelBarContainer.SetActive(true);
-    
-                    // Insert 30 Ammo
-                    actionButton1Text.text = "INSERT 30 AMMO";
-                    actionButton1.onClick.AddListener(() => {
-                        if (PlayerController.Instance != null)
-                        {
-                            int load = Mathf.Min(30, PlayerController.Instance.ammoReserve);
-                            load = Mathf.Min(load, turret.maxAmmo - turret.ammoRemaining);
-                            if (load > 0)
-                            {
-                                PlayerController.Instance.ammoReserve -= load;
-                                turret.ammoRemaining += load;
-                                
-                                // Force weapon UI updates
-                                PlayerWeapon playerWeapon = PlayerController.Instance.GetComponentInChildren<PlayerWeapon>();
-                                if (playerWeapon != null) playerWeapon.UpdateAmmoUI();
-    
-                                RefreshBuildingPanel();
-                            }
-                        }
-                    });
-    
-                    // Fully Reload
-                    actionButton2Text.text = "FULLY RELOAD";
-                    actionButton2.onClick.AddListener(() => {
-                        if (PlayerController.Instance != null)
-                        {
-                            int needed = turret.maxAmmo - turret.ammoRemaining;
-                            int load = Mathf.Min(needed, PlayerController.Instance.ammoReserve);
-                            if (load > 0)
-                            {
-                                PlayerController.Instance.ammoReserve -= load;
-                                turret.ammoRemaining += load;
-    
-                                PlayerWeapon playerWeapon = PlayerController.Instance.GetComponentInChildren<PlayerWeapon>();
-                                if (playerWeapon != null) playerWeapon.UpdateAmmoUI();
-    
-                                RefreshBuildingPanel();
-                            }
-                        }
-                    });
-                }
-            }
-    
-            // ================= DYNAMIC UPDATES (runs every frame) =================
-            if (currentOpenBuilding is InterDimensionalTransporter seller)
-            {
-                string statusStr = seller.fuelRemaining > 0f ? "OPERATIONAL" : "OFFLINE (COAL REQUIRED)";
-                if (seller.isUraniumBoosted) statusStr = "BOOSTED // URANIUM ACTIVE (2X VALUE)";
-                
-                buildingDetailText.text = $"Reactor Status: {statusStr}\n\n" +
-                                          $"[DRAG COAL TO INTAKE PORT TO FUEL (+20s)]\n" +
-                                          $"[DRAG URANIUM TO INTAKE PORT TO BOOST (+60s)]\n" +
-                                          $"[DRAG OTHER ORES TO INTAKE PORT TO SELL]";
-    
-                fuelBarContainer.SetActive(true);
-                float fuelPct = seller.fuelRemaining / seller.maxFuel;
-                fuelBarFillImage.rectTransform.anchorMax = new Vector2(fuelPct, 1f);
-                fuelBarText.text = $"Reactor Fuel: {Mathf.CeilToInt(seller.fuelRemaining)}s / {Mathf.CeilToInt(seller.maxFuel)}s";
-            }
-            else if (currentOpenBuilding is Chest chest)
-            {
-                buildingDetailText.text = $"Storage: {chest.GetTotalStored()} / {chest.capacity}\n\n" +
-                                          $"[DRAG RESOURCES FROM YOUR INVENTORY\nINTO THIS PANEL TO DEPOSIT]\n" +
-                                          $"[DRAG FROM THIS PANEL INTO YOUR\nINVENTORY TO WITHDRAW]";
-                RefreshChestInventoryPanel();
-            }
-            else if (currentOpenBuilding is MinerLogic miner)
-            {
-                string statusStr = miner.fuelRemaining > 0f ? "EXTRACTING" : "OUT OF FUEL (COAL REQUIRED)";
-                buildingDetailText.text = $"Machine Status: {statusStr}\n" +
-                                          $"Extraction Speed: {miner.data.proccessingSpeed / miner.GetTierMultiplier():F1}s / cycle\n" +
-                                          $"Carried Coal: {GetResourceCount(ResourceType.Coal)} available";
-
-                fuelBarContainer.SetActive(true);
-                float fuelPct = miner.fuelRemaining / miner.maxFuel;
-                fuelBarFillImage.rectTransform.anchorMax = new Vector2(fuelPct, 1f);
-                fuelBarText.text = $"Boiler Fuel: {Mathf.CeilToInt(miner.fuelRemaining)}% / 100%";
-
-                actionButton1.interactable = GetResourceCount(ResourceType.Coal) > 0;
-                actionButton2.interactable = GetResourceCount(ResourceType.Coal) > 0;
-
-                RefreshPortStatusSlots(miner);
-            }
-            else if (currentOpenBuilding is Furnace furnace)
-            {
-                string statusStr = furnace.fuelRemaining > 0f ? "SMELTING" : "OUT OF FUEL (COAL REQUIRED)";
-                buildingDetailText.text = $"Smelter Status: {statusStr}\n" +
-                                          $"Cooking Speed: {furnace.data.proccessingSpeed / furnace.GetTierMultiplier():F1}s / cycle\n" +
-                                          $"Carried Coal: {GetResourceCount(ResourceType.Coal)} available";
-
-                fuelBarContainer.SetActive(true);
-                float fuelPct = furnace.fuelRemaining / furnace.maxFuel;
-                fuelBarFillImage.rectTransform.anchorMax = new Vector2(fuelPct, 1f);
-                fuelBarText.text = $"Furnace Fuel: {Mathf.CeilToInt(furnace.fuelRemaining)}% / 100%";
-
-                actionButton1.interactable = GetResourceCount(ResourceType.Coal) > 0;
-                actionButton2.interactable = GetResourceCount(ResourceType.Coal) > 0;
-
-                RefreshPortStatusSlots(furnace);
-            }
-            else if (currentOpenBuilding is TurretLogic turret)
-            {
-                int reserve = PlayerController.Instance != null ? PlayerController.Instance.ammoReserve : 0;
-                string statusStr = turret.ammoRemaining > 0 ? "ARMED // SCANNING" : "OUT OF AMMO // DEFENSE SYSTEM HALTED";
-    
-                buildingDetailText.text = $"Turret Status: {statusStr}\n" +
-                                          $"Targeting Range: {turret.targetRange} tiles\n" +
-                                          $"Ammo Reserves: {reserve} rounds carried";
-    
-                fuelBarContainer.SetActive(true);
-                float ammoPct = (float)turret.ammoRemaining / turret.maxAmmo;
-                fuelBarFillImage.rectTransform.anchorMax = new Vector2(ammoPct, 1f);
-                fuelBarText.text = $"Mag Capacity: {turret.ammoRemaining} / {turret.maxAmmo}";
-    
-                actionButton1.interactable = reserve > 0 && turret.ammoRemaining < turret.maxAmmo;
-                actionButton2.interactable = reserve > 0 && turret.ammoRemaining < turret.maxAmmo;
             }
         }
-    
-        #endregion
-    
-        #region Hover Raycasting & Update
-    
+
+
         private void Update()
         {
             if (PauseManager.IsPaused) return;

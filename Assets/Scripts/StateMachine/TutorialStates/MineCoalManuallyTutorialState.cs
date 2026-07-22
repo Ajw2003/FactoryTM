@@ -18,7 +18,7 @@ namespace StateMachine
 
         public override void CheckTransitions()
         {
-            int coalCount = BuildingUiManager.Instance != null ? BuildingUiManager.Instance.GetResourceCount(ResourceType.Coal) : 0;
+            int coalCount = BuildingUiManager.Instance != null ? BuildingUiManager.Instance.GetResourceCount(specificItemType.Coal) : 0;
             if (coalCount >= 5)
             {
                 manager.ChangeState(manager.fuelDCTState);

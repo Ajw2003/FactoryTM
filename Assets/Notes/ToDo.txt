@@ -57,6 +57,10 @@ Fix debugs and remove or disable safely
 
 
 
+Migrate all items to new item data system including buildings this means generating itemdata for each and assigning specificItemTypes to each instead of resource types as before.
+Make items mined added to the hotbar instead of the inventory.
+
+
 
 
 

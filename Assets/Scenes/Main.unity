@@ -412,6 +412,10 @@ PrefabInstance:
       propertyPath: m_VertexColorAlwaysGammaSpace
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3462653280731713957, guid: 4239595360184ce46828e64aeb892d8b, type: 3}
+      propertyPath: detachFromParent
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4170387465296929963, guid: 4239595360184ce46828e64aeb892d8b, type: 3}
       propertyPath: Stats
       value: 

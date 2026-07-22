@@ -6,15 +6,25 @@ public class ItemData : ScriptableObject
     public Sprite sprite;
     public string itemName;
     public string itemDescription;
-    public itemType itemType;
-    public ResourceType resourceType;
-    
+    public specificItemType specificItemType;
+
 }
 
-public enum itemType
+public enum specificItemType
 {
-    Ore,
-    Building,
-    Weapon,
-    Consumable
+    Miner,
+    IDT,
+    Conveyor,
+    Furnace,
+    Turret,
+    Wall,
+    Chest,
+    Copper,
+    Stone,
+    Iron,
+    Diamond,
+    Coal,
+    Titanium,
+    Uranium,
+    Quartz,
 }

@@ -16,23 +16,21 @@ namespace Items
 
         public bool created;
     
-        private Image _image;
+        protected Image _image;
 
         public string itemName;
         
         public string description;
         
-        private itemType _itemType;
+        public specificItemType _itemType;
         
-        public ResourceType resourceType;
-        
-        private RectTransform _rectTransform;
+        protected RectTransform _rectTransform;
 
-        private Vector2 _startingTransform;
+        protected Vector2 _startingTransform;
         
-        private Canvas parentCanvas;
+        protected Canvas parentCanvas;
 
-        private void Start()
+        protected void Start()
         {
             if(created) return;
             Initalize();
@@ -47,13 +45,8 @@ namespace Items
             _image.sprite = itemData.sprite;
             itemName = itemData.itemName;
             description = itemData.itemDescription;
-            _itemType = itemData.itemType;
+            _itemType = itemData.specificItemType;
             _startingTransform = _rectTransform.anchoredPosition;
-            
-            if (_itemType == itemType.Ore)
-            {
-                resourceType =  itemData.resourceType;
-            }
         }
 
         public void ResetPosition()
