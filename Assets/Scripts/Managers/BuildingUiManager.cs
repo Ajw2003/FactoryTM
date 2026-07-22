@@ -45,8 +45,6 @@ namespace Managers
         private Button actionButton2;
         private TMP_Text actionButton2Text;
     
-        private GameObject resourceInventoryPanel;
-        private Dictionary<specificItemType, GameObject> resourceSlots = new Dictionary<specificItemType, GameObject>();
         private GameObject idtIntakeDropZone;
 
         private GameObject chestInventoryZone;
@@ -58,15 +56,6 @@ namespace Managers
         private Transform idtSellSlotRegion;
         private Transform chestSlotGrid;
 
-        // Cached so ShowStandaloneResourcePanel/HideStandaloneResourcePanel can restore the panel's
-        // normal floating position after being reparented into the store's Inventory tab.
-        private Transform resourceInventoryPanelDefaultParent;
-        private Vector2 resourceInventoryPanelDefaultAnchorMin;
-        private Vector2 resourceInventoryPanelDefaultAnchorMax;
-        private Vector2 resourceInventoryPanelDefaultPivot;
-        private Vector2 resourceInventoryPanelDefaultAnchoredPos;
-        private Vector2 resourceInventoryPanelDefaultSizeDelta;
-    
         [Header("State")]
         private BuildingLogic currentOpenBuilding;
         public BuildingLogic CurrentOpenBuilding => currentOpenBuilding;
@@ -562,9 +551,6 @@ namespace Managers
     
         
     
-        /// <summary>Reparents the player resource panel into a store UI tab container so it can be
-        /// browsed without any building open. Call HideStandaloneResourcePanel to restore it.</summary>
-
         public bool IsMouseOverBuildingPanel(Vector2 screenPosition)
         {
             if (buildingPanel == null) return false;
@@ -584,14 +570,6 @@ namespace Managers
         {
             if (chestInventoryZone == null || !chestInventoryZone.activeInHierarchy) return false;
             RectTransform rt = chestInventoryZone.GetComponent<RectTransform>();
-            Camera cam = (HUDCanvas != null && HUDCanvas.renderMode == RenderMode.ScreenSpaceOverlay) ? null : Camera.main;
-            return RectTransformUtility.RectangleContainsScreenPoint(rt, screenPosition, cam);
-        }
-
-        public bool IsMouseOverPlayerInventoryPanel(Vector2 screenPosition)
-        {
-            if (resourceInventoryPanel == null || !resourceInventoryPanel.activeInHierarchy) return false;
-            RectTransform rt = resourceInventoryPanel.GetComponent<RectTransform>();
             Camera cam = (HUDCanvas != null && HUDCanvas.renderMode == RenderMode.ScreenSpaceOverlay) ? null : Camera.main;
             return RectTransformUtility.RectangleContainsScreenPoint(rt, screenPosition, cam);
         }
@@ -705,30 +683,7 @@ namespace Managers
             currentOpenBuilding = building;
             buildingPanel.SetActive(true);
             RefreshBuildingPanel();
-    
-            if (building is InterDimensionalTransporter)
-            {
-                if (resourceInventoryPanel != null)
-                {
-                    resourceInventoryPanel.transform.SetParent(resourceInventoryPanelDefaultParent, false);
-                    RectTransform rrt = resourceInventoryPanel.GetComponent<RectTransform>();
-                    rrt.anchorMin = resourceInventoryPanelDefaultAnchorMin;
-                    rrt.anchorMax = resourceInventoryPanelDefaultAnchorMax;
-                    rrt.pivot = resourceInventoryPanelDefaultPivot;
-                    rrt.anchoredPosition = resourceInventoryPanelDefaultAnchoredPos;
-                    rrt.sizeDelta = resourceInventoryPanelDefaultSizeDelta;
 
-                    resourceInventoryPanel.SetActive(true);
-                }
-            }
-            else
-            {
-                if (resourceInventoryPanel != null)
-                {
-                    resourceInventoryPanel.SetActive(false);
-                }
-            }
-    
             if (PlayerController.Instance != null)
             {
                 PlayerController.Instance.StateMachine.ChangeState(PlayerController.Instance.StateMachine.buildingUiState);
@@ -743,12 +698,7 @@ namespace Managers
             HideBuildingSlots(lastConfiguredBuilding);
             currentOpenBuilding = null;
             lastConfiguredBuilding = null;
-    
-            if (resourceInventoryPanel != null)
-            {
-                resourceInventoryPanel.SetActive(false);
-            }
-    
+
             if (PlayerController.Instance != null && PlayerController.Instance.StateMachine.CurrentState == PlayerController.Instance.StateMachine.buildingUiState)
             {
                 PlayerController.Instance.StateMachine.ChangeState(PlayerController.Instance.StateMachine.idleState);
@@ -854,21 +804,6 @@ namespace Managers
                 {
                     foreach (var result in results)
                     {
-                        // Check if it's a hotbar slot
-                        HotbarSlotUI slot = result.gameObject.GetComponentInParent<HotbarSlotUI>();
-                        if (slot != null)
-                        {
-                            // Get data via reflection or public method
-                            var field = slot.GetType().GetField("currentData", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                            BuildingData data = field != null ? (BuildingData)field.GetValue(slot) : null;
-                            
-                            if (data != null)
-                            {
-                                isHoveringUi = true;
-                                break;
-                            }
-                        }
-    
                         // Check if it's a shop upgrade item
                         UpgradeShopItem shopItem = result.gameObject.GetComponentInParent<UpgradeShopItem>();
                         if (shopItem != null && shopItem.Definition != null)
