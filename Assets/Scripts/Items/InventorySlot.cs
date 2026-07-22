@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Items
 {
-    public class InventorySlot : MonoBehaviour,IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IDragHandler, IEndDragHandler
+    public class InventorySlot : MonoBehaviour,IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IDragHandler, IEndDragHandler
     {
         // An Image with no sprite still renders as a solid block, so empty slots use a faint tint
         // (matching the hotbar's own pre-authored ~20% alpha) rather than full opacity or full
@@ -135,6 +135,8 @@ namespace Items
 
         public void CheckCollision(Rectangle2D itemBox, Item item)
         {
+            if (item.IsClaimed) return; // another overlapping slot already took this drop this cycle
+
             Rectangle2D boundingBox = GetBoundingBox();
 
             if (Rectangle2D.CheckCollision(boundingBox, itemBox))
@@ -167,6 +169,16 @@ namespace Items
         }
 
         public void OnEndDrag(PointerEventData eventData)
+        {
+            DragLayer.Instance.EndDrag();
+        }
+
+        /// <summary>Unity only fires OnBeginDrag/OnDrag/OnEndDrag once the pointer has moved past a
+        /// pixel threshold - a quick click-without-moving (a common way to "drop in place") never
+        /// crosses it, so OnEndDrag would never come and the grabbed stack would be stuck floating,
+        /// forever, un-resolved. OnPointerUp fires unconditionally on release regardless of movement,
+        /// so it's the reliable place to resolve the drop. EndDrag() is a no-op if already resolved.</summary>
+        public void OnPointerUp(PointerEventData eventData)
         {
             DragLayer.Instance.EndDrag();
         }
