@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Buildings.BuildingData
   buildingName: Wall
   icon: {fileID: 21300000, guid: 30b5e609e69c49548b615c83ccb0a995, type: 3}
+  itemData: {fileID: 11400000, guid: 3bd7451e15b2459ebf579dfffde806e6, type: 2}
   description: Build to block enemies until destroyed
   rotatedTiles:
   - {fileID: 11400000, guid: 3cb064f888c9c134db57af4c942b1af0, type: 2}

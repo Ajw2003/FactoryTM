@@ -75,6 +75,7 @@ namespace Buildings
     {
         public string buildingName;
         public Sprite icon; // New icon field
+        public ItemData itemData; // Inventory/hotbar identity for this building (specificItemType-based item system)
         [TextArea(3, 10)]
         public string description;
         public TileBase[] rotatedTiles; // 0:Right, 1:Down, 2:Left, 3:Up

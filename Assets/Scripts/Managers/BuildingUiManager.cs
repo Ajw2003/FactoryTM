@@ -135,7 +135,6 @@ namespace Managers
         {
             if (playerResources.ContainsKey(data))
             {
-                ResourcesToHotBar(data);
                 playerResources[data] += count;
                 playerResourcesByType[data.specificItemType] +=  count;
             }
@@ -143,46 +142,29 @@ namespace Managers
             {
                 playerResources[data] = count;
                 playerResourcesByType[data.specificItemType] = count;
-                Debug.Log(data.specificItemType);
-                ResourcesToHotBar(data);
             }
-    
+
+            ResourcesToHotBar(data, count);
             DiscoverResource(data);
-            
+
             if (TutorialManager.HasInstance)
             {
                 TutorialManager.Instance.UpdateObjectiveText();
             }
         }
 
-        public void ResourcesToHotBar(ItemData itemData)
+        /// <summary>Adds `amount` of `itemData` into the first hotbar slot that already holds
+        /// that type, or the first empty slot if none does. Shared entry point for both mined
+        /// resources (AddResource) and purchased buildings (see UpgradeShopItem/UiItemButton).</summary>
+        public void ResourcesToHotBar(ItemData itemData, int amount = 1)
         {
             foreach (var slot in HotbarUI.Instance.slots)
             {
-                if (slot._itemData == null)
+                if (slot.TryAdd(itemData, amount))
                 {
-                    var temp = new GameObject ("DragVisual", typeof(Item), typeof(Image));
-                    var tempItem = temp.GetComponent<Item>();
-                    tempItem.itemData = itemData;
-                    tempItem.created = true;
-                    tempItem.Initalize();
-                    slot.FillSlot(tempItem);
-                    Debug.Log("AddingNewItem");
                     break;
-                }
-                else if (slot._itemData.specificItemType == itemData.specificItemType)
-                {
-                    slot.IncreaseCount();
-                    Debug.Log("increasingCount");
-                    break;
-                    
-                }
-                else
-                {
-                    Debug.Log(itemData);
                 }
             }
-
         }
         #endregion
     

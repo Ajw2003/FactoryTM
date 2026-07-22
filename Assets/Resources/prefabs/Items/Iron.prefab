@@ -107,7 +107,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Item
   moveSpeed: 2
   value: 0.4
-  resourceType: 2
+  itemType: 9
+  _itemData: {fileID: 11400000, guid: f617f46d4a79d2f4ca46f51db9478be8, type: 2}
 --- !u!61 &5872557316613315578
 BoxCollider2D:
   m_ObjectHideFlags: 0

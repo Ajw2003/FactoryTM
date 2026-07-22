@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e869d0035a32a9446b15170a35bae304, type: 3}
-  m_Name: Miner
+  m_Name: FurnaceItemData
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  sprite: {fileID: -798344355, guid: 31a78c5981fef90459292a25990a5c4d, type: 3}
-  itemName: Miner
-  itemDescription: Mines ore
-  specificItemType: 0
+  sprite: {fileID: 21300000, guid: 73301d512a0ba1046a26d720934e9186, type: 3}
+  itemName: Furnace
+  itemDescription: Cooks ore into plates
+  specificItemType: 3
