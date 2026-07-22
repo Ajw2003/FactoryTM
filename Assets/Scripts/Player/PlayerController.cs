@@ -196,7 +196,7 @@ public class PlayerController : MonoBehaviour, IHealth
                 Vector3 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 pos.z = 0;
                 FloatingTextSettings settings = Resources.Load<FloatingTextSettings>("FloatingTextSettings/PlayerPickupSettings");
-                FloatingTextManager.Instance.Spawn("+1 " + rType.ToString().ToUpper(), pos, settings);
+                FloatingTextManager.Instance.Spawn("+1 " + rType.itemName.ToUpper(), pos, settings);
                 return;
             }
         }

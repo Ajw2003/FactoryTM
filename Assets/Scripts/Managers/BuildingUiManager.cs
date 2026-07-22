@@ -104,7 +104,7 @@ namespace Managers
             {
                 if (UiManager.HasInstance)
                 {
-                    UiManager.Instance.ShowGeneralAlert($"NEW RESOURCE IDENTIFIED: {type.ToString().ToUpper()}", new Color(0.2f, 1f, 1f));
+                    UiManager.Instance.ShowGeneralAlert($"NEW RESOURCE IDENTIFIED: {type.itemName.ToUpper()}", new Color(0.2f, 1f, 1f));
                 }
             }
         }
