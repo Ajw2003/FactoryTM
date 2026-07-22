@@ -8,18 +8,6 @@ using EventTypes.InventoryEvents;
 using EventTypes.InputEvents;
 using UnityEngine;
 
-public enum ResourceType
-{
-    Copper,
-    Ston,
-    Iron,
-    Diamond,
-    Coal,
-    Titanium,
-    Uranium,
-    Quartz
-    
-}
 
 public class ConveyorItem : MonoBehaviour
 {
@@ -27,7 +15,7 @@ public class ConveyorItem : MonoBehaviour
     private Vector2Int currentCell;
     public float moveSpeed = 2f;
     public float value = 10f;
-    public ResourceType resourceType;
+    public specificItemType itemType;
     public ItemData _itemData;
 
     public bool IsMoving { get; private set; }
@@ -44,7 +32,7 @@ public class ConveyorItem : MonoBehaviour
     {
         if (!isInitialized)
         {
-            resourceType = _itemData.resourceType;
+            itemType = _itemData.specificItemType;
             var center = GridManager.Instance.center;
             currentCell = GridManager.Instance.WorldToCellConversion(center);
             transform.position = GridManager.Instance.CellToWorldConversion(currentCell);

@@ -49,7 +49,7 @@ namespace Placeables
             return incomingDirection == GetFacingDirection();
         }
     
-        private ResourceType lastProcessedResourceType = (ResourceType)(-1);
+        private specificItemType lastProcessedResourceType = (specificItemType)(-1);
         private HashSet<ConveyorItem> itemsInProcess = new HashSet<ConveyorItem>();
     
         private void Update()
@@ -117,7 +117,7 @@ namespace Placeables
             }
     
             // Only find the plate prefab if it's null or the resource type changed
-            if (platePrefab == null || item.resourceType != lastProcessedResourceType)
+            if (platePrefab == null || item.itemType != lastProcessedResourceType)
             {
                 string prefix = GameManager.GetPrefix(item.name);
     
@@ -127,7 +127,7 @@ namespace Placeables
                 if (prefabGo != null)
                 {
                     platePrefab = prefabGo.GetComponent<ConveyorItem>();
-                    lastProcessedResourceType = item.resourceType;
+                    lastProcessedResourceType = item.itemType;
                 }
                 else
                 {

@@ -15,5 +15,4 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 7fcbce09a4ecbf44f82df24163e04ac8, type: 3}
   itemName: Copper
   itemDescription: A softer metal
-  itemType: 0
-  resourceType: 0
+  specificItemType: 7

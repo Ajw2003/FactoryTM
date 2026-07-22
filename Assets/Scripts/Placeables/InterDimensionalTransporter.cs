@@ -24,7 +24,7 @@ namespace Placeables
     
         public static InterDimensionalTransporter Instance { get; private set; }
     
-        public delegate void FuelAddedAction(ResourceType type);
+        public delegate void FuelAddedAction(specificItemType type);
         public event FuelAddedAction OnFuelAdded;
     
         public delegate void ItemSoldAction(ConveyorItem item);
@@ -98,22 +98,22 @@ namespace Placeables
     
                 if (!item.IsMoving)
                 {
-                    if (item.resourceType == ResourceType.Coal)
+                    if (item.itemType == specificItemType.Coal)
                     {
                         fuelRemaining = Mathf.Min(maxFuel, fuelRemaining + 20f);
-                        OnFuelAdded?.Invoke(ResourceType.Coal);
+                        OnFuelAdded?.Invoke(specificItemType.Coal);
                         if (UiManager.HasInstance)
                         {
                             UiManager.Instance.ShowGeneralAlert("IDT FUELED: COAL (+20s)", new Color(0.3f, 0.9f, 0.3f));
                         }
                         ObjectPoolManager.Instance.ReturnToPool(item.gameObject);
                     }
-                    else if (item.resourceType == ResourceType.Uranium)
+                    else if (item.itemType == specificItemType.Uranium)
                     {
                         fuelRemaining = Mathf.Min(maxFuel, fuelRemaining + 60f);
                         isUraniumBoosted = true;
                         uraniumBoostDuration = 30f;
-                        OnFuelAdded?.Invoke(ResourceType.Uranium);
+                        OnFuelAdded?.Invoke(specificItemType.Uranium);
                         if (UiManager.HasInstance)
                         {
                             UiManager.Instance.ShowGeneralAlert("IDT BOOSTED: URANIUM (+60s, 2X OUTPUT)", new Color(0.3f, 1f, 1f));

@@ -15,5 +15,4 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 7c169e9dc50692348a0ff6ad9c6d9b4b, type: 3}
   itemName: Iron
   itemDescription: a hard as metal man
-  itemType: 0
-  resourceType: 2
+  specificItemType: 9

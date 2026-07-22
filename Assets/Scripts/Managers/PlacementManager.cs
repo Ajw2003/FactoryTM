@@ -159,7 +159,7 @@ namespace Managers
                                 ConveyorItem item = itemsInCell[i];
                                 if (item != null)
                                 {
-                                    ResourceType rType = item.resourceType;
+                                    ItemData rType = item._itemData;
                                     if (BuildingUiManager.Instance != null)
                                     {
                                         BuildingUiManager.Instance.AddResource(rType, 1);
@@ -188,7 +188,6 @@ namespace Managers
                 switch (activeBuilding.type)
                 {
                     case (BuildingType.Chest):
-                        buildingObj = SpawnChestLogic(cell);
                         break;
                     case (BuildingType.Conveyor):
                         buildingObj = SpawnBeltLogic(cell);
@@ -446,17 +445,6 @@ namespace Managers
             interDimensionalTransporter.Setup(activeBuilding, cell, rotationIndex);
             activeBuildings.Add(cell, sellerObj);
             return sellerObj;
-        }
-
-        GameObject SpawnChestLogic(Vector2Int cell)
-        {
-            PlacementVersion++;
-            GameObject chestObj = new GameObject("Chest_Logic_" + cell);
-            chestObj.transform.position = GridManager.Instance.CellToWorldConversion(cell);
-            Chest logic = chestObj.AddComponent<Chest>();
-            logic.Setup(activeBuilding, cell, rotationIndex);
-            activeBuildings.Add(cell, chestObj);
-            return chestObj;
         }
     
         GameObject SpawnBeltLogic(Vector2Int cell)

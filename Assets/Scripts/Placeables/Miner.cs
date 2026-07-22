@@ -126,7 +126,7 @@ namespace Placeables
                 for (int i = items.Count - 1; i >= 0; i--)
                 {
                     ConveyorItem item = items[i];
-                    if (item != null && !item.IsMoving && item.resourceType == ResourceType.Coal)
+                    if (item != null && !item.IsMoving && item.itemType == specificItemType.Coal)
                     {
                         fuelRemaining = Mathf.Min(maxFuel, fuelRemaining + FuelPerCoal);
                         ObjectPoolManager.Instance.ReturnToPool(item.gameObject);
@@ -156,7 +156,7 @@ namespace Placeables
             ConveyorItem itemComp = newItem.GetComponent<ConveyorItem>();
             if (itemComp != null && !isEnemyOwned && BuildingUiManager.Instance != null)
             {
-                BuildingUiManager.Instance.DiscoverResource(itemComp.resourceType);
+                BuildingUiManager.Instance.DiscoverResource(itemComp._itemData);
             }
             if (itemComp != null)
             {

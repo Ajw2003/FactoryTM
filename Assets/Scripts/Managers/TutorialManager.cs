@@ -224,24 +224,6 @@ namespace Managers
                 DayNightManager.Instance.isTutorialActive = true;
             }
     
-            // Wipe starting items and resources
-            if (InventoryManager.Instance != null)
-            {
-                InventoryManager.Instance.items.Clear();
-            }
-    
-            if (BuildingUiManager.Instance != null)
-            {
-                foreach (ResourceType r in System.Enum.GetValues(typeof(ResourceType)))
-                {
-                    int count = BuildingUiManager.Instance.GetResourceCount(r);
-                    if (count > 0)
-                    {
-                        BuildingUiManager.Instance.RemoveResource(r, count);
-                    }
-                }
-            }
-    
             // Set player money to $0
             if (CurrencyManager.Instance != null)
             {
@@ -375,9 +357,9 @@ namespace Managers
             }
         }
     
-        public void HandleFuelAdded(ResourceType type)
+        public void HandleFuelAdded(specificItemType type)
         {
-            if (currentState == TutorialState.FuelDCT && type == ResourceType.Coal)
+            if (currentState == TutorialState.FuelDCT && type == specificItemType.Coal)
             {
                 coalFedCount++;
                 UpdateObjectiveText();
@@ -602,7 +584,7 @@ namespace Managers
             switch (state)
             {
                 case TutorialState.MineCoalManually:
-                    int coalCount = isInitial ? 0 : (BuildingUiManager.Instance != null ? BuildingUiManager.Instance.GetResourceCount(ResourceType.Coal) : 0);
+                    int coalCount = isInitial ? 0 : (BuildingUiManager.Instance != null ? BuildingUiManager.Instance.GetResourceCount(specificItemType.Coal) : 0);
                     return string.Format(template, coalCount);
     
                 case TutorialState.FuelDCT:
@@ -829,7 +811,7 @@ namespace Managers
                     break;
     
                 case TutorialState.MineCoalManually:
-                    int coalCount = BuildingUiManager.Instance != null ? BuildingUiManager.Instance.GetResourceCount(ResourceType.Coal) : 0;
+                    int coalCount = BuildingUiManager.Instance != null ? BuildingUiManager.Instance.GetResourceCount(specificItemType.Coal) : 0;
                     objectiveTexts[0].text = coalCount >= 5 ? $"[x] Mine Coal ({coalCount}/5)" : $"[ ] Mine Coal ({coalCount}/5)";
                     break;
     
