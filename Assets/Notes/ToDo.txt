@@ -38,6 +38,8 @@
 - [ ] Add difficulty settings.
 - [ ] Add achievements.
 - [ ] Add random weapon modifiers and build weapons like noita 
+-BElT SPLITTERS
+-belts with multiple tracks for multiple items inline
 - add day night cycle where it gradually gets darker but ensuring everything still remains relatively visible until nightfall where night vis kicks in
 
 ## 🧹 Code Architecture & Cleanup
@@ -63,6 +65,23 @@ Make rendered items for dragging appear over top of existing ui elements
 make right-clicking grab all of the items in a slot and left-clicking only grab 1 at a time
 make grabbing an item from an inventory slot automatically pick up the item and allow dragging instantly instead of the current spawn then grab logic
 make buildings work with new item logic completely placing and adding to the new inventory slot based hotbar when purchased from the store
+
+
+Fix enemies being able to attack you from zones you don't own yet, make it so they cannot attack until crossing into your owned zones
+
+make mining ore use left or right click instead of e so you can have an easier time trying to open the store
+
+fix health not displaying and add damage flash to screen when you take damage and bigger effects when enemies are shot, blood, explosions, bullet holes ect
+
+fix ui elements all on left side distribute better across the screen but not blocking the view of the player.
+
+particles and anims for every building and every ore processed 
+
+sounds for every action by a player, building, ui element or npc
+
+ui to show how many health packs you have currently
+
+adding an item via input from a conveyor or building should increase the counter of the items inside the building as well i.e. coal fed by conveyor not getting added to the amount of coal inside the idt.
 
 
 
