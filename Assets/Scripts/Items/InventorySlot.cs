@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Items
 {
-    public class InventorySlot : MonoBehaviour,IPointerEnterHandler, IPointerExitHandler, IDragHandler, IBeginDragHandler, IEndDragHandler
+    public class InventorySlot : MonoBehaviour,IPointerEnterHandler, IPointerExitHandler, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerClickHandler
     { 
         Item _currentItem;
         private ItemData _itemData;
@@ -34,12 +34,13 @@ namespace Items
             _countText = Instantiate(textPrefab, _rectTransform);
             _countText.transform.SetParent(_rectTransform);
             _countText.rectTransform.anchoredPosition += textOffset + new Vector2(0, textSpacing);
+            EventManager.Instance.Subscribe(this, (CollisionItemExchangeEvent e) => CheckCollision(e.rectangle, e.item));
         }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
             //fix this currently causing any item placed bellow on the heirarchy to block the raycast that would allow this 
-            EventManager.Instance.Subscribe(this, (CollisionItemExchangeEvent e) => CheckCollision(e.rectangle, e.item));
+            
             //if slot filled fire event with slot item listed
             // if slot not filled fire event saying slot is empty
         }
@@ -97,7 +98,7 @@ namespace Items
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            EventManager.Instance.Unsubscribe<CollisionItemExchangeEvent>(this);
+            //EventManager.Instance.Unsubscribe<CollisionItemExchangeEvent>(this);
         }
 
         public void OnDrag(PointerEventData eventData)
@@ -106,6 +107,16 @@ namespace Items
         }
 
         public void OnBeginDrag(PointerEventData eventData)
+        {
+            
+        }
+
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
         {
             if (slotFilled)
             {
@@ -126,11 +137,6 @@ namespace Items
                     slotFilled = false;
                 }
             }
-        }
-
-        public void OnEndDrag(PointerEventData eventData)
-        {
-            
         }
     }
     
