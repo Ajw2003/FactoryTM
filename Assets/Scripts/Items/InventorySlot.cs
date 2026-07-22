@@ -133,8 +133,16 @@ namespace Items
                     DecreaseCount();
                     var temp = new GameObject ("DragVisual", typeof(Item), typeof(Image));
                     RectTransform rt = temp.GetComponent<RectTransform>();
-                    rt.SetParent(CanvasSingleton.Instance.transform, false);
-                    rt.anchoredPosition = _rectTransform.anchoredPosition;
+                    if (this.GetComponentInParent<HorizontalLayoutGroup>())
+                    {
+                        rt.SetParent(_rectTransform, worldPositionStays: false);
+                        rt.localPosition = Vector3.zero;
+                    }
+                    else
+                    {
+                        rt.SetParent(CanvasSingleton.Instance.transform, true);
+                        rt.anchoredPosition = _rectTransform.anchoredPosition;
+                    }
                     Item tempItem = temp.GetComponent<Item>();
                     tempItem.itemData = _itemData;
                     tempItem.created = true;
