@@ -7,11 +7,9 @@ using UnityEngine.UI;
 
 namespace Items
 {
-    public class InventorySlot : MonoBehaviour,IPointerEnterHandler, IPointerExitHandler, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerClickHandler
-    { 
-        Item _currentItem;
+    public class InventorySlot : MonoBehaviour,IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IDragHandler, IEndDragHandler
+    {
         public ItemData _itemData;
-        private Item _tempItem;
         public int itemCount;
         public Image _image;
         public bool slotFilled;
@@ -22,12 +20,16 @@ namespace Items
         private TMP_Text _nameText;
         private TMP_Text _countText;
 
+        public event Action<InventorySlot> OnSlotChanged;
+        public event Action<InventorySlot> OnSlotHovered;
+        public event Action<InventorySlot> OnSlotUnhovered;
+
         private void Start()
         {
             _image = GetComponent<Image>();
             _rectTransform = GetComponent<RectTransform>();
             var textOffset = textSpawnOffset;
-    
+
             _nameText = Instantiate(textPrefab, _rectTransform);
             _nameText.transform.SetParent(_rectTransform);
             _nameText.rectTransform.anchoredPosition += textOffset;
@@ -39,138 +41,110 @@ namespace Items
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            //fix this currently causing any item placed bellow on the heirarchy to block the raycast that would allow this 
-            
-            //if slot filled fire event with slot item listed
-            // if slot not filled fire event saying slot is empty
+            OnSlotHovered?.Invoke(this);
         }
 
-        public void SpawnItem()
+        public void OnPointerExit(PointerEventData eventData)
         {
-            //instantiate new item if slot filled and decrement item count, if last item set count to 0 and slot filled to false
+            OnSlotUnhovered?.Invoke(this);
         }
-        
-        
+
         public Rectangle2D GetBoundingBox()
         {
             float angleRadians = transform.eulerAngles.z * Mathf.Deg2Rad;
             return TwoDCollision.CreateFromRotated(_rectTransform.position.x, _rectTransform.position.y, _rectTransform.sizeDelta.x, _rectTransform.sizeDelta.y, angleRadians);
         }
 
-        public void IncreaseCount()
+        /// <summary>Adds `amount` of `data` to this slot if it's empty or already holds the same specificItemType. Returns whether the add happened.</summary>
+        public bool TryAdd(ItemData data, int amount)
         {
-            itemCount++;
+            if (data == null || amount <= 0) return false;
+            if (slotFilled && _itemData.specificItemType != data.specificItemType) return false;
+
+            if (!slotFilled)
+            {
+                slotFilled = true;
+                _itemData = data;
+                _image.sprite = data.sprite;
+                _nameText.text = data.itemName;
+            }
+
+            itemCount += amount;
             _countText.text = itemCount.ToString();
+            OnSlotChanged?.Invoke(this);
+            return true;
         }
 
-        private void DecreaseCount()
+        /// <summary>Removes up to `amount` from this slot, clearing it if it hits 0. Returns how much was actually removed.</summary>
+        public int TryRemove(int amount)
         {
-            itemCount--;
+            if (!slotFilled || amount <= 0) return 0;
+
+            int removed = Mathf.Min(amount, itemCount);
+            itemCount -= removed;
             _countText.text = itemCount.ToString();
+
             if (itemCount <= 0)
             {
-                slotFilled = false;
-                _currentItem = null;
-                _image.sprite = null;
-                _nameText.text = "";
-                _countText.text = "";
+                Clear();
             }
+            else
+            {
+                OnSlotChanged?.Invoke(this);
+            }
+
+            return removed;
         }
-        
-        
+
+        public void Clear()
+        {
+            slotFilled = false;
+            _itemData = null;
+            itemCount = 0;
+            _image.sprite = null;
+            _nameText.text = "";
+            _countText.text = "";
+            OnSlotChanged?.Invoke(this);
+        }
+
         public void CheckCollision(Rectangle2D itemBox, Item item)
         {
-            Debug.Log(item.itemData.itemName);
-
             Rectangle2D boundingBox = GetBoundingBox();
-            
+
             if (Rectangle2D.CheckCollision(boundingBox, itemBox))
             {
-                if (slotFilled)
+                if (TryAdd(item.itemData, item.carriedCount))
                 {
-                    if (item._itemType == _currentItem._itemType) { IncreaseCount(); Destroy(item.gameObject); }
-                    else item.ResetPosition();
-                }
-                else
-                {
-                    FillSlot(item);
+                    item.MarkClaimed();
                 }
             }
         }
 
-        public void FillSlot(Item item)
+        /// <summary>Grabs this slot's contents instantly on press - left click takes 1, right click
+        /// takes the whole stack - and hands it to the always-on-top DragLayer cursor to follow the
+        /// mouse from this exact frame, no separate drag-start step required.</summary>
+        public void OnPointerDown(PointerEventData eventData)
         {
-            slotFilled = true;
-            _currentItem = item;
-            IncreaseCount();
-            _itemData = item.itemData;
-            _nameText.text = item.itemName;
-            _image.sprite = item.itemData.sprite;
-            Destroy(item.gameObject);
-        }
+            if (!slotFilled) return;
 
-        public void FillSlotItemData(ItemData itemData)
-        {
-            slotFilled = true;
-            _itemData = itemData;
-            IncreaseCount();
-        }
+            int requested = eventData.button == PointerEventData.InputButton.Right ? itemCount : 1;
+            ItemData grabbedData = _itemData;
+            int removed = TryRemove(requested);
+            if (removed <= 0) return;
 
-        public void OnPointerExit(PointerEventData eventData)
-        {
-            //EventManager.Instance.Unsubscribe<CollisionItemExchangeEvent>(this);
+            DragLayer.Instance.BeginDrag(grabbedData, removed, this, eventData.position);
         }
 
         public void OnDrag(PointerEventData eventData)
         {
-            
-        }
-
-        public void OnBeginDrag(PointerEventData eventData)
-        {
-            
+            DragLayer.Instance.UpdateDrag(eventData.position);
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            
-        }
-
-        public void OnPointerClick(PointerEventData eventData)
-        {
-            if (slotFilled)
-            {
-                if (itemCount > 0)
-                {
-                    DecreaseCount();
-                    var temp = new GameObject ("DragVisual", typeof(Item), typeof(Image));
-                    RectTransform rt = temp.GetComponent<RectTransform>();
-                    if (this.GetComponentInParent<HorizontalLayoutGroup>())
-                    {
-                        rt.SetParent(_rectTransform, worldPositionStays: false);
-                        rt.localPosition = Vector3.zero;
-                    }
-                    else
-                    {
-                        rt.SetParent(CanvasSingleton.Instance.transform, true);
-                        rt.anchoredPosition = _rectTransform.anchoredPosition;
-                    }
-                    Item tempItem = temp.GetComponent<Item>();
-                    tempItem.itemData = _itemData;
-                    tempItem.created = true;
-                    tempItem.Initalize();
-                }
-                else
-                {
-                    slotFilled = false;
-                    _currentItem = null;
-                    _image.sprite = null;
-                    _nameText.text = "";
-                    
-                }
-            }
+            DragLayer.Instance.EndDrag();
         }
     }
-    
-   
+
+
 }

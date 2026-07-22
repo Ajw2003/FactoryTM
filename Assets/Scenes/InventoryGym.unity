@@ -382,9 +382,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Items.InvetoryItem
   itemData: {fileID: 11400000, guid: 4e445480e68857843b2ca2ab276138d5, type: 2}
   created: 0
-  itemName: 
-  description: 
-  resourceType: 0
+  itemName:
+  description:
 --- !u!114 &368634405
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -475,9 +474,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Items.InvetoryItem
   itemData: {fileID: 11400000, guid: f617f46d4a79d2f4ca46f51db9478be8, type: 2}
   created: 0
-  itemName: 
-  description: 
-  resourceType: 0
+  itemName:
+  description:
 --- !u!114 &972600339
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -805,9 +803,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Items.InvetoryItem
   itemData: {fileID: 11400000, guid: 4e445480e68857843b2ca2ab276138d5, type: 2}
   created: 0
-  itemName: 
-  description: 
-  resourceType: 0
+  itemName:
+  description:
 --- !u!114 &1463219382
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -932,9 +929,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Items.InvetoryItem
   itemData: {fileID: 11400000, guid: f617f46d4a79d2f4ca46f51db9478be8, type: 2}
   created: 0
-  itemName: 
-  description: 
-  resourceType: 0
+  itemName:
+  description:
 --- !u!114 &1622593590
 MonoBehaviour:
   m_ObjectHideFlags: 0

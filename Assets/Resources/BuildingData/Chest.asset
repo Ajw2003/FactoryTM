@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Buildings.BuildingData
   buildingName: Chest
   icon: {fileID: 21300000, guid: 30b5e609e69c49548b615c83ccb0a995, type: 3}
+  itemData: {fileID: 11400000, guid: 0e275b9f9516451398749679d9fc2668, type: 2}
   description: Stores items from its input side and releases them from its output side, directly opposite. PLACEHOLDER ART - reuses the Wall sprite until real Chest art is authored.
   rotatedTiles:
   - {fileID: 11400000, guid: 3cb064f888c9c134db57af4c942b1af0, type: 2}
