@@ -33,6 +33,11 @@ namespace Items
 
         private bool _claimed;
 
+        /// <summary>True once some InventorySlot has already accepted this drop this cycle - checked
+        /// by other overlapping slots so a drop landing on the border between two slots isn't
+        /// double-counted into both.</summary>
+        public bool IsClaimed => _claimed;
+
         protected void Start()
         {
             if(created) return;

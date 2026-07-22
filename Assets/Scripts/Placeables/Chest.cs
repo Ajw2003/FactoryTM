@@ -34,9 +34,16 @@ namespace Placeables
 
             Vector2Int facing = GetFacingDirection();
             var outputEdges = GetEdgeCells(facing);
-            var inputEdges = GetEdgeCells(-facing);
             if (outputEdges.Count > 0) CreatePortIndicator(outputEdges[0], facing, facing, new Color(0.3f, 1f, 0.3f), "Output");
-            if (inputEdges.Count > 0) CreatePortIndicator(inputEdges[0], -facing, facing, new Color(0.3f, 0.8f, 1f), "Input");
+
+            // Input on the other 3 sides - only the facing (output) side is excluded.
+            Vector2Int[] allDirections = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+            foreach (var dir in allDirections)
+            {
+                if (dir == facing) continue;
+                var edgeCells = GetEdgeCells(dir);
+                if (edgeCells.Count > 0) CreatePortIndicator(edgeCells[0], dir, -dir, new Color(0.3f, 0.8f, 1f), "Input_" + dir);
+            }
 
             Slots = new InventorySlot[SlotCount];
             for (int i = 0; i < SlotCount; i++)
@@ -45,10 +52,10 @@ namespace Placeables
             }
         }
 
-        // Chests only accept items entering through their single input side, opposite the output.
+        // Chests accept items from any side except the one they output onto.
         public override bool CanAcceptInputFrom(Vector2Int incomingDirection)
         {
-            return incomingDirection == GetFacingDirection();
+            return incomingDirection != -GetFacingDirection();
         }
 
         public override void PerformAction()
