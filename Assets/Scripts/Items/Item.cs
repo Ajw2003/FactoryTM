@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using Code.Scripts.EventSystems;
 using TMPro;
 using UnityEngine;
@@ -12,6 +13,8 @@ namespace Items
     {
 
         public ItemData itemData;
+
+        public bool created;
     
         private Image _image;
 
@@ -27,14 +30,15 @@ namespace Items
 
         private Vector2 _startingTransform;
         
-        private TMP_Text _nameText;
-        private TMP_Text _descriptionText;
-        
         private Canvas parentCanvas;
 
-        private bool _canDrag;
-
         private void Start()
+        {
+            if(created) return;
+            Initalize();
+        }
+
+        public void Initalize()
         {
             _image = GetComponent<Image>();
             parentCanvas = gameObject.GetComponentInParent<Canvas>();
@@ -52,11 +56,6 @@ namespace Items
             }
         }
 
-        public void Update()
-        {
-            if(!_canDrag) return;
-        }
-
         public void ResetPosition()
         {
             _rectTransform.anchoredPosition = _startingTransform;
@@ -70,6 +69,7 @@ namespace Items
 
         public void CheckCollision()
         {
+            Debug.Log("colliding");
             Rectangle2D boundingBox = GetBoundingBox();
             EventManager.Instance.Publish(new CollisionItemExchangeEvent{ rectangle =  boundingBox, item = this});
         }
@@ -90,17 +90,12 @@ namespace Items
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            _canDrag = true;
+           
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
             CheckCollision();
-            _canDrag = false;
-            //check to see if collided with inventory slot
-            //if collided check to see if the slot is empty
-            //if empty add yourself to the slot 
-            //if full check item, if same increase count if not return.
         }
     }
 }
