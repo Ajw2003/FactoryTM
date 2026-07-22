@@ -376,6 +376,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Items.InvetoryItem
   itemData: {fileID: 11400000, guid: 4e445480e68857843b2ca2ab276138d5, type: 2}
+  created: 0
   itemName: 
   description: 
   resourceType: 0
@@ -468,6 +469,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Items.InvetoryItem
   itemData: {fileID: 11400000, guid: f617f46d4a79d2f4ca46f51db9478be8, type: 2}
+  created: 0
   itemName: 
   description: 
   resourceType: 0
@@ -521,6 +523,7 @@ GameObject:
   - component: {fileID: 1381575652}
   - component: {fileID: 1381575651}
   - component: {fileID: 1381575650}
+  - component: {fileID: 1381575654}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -557,10 +560,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -580,7 +583,7 @@ Canvas:
   m_RenderMode: 0
   m_Camera: {fileID: 0}
   m_PlaneDistance: 100
-  m_PixelPerfect: 0
+  m_PixelPerfect: 1
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
@@ -620,6 +623,20 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1381575654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1381575649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68bf77c662d60dc4ca39b7a8859ad19d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CanvasSingleton
+  persistBetweenScenes: 0
+  detachFromParent: 1
 --- !u!1 &1463219379
 GameObject:
   m_ObjectHideFlags: 0
@@ -671,6 +688,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Items.InvetoryItem
   itemData: {fileID: 11400000, guid: 4e445480e68857843b2ca2ab276138d5, type: 2}
+  created: 0
   itemName: 
   description: 
   resourceType: 0
@@ -763,6 +781,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Items.InvetoryItem
   itemData: {fileID: 11400000, guid: f617f46d4a79d2f4ca46f51db9478be8, type: 2}
+  created: 0
   itemName: 
   description: 
   resourceType: 0
@@ -1019,6 +1038,10 @@ PrefabInstance:
       propertyPath: itemData
       value: 
       objectReference: {fileID: 11400000, guid: 8f6e90ea29aa4ac4cbc6faadba590b7c, type: 2}
+    - target: {fileID: 5692895441724805309, guid: 9b46f38f8dad10a49a581c9505444f11, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6667044422123072913, guid: 9b46f38f8dad10a49a581c9505444f11, type: 3}
       propertyPath: m_Name
       value: InventoryItem (1)
@@ -1125,6 +1148,10 @@ PrefabInstance:
       propertyPath: itemData
       value: 
       objectReference: {fileID: 11400000, guid: 8f6e90ea29aa4ac4cbc6faadba590b7c, type: 2}
+    - target: {fileID: 5692895441724805309, guid: 9b46f38f8dad10a49a581c9505444f11, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6667044422123072913, guid: 9b46f38f8dad10a49a581c9505444f11, type: 3}
       propertyPath: m_Name
       value: InventoryItem (2)
@@ -1332,6 +1359,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1381575653}
     m_Modifications:
+    - target: {fileID: 5692895441724805309, guid: 9b46f38f8dad10a49a581c9505444f11, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6667044422123072913, guid: 9b46f38f8dad10a49a581c9505444f11, type: 3}
       propertyPath: m_Name
       value: InventoryItem

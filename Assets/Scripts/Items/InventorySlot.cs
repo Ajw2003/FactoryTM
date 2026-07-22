@@ -7,9 +7,11 @@ using UnityEngine.UI;
 
 namespace Items
 {
-    public class InventorySlot : MonoBehaviour,IPointerEnterHandler, IPointerExitHandler
-    {
+    public class InventorySlot : MonoBehaviour,IPointerEnterHandler, IPointerExitHandler, IDragHandler, IBeginDragHandler, IEndDragHandler
+    { 
         Item _currentItem;
+        private ItemData _itemData;
+        private Item _tempItem;
         public int itemCount;
         public Image _image;
         public bool slotFilled;
@@ -36,9 +38,15 @@ namespace Items
 
         public void OnPointerEnter(PointerEventData eventData)
         {
+            //fix this currently causing any item placed bellow on the heirarchy to block the raycast that would allow this 
             EventManager.Instance.Subscribe(this, (CollisionItemExchangeEvent e) => CheckCollision(e.rectangle, e.item));
             //if slot filled fire event with slot item listed
             // if slot not filled fire event saying slot is empty
+        }
+
+        public void SpawnItem()
+        {
+            //instantiate new item if slot filled and decrement item count, if last item set count to 0 and slot filled to false
         }
         
         
@@ -53,10 +61,17 @@ namespace Items
             itemCount++;
             _countText.text = itemCount.ToString();
         }
+
+        private void DecreaseCount()
+        {
+            itemCount--;
+            _countText.text = itemCount.ToString();
+        }
         
         
         public void CheckCollision(Rectangle2D itemBox, Item item)
         {
+            Debug.Log(item.itemData.itemName);
 
             Rectangle2D boundingBox = GetBoundingBox();
             
@@ -64,7 +79,7 @@ namespace Items
             {
                 if (slotFilled)
                 {
-                    if (item.resourceType == _currentItem.resourceType) { IncreaseCount(); Destroy(item.gameObject);}
+                    if (item.resourceType == _currentItem.resourceType) { IncreaseCount(); Destroy(item.gameObject); }
                     else item.ResetPosition();
                 }
                 else
@@ -72,6 +87,7 @@ namespace Items
                     slotFilled = true;
                     _currentItem = item;
                     IncreaseCount();
+                    _itemData = item.itemData;
                     _nameText.text = item.itemName;
                     _image.sprite = item.itemData.sprite;
                     Destroy(item.gameObject);
@@ -82,6 +98,39 @@ namespace Items
         public void OnPointerExit(PointerEventData eventData)
         {
             EventManager.Instance.Unsubscribe<CollisionItemExchangeEvent>(this);
+        }
+
+        public void OnDrag(PointerEventData eventData)
+        {
+            
+        }
+
+        public void OnBeginDrag(PointerEventData eventData)
+        {
+            if (slotFilled)
+            {
+                if (itemCount > 0)
+                {
+                    DecreaseCount();
+                    var temp = new GameObject ("DragVisual", typeof(Item), typeof(Image));
+                    RectTransform rt = temp.GetComponent<RectTransform>();
+                    rt.SetParent(CanvasSingleton.Instance.transform, false);
+                    rt.anchoredPosition = _rectTransform.anchoredPosition;
+                    Item tempItem = temp.GetComponent<Item>();
+                    tempItem.itemData = _itemData;
+                    tempItem.created = true;
+                    tempItem.Initalize();
+                }
+                else
+                {
+                    slotFilled = false;
+                }
+            }
+        }
+
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            
         }
     }
     
