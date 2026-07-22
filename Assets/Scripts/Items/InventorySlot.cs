@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Code.Scripts.EventSystems;
 using TMPro;
 using UnityEngine;
@@ -9,11 +10,20 @@ namespace Items
 {
     public class InventorySlot : MonoBehaviour,IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IDragHandler, IEndDragHandler
     {
+        // An Image with no sprite still renders as a solid block, so empty slots use a faint tint
+        // (matching the hotbar's own pre-authored ~20% alpha) rather than full opacity or full
+        // invisibility - visible enough to tell a slot is there, subtle enough not to look filled.
+        private static readonly Color EmptyColor = new Color(1f, 1f, 1f, 0.2f);
+
         public ItemData _itemData;
         public int itemCount;
         public Image _image;
         public bool slotFilled;
         private RectTransform _rectTransform;
+
+        /// <summary>When set, TryAdd rejects any ItemData whose specificItemType isn't in this set -
+        /// used for fuel-only slots (Coal/Uranium) on Furnace/Miner/IDT. Null means no restriction.</summary>
+        public HashSet<specificItemType> allowedTypes;
         [SerializeField] private TMP_Text textPrefab;
         [SerializeField] private Vector2 textSpawnOffset = new Vector2(0, 5);
         [SerializeField] private float textSpacing = 20f;
@@ -24,10 +34,15 @@ namespace Items
         public event Action<InventorySlot> OnSlotHovered;
         public event Action<InventorySlot> OnSlotUnhovered;
 
-        private void Start()
+        // Building-owned slots are created inactive (BuildingSlotFactory) and only ever activated
+        // later when their panel opens - Start() would never fire for them since Unity defers Start
+        // to the next frame and they're deactivated before that frame arrives. Awake() runs
+        // synchronously during Instantiate instead, so initialization always happens.
+        private void Awake()
         {
             _image = GetComponent<Image>();
             _rectTransform = GetComponent<RectTransform>();
+            _image.color = EmptyColor;
             var textOffset = textSpawnOffset;
 
             _nameText = Instantiate(textPrefab, _rectTransform);
@@ -37,6 +52,14 @@ namespace Items
             _countText.transform.SetParent(_rectTransform);
             _countText.rectTransform.anchoredPosition += textOffset + new Vector2(0, textSpacing);
             EventManager.Instance.Subscribe(this, (CollisionItemExchangeEvent e) => CheckCollision(e.rectangle, e.item));
+        }
+
+        private void OnDestroy()
+        {
+            if (EventManager.HasInstance)
+            {
+                EventManager.Instance.Unsubscribe<CollisionItemExchangeEvent>(this);
+            }
         }
 
         public void OnPointerEnter(PointerEventData eventData)
@@ -59,6 +82,7 @@ namespace Items
         public bool TryAdd(ItemData data, int amount)
         {
             if (data == null || amount <= 0) return false;
+            if (allowedTypes != null && !allowedTypes.Contains(data.specificItemType)) return false;
             if (slotFilled && _itemData.specificItemType != data.specificItemType) return false;
 
             if (!slotFilled)
@@ -66,6 +90,7 @@ namespace Items
                 slotFilled = true;
                 _itemData = data;
                 _image.sprite = data.sprite;
+                _image.color = Color.white;
                 _nameText.text = data.itemName;
             }
 
@@ -102,6 +127,7 @@ namespace Items
             _itemData = null;
             itemCount = 0;
             _image.sprite = null;
+            _image.color = EmptyColor;
             _nameText.text = "";
             _countText.text = "";
             OnSlotChanged?.Invoke(this);

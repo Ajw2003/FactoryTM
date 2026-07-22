@@ -224,6 +224,8 @@ public class PlayerController : MonoBehaviour, IHealth
         {
             if (building == null || building.isEnemyOwned) continue;
             if (building.data.type == Buildings.BuildingType.Conveyor) continue; // Exclude conveyors
+            if (building.data.type == Buildings.BuildingType.Wall) continue; // No configurable panel
+            if (building.data.type == Buildings.BuildingType.Turret) continue; // No configurable panel
 
             float minCellDist = float.MaxValue;
             foreach (var cell in building.occupiedCells)
