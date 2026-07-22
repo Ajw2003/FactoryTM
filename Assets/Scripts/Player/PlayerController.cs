@@ -40,7 +40,6 @@ public class PlayerController : MonoBehaviour, IHealth
     public enum PlayerMode { Combat, Building }
     [Header("Game Mode")]
     public PlayerMode currentMode = PlayerMode.Combat;
-    private HotbarUI hotbarUIInstance;
     public delegate void ModeChangedAction(PlayerMode mode);
     public event ModeChangedAction OnModeChanged;
     public event System.Action OnPlayerDodge;
@@ -107,13 +106,6 @@ public class PlayerController : MonoBehaviour, IHealth
         EventManager.Instance?.Subscribe(this, (PlayerOpenStoreEvent e) => OnOpenStoreInput());
 
         weapon = GetComponentInChildren<PlayerWeapon>();
-
-        // Cache HotbarUI and set to initial mode (Combat Mode = hidden hotbar)
-        hotbarUIInstance = FindFirstObjectByType<HotbarUI>();
-        if (hotbarUIInstance != null)
-        {
-            hotbarUIInstance.gameObject.SetActive(false);
-        }
 
         StateMachine.ChangeState(StateMachine.idleState);
     }
@@ -307,14 +299,6 @@ public class PlayerController : MonoBehaviour, IHealth
             {
                 PlacementManager.Instance.ChangeSelection(null);
             }
-            if (hotbarUIInstance == null)
-            {
-                hotbarUIInstance = FindFirstObjectByType<HotbarUI>();
-            }
-            if (hotbarUIInstance != null)
-            {
-                hotbarUIInstance.gameObject.SetActive(false);
-            }
 
             if (UiManager.HasInstance)
             {
@@ -323,15 +307,6 @@ public class PlayerController : MonoBehaviour, IHealth
         }
         else
         {
-            if (hotbarUIInstance == null)
-            {
-                hotbarUIInstance = FindFirstObjectByType<HotbarUI>();
-            }
-            if (hotbarUIInstance != null)
-            {
-                hotbarUIInstance.gameObject.SetActive(true);
-            }
-
             if (PlacementManager.Instance != null && HotbarManager.Instance != null)
             {
                 PlacementManager.Instance.ChangeSelection(HotbarManager.Instance.GetSelectedBuilding());
