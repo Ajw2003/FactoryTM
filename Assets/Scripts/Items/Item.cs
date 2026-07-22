@@ -77,11 +77,18 @@ namespace Items
         public void OnDrag(PointerEventData eventData)
         {
             Vector2 screenPoint = eventData.position;
-            RectTransform canvasRt = parentCanvas.transform as RectTransform;
-            if (canvasRt == null) return;
+
+            // Convert into the space of whatever this item is actually parented
+            // to right now (Canvas in the no-layout-group case, the InventorySlot
+            // when a HorizontalLayoutGroup put it there) instead of always assuming
+            // the Canvas. anchoredPosition is relative to the immediate parent, so
+            // using the wrong space here is what made dragging fly off/jitter when
+            // a layout group was involved.
+            RectTransform targetSpace = _rectTransform.parent as RectTransform;
+            if (targetSpace == null) return;
     
             Camera cam = (parentCanvas.renderMode == RenderMode.ScreenSpaceOverlay) ? null : Camera.main;
-            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRt, screenPoint, cam, out Vector2 localPoint))
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(targetSpace, screenPoint, cam, out Vector2 localPoint))
             {
                 _rectTransform.anchoredPosition = localPoint;
             }
