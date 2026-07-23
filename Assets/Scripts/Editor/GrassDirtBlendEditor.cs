@@ -72,7 +72,7 @@ public static class GrassDirtBlendEditor
         controller.blendTilemap = blendTilemap;
 
         controller.pieces.edgeVariantA = LoadPiece("GrassTopOuter 1");
-        controller.pieces.edgeVariantB = LoadPiece("GrassRightInner");
+        controller.pieces.edgeVariantB = LoadPiece("GrassTopOuter 1"); // GrassRightInner is unusable (see GrassDirtBlendPieces comment)
         controller.pieces.cornerInner = LoadPiece("GrassCornerInner");
         controller.pieces.cornerHalf = LoadPiece("GrassCornerHalf");
         controller.pieces.cornerFull = LoadPiece("GrassCornerFull");

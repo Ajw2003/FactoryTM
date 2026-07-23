@@ -10,9 +10,12 @@ namespace TerrainBlending
     {
         [Header("1 grass neighbor (straight edge) - alternates for variety")]
         public TileBase edgeVariantA; // GrassTopOuter 1 - art is canonically South-facing (content sits at the bottom of its canvas)
-        public TileBase edgeVariantB; // GrassRightInner - art is canonically West-facing (content sits at the left of its canvas)
+        // GrassRightInner turned out to be visually broken/mismatched for this use (no rotation offset fixed it),
+        // so edgeVariantB defaults to the same GrassTopOuter 1 asset as edgeVariantA. The alternation logic in
+        // PickEdge is harmless either way and left in place in case a real second variant shows up later.
+        public TileBase edgeVariantB;
         public int edgeVariantARotationOffset = 180;
-        public int edgeVariantBRotationOffset = -90;
+        public int edgeVariantBRotationOffset = 180;
 
         [Header("2 adjacent grass neighbors (concave corner)")]
         public TileBase cornerInner; // GrassCornerInner
