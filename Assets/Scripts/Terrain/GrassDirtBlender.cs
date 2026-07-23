@@ -9,10 +9,10 @@ namespace TerrainBlending
     public class GrassDirtBlendPieces
     {
         [Header("1 grass neighbor (straight edge) - alternates for variety")]
-        public TileBase edgeVariantA; // GrassTopOuter 1
-        public TileBase edgeVariantB; // GrassRightInner
-        public int edgeVariantARotationOffset;
-        public int edgeVariantBRotationOffset;
+        public TileBase edgeVariantA; // GrassTopOuter 1 - art is canonically South-facing (content sits at the bottom of its canvas)
+        public TileBase edgeVariantB; // GrassRightInner - art is canonically West-facing (content sits at the left of its canvas)
+        public int edgeVariantARotationOffset = 180;
+        public int edgeVariantBRotationOffset = -90;
 
         [Header("2 adjacent grass neighbors (concave corner)")]
         public TileBase cornerInner; // GrassCornerInner
