@@ -20,7 +20,7 @@ namespace TerrainBlending
 
         [Header("2 opposite grass neighbors (corridor)")]
         public TileBase cornerHalf; // GrassCornerHalf
-        public int cornerHalfRotationOffset;
+        public int cornerHalfRotationOffset = 180;
 
         [Header("3 grass neighbors (peninsula tip)")]
         public TileBase cornerFull; // GrassCornerFull
