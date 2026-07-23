@@ -83,11 +83,11 @@ ui to show how many health packs you have currently
 
 adding an item via input from a conveyor or building should increase the counter of the items inside the building as well i.e. coal fed by conveyor not getting added to the amount of coal inside the idt.
 
+Make grass and vegitation programatically disapear as you progress to show the world detiriorating as you strip the planet of resources.
 
+Figure out programatic grass and dirt distrobution with correct functionality to place blending tiles on the blend layers with the correct rotation. 
 
-
-
-
+there are 7 peices and each can be placed and rotated to orient in one of the 4 cardinal directions to correctly tile with similar functionality to rule tiles but that works with two tile maps 1 as the base and 1 for the blending peices to be overlayed programatically
 
 
 
