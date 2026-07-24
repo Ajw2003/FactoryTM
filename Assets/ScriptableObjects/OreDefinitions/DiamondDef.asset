@@ -17,4 +17,4 @@ MonoBehaviour:
   resourceNodePrefab: {fileID: 1405501195396039579, guid: 242f3d6c8d5b0974d9bfc503d0270f06, type: 3}
   spawnWeight: 0.2
   oreCount: 1000
-  oreGroundTile: {fileID: 11400000, guid: 759945e6b50ad5446a84d33cfe7e2554, type: 2}
+  oreGroundTile: {fileID: 11400000, guid: d2c6acf64cbea8544b72059c2ebcdbb1, type: 2}

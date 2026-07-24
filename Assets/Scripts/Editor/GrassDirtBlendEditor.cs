@@ -176,6 +176,72 @@ public static class GrassDirtBlendEditor
                   "after resource nodes have already spawned - safe to ignore for this test.");
     }
 
+    const string OreSpriteFolder = "Assets/Art/Sprites/Tiles/";
+    const string OreGroundTileFolder = "Assets/Art/Sprites/Tiles/OreGround/";
+
+    static readonly (string defPath, string spriteFileName, string tileName)[] OreGroundConfig =
+    {
+        ("Assets/ScriptableObjects/OreDefinitions/CoalDef.asset", "CoalOre-sheet.png", "CoalOreGround"),
+        ("Assets/ScriptableObjects/OreDefinitions/CopperDef.asset", "CopperOre.png", "CopperOreGround"),
+        ("Assets/ScriptableObjects/OreDefinitions/DiamondDef.asset", "DiamondOre.png", "DiamondOreGround"),
+        ("Assets/ScriptableObjects/OreDefinitions/IronDef.asset", "IronOre.png", "IronOreGround"),
+        ("Assets/ScriptableObjects/OreDefinitions/QuartzDef.asset", "QuartzcrystalShiny-sheet.png", "QuartzOreGround"),
+        ("Assets/ScriptableObjects/OreDefinitions/StoneDef.asset", "Stone.png", "StoneOreGround"),
+        ("Assets/ScriptableObjects/OreDefinitions/TitaniumDef.asset", "TitaniumOre.png", "TitaniumOreGround"),
+        ("Assets/ScriptableObjects/OreDefinitions/UraniumDef.asset", "UraniumOre.png", "UraniumOreGround"),
+    };
+
+    // Replaces the shared DirtWithRock placeholder with each ore type's own ground sprite
+    // (all confirmed 32x32, fully opaque - already shaped like proper ground tiles, not icons).
+    // Creates one Tile asset per ore under Assets/Art/Sprites/Tiles/OreGround/ if it doesn't
+    // already exist, then re-points every ResourceNodeDefinition at its own tile. Safe to re-run.
+    [MenuItem("Tools/Terrain/Use Real Ore Ground Tiles")]
+    public static void UseRealOreGroundTiles()
+    {
+        if (!AssetDatabase.IsValidFolder(OreGroundTileFolder))
+        {
+            AssetDatabase.CreateFolder("Assets/Art/Sprites/Tiles", "OreGround");
+        }
+
+        foreach (var (defPath, spriteFileName, tileName) in OreGroundConfig)
+        {
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>($"{OreSpriteFolder}{spriteFileName}");
+            if (sprite == null)
+            {
+                Debug.LogError($"GrassDirtBlendEditor: couldn't load sprite {OreSpriteFolder}{spriteFileName}");
+                continue;
+            }
+
+            string tileAssetPath = $"{OreGroundTileFolder}{tileName}.asset";
+            Tile tile = AssetDatabase.LoadAssetAtPath<Tile>(tileAssetPath);
+            if (tile == null)
+            {
+                tile = ScriptableObject.CreateInstance<Tile>();
+                tile.sprite = sprite;
+                tile.color = Color.white;
+                tile.colliderType = Tile.ColliderType.Sprite;
+                AssetDatabase.CreateAsset(tile, tileAssetPath);
+            }
+            else if (tile.sprite != sprite)
+            {
+                tile.sprite = sprite;
+                EditorUtility.SetDirty(tile);
+            }
+
+            ResourceNodeDefinition def = AssetDatabase.LoadAssetAtPath<ResourceNodeDefinition>(defPath);
+            if (def == null)
+            {
+                Debug.LogWarning($"GrassDirtBlendEditor: couldn't load {defPath}");
+                continue;
+            }
+            def.oreGroundTile = tile;
+            EditorUtility.SetDirty(def);
+        }
+
+        AssetDatabase.SaveAssets();
+        Debug.Log("GrassDirtBlendEditor: assigned real per-ore ground tiles. Re-enter Play Mode to see them.");
+    }
+
     static Tilemap FindOrCreateOreTilemap(GameObject gridGO, GameObject blendGO)
     {
         Transform existing = gridGO.transform.Find("Ore");
