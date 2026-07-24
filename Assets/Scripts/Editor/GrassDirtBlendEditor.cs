@@ -93,4 +93,106 @@ public static class GrassDirtBlendEditor
         }
         return tile;
     }
+
+    const string GameManagerPrefabPath = "Assets/Resources/prefabs/Managers/Gamemanager.prefab";
+    const string PlaceholderOreGroundTile = "Assets/Art/Sprites/BlendTileExports/DirtWithRock.asset";
+
+    static readonly string[] OreDefinitionPaths =
+    {
+        "Assets/ScriptableObjects/OreDefinitions/CoalDef.asset",
+        "Assets/ScriptableObjects/OreDefinitions/CopperDef.asset",
+        "Assets/ScriptableObjects/OreDefinitions/DiamondDef.asset",
+        "Assets/ScriptableObjects/OreDefinitions/IronDef.asset",
+        "Assets/ScriptableObjects/OreDefinitions/QuartzDef.asset",
+        "Assets/ScriptableObjects/OreDefinitions/StoneDef.asset",
+        "Assets/ScriptableObjects/OreDefinitions/TitaniumDef.asset",
+        "Assets/ScriptableObjects/OreDefinitions/UraniumDef.asset",
+    };
+
+    // Adds an "ores"-sorting-layer Ore tilemap next to Grass/Blending, brings a GameManager into
+    // RuleTileGym (so its normal ore-spawning path runs here) and wired to the new tilemap, and
+    // gives every ResourceNodeDefinition a placeholder ground tile (DirtWithRock) so ore is visible
+    // immediately - swap in real per-ore art later. Ore only actually spawns in Play Mode, since
+    // that's when GameManager.Start() runs. Safe to run more than once.
+    [MenuItem("Tools/Terrain/Wire Up Ore Spawning (RuleTileGym)")]
+    public static void WireUpOreSpawning()
+    {
+        Scene scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+
+        GameObject gridGO = GameObject.Find("LevelPrefab/Grid");
+        GameObject blendGO = GameObject.Find("LevelPrefab/Grid/Blending");
+        if (gridGO == null || blendGO == null)
+        {
+            Debug.LogError("GrassDirtBlendEditor: couldn't find LevelPrefab/Grid or LevelPrefab/Grid/Blending in RuleTileGym.");
+            return;
+        }
+
+        Tilemap oreTilemap = FindOrCreateOreTilemap(gridGO, blendGO);
+
+        GameManager gameManager = Object.FindFirstObjectByType<GameManager>();
+        if (gameManager == null)
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(GameManagerPrefabPath);
+            if (prefab == null)
+            {
+                Debug.LogError($"GrassDirtBlendEditor: couldn't load {GameManagerPrefabPath}");
+                return;
+            }
+            GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, scene);
+            gameManager = instance.GetComponent<GameManager>();
+        }
+        gameManager.OreTileMap = oreTilemap;
+        EditorUtility.SetDirty(gameManager);
+
+        TileBase placeholder = AssetDatabase.LoadAssetAtPath<TileBase>(PlaceholderOreGroundTile);
+        if (placeholder == null)
+        {
+            Debug.LogError($"GrassDirtBlendEditor: couldn't load {PlaceholderOreGroundTile}");
+        }
+        else
+        {
+            foreach (string path in OreDefinitionPaths)
+            {
+                ResourceNodeDefinition def = AssetDatabase.LoadAssetAtPath<ResourceNodeDefinition>(path);
+                if (def == null)
+                {
+                    Debug.LogWarning($"GrassDirtBlendEditor: couldn't load {path}");
+                    continue;
+                }
+                if (def.oreGroundTile == null)
+                {
+                    def.oreGroundTile = placeholder;
+                    EditorUtility.SetDirty(def);
+                }
+            }
+            AssetDatabase.SaveAssets();
+        }
+
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+
+        Debug.Log("GrassDirtBlendEditor: wired up ore spawning in RuleTileGym. Ore only spawns in Play Mode (GameManager.Start()). " +
+                  "Note: RuleTileGym has no PlayerController, so GameManager.Start() will log a harmless NullReferenceException " +
+                  "after resource nodes have already spawned - safe to ignore for this test.");
+    }
+
+    static Tilemap FindOrCreateOreTilemap(GameObject gridGO, GameObject blendGO)
+    {
+        Transform existing = gridGO.transform.Find("Ore");
+        if (existing != null)
+        {
+            return existing.GetComponent<Tilemap>();
+        }
+
+        GameObject oreGO = new GameObject("Ore", typeof(Tilemap), typeof(TilemapRenderer));
+        oreGO.transform.SetParent(gridGO.transform, false);
+
+        TilemapRenderer blendRenderer = blendGO.GetComponent<TilemapRenderer>();
+        TilemapRenderer oreRenderer = oreGO.GetComponent<TilemapRenderer>();
+        oreRenderer.sharedMaterial = blendRenderer.sharedMaterial;
+        oreRenderer.sortingLayerName = "ores";
+        oreRenderer.sortingOrder = 0;
+
+        return oreGO.GetComponent<Tilemap>();
+    }
 }

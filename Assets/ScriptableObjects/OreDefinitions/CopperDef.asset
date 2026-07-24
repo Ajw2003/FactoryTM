@@ -16,3 +16,5 @@ MonoBehaviour:
   miningSpeed: 1
   resourceNodePrefab: {fileID: 8600219209846783826, guid: 084203acd554b7e40a4222ffbb270344, type: 3}
   spawnWeight: 0.75
+  oreCount: 1000
+  oreGroundTile: {fileID: 11400000, guid: 759945e6b50ad5446a84d33cfe7e2554, type: 2}

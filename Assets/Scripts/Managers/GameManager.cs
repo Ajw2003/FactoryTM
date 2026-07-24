@@ -29,6 +29,7 @@ namespace Managers
         public BuildingData[] allBuildings;
         public Tilemap MainTileMap;
         public Tilemap BuildingTileMap;
+        public Tilemap OreTileMap; // Ground tile painted under a spawned ResourceNode, see ResourceNode.Setup
         public TileBase sellerTile;
         public bool finiteOres;
     
@@ -505,7 +506,7 @@ namespace Managers
             ResourceNode resourceNode = nodeGO.GetComponent<ResourceNode>();
             if (resourceNode != null)
             {
-                resourceNode.Setup(cell);
+                resourceNode.Setup(cell, definition.oreGroundTile);
                 // Assign properties from definition
                 resourceNode.minedItemPrefab = definition.minedItemPrefab;
                 resourceNode.miningSpeed = definition.miningSpeed;
