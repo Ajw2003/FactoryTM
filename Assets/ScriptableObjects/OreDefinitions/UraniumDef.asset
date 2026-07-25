@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8eb320c0288e4fd44bf86cba11711f91, type: 3}
+  m_Name: UraniumDef
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceNodeDefinition
+  minedItemPrefab: {fileID: 4074567141104984735, guid: b983add23e48ef44882a14068bbd2ede, type: 3}
+  miningSpeed: 1
+  resourceNodePrefab: {fileID: 7168288065874615922, guid: 856d9405ced122f4aa788d30347e771a, type: 3}
+  spawnWeight: 0.25
+  oreCount: 1000
+  oreGroundTile: {fileID: 11400000, guid: fe863f8d1f700eb4fa953afe63af88d8, type: 2}

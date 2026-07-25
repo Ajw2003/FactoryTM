@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0ca08527901b87418cef1a12919f7ec, type: 3}
+  m_Name: Conveyor
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingData
+  buildingName: Conveyor
+  icon: {fileID: -882964857, guid: 2b6e8d5c843058f498ccb89bd47f1e90, type: 3}
+  itemData: {fileID: 11400000, guid: 59a2c7173aa648c7a8d2ce66a5e8c5e9, type: 2}
+  description: Transports Items in direction of arrow, has input on 3 sides and output
+    on 1
+  rotatedTiles:
+  - {fileID: 11400000, guid: b63630aefcd2cb4419610efd8e015268, type: 2}
+  - {fileID: 11400000, guid: 9fec515c79c33464aa1e422aa5f64adf, type: 2}
+  - {fileID: 11400000, guid: 460cf8c504d625041a0c6ef960f162a6, type: 2}
+  - {fileID: 11400000, guid: b7664cde197f7da40bdcd86fce36d9e3, type: 2}
+  proccessingSpeed: 2
+  itemPrefab: {fileID: 0}
+  cost: 1
+  type: 3
+  size: {x: 1, y: 1}
+  unlockConditions: []

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0ca08527901b87418cef1a12919f7ec, type: 3}
+  m_Name: Chest
+  m_EditorClassIdentifier: Assembly-CSharp::Buildings.BuildingData
+  buildingName: Chest
+  icon: {fileID: 21300000, guid: 30b5e609e69c49548b615c83ccb0a995, type: 3}
+  itemData: {fileID: 11400000, guid: 0e275b9f9516451398749679d9fc2668, type: 2}
+  description: Stores items from its input side and releases them from its output side, directly opposite. PLACEHOLDER ART - reuses the Wall sprite until real Chest art is authored.
+  rotatedTiles:
+  - {fileID: 11400000, guid: 3cb064f888c9c134db57af4c942b1af0, type: 2}
+  - {fileID: 11400000, guid: 246a5f6c0e990fc44aba061ad93640f9, type: 2}
+  - {fileID: 11400000, guid: b0ad8d0f6bb7b14498255714097adc37, type: 2}
+  - {fileID: 11400000, guid: 354e57b79ee164e45a0ff3bd6c191f50, type: 2}
+  proccessingSpeed: 2
+  itemPrefab: {fileID: 0}
+  cost: 15
+  type: 0
+  maxHealth: 50
+  size: {x: 1, y: 1}
+  unlockConditions: []

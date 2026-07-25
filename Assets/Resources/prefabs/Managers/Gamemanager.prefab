@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3968345495500856008
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3640256596449889271}
+  - component: {fileID: 5635340607988862136}
+  m_Layer: 0
+  m_Name: Gamemanager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3640256596449889271
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3968345495500856008}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.93933, y: 9.42963, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5635340607988862136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3968345495500856008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d0ae68f335b90946a9f1e86df0315d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  persistBetweenScenes: 1
+  mainCamera: {fileID: 0}
+  allBuildings:
+  - {fileID: 11400000, guid: 2340c767c3cf7b24281b4d11689714bc, type: 2}
+  - {fileID: 11400000, guid: 879ba1482606309449b799396e84e593, type: 2}
+  - {fileID: 11400000, guid: 1bf5ae58fb9f88a4da426b0034f3c294, type: 2}
+  - {fileID: 11400000, guid: 14c1a306f9f36df4cb1e596341da8563, type: 2}
+  MainTileMap: {fileID: 0}
+  BuildingTileMap: {fileID: 0}
+  sellerTile: {fileID: 11400000, guid: 630da3bd71b705b419eba5725d2c268e, type: 2}
+  finiteOres: 0
+  resourceNodeDefinitions:
+  - {fileID: 11400000, guid: bbd572b718c4a6a4a95c63819a3ebe1f, type: 2}
+  - {fileID: 11400000, guid: ae521b1c7e606904a8b5063fd6c6d036, type: 2}
+  - {fileID: 11400000, guid: c267ab9d53bddcc4797aad4ed1ddf6dd, type: 2}
+  - {fileID: 11400000, guid: 96cf7282abe0d954ab3b997806f79c97, type: 2}
+  - {fileID: 11400000, guid: 22ae56f506d3c5c42a40f15580c31b84, type: 2}
+  - {fileID: 11400000, guid: 48a46f629699bf54199df29d9ac0e32a, type: 2}
+  - {fileID: 11400000, guid: 8c08c1a195c6aac46839c9d7f3ffcb71, type: 2}
+  - {fileID: 11400000, guid: 3e660a0d1b238a14f8e2371e6decaebb, type: 2}
+  minPatchSize: 6
+  maxPatchSize: 12
+  patchSpawnChance: 0.01
+  Plates: []
+  playerController: {fileID: 0}
+  ActiveEnemies: []
