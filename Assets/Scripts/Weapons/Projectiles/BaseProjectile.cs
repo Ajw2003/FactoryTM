@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 namespace Weapons
 {
     using System;
@@ -94,7 +92,7 @@ namespace Weapons
                     }
                 }
     
-                // Collide with player-owned buildings (where !building.isEnemyOwned and not conveyor)
+                // Collide with player-owned buildings (where !building.IsEnemyOwned and not conveyor)
                 if (PlacementManager.HasInstance)
                 {
                     var activeBuildings = PlacementManager.Instance.GetActiveBuildings();
@@ -108,7 +106,7 @@ namespace Weapons
                                 if (buildingObj != null)
                                 {
                                     BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
-                                    if (building != null && building.Health > 0 && !building.isEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
+                                    if (building != null && building.IsAlive && !building.IsEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
                                     {
                                         Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
                                         Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
@@ -157,7 +155,7 @@ namespace Weapons
                                 if (buildingObj != null)
                                 {
                                     BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
-                                    if (building != null && building.Health > 0 && building.isEnemyOwned)
+                                    if (building != null && building.IsAlive && building.IsEnemyOwned)
                                     {
                                         Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
                                         Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);

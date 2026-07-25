@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 using System.Collections;
 using Code.Scripts.EventSystems;
 using Singleton;
@@ -29,7 +27,6 @@ namespace Managers
         private void Start()
         {
             startingVolume = globalVolume.weight;
-            EventManager.Instance?.Subscribe(this, (GlobalVolumeEvent e) => StartAjustVolumeRoutine(e.Target, e.FadeIncrement));
             persistBetweenScenes = PersistBetweenScenes;
         }
 

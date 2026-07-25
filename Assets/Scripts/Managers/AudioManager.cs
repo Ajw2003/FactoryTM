@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 // GEMINI_MODIFICATION_TEST
 
 using System.Collections;
@@ -35,7 +33,6 @@ namespace Code.Scripts.Audio
           persistBetweenScenes = PersistBetweenScenes;
             sfxSource = GetComponent<AudioSource>();
                         EventManager.Instance?.Subscribe(this, (AudioClipEvent e) => PlayClip(e.Clip, e.Channel, e.Volume, e.Duration));
-            EventManager.Instance?.Subscribe(this, (StopAudioEvent e) => StopClip(e.Channel));
         }
 
         void PlayClip(AudioClip clip, AudioChannel channel, float volume, float duration)

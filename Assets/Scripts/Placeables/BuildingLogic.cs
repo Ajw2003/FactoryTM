@@ -4,10 +4,10 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 namespace Placeables
 {
+    using Code.Scripts.EventSystems;
+    using EventTypes.BuildingEvents;
     using UnityEngine;
     
     public abstract class BuildingLogic : MonoBehaviour, IHealth
@@ -16,10 +16,23 @@ namespace Placeables
         protected Vector2Int myCell;
         protected int rotationIndex = 0;
         public System.Collections.Generic.List<Vector2Int> occupiedCells = new System.Collections.Generic.List<Vector2Int>();
-        public bool isEnemyOwned = false;
+        [SerializeField] private bool isEnemyOwned = false;
         public EnemyOutpost outpost;
 
-        public int Health { get; set; }
+        /// <summary>Whether this building currently belongs to an enemy outpost. Change it through <see cref="SetEnemyOwned"/>.</summary>
+        public bool IsEnemyOwned => isEnemyOwned;
+
+        // Subclasses set Health from their Setup overrides; external code must go through TakeDamage.
+        public int Health { get; protected set; }
+
+        public bool IsAlive => Health > 0;
+
+        /// <summary>Transfers ownership of this building, optionally attaching it to the outpost that now owns it.</summary>
+        public virtual void SetEnemyOwned(bool value, EnemyOutpost owningOutpost = null)
+        {
+            isEnemyOwned = value;
+            outpost = owningOutpost;
+        }
 
         private Sprite crackSprite;
         private SpriteRenderer crackRenderer;
@@ -223,16 +236,13 @@ namespace Placeables
             {
                 BuildingManager.Instance.NotifyBuildingDamaged();
             }
-    
+
+            EventManager.Instance?.Publish(new BuildingDamagedEvent(this, Health, data?.maxHealth ?? Health));
+
             if (Health <= 0)
             {
                 Die();
             }
-        }
-    
-        public void ChangeHealth(int amount, int previous)
-        {
-            
         }
     
         // private System.Collections.IEnumerator FlashRedTile()
@@ -270,6 +280,8 @@ namespace Placeables
             {
                 PlacementManager.Instance.DestroyBuilding(myCell, false);
             }
+
+            EventManager.Instance?.Publish(new BuildingDiedEvent(this));
         }
     
         public float GetTierMultiplier()

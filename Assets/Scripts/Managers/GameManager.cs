@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 namespace Managers
 {
     using System;
@@ -129,7 +127,6 @@ namespace Managers
                     Debug.LogWarning("GameManager: Null or invalid plate item found in Plates list.");
                 }
             }
-            UiManager.Instance?.UpdateHp(playerController.Health, playerController.maxHealth);
             SpawnStartingIDT();
         }
     

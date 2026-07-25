@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 namespace Placeables
 {
     using System.Collections.Generic;
@@ -55,7 +53,7 @@ namespace Placeables
             }
     
             // If claimed or deactivated, do not spawn enemies
-            if (!isEnemyOwned)
+            if (!IsEnemyOwned)
             {
                 return;
             }

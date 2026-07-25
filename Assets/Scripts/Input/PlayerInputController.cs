@@ -4,11 +4,8 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 using System;
 using Code.Scripts.EventSystems;
-using EventTypes.InputEvents;
 using Code.Scripts.Interfaces.EventTypes;
 using NUnit.Framework.Internal.Execution;
 using StateMachine;
@@ -27,7 +24,6 @@ public class PlayerInputController : MonoBehaviour
             _playerInputs = new InputSystem_Actions();
         EventManager.Instance?.Subscribe(this, (MovementInputEvent e) => MovementInputs(e.IsEnabled));
         EventManager.Instance?.Subscribe(this, (InventoryInputEvent e) => InventoryInputs(e.IsEnabled));
-        EventManager.Instance?.Subscribe(this, (SceneChangeEvent e) => OnSceneChange());
 
         _playerInputs.Enable();
     }
@@ -41,11 +37,6 @@ public class PlayerInputController : MonoBehaviour
             InventoryInputs(false);
             _playerInputs.Disable();
         }
-    }
-
-    public void OnSceneChange()
-    {
-        _playerInputs.Disable();
     }
 
     private void Start()
@@ -135,35 +126,27 @@ public class PlayerInputController : MonoBehaviour
         EventManager.Instance?.Publish(new PlayerMoveEvent(val.ReadValue<Vector2>()));
     }
 
+    // Place/Remove/Rotate/Next/Previous stay bound to their Input System actions but no longer
+    // publish events: PlacementManager and HotbarManager poll raw Input directly. Migrating
+    // those two off raw Input is a separate change.
     void OnPlacePerformed(InputAction.CallbackContext val)
     {
-        if (PauseManager.IsPaused) return;
-        EventManager.Instance?.Publish(new PlayerPlaceEvent());
-        EventManager.Instance?.Publish(new PlayerInteractEvent()); // Legacy/Fallback
     }
 
     void OnRemovePerformed(InputAction.CallbackContext val)
     {
-        if (PauseManager.IsPaused) return;
-        EventManager.Instance?.Publish(new PlayerRemoveEvent());
     }
 
     void OnRotatePerformed(InputAction.CallbackContext val)
     {
-        if (PauseManager.IsPaused) return;
-        EventManager.Instance?.Publish(new PlayerRotateEvent());
     }
 
     void OnNextPerformed(InputAction.CallbackContext val)
     {
-        if (PauseManager.IsPaused) return;
-        EventManager.Instance?.Publish(new PlayerNextItemEvent());
     }
 
     void OnPreviousPerformed(InputAction.CallbackContext val)
     {
-        if (PauseManager.IsPaused) return;
-        EventManager.Instance?.Publish(new PlayerPreviousItemEvent());
     }
 
     void OnDodgePerformed(InputAction.CallbackContext val)
@@ -179,41 +162,4 @@ public class PlayerInputController : MonoBehaviour
     }
 
     #endregion
-
-    #region FindActions
-    
-    private InputAction FindAction(string actionName)
-    {
-        var actionMap = _playerInputs.Player;
-
-        var property = typeof(InputSystem_Actions.PlayerActions).GetProperty(actionName);
-        if (property != null)
-        {
-            return property.GetValue(actionMap) as InputAction;
-        }
-
-        Debug.LogWarning($"Input action '{actionName}' not found.");
-        return null;
-    }
-
-    private void HandleInputToggleEvent(InputToggleEvent inputEvent)
-    {
-        InputAction action = FindAction(inputEvent.ActionName);
-
-        if (action != null)
-        {
-            if (inputEvent.Enable)
-                action.Enable();
-            else
-                action.Disable();
-
-            //Debug.Log($"Input action '{inputEvent.ActionName}' set to {(inputEvent.Enable ? "Enabled" : "Disabled")}");
-        }
-        else
-        {
-            Debug.LogWarning($"Input action '{inputEvent.ActionName}' not found.");
-        }
-    }
-
-    #endregion
-}   
+}

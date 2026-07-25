@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 namespace Ui
 {
     using System.Collections;
@@ -153,8 +151,8 @@ namespace Ui
                 case UpgradeType.HealthPack:
                     if (PlayerController.Instance != null)
                     {
-                        PlayerController.Instance.healthPacksCount += 1;
-                        Debug.Log($"Purchased health pack. Total: {PlayerController.Instance.healthPacksCount}");
+                        PlayerController.Instance.GrantHealthPacks(1);
+                        Debug.Log($"Purchased health pack. Total: {PlayerController.Instance.HealthPacksCount}");
                         
                         if (TutorialManager.HasInstance)
                         {
@@ -166,15 +164,10 @@ namespace Ui
                 case UpgradeType.Ammo:
                     if (PlayerController.Instance != null)
                     {
-                        PlayerController.Instance.ammoReserve += 30;
-                        Debug.Log($"Purchased ammo pack. Total: {PlayerController.Instance.ammoReserve}");
-                        
-                        PlayerWeapon playerWeapon = FindFirstObjectByType<PlayerWeapon>();
-                        if (playerWeapon != null)
-                        {
-                            playerWeapon.UpdateAmmoUI();
-                        }
-    
+                        PlayerController.Instance.AddAmmoReserve(30);
+                        Debug.Log($"Purchased ammo pack. Total: {PlayerController.Instance.AmmoReserve}");
+
+
                         if (TutorialManager.HasInstance)
                         {
                             TutorialManager.Instance.HandleAmmoPurchased();
@@ -185,11 +178,9 @@ namespace Ui
                 case UpgradeType.Armor:
                     if (PlayerController.Instance != null)
                     {
-                        PlayerController.Instance.damageReductionFactor = Mathf.Clamp01(PlayerController.Instance.damageReductionFactor + definition.armorPercentBoost * 0.5f); // Half bonus on re-buy
+                        // Half bonus on re-buy
                         int healthBoost = Mathf.RoundToInt(definition.maxHealthBoost * 0.5f);
-                        PlayerController.Instance.maxHealth += healthBoost;
-                        PlayerController.Instance.Health = Mathf.Min(PlayerController.Instance.maxHealth, PlayerController.Instance.Health + healthBoost);
-                        UiManager.Instance.UpdateHp(PlayerController.Instance.Health, PlayerController.Instance.maxHealth);
+                        PlayerController.Instance.ApplyArmorUpgrade(healthBoost, definition.armorPercentBoost * 0.5f);
                     }
                     break;
     

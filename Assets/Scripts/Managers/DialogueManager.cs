@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 namespace Managers
 {
     using System;
@@ -54,8 +52,6 @@ namespace Managers
     
         private void Start()
         {
-            EventManager.Instance.Subscribe(this, (DialogueEvent e) => HandleDialogueEvent(e));
-            
             bool playTutorial = PlayerPrefs.GetInt("PlayTutorial", 1) == 1;
             if (!playTutorial)
             {
@@ -67,17 +63,6 @@ namespace Managers
             }
         }
     
-        private void HandleDialogueEvent(DialogueEvent e)
-        {
-            bool playTutorial = PlayerPrefs.GetInt("PlayTutorial", 1) == 1;
-            if (!playTutorial)
-            {
-                ToggleUi(false);
-                return;
-            }
-            currentDialogue = e.dialogue;
-            ToggleUi(e.enabled);
-        }
     
         private IEnumerator DialogueCoroutine()
         {

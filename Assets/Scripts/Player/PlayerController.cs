@@ -4,8 +4,7 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
+using EventTypes.PlayerEvents;
 using System.Collections;
 using Code.Scripts.EventSystems;
 using Code.Scripts.Interfaces.EventTypes;
@@ -22,7 +21,7 @@ public class PlayerController : MonoBehaviour, IHealth
     [SerializeField] private float dodgeDistance = 2f;
     private bool isMoving = false;
     private bool isDodging = false;
-    public bool canDodgeRoll = false;
+    [SerializeField] private bool canDodgeRoll = false;
     private Vector2Int lastMoveDirection = Vector2Int.up;
     private Vector2 rawInputDirection;
     private Coroutine currentCoroutine;
@@ -30,19 +29,27 @@ public class PlayerController : MonoBehaviour, IHealth
     
     public float width = 1.0f;
     public float height = 1.0f;
-    public int maxHealth = 10;
-    public int Health { get; set; }
+    [SerializeField] private int maxHealth = 10;
+    public int Health { get; private set; }
 
-    public float damageReductionFactor = 0f;
-    public int healthPacksCount = 0;
-    public int ammoReserve = 90;
+    [SerializeField] private float damageReductionFactor = 0f;
+    [SerializeField] private int healthPacksCount = 0;
+    [SerializeField] private int ammoReserve = 90;
 
     public enum PlayerMode { Combat, Building }
     [Header("Game Mode")]
-    public PlayerMode currentMode = PlayerMode.Combat;
-    public delegate void ModeChangedAction(PlayerMode mode);
-    public event ModeChangedAction OnModeChanged;
+    [SerializeField] private PlayerMode currentMode = PlayerMode.Combat;
     public event System.Action OnPlayerDodge;
+
+    // Read-only views of the serialized stats above. Mutate them through the
+    // Apply*/Grant*/Consume* methods below so the matching event gets published.
+    public int MaxHealth => maxHealth;
+    public bool IsAlive => Health > 0;
+    public float DamageReductionFactor => damageReductionFactor;
+    public int HealthPacksCount => healthPacksCount;
+    public int AmmoReserve => ammoReserve;
+    public bool CanDodgeRoll => canDodgeRoll;
+    public PlayerMode CurrentMode => currentMode;
 
     [Header("Stamina Settings")]
     public float maxStamina = 100f;
@@ -107,8 +114,58 @@ public class PlayerController : MonoBehaviour, IHealth
 
         weapon = GetComponentInChildren<PlayerWeapon>();
 
+        // Seed the UI with a first value so it doesn't have to reach in for it.
+        EventManager.Instance?.Publish(new PlayerHealthChangedEvent(Health, maxHealth));
+        EventManager.Instance?.Publish(new PlayerAmmoChangedEvent(ammoReserve));
+
         StateMachine.ChangeState(StateMachine.idleState);
     }
+
+    #region Stat mutation
+
+    /// <summary>Applies an armor upgrade's damage reduction and max-health boost, healing by the same amount.</summary>
+    public void ApplyArmorUpgrade(int maxHealthBoost, float armorPercentBoost)
+    {
+        damageReductionFactor = Mathf.Clamp01(damageReductionFactor + armorPercentBoost);
+        maxHealth += maxHealthBoost;
+        Health = Mathf.Min(maxHealth, Health + maxHealthBoost);
+        EventManager.Instance?.Publish(new PlayerHealthChangedEvent(Health, maxHealth));
+    }
+
+    public void GrantHealthPacks(int amount)
+    {
+        if (amount <= 0) return;
+        healthPacksCount += amount;
+    }
+
+    public void AddAmmoReserve(int amount)
+    {
+        if (amount <= 0) return;
+        ammoReserve += amount;
+        EventManager.Instance?.Publish(new PlayerAmmoChangedEvent(ammoReserve));
+    }
+
+    public void ConsumeAmmoReserve(int amount)
+    {
+        if (amount <= 0) return;
+        ammoReserve = Mathf.Max(0, ammoReserve - amount);
+        EventManager.Instance?.Publish(new PlayerAmmoChangedEvent(ammoReserve));
+    }
+
+    public void UnlockDodgeRoll()
+    {
+        canDodgeRoll = true;
+    }
+
+    /// <summary>Raises both max and current stamina by the given amount.</summary>
+    public void ApplyStaminaBoost(float amount)
+    {
+        maxStamina += amount;
+        currentStamina += amount;
+        UiManager.Instance.UpdateStamina(currentStamina, maxStamina);
+    }
+
+    #endregion
 
     private void OnMoveInput(Vector2 input)
     {
@@ -222,7 +279,7 @@ public class PlayerController : MonoBehaviour, IHealth
 
         foreach (var building in BuildingManager.Instance.Buildings)
         {
-            if (building == null || building.isEnemyOwned) continue;
+            if (building == null || building.IsEnemyOwned) continue;
             if (building.data.type == Buildings.BuildingType.Conveyor) continue; // Exclude conveyors
             if (building.data.type == Buildings.BuildingType.Wall) continue; // No configurable panel
             if (building.data.type == Buildings.BuildingType.Turret) continue; // No configurable panel
@@ -320,7 +377,7 @@ public class PlayerController : MonoBehaviour, IHealth
             }
         }
 
-        OnModeChanged?.Invoke(currentMode);
+        EventManager.Instance?.Publish(new PlayerModeChangedEvent(currentMode));
     }
 
     public void SetLastMoveDirection(Vector2Int direction)
@@ -430,7 +487,7 @@ public class PlayerController : MonoBehaviour, IHealth
         // Apply armor damage reduction (e.g. 0.2f = 20% less damage)
         int reduced = Mathf.Max(1, Mathf.RoundToInt(amount * (1f - damageReductionFactor)));
         Health = Mathf.Max(0, Health - reduced);
-        UiManager.Instance.UpdateHp(Health, maxHealth);
+        EventManager.Instance?.Publish(new PlayerHealthChangedEvent(Health, maxHealth));
 
         // Spawn floating damage text in red
         SpawnDamageNumber(reduced, Color.red, transform.position);
@@ -444,11 +501,6 @@ public class PlayerController : MonoBehaviour, IHealth
         }
     }
 
-    public void ChangeHealth(int amount, int previous)
-    {
-        // Satisfies IHealth interface, but unused since we modify Health directly.
-    }
-
     /// <summary>Consume one health pack to restore half of max health.</summary>
     public void UseHealthPack()
     {
@@ -458,7 +510,7 @@ public class PlayerController : MonoBehaviour, IHealth
         healthPacksCount--;
         int healAmount = Mathf.CeilToInt(maxHealth * 0.5f);
         Health = Mathf.Min(maxHealth, Health + healAmount);
-        UiManager.Instance.UpdateHp(Health, maxHealth);
+        EventManager.Instance?.Publish(new PlayerHealthChangedEvent(Health, maxHealth));
 
         // Green heal number
         SpawnDamageNumber(healAmount, new Color(0.2f, 1f, 0.2f, 1f), transform.position);
@@ -495,6 +547,8 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private void OnDestroy()
     {
+        EventManager.Instance?.UnsubscribeFromAllEvents(this);
+
         if (Instance == this)
         {
             Instance = null;

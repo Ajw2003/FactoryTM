@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -46,7 +44,7 @@ public class CartelMember : MonoBehaviour, IHealth
 
     private bool attacking;
     
-    public int Health { get; set; }
+    public int Health { get; private set; }
     public int MaxHealth = 10;
     
         
@@ -112,7 +110,7 @@ public class CartelMember : MonoBehaviour, IHealth
                                 if (buildingObj != null)
                                 {
                                     BuildingLogic building = buildingObj.GetComponent<BuildingLogic>();
-                                     if (building != null && building.Health > 0 && !building.isEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
+                                     if (building != null && building.IsAlive && !building.IsEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
                                     {
                                         Vector3 cellWorldPos = GridManager.Instance.CellToWorldConversion(cell);
                                         Rectangle2D cellBox = TwoDCollision.CreateFromRotated(cellWorldPos.x, cellWorldPos.y, 1f, 1f, 0f);
@@ -204,7 +202,7 @@ public class CartelMember : MonoBehaviour, IHealth
         {
             foreach (var building in BuildingManager.Instance.Buildings)
             {
-                if (building != null && building.Health > 0 && !building.isEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
+                if (building != null && building.IsAlive && !building.IsEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
                 {
                     float dist = Vector3.Distance(transform.position, building.transform.position);
                     if (dist < minDistance)
@@ -285,11 +283,6 @@ public class CartelMember : MonoBehaviour, IHealth
         {
             Die();
         }
-    }
-
-    public void ChangeHealth(int amount, int previous)
-    {
-        
     }
 
     private IEnumerator FlashRed()

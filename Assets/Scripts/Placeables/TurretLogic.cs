@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 namespace Placeables
 {
     using System.Collections.Generic;
@@ -40,13 +38,23 @@ namespace Placeables
                 int bullets = data.bulletsFired > 0 ? data.bulletsFired : 1;
                 turretWeapon.SetupWeapon(data.itemPrefab, fRate, data.damage, data.bulletSpeed, bullets, data.bulletSpread, data.weaponType);
                 turretWeapon.ApplyTierMultiplier(GetTierMultiplier());
-                turretWeapon.isEnemyFired = isEnemyOwned;
+                turretWeapon.isEnemyFired = IsEnemyOwned;
             }
-    
-            if (isEnemyOwned)
+
+            if (IsEnemyOwned)
             {
                 targetRange = 8f; // Reduce range of enemy turrets so player can out-range them
             }
+        }
+
+        public override void SetEnemyOwned(bool value, EnemyOutpost owningOutpost = null)
+        {
+            base.SetEnemyOwned(value, owningOutpost);
+
+            // May be called before Setup() has resolved the weapon (enemy spawn path sets
+            // ownership first); Setup() applies isEnemyFired itself in that case.
+            if (turretWeapon == null) turretWeapon = GetComponentInChildren<TurretWeapon>();
+            if (turretWeapon != null) turretWeapon.isEnemyFired = value;
         }
     
         private float targetScanTimer = 0f;
@@ -88,10 +96,10 @@ namespace Placeables
             float minDistance = targetRange;
             Vector3? closestTarget = null;
     
-            if (isEnemyOwned)
+            if (IsEnemyOwned)
             {
                 // Target player
-                if (PlayerController.Instance != null && PlayerController.Instance.Health > 0 && PlayerController.Instance.gameObject.activeInHierarchy)
+                if (PlayerController.Instance != null && PlayerController.Instance.IsAlive && PlayerController.Instance.gameObject.activeInHierarchy)
                 {
                     float distance = Vector2.Distance(transform.position, PlayerController.Instance.transform.position);
                     if (distance <= minDistance)
@@ -101,12 +109,12 @@ namespace Placeables
                     }
                 }
     
-                // Target player-owned buildings (where !building.isEnemyOwned and not conveyor)
+                // Target player-owned buildings (where !building.IsEnemyOwned and not conveyor)
                 if (BuildingManager.HasInstance)
                 {
                     foreach (var building in BuildingManager.Instance.Buildings)
                     {
-                        if (building != null && building.Health > 0 && !building.isEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
+                        if (building != null && building.IsAlive && !building.IsEnemyOwned && building.data.type != Buildings.BuildingType.Conveyor)
                         {
                             float distance = Vector2.Distance(transform.position, building.transform.position);
                             if (distance <= minDistance)

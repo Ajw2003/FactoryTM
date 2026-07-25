@@ -4,12 +4,12 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 namespace Weapons
 {
     using System;
     using System.Collections;
+    using Code.Scripts.EventSystems;
+    using EventTypes.PlayerEvents;
     using UnityEngine;
     using UnityEngine.InputSystem.LowLevel;
     
@@ -28,7 +28,7 @@ namespace Weapons
         {
             if (ammoUI != null)
             {
-                int reserve = PlayerController.Instance != null ? PlayerController.Instance.ammoReserve : 0;
+                int reserve = PlayerController.Instance != null ? PlayerController.Instance.AmmoReserve : 0;
                 ammoUI.UpdateAmmo(roundsLeft, magazineSize, reserve);
             }
         }
@@ -50,7 +50,13 @@ namespace Weapons
             base.Start();
             cam = GameManager.Instance.mainCamera;
             ammoUI = FindFirstObjectByType<AmmoUI>();
+            EventManager.Instance?.Subscribe(this, (PlayerAmmoChangedEvent e) => UpdateAmmoUI());
             UpdateAmmoUI();
+        }
+
+        private void OnDestroy()
+        {
+            EventManager.Instance?.UnsubscribeFromAllEvents(this);
         }
     
         protected override void Update()
@@ -59,7 +65,7 @@ namespace Weapons
            
             if (PauseManager.IsPaused) return;
     
-            if (PlayerController.Instance == null || PlayerController.Instance.currentMode != PlayerController.PlayerMode.Combat) return;
+            if (PlayerController.Instance == null || PlayerController.Instance.CurrentMode != PlayerController.PlayerMode.Combat) return;
     
             if (PlayerController.Instance.StateMachine.CurrentState == PlayerController.Instance.StateMachine.storeState ||
                 PlayerController.Instance.StateMachine.CurrentState == PlayerController.Instance.StateMachine.buildingUiState ||
@@ -83,7 +89,7 @@ namespace Weapons
             // Manual reload
             if (Input.GetKeyDown(KeyCode.R) && !isReloading && roundsLeft < magazineSize)
             {
-                int reserve = PlayerController.Instance != null ? PlayerController.Instance.ammoReserve : 0;
+                int reserve = PlayerController.Instance != null ? PlayerController.Instance.AmmoReserve : 0;
                 if (reserve > 0)
                 {
                     StartCoroutine(Reload());
@@ -131,7 +137,7 @@ namespace Weapons
             if (isReloading) return;
             if (roundsLeft <= 0)
             {
-                int reserve = PlayerController.Instance != null ? PlayerController.Instance.ammoReserve : 0;
+                int reserve = PlayerController.Instance != null ? PlayerController.Instance.AmmoReserve : 0;
                 if (reserve <= 0)
                 {
                     if (Time.time - lastNoReserveWarningTime > 1.5f)
@@ -157,7 +163,7 @@ namespace Weapons
     
             if (roundsLeft <= 0)
             {
-                int reserve = PlayerController.Instance != null ? PlayerController.Instance.ammoReserve : 0;
+                int reserve = PlayerController.Instance != null ? PlayerController.Instance.AmmoReserve : 0;
                 if (reserve <= 0)
                 {
                     canFire = false;
@@ -180,7 +186,7 @@ namespace Weapons
             int needed = magazineSize - roundsLeft;
             if (needed <= 0) yield break;
     
-            int reserve = PlayerController.Instance != null ? PlayerController.Instance.ammoReserve : 0;
+            int reserve = PlayerController.Instance != null ? PlayerController.Instance.AmmoReserve : 0;
             if (reserve <= 0)
             {
                 Debug.Log("No ammo reserve left to reload!");
@@ -202,13 +208,14 @@ namespace Weapons
             roundsLeft += toLoad;
             if (PlayerController.Instance != null)
             {
-                PlayerController.Instance.ammoReserve -= toLoad;
+                // Publishes PlayerAmmoChangedEvent, which refreshes the ammo UI (roundsLeft is
+                // already updated above, so the event-driven redraw picks up both numbers).
+                PlayerController.Instance.ConsumeAmmoReserve(toLoad);
             }
-    
+
             isReloading = false;
             canFire = true;
             if (ammoUI != null) ammoUI.SetReloading(false);
-            UpdateAmmoUI();
         }
     }
     

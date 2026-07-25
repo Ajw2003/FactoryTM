@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 namespace Managers
 {
     using System.Collections.Generic;
@@ -47,7 +45,7 @@ namespace Managers
 
             // Number keys only select in Building mode - actually placing is separately gated there
             // too, so this just avoids the keys doing anything during combat.
-            if (PlayerController.Instance.currentMode != PlayerController.PlayerMode.Combat)
+            if (PlayerController.Instance.CurrentMode != PlayerController.PlayerMode.Combat)
             {
                 for (int i = 0; i < slotCount; i++)
                 {

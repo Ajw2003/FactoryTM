@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 using System.Collections.Generic;
 using UnityEngine;
 using Singleton;
@@ -87,10 +85,12 @@ public class EnemyOutpost
 
         foreach (var building in buildings)
         {
-            if (building != null && building.isEnemyOwned)
+            if (building != null && building.IsEnemyOwned)
             {
-                building.isEnemyOwned = false;
-                
+                // TurretLogic's SetEnemyOwned override clears its weapon's isEnemyFired flag.
+                building.SetEnemyOwned(false);
+
+
                 // Reset color tint of the tile to white
                 Vector2Int cell = building.GetMyCell();
                 Vector3Int tilePos = new Vector3Int(cell.x, cell.y, 0);
@@ -98,16 +98,6 @@ public class EnemyOutpost
                 {
                     GameManager.Instance.BuildingTileMap.SetTileFlags(tilePos, UnityEngine.Tilemaps.TileFlags.None);
                     GameManager.Instance.BuildingTileMap.SetColor(tilePos, Color.white);
-                }
-
-                // If it's a turret, reset weapon flag
-                if (building is TurretLogic turret)
-                {
-                    var turretWeapon = turret.GetComponentInChildren<TurretWeapon>();
-                    if (turretWeapon != null)
-                    {
-                        turretWeapon.isEnemyFired = false;
-                    }
                 }
 
                 // Spawn floating "+CLAIMED!" text
@@ -394,7 +384,9 @@ namespace Managers
                 return null;
             }
             
-            logic.isEnemyOwned = true;
+            // Ownership must be set before Setup(): TurretLogic.Setup() reads it to configure
+            // its weapon and range. The owning outpost is attached later by RegisterBuilding().
+            logic.SetEnemyOwned(true);
             logic.Setup(buildingData, cell);
  
             // Calculate all occupied cells based on size

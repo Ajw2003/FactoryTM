@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 namespace Managers
 {
     using System.Collections.Generic;
@@ -70,7 +68,7 @@ namespace Managers
                 return;
             }
     
-            if (PlayerController.Instance == null || PlayerController.Instance.currentMode == PlayerController.PlayerMode.Combat)
+            if (PlayerController.Instance == null || PlayerController.Instance.CurrentMode == PlayerController.PlayerMode.Combat)
             {
                 if (previewTilemap != null) previewTilemap.ClearAllTiles();
                 return;
@@ -267,7 +265,7 @@ namespace Managers
                         BuildingLogic logic = buildingObj.GetComponent<BuildingLogic>();
                         if (logic != null)
                         {
-                            if (logic.isEnemyOwned)
+                            if (logic.IsEnemyOwned)
                             {
                                 if (logic.outpost != null && logic.outpost.IsCleared)
                                 {

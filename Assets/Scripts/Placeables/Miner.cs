@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 namespace Placeables
 {
     using System.Collections.Generic;
@@ -74,7 +72,7 @@ namespace Placeables
             }
             else
             {
-                if (!isEnemyOwned)
+                if (!IsEnemyOwned)
                 {
                     Debug.LogWarning($"Miner at {myCell} has no ResourceNode assigned. Disabling miner.");
                 }
@@ -97,7 +95,7 @@ namespace Placeables
         {
             if (!enabled) return; // Ensure miner is enabled
 
-            if (!isEnemyOwned)
+            if (!IsEnemyOwned)
             {
                 AbsorbFuelFromInput();
                 DrainFuelSlot();
@@ -178,7 +176,7 @@ namespace Placeables
             }
     
             ConveyorItem itemComp = newItem.GetComponent<ConveyorItem>();
-            if (itemComp != null && !isEnemyOwned && BuildingUiManager.Instance != null)
+            if (itemComp != null && !IsEnemyOwned && BuildingUiManager.Instance != null)
             {
                 BuildingUiManager.Instance.DiscoverResource(itemComp._itemData);
             }

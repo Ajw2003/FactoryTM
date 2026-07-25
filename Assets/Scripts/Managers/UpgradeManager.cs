@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 using System.Collections.Generic;
 using Buildings;
 using Singleton;
@@ -165,11 +163,9 @@ namespace Managers
                     // Apply permanent armor / health boost immediately on research
                     if (PlayerController.Instance != null)
                     {
-                        PlayerController.Instance.damageReductionFactor = Mathf.Clamp01(PlayerController.Instance.damageReductionFactor + upgrade.armorPercentBoost);
-                        PlayerController.Instance.maxHealth += upgrade.maxHealthBoost; 
-                        PlayerController.Instance.Health = Mathf.Min(PlayerController.Instance.maxHealth, PlayerController.Instance.Health + upgrade.maxHealthBoost);
-                        UiManager.Instance.UpdateHp(PlayerController.Instance.Health, PlayerController.Instance.maxHealth);
-                        
+                        PlayerController.Instance.ApplyArmorUpgrade(upgrade.maxHealthBoost, upgrade.armorPercentBoost);
+
+
                         Debug.Log($"Applied armor boost: +{upgrade.armorPercentBoost*100}% reduction, +{upgrade.maxHealthBoost} max HP");
                     }
                     break;
@@ -178,8 +174,8 @@ namespace Managers
                     // Grant 2 health packs immediately; more can be purchased from the shop
                     if (PlayerController.Instance != null)
                     {
-                        PlayerController.Instance.healthPacksCount += 2;
-                        Debug.Log($"Granted 2 health packs. Total: {PlayerController.Instance.healthPacksCount}");
+                        PlayerController.Instance.GrantHealthPacks(2);
+                        Debug.Log($"Granted 2 health packs. Total: {PlayerController.Instance.HealthPacksCount}");
                     }
                     break;
 
@@ -187,8 +183,8 @@ namespace Managers
                     // Grant 90 ammo immediately; more can be purchased from the shop
                     if (PlayerController.Instance != null)
                     {
-                        PlayerController.Instance.ammoReserve += 90;
-                        Debug.Log($"Granted 90 ammo. Total: {PlayerController.Instance.ammoReserve}");
+                        PlayerController.Instance.AddAmmoReserve(90);
+                        Debug.Log($"Granted 90 ammo. Total: {PlayerController.Instance.AmmoReserve}");
                     }
                     break;
 
@@ -234,7 +230,7 @@ namespace Managers
                 case UpgradeType.DodgeRoll:
                     if (PlayerController.Instance != null)
                     {
-                        PlayerController.Instance.canDodgeRoll = true;
+                        PlayerController.Instance.UnlockDodgeRoll();
                         Debug.Log("Dodge Roll capability unlocked!");
                     }
                     break;
@@ -242,9 +238,7 @@ namespace Managers
                 case UpgradeType.StaminaBoost:
                     if (PlayerController.Instance != null)
                     {
-                        PlayerController.Instance.maxStamina += 50f;
-                        PlayerController.Instance.currentStamina += 50f;
-                        UiManager.Instance.UpdateStamina(PlayerController.Instance.currentStamina, PlayerController.Instance.maxStamina);
+                        PlayerController.Instance.ApplyStaminaBoost(50f);
                         Debug.Log($"Applied Stamina Boost: New Max Stamina = {PlayerController.Instance.maxStamina}");
                     }
                     break;

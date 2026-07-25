@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 namespace Weapons
 {
     using UnityEngine;
@@ -21,7 +19,7 @@ namespace Weapons
             base.Update();
     
             TurretLogic turret = GetComponentInParent<TurretLogic>();
-            bool hasAmmo = turret == null || turret.isEnemyOwned || turret.ammoRemaining > 0;
+            bool hasAmmo = turret == null || turret.IsEnemyOwned || turret.ammoRemaining > 0;
             
             if (hasTarget && canFire && roundsLeft > 0 && hasAmmo)
             {
@@ -40,7 +38,7 @@ namespace Weapons
         protected override void SpawnBullet()
         {
             TurretLogic turret = GetComponentInParent<TurretLogic>();
-            if (turret != null && !turret.isEnemyOwned)
+            if (turret != null && !turret.IsEnemyOwned)
             {
                 if (turret.ammoRemaining <= 0) return;
                 turret.ammoRemaining = Mathf.Max(0, turret.ammoRemaining - 1);

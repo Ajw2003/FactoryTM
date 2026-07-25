@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 namespace Placeables
 {
     using System.Collections;
@@ -69,7 +67,7 @@ namespace Placeables
         {
             if (PauseManager.IsPaused) return;
     
-            if (!isEnemyOwned)
+            if (!IsEnemyOwned)
             {
                 if (fuelRemaining > 0f)
                 {
@@ -84,7 +82,7 @@ namespace Placeables
             AbsorbFuelFromInput();
             DrainFuelSlot();
 
-            if (!isEnemyOwned && fuelRemaining <= 0f) return;
+            if (!IsEnemyOwned && fuelRemaining <= 0f) return;
 
             foreach (var inputCell in GetEdgeCells(-GetFacingDirection()))
             {
@@ -149,7 +147,7 @@ namespace Placeables
                     continue;
                 }
 
-                if (!isEnemyOwned && fuelRemaining <= 0f)
+                if (!IsEnemyOwned && fuelRemaining <= 0f)
                 {
                     yield return null;
                     continue;

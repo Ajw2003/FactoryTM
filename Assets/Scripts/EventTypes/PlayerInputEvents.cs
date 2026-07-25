@@ -4,8 +4,6 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 using EventSystems;
 using UnityEngine;
 
@@ -30,26 +28,6 @@ namespace Code.Scripts.Interfaces.EventTypes
     }
 
     public class PlayerOpenStoreEvent : IEvent
-    {
-    }
-
-    public class PlayerPlaceEvent : IEvent
-    {
-    }
-
-    public class PlayerRemoveEvent : IEvent
-    {
-    }
-
-    public class PlayerRotateEvent : IEvent
-    {
-    }
-
-    public class PlayerNextItemEvent : IEvent
-    {
-    }
-
-    public class PlayerPreviousItemEvent : IEvent
     {
     }
 }

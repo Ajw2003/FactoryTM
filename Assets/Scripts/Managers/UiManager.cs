@@ -4,12 +4,12 @@ using Ui;
 using Weapons;
 using Nodes;
 using EventTypes;
-using EventTypes.InventoryEvents;
-using EventTypes.InputEvents;
 namespace Managers
 {
     using System;
     using System.Linq;
+    using Code.Scripts.EventSystems;
+    using EventTypes.PlayerEvents;
     using Singleton;
     using TMPro;
     using UnityEngine;
@@ -64,8 +64,18 @@ namespace Managers
           }
     
           SetupStaminaUI();
+
+          // Subscribed in Awake, not Start: PlayerController.Start() publishes the initial
+          // health value and Unity gives no ordering guarantee between Start() calls.
+          EventManager.Instance?.Subscribe(this, (PlayerHealthChangedEvent e) => UpdateHp(e.Health, e.MaxHealth));
        }
-    
+
+       protected override void OnDestroy()
+       {
+          EventManager.Instance?.UnsubscribeFromAllEvents(this);
+          base.OnDestroy();
+       }
+
        private void SetupStaminaUI()
        {
           GameObject staminaGo = GameObject.Find("StaminaText");
@@ -179,10 +189,6 @@ namespace Managers
           if (GameOverPanel != null) GameOverPanel.SetActive(false);
           isGameOver = false;
     
-          if (GameManager.Instance != null && GameManager.Instance.playerController != null)
-          {
-             UpdateHp(GameManager.Instance.playerController.Health, GameManager.Instance.playerController.maxHealth);
-          }
        }
     
        private void Update()
@@ -192,7 +198,7 @@ namespace Managers
           // Show stamina UI if dodge is unlocked
           if (staminaContainer != null && PlayerController.Instance != null)
           {
-             if (PlayerController.Instance.canDodgeRoll && !staminaContainer.activeSelf)
+             if (PlayerController.Instance.CanDodgeRoll && !staminaContainer.activeSelf)
              {
                 staminaContainer.SetActive(true);
              }
