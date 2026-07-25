@@ -1,14 +1,10 @@
-using Managers;
 using Placeables;
 using Ui;
-using Weapons;
 using Nodes;
-using EventTypes;
 using Items;
 
 namespace Managers
 {
-    using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.UI;
@@ -244,7 +240,6 @@ namespace Managers
             buildingDetailText.fontSize = 40;
             buildingDetailText.color = new Color(0.2f, 0.9f, 0.2f);
             buildingDetailText.alignment = TextAlignmentOptions.TopLeft;
-            buildingDetailText.enableWordWrapping = true;
     
             // Progress / Fuel Bar Container
             fuelBarContainer = new GameObject("FuelBarContainer", typeof(RectTransform), typeof(Image));
@@ -479,9 +474,9 @@ namespace Managers
     
         public Sprite GetResourceSprite(specificItemType type)
         {
-            if (GameManager.Instance != null && GameManager.Instance.resourceNodeDefinitions != null)
+            if (GameManager.Instance != null && GameManager.Instance.ResourceNodeDefinitions != null)
             {
-                foreach (var def in GameManager.Instance.resourceNodeDefinitions)
+                foreach (var def in GameManager.Instance.ResourceNodeDefinitions)
                 {
                     if (def != null && def.minedItemPrefab != null)
                     {
@@ -500,9 +495,9 @@ namespace Managers
         /// <summary>The raw-ore item prefab for a resource type, looked up the same way GetResourceSprite finds its icon.</summary>
         public GameObject GetResourceItemPrefab(specificItemType type)
         {
-            if (GameManager.Instance != null && GameManager.Instance.resourceNodeDefinitions != null)
+            if (GameManager.Instance != null && GameManager.Instance.ResourceNodeDefinitions != null)
             {
-                foreach (var def in GameManager.Instance.resourceNodeDefinitions)
+                foreach (var def in GameManager.Instance.ResourceNodeDefinitions)
                 {
                     if (def != null && def.minedItemPrefab != null)
                     {
@@ -519,9 +514,9 @@ namespace Managers
 
         public float GetResourceValue(specificItemType type)
         {
-            if (GameManager.Instance != null && GameManager.Instance.resourceNodeDefinitions != null)
+            if (GameManager.Instance != null && GameManager.Instance.ResourceNodeDefinitions != null)
             {
-                foreach (var def in GameManager.Instance.resourceNodeDefinitions)
+                foreach (var def in GameManager.Instance.ResourceNodeDefinitions)
                 {
                     if (def != null && def.minedItemPrefab != null)
                     {

@@ -38,7 +38,7 @@ namespace Placeables
         {
             base.Setup(minerData, cell);
             this.rotationIndex = rotationIndex;
-            finiteOres = GameManager.Instance != null ? GameManager.Instance.finiteOres : false;
+            finiteOres = GameManager.Instance != null ? GameManager.Instance.FiniteOres : false;
 
             // Setup runs before PlacementManager.SetOccupiedCells, so compute the footprint here
             // to find the assigned ResourceNode immediately.

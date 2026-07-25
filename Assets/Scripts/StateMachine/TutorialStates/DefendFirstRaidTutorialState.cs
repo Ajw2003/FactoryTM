@@ -1,10 +1,5 @@
 using Managers;
-using Placeables;
-using Ui;
-using Weapons;
-using Nodes;
-using EventTypes;
-using Managers;
+
 
 namespace StateMachine
 {
@@ -16,7 +11,7 @@ namespace StateMachine
 
         public override void CheckTransitions()
         {
-            if (DayNightManager.Instance != null && DayNightManager.Instance.currentPhase == CyclePhase.UpgradePhase)
+            if (DayNightManager.Instance != null && DayNightManager.Instance.CurrentPhase == CyclePhase.UpgradePhase)
             {
                 manager.ChangeState(manager.completedState);
             }

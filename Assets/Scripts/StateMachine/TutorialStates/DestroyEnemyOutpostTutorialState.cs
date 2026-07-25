@@ -22,16 +22,16 @@ namespace StateMachine
         {
             manager.SetupOutpostPhase();
 
-            if (manager.tutorialOutpost != null)
+            if (manager.TutorialOutpost != null)
             {
-                manager.tutorialOutpost.buildings.RemoveAll(b => b == null);
-                if (manager.tutorialOutpost.buildings.Count == 0)
+                manager.TutorialOutpost.buildings.RemoveAll(b => b == null);
+                if (manager.TutorialOutpost.buildings.Count == 0)
                 {
-                    manager.hasClearedOutpost = true;
+                    manager.MarkOutpostCleared();
                 }
             }
 
-            if (manager.hasClearedOutpost)
+            if (manager.HasClearedOutpost)
             {
                 manager.ChangeState(manager.buyMinerConveyorsState);
             }

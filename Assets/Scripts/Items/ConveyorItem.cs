@@ -31,7 +31,7 @@ public class ConveyorItem : MonoBehaviour
         if (!isInitialized)
         {
             itemType = _itemData.specificItemType;
-            var center = GridManager.Instance.center;
+            var center = GridManager.Instance.Center;
             currentCell = GridManager.Instance.WorldToCellConversion(center);
             transform.position = GridManager.Instance.CellToWorldConversion(currentCell);
             targetPosition = transform.position;

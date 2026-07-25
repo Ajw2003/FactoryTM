@@ -48,7 +48,7 @@ namespace Weapons
         protected override void Start()
         {
             base.Start();
-            cam = GameManager.Instance.mainCamera;
+            cam = GameManager.Instance.MainCamera;
             ammoUI = FindFirstObjectByType<AmmoUI>();
             EventManager.Instance?.Subscribe(this, (PlayerAmmoChangedEvent e) => UpdateAmmoUI());
             UpdateAmmoUI();

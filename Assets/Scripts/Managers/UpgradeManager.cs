@@ -14,11 +14,13 @@ namespace Managers
     public class UpgradeManager : SingletonBase<UpgradeManager>
     {
         [Header("Upgrade Database")]
-        public List<UpgradeDefinition> allUpgrades = new List<UpgradeDefinition>();
+        [SerializeField] private List<UpgradeDefinition> allUpgrades = new List<UpgradeDefinition>();
+        public List<UpgradeDefinition> AllUpgrades => allUpgrades;
     
         [Header("Runtime Status")]
         public List<UpgradeDefinition> researchedUpgrades = new List<UpgradeDefinition>();
-        public List<UpgradeDefinition> activeUpgradesInShop = new List<UpgradeDefinition>();
+        [SerializeField] private List<UpgradeDefinition> activeUpgradesInShop = new List<UpgradeDefinition>();
+        public List<UpgradeDefinition> ActiveUpgradesInShop => activeUpgradesInShop;
         
         public Dictionary<BuildingType, int> buildingTiers = new Dictionary<BuildingType, int>();
 
@@ -222,8 +224,8 @@ namespace Managers
                 case UpgradeType.RaidReduction:
                     if (DayNightManager.Instance != null)
                     {
-                        DayNightManager.Instance.raidEnemyReduction += 2; // -2 enemies per wave per upgrade
-                        Debug.Log($"Applied Raid Reduction: Total reduction = {DayNightManager.Instance.raidEnemyReduction}");
+                        DayNightManager.Instance.AddRaidEnemyReduction(2); // -2 enemies per wave per upgrade
+                        Debug.Log($"Applied Raid Reduction: Total reduction = {DayNightManager.Instance.RaidEnemyReduction}");
                     }
                     break;
 

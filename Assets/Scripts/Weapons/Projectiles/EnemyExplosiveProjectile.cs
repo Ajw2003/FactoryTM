@@ -75,7 +75,7 @@ namespace Weapons
             // Hit buildings using grid check (O(Radius^2))
             if (PlacementManager.HasInstance && GridManager.Instance != null)
             {
-                Vector2 tileSize = GridManager.Instance.tileSize;
+                Vector2 tileSize = GridManager.Instance.TileSize;
                 int minX = Mathf.FloorToInt((transform.position.x - ExplosionRadius) / tileSize.x);
                 int maxX = Mathf.FloorToInt((transform.position.x + ExplosionRadius) / tileSize.x);
                 int minY = Mathf.FloorToInt((transform.position.y - ExplosionRadius) / tileSize.y);

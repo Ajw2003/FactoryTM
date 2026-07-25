@@ -40,29 +40,58 @@ namespace Managers
         public static bool HasInstance => Instance != null;
     
         [Header("Dialogue Assets (Bypassed)")]
-        public DialogueSO introDialogue;
-        public DialogueSO combatDialogue;
-    
+        [SerializeField] private DialogueSO introDialogue;
+        [SerializeField] private DialogueSO combatDialogue;
+
         [Header("State (ReadOnly)")]
         public TutorialState currentState => (CurrentState as StateMachine.BaseTutorialState)?.StateId ?? TutorialState.NotStarted;
-        
+
         [Header("Progression Variables")]
-        public int coalFedCount = 0;
-        public bool hasFiredWeapon = false;
-        public bool hasDodgeRolled = false;
-        public bool isSubscribed = false;
-    
-        public bool hasOpenedIDT = false;
-        public bool hasPurchasedWeapon = false;
-        public bool hasPurchasedAmmo = false;
-        public bool hasPurchasedHealthPack = false;
-        public bool hasClearedOutpost = false;
-        public bool hasSoldAutomatically = false;
-        
-        public bool weaponsUnlockedInShop = false;
-        public bool isAutomaticSaleSubscribed = false;
-        public bool outpostSetupDone = false;
-        public EnemyOutpost tutorialOutpost;
+        [SerializeField] private int coalFedCount = 0;
+        [SerializeField] private bool hasFiredWeapon = false;
+        [SerializeField] private bool hasDodgeRolled = false;
+        [SerializeField] private bool isSubscribed = false;
+
+        [SerializeField] private bool hasOpenedIDT = false;
+        [SerializeField] private bool hasPurchasedWeapon = false;
+        [SerializeField] private bool hasPurchasedAmmo = false;
+        [SerializeField] private bool hasPurchasedHealthPack = false;
+        [SerializeField] private bool hasClearedOutpost = false;
+        [SerializeField] private bool hasSoldAutomatically = false;
+
+        [SerializeField] private bool weaponsUnlockedInShop = false;
+        [SerializeField] private bool isAutomaticSaleSubscribed = false;
+        [SerializeField] private bool outpostSetupDone = false;
+        [SerializeField] private EnemyOutpost tutorialOutpost;
+
+        // Progression flags are driven by TutorialManager itself and read by the tutorial state
+        // classes; the two the states also need to set go through the Mark* methods below.
+        public int CoalFedCount => coalFedCount;
+        public bool HasFiredWeapon => hasFiredWeapon;
+        public bool HasDodgeRolled => hasDodgeRolled;
+        public bool IsSubscribed => isSubscribed;
+        public bool HasOpenedIDT => hasOpenedIDT;
+        public bool HasPurchasedWeapon => hasPurchasedWeapon;
+        public bool HasPurchasedAmmo => hasPurchasedAmmo;
+        public bool HasPurchasedHealthPack => hasPurchasedHealthPack;
+        public bool HasClearedOutpost => hasClearedOutpost;
+        public bool HasSoldAutomatically => hasSoldAutomatically;
+        public bool WeaponsUnlockedInShop => weaponsUnlockedInShop;
+        public bool IsAutomaticSaleSubscribed => isAutomaticSaleSubscribed;
+        public bool OutpostSetupDone => outpostSetupDone;
+        public EnemyOutpost TutorialOutpost => tutorialOutpost;
+
+        /// <summary>Records that the tutorial's target outpost has been fully destroyed.</summary>
+        public void MarkOutpostCleared()
+        {
+            hasClearedOutpost = true;
+        }
+
+        /// <summary>Records that the automatic-sale hook on the IDT has been wired up.</summary>
+        public void MarkAutomaticSaleSubscribed()
+        {
+            isAutomaticSaleSubscribed = true;
+        }
     
         private List<GameObject> activeObjectiveObjects = new List<GameObject>();
         private List<TextMeshProUGUI> objectiveTexts = new List<TextMeshProUGUI>();
@@ -128,7 +157,7 @@ namespace Managers
                 ChangeState(completedState);
                 if (DayNightManager.Instance != null)
                 {
-                    DayNightManager.Instance.isTutorialActive = false;
+                    DayNightManager.Instance.SetTutorialActive(false);
                 }
                 return;
             }
@@ -219,7 +248,7 @@ namespace Managers
             
             if (DayNightManager.Instance != null)
             {
-                DayNightManager.Instance.isTutorialActive = true;
+                DayNightManager.Instance.SetTutorialActive(true);
             }
     
             // Set player money to $0
@@ -269,7 +298,7 @@ namespace Managers
             if (EnemyOutpostManager.Instance != null)
             {
                 Vector2Int centerCell = Vector2Int.zero;
-                if (GridManager.Instance != null) centerCell = GridManager.Instance.center;
+                if (GridManager.Instance != null) centerCell = GridManager.Instance.Center;
                 
                 Vector2Int spawnPos = centerCell + new Vector2Int(16, 16);
                 tutorialOutpost = EnemyOutpostManager.Instance.SpawnTutorialOutpost(spawnPos, 4);
@@ -284,13 +313,13 @@ namespace Managers
             if (weaponsUnlockedInShop || UpgradeManager.Instance == null) return;
             weaponsUnlockedInShop = true;
     
-            foreach (var upg in UpgradeManager.Instance.allUpgrades)
+            foreach (var upg in UpgradeManager.Instance.AllUpgrades)
             {
                 if (upg != null && upg.type == UpgradeType.Weapon)
                 {
-                    if (!UpgradeManager.Instance.activeUpgradesInShop.Contains(upg))
+                    if (!UpgradeManager.Instance.ActiveUpgradesInShop.Contains(upg))
                     {
-                        UpgradeManager.Instance.activeUpgradesInShop.Add(upg);
+                        UpgradeManager.Instance.ActiveUpgradesInShop.Add(upg);
                     }
                 }
             }
@@ -307,7 +336,7 @@ namespace Managers
                 if (UpgradeManager.Instance != null)
                 {
                     List<UpgradeDefinition> toRemove = new List<UpgradeDefinition>();
-                    foreach (var upg in UpgradeManager.Instance.activeUpgradesInShop)
+                    foreach (var upg in UpgradeManager.Instance.ActiveUpgradesInShop)
                     {
                         if (upg != null && upg.type == UpgradeType.Weapon && upg != weapon)
                         {
@@ -316,7 +345,7 @@ namespace Managers
                     }
                     foreach (var upg in toRemove)
                     {
-                        UpgradeManager.Instance.activeUpgradesInShop.Remove(upg);
+                        UpgradeManager.Instance.ActiveUpgradesInShop.Remove(upg);
                     }
                     UpgradeManager.Instance.TriggerUpgradesChanged();
                 }
@@ -429,11 +458,11 @@ namespace Managers
                 DayNightManager.Instance.CompleteTutorial();
                 if (showVisual)
                 {
-                    DayNightManager.Instance.timeRemaining = 10f; // Give them a few seconds before next day starts
+                    DayNightManager.Instance.SetTimeRemaining(10f); // Give them a few seconds before next day starts
                 }
                 else
                 {
-                    DayNightManager.Instance.isTutorialActive = false;
+                    DayNightManager.Instance.SetTutorialActive(false);
                 }
             }
         }
@@ -470,7 +499,7 @@ namespace Managers
     
             if (DayNightManager.Instance != null)
             {
-                DayNightManager.Instance.isTutorialActive = true;
+                DayNightManager.Instance.SetTutorialActive(true);
             }
     
             SubscribeEvents();
@@ -625,7 +654,7 @@ namespace Managers
                     return string.Format(template, miners, conveyors);
     
                 case TutorialState.EarnAndExpand:
-                    float time = isInitial ? 25f : (DayNightManager.Instance != null ? DayNightManager.Instance.timeRemaining : 0f);
+                    float time = isInitial ? 25f : (DayNightManager.Instance != null ? DayNightManager.Instance.TimeRemaining : 0f);
                     return string.Format(template, Mathf.CeilToInt(time));
     
                 case TutorialState.DefendFirstRaid:
@@ -874,7 +903,7 @@ namespace Managers
                     break;
     
                 case TutorialState.EarnAndExpand:
-                    float timeRemaining = DayNightManager.Instance != null ? DayNightManager.Instance.timeRemaining : 0f;
+                    float timeRemaining = DayNightManager.Instance != null ? DayNightManager.Instance.TimeRemaining : 0f;
                     objectiveTexts[0].text = "[x] Automation active!";
                     objectiveTexts[1].text = "[ ] Earn credits and expand your factory";
                     objectiveTexts[2].text = timeRemaining <= 0f ? "[x] Prepare for nightfall" : $"[ ] Prepare for nightfall ({Mathf.CeilToInt(timeRemaining)}s remaining)";

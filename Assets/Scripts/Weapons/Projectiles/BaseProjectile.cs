@@ -72,7 +72,7 @@ namespace Weapons
                 transform.position.x, transform.position.y, width, height, angleRadians);
     
             if (GridManager.Instance == null) return;
-            Vector2 tileSize = GridManager.Instance.tileSize;
+            Vector2 tileSize = GridManager.Instance.TileSize;
             int minX = Mathf.FloorToInt((transform.position.x - width / 2f) / tileSize.x);
             int maxX = Mathf.FloorToInt((transform.position.x + width / 2f) / tileSize.x);
             int minY = Mathf.FloorToInt((transform.position.y - height / 2f) / tileSize.y);

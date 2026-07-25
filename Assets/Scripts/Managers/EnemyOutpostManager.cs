@@ -194,7 +194,7 @@ namespace Managers
                     }
 
                     // Keep starting area clear (within 10 tiles of (0,0) or GridManager center)
-                    Vector2Int center = GridManager.Instance != null ? GridManager.Instance.center : Vector2Int.zero;
+                    Vector2Int center = GridManager.Instance != null ? GridManager.Instance.Center : Vector2Int.zero;
                     if (Vector2Int.Distance(cell, center) < 12f)
                     {
                         continue;

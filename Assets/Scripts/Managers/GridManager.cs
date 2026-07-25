@@ -12,11 +12,18 @@ namespace Managers
     
     public class GridManager : SingletonBase<GridManager>
     {
-        public Vector2Int center = new Vector2Int(0, 0);
-    
-        public Vector2 tileSize =new (1,1);
-        public Vector2Int gridSize;
-    
+        [SerializeField] private Vector2Int center = new Vector2Int(0, 0);
+
+        [SerializeField] private Vector2 tileSize = new(1, 1);
+        [SerializeField] private Vector2Int gridSize;
+
+        /// <summary>Cell coordinate the grid is centred on (the starting zone's middle).</summary>
+        public Vector2Int Center => center;
+        /// <summary>World-space size of a single grid cell. Read every frame by placement and conveyor math.</summary>
+        public Vector2 TileSize => tileSize;
+        public Vector2Int GridSize => gridSize;
+
+
         protected override void Awake()
         {
             persistBetweenScenes = false;
@@ -58,7 +65,7 @@ namespace Managers
             // Dynamically center on the center of the starting zone (0, 0) if ZoneManager is present
             if (ZoneManager.Instance != null)
             {
-                Vector2Int zoneSize = ZoneManager.Instance.zoneSizeInTiles;
+                Vector2Int zoneSize = ZoneManager.Instance.ZoneSizeInTiles;
                 center = new Vector2Int(zoneSize.x / 2, zoneSize.y / 2);
             }
         }

@@ -18,7 +18,8 @@ namespace Managers
     
     public class UiManager : SingletonBase<UiManager>
     {
-       public TMP_Text currentCurrency;
+       [SerializeField] private TMP_Text currentCurrency;
+       public TMP_Text CurrentCurrency => currentCurrency;
        
        public GameObject StorePanel;
        public GameObject StatsPanel;

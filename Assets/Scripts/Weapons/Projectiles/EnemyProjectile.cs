@@ -40,7 +40,7 @@ namespace Weapons
             // 4. Check for building collision using dictionary
             if (PlacementManager.HasInstance && GridManager.Instance != null)
             {
-                Vector2 tileSize = GridManager.Instance.tileSize;
+                Vector2 tileSize = GridManager.Instance.TileSize;
                 int minX = Mathf.FloorToInt((transform.position.x - width / 2f) / tileSize.x);
                 int maxX = Mathf.FloorToInt((transform.position.x + width / 2f) / tileSize.x);
                 int minY = Mathf.FloorToInt((transform.position.y - height / 2f) / tileSize.y);

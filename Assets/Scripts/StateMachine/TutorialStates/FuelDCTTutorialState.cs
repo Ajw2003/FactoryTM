@@ -16,7 +16,7 @@ namespace StateMachine
 
         public override void CheckTransitions()
         {
-            if (manager.coalFedCount >= 5)
+            if (manager.CoalFedCount >= 5)
             {
                 manager.ChangeState(manager.sellOtherOresState);
                 

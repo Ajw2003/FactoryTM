@@ -60,7 +60,7 @@ namespace StateMachine
             else
             {
                 bool isVisible = true;
-                Camera mainCam = ZoneManager.Instance != null && ZoneManager.Instance.mainCamera != null ? ZoneManager.Instance.mainCamera : Camera.main;
+                Camera mainCam = ZoneManager.Instance != null && ZoneManager.Instance.MainCamera != null ? ZoneManager.Instance.MainCamera : Camera.main;
                 if (mainCam != null && GridManager.Instance != null)
                 {
                     Vector2 targetWorldPos = GridManager.Instance.CellToWorldConversion(nextCell);

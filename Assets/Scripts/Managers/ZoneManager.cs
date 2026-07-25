@@ -13,15 +13,21 @@ namespace Managers
     public class ZoneManager : SingletonBase<ZoneManager>
     {
         [Header("Settings")]
-        public Vector2Int zoneSizeInTiles = new Vector2Int(30, 15);
-        public float initialUnlockCost = 20000f;
-        public float costIncreasePerZone = 10000f;
+        [SerializeField] private Vector2Int zoneSizeInTiles = new Vector2Int(30, 15);
+        [SerializeField] private float initialUnlockCost = 20000f;
+        [SerializeField] private float costIncreasePerZone = 10000f;
+
+        /// <summary>Width/height of a single zone in grid tiles.</summary>
+        public Vector2Int ZoneSizeInTiles => zoneSizeInTiles;
+        public float InitialUnlockCost => initialUnlockCost;
+        public float CostIncreasePerZone => costIncreasePerZone;
     
         [Header("Initial Setup")]
         public List<Vector2Int> defaultUnlockedZones = new List<Vector2Int> { Vector2Int.zero };
     
         [Header("References")]
-        public Camera mainCamera;
+        [SerializeField] private Camera mainCamera;
+        public Camera MainCamera => mainCamera;
     
         private HashSet<Vector2Int> unlockedZones = new HashSet<Vector2Int>();
         private Vector2Int currentZone = Vector2Int.zero;

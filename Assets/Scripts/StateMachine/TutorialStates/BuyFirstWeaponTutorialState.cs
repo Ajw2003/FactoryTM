@@ -21,7 +21,7 @@ namespace StateMachine
         public override void CheckTransitions()
         {
             manager.UnlockWeaponsInShop();
-            if (manager.hasPurchasedWeapon)
+            if (manager.HasPurchasedWeapon)
             {
                 manager.ChangeState(manager.buyAmmoHealthState);
             }

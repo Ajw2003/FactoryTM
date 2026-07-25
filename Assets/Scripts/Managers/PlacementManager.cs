@@ -57,7 +57,7 @@ namespace Managers
         {
             mainTilemap = GameManager.Instance.BuildingTileMap;
             cam = Camera.main;
-            playerController = GameManager.Instance.playerController;
+            playerController = GameManager.Instance.PlayerController;
         }
     
         void Update()

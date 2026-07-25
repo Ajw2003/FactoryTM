@@ -131,7 +131,7 @@ namespace Ui
         private void OnUpgradesChanged()
         {
             if (!UpgradeManager.HasInstance) return;
-            var shop = UpgradeManager.Instance.activeUpgradesInShop;
+            var shop = UpgradeManager.Instance.ActiveUpgradesInShop;
             foreach (var upg in shop)
             {
                 if (upg == null) continue;
@@ -555,9 +555,9 @@ namespace Ui
             if (canvasTransform == null) return;
             
             GameObject moneyUiObj = null;
-            if (UiManager.Instance != null && UiManager.Instance.currentCurrency != null)
+            if (UiManager.Instance != null && UiManager.Instance.CurrentCurrency != null)
             {
-                moneyUiObj = UiManager.Instance.currentCurrency.gameObject;
+                moneyUiObj = UiManager.Instance.CurrentCurrency.gameObject;
             }
             else
             {

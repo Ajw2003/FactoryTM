@@ -58,9 +58,9 @@ public class CartelMember : MonoBehaviour, IHealth
     void Start()
     {
         Setup();
-        if (GameManager.Instance != null && GameManager.Instance.playerController != null)
+        if (GameManager.Instance != null && GameManager.Instance.PlayerController != null)
         {
-            target = GameManager.Instance.playerController.gameObject;
+            target = GameManager.Instance.PlayerController.gameObject;
         }
         weapon = GetComponent<EnemyWeapon>();
         if (weapon != null)
@@ -93,7 +93,7 @@ public class CartelMember : MonoBehaviour, IHealth
 
                 if (PlacementManager.HasInstance && GridManager.Instance != null)
                 {
-                    Vector2 tileSize = GridManager.Instance.tileSize;
+                    Vector2 tileSize = GridManager.Instance.TileSize;
                     int minX = Mathf.FloorToInt((nextPos.x - width / 2f) / tileSize.x);
                     int maxX = Mathf.FloorToInt((nextPos.x + width / 2f) / tileSize.x);
                     int minY = Mathf.FloorToInt((nextPos.y - height / 2f) / tileSize.y);
@@ -170,9 +170,9 @@ public class CartelMember : MonoBehaviour, IHealth
         if (forceTargetTimer > 0f)
         {
             forceTargetTimer -= Time.deltaTime;
-            if (GameManager.Instance != null && GameManager.Instance.playerController != null)
+            if (GameManager.Instance != null && GameManager.Instance.PlayerController != null)
             {
-                target = GameManager.Instance.playerController.gameObject;
+                target = GameManager.Instance.PlayerController.gameObject;
                 return;
             }
         }
@@ -184,18 +184,18 @@ public class CartelMember : MonoBehaviour, IHealth
         float minDistance = float.MaxValue;
         GameObject closest = null;
 
-        if (GameManager.Instance != null && GameManager.Instance.playerController != null)
+        if (GameManager.Instance != null && GameManager.Instance.PlayerController != null)
         {
-            float playerDist = Vector3.Distance(transform.position, GameManager.Instance.playerController.transform.position);
+            float playerDist = Vector3.Distance(transform.position, GameManager.Instance.PlayerController.transform.position);
             
             if (playerDist <= engagementDistance)
             {
-                target = GameManager.Instance.playerController.gameObject;
+                target = GameManager.Instance.PlayerController.gameObject;
                 return;
             }
 
             minDistance = playerDist;
-            closest = GameManager.Instance.playerController.gameObject;
+            closest = GameManager.Instance.PlayerController.gameObject;
         }
 
         if (BuildingManager.HasInstance)

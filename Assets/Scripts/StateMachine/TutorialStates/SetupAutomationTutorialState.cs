@@ -17,23 +17,23 @@ namespace StateMachine
 
         public override void Enter()
         {
-            if (InterDimensionalTransporter.Instance != null && !manager.isAutomaticSaleSubscribed)
+            if (InterDimensionalTransporter.Instance != null && !manager.IsAutomaticSaleSubscribed)
             {
                 InterDimensionalTransporter.Instance.OnItemSold += manager.HandleAutomaticSale;
-                manager.isAutomaticSaleSubscribed = true;
+                manager.MarkAutomaticSaleSubscribed();
             }
             base.Enter();
         }
 
         public override void CheckTransitions()
         {
-            if (InterDimensionalTransporter.Instance != null && !manager.isAutomaticSaleSubscribed)
+            if (InterDimensionalTransporter.Instance != null && !manager.IsAutomaticSaleSubscribed)
             {
                 InterDimensionalTransporter.Instance.OnItemSold += manager.HandleAutomaticSale;
-                manager.isAutomaticSaleSubscribed = true;
+                manager.MarkAutomaticSaleSubscribed();
             }
 
-            if (manager.hasSoldAutomatically)
+            if (manager.HasSoldAutomatically)
             {
                 manager.ChangeState(manager.earnAndExpandState);
             }
@@ -43,8 +43,8 @@ namespace StateMachine
         {
             if (DayNightManager.Instance != null)
             {
-                DayNightManager.Instance.isTutorialActive = false;
-                DayNightManager.Instance.timeRemaining = 25f; // Night in 25s
+                DayNightManager.Instance.SetTutorialActive(false);
+                DayNightManager.Instance.SetTimeRemaining(25f); // Night in 25s
             }
         }
     }

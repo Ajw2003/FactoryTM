@@ -173,14 +173,14 @@ namespace Managers
         {
             Vector3 center = Vector3.zero;
     
-            if (GameManager.Instance.playerController != null)
+            if (GameManager.Instance.PlayerController != null)
             {
-                center = GameManager.Instance.playerController.transform.position;
+                center = GameManager.Instance.PlayerController.transform.position;
             }
             else if (ZoneManager.Instance != null)
             {
                 Vector2Int zoneCoords = ZoneManager.Instance.GetCurrentZone();
-                Vector2Int zoneSize = ZoneManager.Instance.zoneSizeInTiles;
+                Vector2Int zoneSize = ZoneManager.Instance.ZoneSizeInTiles;
                 float centerX = (zoneCoords.x * zoneSize.x) + (zoneSize.x / 2f);
                 float centerY = (zoneCoords.y * zoneSize.y) + (zoneSize.y / 2f);
                 center = new Vector3(centerX, centerY, 0);

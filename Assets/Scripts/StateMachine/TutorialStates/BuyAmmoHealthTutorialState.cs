@@ -15,7 +15,7 @@ namespace StateMachine
         public override void CheckTransitions()
         {
             bool isStoreOpen = UiManager.Instance != null && UiManager.Instance.StorePanel != null && UiManager.Instance.StorePanel.activeSelf;
-            if (manager.hasPurchasedAmmo && manager.hasPurchasedHealthPack && !isStoreOpen)
+            if (manager.HasPurchasedAmmo && manager.HasPurchasedHealthPack && !isStoreOpen)
             {
                 manager.ChangeState(manager.destroyOutpostState);
             }

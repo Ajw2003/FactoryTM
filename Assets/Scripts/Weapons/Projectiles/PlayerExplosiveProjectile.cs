@@ -43,7 +43,7 @@ namespace Weapons
             // Check enemy-owned buildings
             if (!hit && PlacementManager.HasInstance && GridManager.Instance != null)
             {
-                Vector2 tileSize = GridManager.Instance.tileSize;
+                Vector2 tileSize = GridManager.Instance.TileSize;
                 int minX = Mathf.FloorToInt((transform.position.x - width / 2f) / tileSize.x);
                 int maxX = Mathf.FloorToInt((transform.position.x + width / 2f) / tileSize.x);
                 int minY = Mathf.FloorToInt((transform.position.y - height / 2f) / tileSize.y);
@@ -101,7 +101,7 @@ namespace Weapons
             // Deal damage to all enemy-owned buildings within ExplosionRadius
             if (PlacementManager.HasInstance && GridManager.Instance != null)
             {
-                Vector2 tileSize = GridManager.Instance.tileSize;
+                Vector2 tileSize = GridManager.Instance.TileSize;
                 int minX = Mathf.FloorToInt((transform.position.x - ExplosionRadius) / tileSize.x);
                 int maxX = Mathf.FloorToInt((transform.position.x + ExplosionRadius) / tileSize.x);
                 int minY = Mathf.FloorToInt((transform.position.y - ExplosionRadius) / tileSize.y);

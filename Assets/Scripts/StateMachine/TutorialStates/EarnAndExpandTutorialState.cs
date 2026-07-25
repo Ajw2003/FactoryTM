@@ -16,7 +16,7 @@ namespace StateMachine
 
         public override void CheckTransitions()
         {
-            if (DayNightManager.Instance != null && DayNightManager.Instance.currentPhase == CyclePhase.Evening)
+            if (DayNightManager.Instance != null && DayNightManager.Instance.CurrentPhase == CyclePhase.Evening)
             {
                 manager.ChangeState(manager.defendFirstRaidState);
             }

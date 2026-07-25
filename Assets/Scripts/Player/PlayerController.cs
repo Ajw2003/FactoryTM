@@ -88,12 +88,12 @@ public class PlayerController : MonoBehaviour, IHealth
         Vector2Int spawnCell = Vector2Int.zero;
         if (ZoneManager.Instance != null)
         {
-            Vector2Int zoneSize = ZoneManager.Instance.zoneSizeInTiles;
+            Vector2Int zoneSize = ZoneManager.Instance.ZoneSizeInTiles;
             spawnCell = new Vector2Int(zoneSize.x / 2, zoneSize.y / 2);
         }
         else if (GridManager.Instance != null)
         {
-            spawnCell = GridManager.Instance.center;
+            spawnCell = GridManager.Instance.Center;
         }
 
         // Shift player 2 cells north of IDT center to prevent overlap
@@ -243,7 +243,7 @@ public class PlayerController : MonoBehaviour, IHealth
                     if (citem != null) rType = citem._itemData;
                 }
 
-                if (GameManager.Instance != null && GameManager.Instance.finiteOres)
+                if (GameManager.Instance != null && GameManager.Instance.FiniteOres)
                 {
                     node.oreCount--;
                 }

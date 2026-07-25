@@ -25,19 +25,44 @@ namespace Managers
     public class DayNightManager : SingletonBase<DayNightManager>
     {
         [Header("Cycle Settings")]
-        public float dayDuration = 90f; // Duration of day in seconds
-        public int currentDay = 1;
-        public CyclePhase currentPhase = CyclePhase.Day;
-        public bool isTutorialActive = true;
-    
+        [SerializeField] private float dayDuration = 90f; // Duration of day in seconds
+        [SerializeField] private int currentDay = 1;
+        [SerializeField] private CyclePhase currentPhase = CyclePhase.Day;
+        [SerializeField] private bool isTutorialActive = true;
+
         [Header("Raid Settings per Day")]
-        public int baseEnemiesPerWave = 3;
-        public int wavesPerRaid = 2;
-        public float waveInterval = 10f;
-        public int raidEnemyReduction = 0;
-    
+        [SerializeField] private int baseEnemiesPerWave = 3;
+        [SerializeField] private int wavesPerRaid = 2;
+        [SerializeField] private float waveInterval = 10f;
+        [SerializeField] private int raidEnemyReduction = 0;
+
         [Header("UI Reference")]
-        public float timeRemaining;
+        [SerializeField] private float timeRemaining;
+
+        public float DayDuration => dayDuration;
+        public int CurrentDay => currentDay;
+        public CyclePhase CurrentPhase => currentPhase;
+        public bool IsTutorialActive => isTutorialActive;
+        public int RaidEnemyReduction => raidEnemyReduction;
+        public float TimeRemaining => timeRemaining;
+
+        /// <summary>Suspends/resumes day-cycle progression while the tutorial drives pacing.</summary>
+        public void SetTutorialActive(bool value)
+        {
+            isTutorialActive = value;
+        }
+
+        /// <summary>Overrides the countdown to the next phase, used by the tutorial to pace transitions.</summary>
+        public void SetTimeRemaining(float seconds)
+        {
+            timeRemaining = seconds;
+        }
+
+        /// <summary>Permanently reduces how many enemies each raid wave spawns.</summary>
+        public void AddRaidEnemyReduction(int amount)
+        {
+            raidEnemyReduction += amount;
+        }
         private bool isRaidStarted = false;
         private bool raidHasBegun = false; // True only once enemies have actually spawned
         private float raidSettleTimer = 0f;

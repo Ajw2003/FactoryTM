@@ -21,26 +21,36 @@ namespace Managers
     public class GameManager : SingletonBase<GameManager>
     {
         [Header("Global Variables")]
-        public Camera mainCamera;
+        [SerializeField] private Camera mainCamera;
+        public Camera MainCamera => mainCamera;
         
         [Header("Data Config")]
-        public BuildingData[] allBuildings;
+        [SerializeField] private BuildingData[] allBuildings;
         public Tilemap MainTileMap;
         public Tilemap BuildingTileMap;
         public Tilemap OreTileMap; // Ground tile painted under a spawned ResourceNode, see ResourceNode.Setup
-        public TileBase sellerTile;
-        public bool finiteOres;
-    
+        [SerializeField] private TileBase sellerTile;
+        [SerializeField] private bool finiteOres;
+
         [Header("Resource Node Spawning")]
-        public ResourceNodeDefinition[] resourceNodeDefinitions;
-        public int minPatchSize = 3;
-        public int maxPatchSize = 7;
+        [SerializeField] private ResourceNodeDefinition[] resourceNodeDefinitions;
+        [SerializeField] private int minPatchSize = 3;
+        [SerializeField] private int maxPatchSize = 7;
         [Range(0f, 1f)]
-        public float patchSpawnChance = 0.05f; // Chance for a patch to start at a given cell
-    
+        [SerializeField] private float patchSpawnChance = 0.05f; // Chance for a patch to start at a given cell
+
         // This list will store the ConveyorItem components of the plate prefabs
-        public List<ConveyorItem> Plates; 
-        public PlayerController playerController;
+        public List<ConveyorItem> Plates;
+        [SerializeField] private PlayerController playerController;
+
+        public BuildingData[] AllBuildings => allBuildings;
+        public TileBase SellerTile => sellerTile;
+        public bool FiniteOres => finiteOres;
+        public ResourceNodeDefinition[] ResourceNodeDefinitions => resourceNodeDefinitions;
+        public int MinPatchSize => minPatchSize;
+        public int MaxPatchSize => maxPatchSize;
+        public float PatchSpawnChance => patchSpawnChance;
+        public PlayerController PlayerController => playerController;
     
         // The "Brain": Maps a specific Tile asset to a Direction
         private Dictionary<TileBase, Vector2Int> tileDirectionMap = new Dictionary<TileBase, Vector2Int>();
@@ -157,12 +167,12 @@ namespace Managers
             Vector2Int centerCell = Vector2Int.zero;
             if (ZoneManager.Instance != null)
             {
-                Vector2Int zoneSize = ZoneManager.Instance.zoneSizeInTiles;
+                Vector2Int zoneSize = ZoneManager.Instance.ZoneSizeInTiles;
                 centerCell = new Vector2Int(zoneSize.x / 2, zoneSize.y / 2);
             }
             else if (GridManager.Instance != null)
             {
-                centerCell = GridManager.Instance.center;
+                centerCell = GridManager.Instance.Center;
             }
     
             if (PlacementManager.Instance != null)
@@ -323,12 +333,12 @@ namespace Managers
             Vector2Int centerCell = Vector2Int.zero;
             if (ZoneManager.Instance != null)
             {
-                Vector2Int zoneSize = ZoneManager.Instance.zoneSizeInTiles;
+                Vector2Int zoneSize = ZoneManager.Instance.ZoneSizeInTiles;
                 centerCell = new Vector2Int(zoneSize.x / 2, zoneSize.y / 2);
             }
             else if (GridManager.Instance != null)
             {
-                centerCell = GridManager.Instance.center;
+                centerCell = GridManager.Instance.Center;
             }
     
             // Protect IDT cells so nodes don't spawn under/on the IDT

@@ -7,6 +7,78 @@ and in `docs/decisions/`; this file links out rather than duplicating them.
 
 ---
 
+## 2026-07-25b — Remaining hard-reference clusters: manager encapsulation
+
+Follow-on to the entry below, which deferred 11 clusters. Re-audited them from scratch rather than
+trusting the earlier inventory.
+
+### Investigated
+- Enumerated every `public` field on `GameManager`, `GridManager`, `UiManager`, `UpgradeManager`,
+  `DayNightManager`, `ZoneManager`, `BuildingUiManager`, `TutorialManager`, then counted external
+  reference sites and, separately, external **write** sites.
+- The "11 clusters" turned out to be far smaller than the original framing suggested:
+  - **`BuildingUiManager` hover state was already done** — `HoveredBuilding`/`HoveredNode`/
+    `HoveredItem`/`HoveredInteractable` are already `{ get; private set; }`. No work needed.
+  - **Only 3 genuine cross-subsystem writes existed**, all *into* `DayNightManager`:
+    `isTutorialActive` (5 sites), `timeRemaining` (2), `raidEnemyReduction` (1).
+  - 3 further writes were same-subsystem (tutorial states writing their own `TutorialManager`
+    flags), plus 1 from an Editor tool (`GrassDirtBlendEditor` → `GameManager.OreTileMap`).
+  - The remaining ~23 fields were **read-only polling** — `MainTileMap` (12 reads),
+    `ActiveEnemies` (15), `playerController` (11), `tileSize` (8), `resourceNodeDefinitions` (6)…
+
+### Decided
+- Same split as the previous pass: writes get methods, polling reads get tightened encapsulation.
+- **`[SerializeField] private` keeping the exact field name, plus a PascalCase getter.** This keeps
+  every scene/prefab YAML key valid, so no `[FormerlySerializedAs]` and no scene re-serialization.
+  `Gamemanager.prefab` alone holds `minPatchSize: 6` / `maxPatchSize: 12` (code defaults 3/7), 8
+  `resourceNodeDefinitions` and 4 `allBuildings` references — an auto-property conversion would
+  have silently dropped all of it, exactly the trap avoided last pass.
+- **Deliberately left alone**: the 9 already-PascalCase public fields (`MainTileMap`,
+  `BuildingTileMap`, `OreTileMap`, `Plates`, `ActiveEnemies`, `Hearts`, `StorePanel`, `StatsPanel`,
+  `GameOverPanel`). Encapsulating them requires renaming the backing field, which needs
+  `[FormerlySerializedAs]` and rewrites the scene/prefab files. Deferred as a follow-up.
+- `TutorialManager`'s two state-written flags got explicit `Mark*` methods rather than staying raw
+  public fields — a raw cross-class field write is what this refactor targets regardless of
+  subsystem, unlike `BuildingManager.NotifyBuildingDamaged()`, which was already a method call.
+
+### Changed
+- `Managers/DayNightManager.cs` — all 9 cycle/raid fields to `[SerializeField] private` + getters
+  (`DayDuration`, `CurrentDay`, `CurrentPhase`, `IsTutorialActive`, `RaidEnemyReduction`,
+  `TimeRemaining`). New `SetTutorialActive(bool)`, `SetTimeRemaining(float)`,
+  `AddRaidEnemyReduction(int)`; 8 external call sites in `TutorialManager.cs`,
+  `SetupAutomationTutorialState.cs` and `UpgradeManager.cs` migrated off direct writes.
+- `Managers/GameManager.cs` — `mainCamera`, `allBuildings`, `sellerTile`, `finiteOres`,
+  `resourceNodeDefinitions`, `minPatchSize`, `maxPatchSize`, `patchSpawnChance`, `playerController`
+  encapsulated behind getters.
+- `Managers/GridManager.cs` — `center`, `tileSize`, `gridSize` → `Center`, `TileSize`, `GridSize`.
+- `Managers/ZoneManager.cs` — `zoneSizeInTiles`, `initialUnlockCost`, `costIncreasePerZone`,
+  `mainCamera` encapsulated.
+- `Managers/UpgradeManager.cs` — `allUpgrades`, `activeUpgradesInShop` → `AllUpgrades`,
+  `ActiveUpgradesInShop`.
+- `Managers/UiManager.cs` — `currentCurrency` → `CurrentCurrency`.
+- `Managers/TutorialManager.cs` — all 14 progression flags plus `introDialogue`/`combatDialogue`
+  encapsulated; added `MarkOutpostCleared()` and `MarkAutomaticSaleSubscribed()`. All 11 call sites
+  across `StateMachine/TutorialStates/` migrated.
+
+### Verification
+- Full Roslyn compile: **0 errors**.
+- **Serialization audit**: extracted every serialized YAML key from each manager's scene/prefab
+  block and confirmed it still maps to a field of the same name in code. All accounted for
+  (`detachFromParent` and `currentStateName` resolve to the `SingletonBase` / `BaseStateMachine`
+  base classes).
+- Editor scripts confirmed to reference none of the renamed members.
+- Not playtested.
+
+### Follow-ups
+- The 9 PascalCase public fields above, if the scene/prefab churn from `[FormerlySerializedAs]` is
+  acceptable.
+- `GameManager.OreTileMap` is written by `Assets/Scripts/Editor/GrassDirtBlendEditor.cs`; it must
+  stay settable (or gain an editor-only setter) if it is ever encapsulated.
+- Exposing `AllUpgrades` / `ActiveUpgradesInShop` / `Plates` as `List<T>` getters still lets callers
+  `.Add()` into them. `IReadOnlyList<T>` would close that if it ever matters.
+
+---
+
 ## 2026-07-25 — Event-system refactor: PlayerController / BuildingLogic + dead-event cleanup
 
 ### Investigated
@@ -105,12 +177,7 @@ and in `docs/decisions/`; this file links out rather than duplicating them.
 - Not yet playtested in the editor — see follow-ups.
 
 ### Follow-ups
-- **Playtest**: damage/heal the player, buy armor/health/ammo/dodge/stamina upgrades, fire+reload
-  (ammo UI), toggle build/combat mode, destroy a player building, capture/lose an outpost building
-  (`isEnemyOwned` flip and turret `isEnemyFired` follow-through).
-- **11 remaining hard-reference clusters, out of scope this pass**: TutorialManager flags;
-  GameManager, GridManager, UiManager, UpgradeManager, DayNightManager and ZoneManager singleton
-  public fields; BuildingUiManager hover state.
+- ~~11 remaining hard-reference clusters~~ — addressed in the 2026-07-25b entry above.
 - **`PlacementManager` / `HotbarManager` poll raw `Input` directly** rather than using the Input
   System actions that are still bound in `PlayerInputController`. Migrating them is a separate
   change; until then those five input handlers are intentionally empty.

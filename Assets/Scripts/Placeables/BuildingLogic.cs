@@ -118,7 +118,7 @@ namespace Placeables
         /// <summary>World position aligned to the entry boundary of targetCell for an item traveling in the given direction.</summary>
         protected Vector2 GetEdgeSpawnPosition(Vector2Int targetCell, Vector2Int direction)
         {
-            Vector2 tileSize = GridManager.Instance.tileSize;
+            Vector2 tileSize = GridManager.Instance.TileSize;
             if (direction.x > 0) return new Vector2(targetCell.x * tileSize.x, (targetCell.y + 0.5f) * tileSize.y);
             if (direction.x < 0) return new Vector2((targetCell.x + 1) * tileSize.x, (targetCell.y + 0.5f) * tileSize.y);
             if (direction.y > 0) return new Vector2((targetCell.x + 0.5f) * tileSize.x, targetCell.y * tileSize.y);
@@ -183,7 +183,7 @@ namespace Placeables
             go.transform.SetParent(transform, false);
 
             Vector2 cellCenter = GridManager.Instance.CellToWorldConversion(edgeCell);
-            Vector2 tileSize = GridManager.Instance.tileSize;
+            Vector2 tileSize = GridManager.Instance.TileSize;
             Vector2 edgeOffset = new Vector2(edgeOutwardDir.x * tileSize.x * 0.5f, edgeOutwardDir.y * tileSize.y * 0.5f);
             go.transform.position = new Vector3(cellCenter.x + edgeOffset.x, cellCenter.y + edgeOffset.y, -0.05f);
 
