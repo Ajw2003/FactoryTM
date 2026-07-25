@@ -1,0 +1,99 @@
+# FactoryTM To-Do List
+
+## ⚖️ Game Balance & Tuning
+- [ ] Balance prices, ore yields, ore sale value, enemy spawns, day lengths, and damage for and from player.
+- [ ] Add logic to change length of days based on certain factors (money earned, upgrades purchased, days survived, etc.). Default the first day to 90 seconds, and subsequent days can be shorter or longer.
+- [ ] Lower the curve for enemy spawn rates in the beginning; add more time between rounds.
+
+## ⚙️ Mechanics & Gameplay
+- [ ] Make essential upgrades appear first in upgrade selection (turrets, walls, health packs).
+- [/] Fix not being able to place a tile on valid empty space with items on it, OR make conveyors not move items onto empty spaces.
+- [ ] Fully implement finite resources: remove resource nodes when depleted (and update grid cell data/visuals).
+- [ ] Implement enemy wandering and differentiation between raiders and spawned enemies in structures.
+- [ ] Make the starting store menu contain only the weapons page and consumables pages (ammo and health), then remove all weapons after player has chosen a weapon and revert store to previous default state.
+- [ ] Deprecate the seller building: ground the UI/design for this change, retain its logic but make it no longer purchasable or an upgrade.
+
+## 📖 Story & Narrative
+- [ ] Expand the story: Give the player a reason to progress and a driving motivation. (e.g., sending resources to your home world, but why? Why is your species okay with wiping out Earth?)
+- [ ] Refactor the tutorial into a story with an AI (like Cortana) that briefs you on your mission and teaches you when you get stuck.
+- [ ] Add a tutorial section dictating that you send items back home through the interdimensional transport (which you can only have 1 of). If you die or your IDT is broken, you lose.
+
+## 🎓 Tutorial System Improvements
+- [ ] Add a tutorial section for land expansion and explanation of ore value.
+- [ ] Add a tutorial section for purchasing ammo and using health packs (trigger when ammo reserve or health is low and deprecate the section from where it lies currently).
+- [ ] Create a better shooting tutorial/introduction.
+- [ ] Fix objectives not being large enough / just being copy-pastes of the existing tutorial text; make objectives a quick 1-3 word synopsis of the task.
+- [ ] Make objectives an itemized list that can be listened to, where completion of each individual objective (and all objectives in a given state) fires an event.
+- [ ] Make completing all objectives able to trigger actions (e.g., closing the store UI after all upgrades are purchased).
+
+## 🎨 UI/UX & Aesthetics
+- [ ] Make objectives and current dialogue scale to fit inside the console window when the store UI window is open.
+- [ ] Make all text larger and ignore blur or chromatic aberration post-process effects.
+- [ ] Improve UI contrast, color choices, and general style unification.
+-     make objectives ui more appealing
+- fix store not dynamically changing layout based on tutorial stages properly, if looking for weapons to purchase or ammo and health only show those items in the store until that stage of tutorial is over 
+- [ ] Adjust existing hotbar ui and IDT inventory slots ui to become a Minecraft-style hotbar UI with scrolling or hovering mouse over a given slot to view the name of a given item.
+
+## 🏆 Progression & Meta
+- [ ] Add difficulty settings.
+- [ ] Add achievements.
+- [ ] Add random weapon modifiers and build weapons like noita 
+-BElT SPLITTERS
+-belts with multiple tracks for multiple items inline
+- add day night cycle where it gradually gets darker but ensuring everything still remains relatively visible until nightfall where night vis kicks in
+
+## 🧹 Code Architecture & Cleanup
+
+## Fixes
+- fix dialogue ui disappearing after pressing space when to close or move to next and then reappearing after any action is completed i.e. an ore being sold or a menu opened
+-fix tutorial complete raid detected ui playing when first wave night cleared by removing this ui instead
+[x] fix miners not using the same system as the IDT for item insertion, all building uis should contain the same resources ui and click and dragging into a given location for inserting or outputting (Chest now has real multi-slot storage + drag UI; Miner/Furnace get passive in/out slots; see history log)
+- fix health ui not existing anymore
+
+[x] add intake and output to all buildings both functionally and visually for the sprites. (Furnace/Miner/Chest/Conveyor; Turret & Wall skipped, see history log)
+
+[x] Ensure the IDT can take input from all 4 sides and that every other building has one input and one output directly oposite eachother
+make items take up less space and sit closer on conveyors
+Fix conveyor sprites from being different speeds and not tiling animations properly
+Fix debugs and remove or disable safely
+
+
+
+Migrate all items to new item data system including buildings this means generating itemdata for each and assigning specificItemTypes to each instead of resource types as before.
+Make all buildings with input or output use the new inventory slots for their systems and hook up input and output to increase and decrease the item count in the respective slots after an operation, i.e. cooking ore in a furnace or selling items to the IDT
+Make rendered items for dragging appear over top of existing ui elements
+make right-clicking grab all of the items in a slot and left-clicking only grab 1 at a time
+make grabbing an item from an inventory slot automatically pick up the item and allow dragging instantly instead of the current spawn then grab logic
+make buildings work with new item logic completely placing and adding to the new inventory slot based hotbar when purchased from the store
+
+
+Fix enemies being able to attack you from zones you don't own yet, make it so they cannot attack until crossing into your owned zones
+
+make mining ore use left or right click instead of e so you can have an easier time trying to open the store
+
+fix health not displaying and add damage flash to screen when you take damage and bigger effects when enemies are shot, blood, explosions, bullet holes ect
+
+fix ui elements all on left side distribute better across the screen but not blocking the view of the player.
+
+particles and anims for every building and every ore processed 
+
+sounds for every action by a player, building, ui element or npc
+
+ui to show how many health packs you have currently
+
+adding an item via input from a conveyor or building should increase the counter of the items inside the building as well i.e. coal fed by conveyor not getting added to the amount of coal inside the idt.
+
+Make grass and vegitation programatically disapear as you progress to show the world detiriorating as you strip the planet of resources.
+
+Figure out programatic grass and dirt distrobution with correct functionality to place blending tiles on the blend layers with the correct rotation. 
+
+there are 7 peices and each can be placed and rotated to orient in one of the 4 cardinal directions to correctly tile with similar functionality to rule tiles but that works with two tile maps 1 as the base and 1 for the blending peices to be overlayed programatically
+
+
+
+
+
+
+
+
+

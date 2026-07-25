@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8eb320c0288e4fd44bf86cba11711f91, type: 3}
+  m_Name: QuartzDef
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceNodeDefinition
+  minedItemPrefab: {fileID: 4074567141104984735, guid: 046bc710a82406a4ba3fe0a8aa7bbdc9, type: 3}
+  miningSpeed: 1
+  resourceNodePrefab: {fileID: 7168288065874615922, guid: 23c7d43c63ca5eb49bbe524bc6515f31, type: 3}
+  spawnWeight: 0.15
+  oreCount: 1000
+  oreGroundTile: {fileID: 11400000, guid: aa09c1d0531df1e40a633e0adb17c94a, type: 2}

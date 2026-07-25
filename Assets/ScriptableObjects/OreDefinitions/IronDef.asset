@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8eb320c0288e4fd44bf86cba11711f91, type: 3}
+  m_Name: IronDef
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceNodeDefinition
+  minedItemPrefab: {fileID: 4074567141104984735, guid: 422828d1736f7a448883c3863bcd8ae4, type: 3}
+  miningSpeed: 1
+  resourceNodePrefab: {fileID: 7168288065874615922, guid: a3232a6ec8fd9b14cae816ded1785821, type: 3}
+  spawnWeight: 0.5
+  oreCount: 1000
+  oreGroundTile: {fileID: 11400000, guid: 0d1f3cfafbd96584a9acafeccc109a65, type: 2}
