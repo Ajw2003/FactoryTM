@@ -94,6 +94,10 @@ and in `docs/decisions/`; this file links out rather than duplicating them.
 - Stripped the now-dangling `using EventTypes.InventoryEvents;` / `using EventTypes.InputEvents;`
   boilerplate from 114 files — those namespaces contained only deleted types, so leaving the
   directives would have broken every file.
+- Removed the `EventTypes/InventoryEvents/`, `EventTypes/InputEvents/` and
+  `EventTypes/PuzzleEvents/BlackJack/` folders outright (`AddItemEvent`, the duplicate
+  `InventoryItemEvent`, `InputToggleEvent`, and the three BlackJack events — no BlackJack feature
+  exists anywhere in the codebase), along with their `.meta` files.
 
 ### Verification
 - Compiled the full `Assembly-CSharp` source set with Unity 6000.3.10f1's Roslyn
@@ -101,12 +105,6 @@ and in `docs/decisions/`; this file links out rather than duplicating them.
 - Not yet playtested in the editor — see follow-ups.
 
 ### Follow-ups
-- **Finish the dead-event file deletion.** Six zero-reference files are still on disk (the tooling
-  blocked their removal): `EventTypes/InventoryEvents/{AddItemEvent,InventoryItemEvent}.cs`,
-  `EventTypes/InputEvents/InputToggleEvent.cs`, `EventTypes/PuzzleEvents/BlackJack/*.cs` (3). Also
-  orphaned `.cs.meta` files for the 9 already-deleted scripts, plus the `InventoryEvents.meta`,
-  `InputEvents.meta`, `PuzzleEvents.meta` folder metas. Nothing references them, so the project
-  compiles as-is; deleting them now needs no further code changes.
 - **Playtest**: damage/heal the player, buy armor/health/ammo/dodge/stamina upgrades, fire+reload
   (ammo UI), toggle build/combat mode, destroy a player building, capture/lose an outpost building
   (`isEnemyOwned` flip and turret `isEnemyFired` follow-through).
