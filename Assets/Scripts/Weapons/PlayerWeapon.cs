@@ -56,7 +56,12 @@ namespace Weapons
 
         private void OnDestroy()
         {
-            EventManager.Instance?.UnsubscribeFromAllEvents(this);
+            // HasInstance, not Instance: the Instance getter creates a replacement singleton if
+            // one does not exist, spawning a stray EventManager during scene teardown.
+            if (EventManager.HasInstance)
+            {
+                EventManager.Instance.UnsubscribeFromAllEvents(this);
+            }
         }
     
         protected override void Update()

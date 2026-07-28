@@ -517,6 +517,9 @@ namespace Managers
                 // Assign properties from definition
                 resourceNode.minedItemPrefab = definition.minedItemPrefab;
                 resourceNode.miningSpeed = definition.miningSpeed;
+                // Without this the node's reserve stays 0, so every miner immediately fails its
+                // "oreCount <= 0" check and finite ores produce nothing at all.
+                resourceNode.oreCount = definition.oreCount;
             }
             else
             {

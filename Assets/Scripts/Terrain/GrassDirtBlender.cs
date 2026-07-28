@@ -51,6 +51,10 @@ namespace TerrainBlending
 
         public void RecomputeRegion(BoundsInt area)
         {
+            // Tilemaps are destroyed before the ResourceNodes that notify us on teardown, so a
+            // stop-play or scene reload would otherwise throw MissingReferenceException per cell.
+            if (baseTilemap == null || blendTilemap == null) return;
+
             foreach (Vector3Int cell in area.allPositionsWithin)
             {
                 RecomputeCell(cell);

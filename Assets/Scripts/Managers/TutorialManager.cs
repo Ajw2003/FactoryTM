@@ -61,6 +61,7 @@ namespace Managers
 
         [SerializeField] private bool weaponsUnlockedInShop = false;
         [SerializeField] private bool isAutomaticSaleSubscribed = false;
+        [SerializeField] private bool isFuelSubscribed = false;
         [SerializeField] private bool outpostSetupDone = false;
         [SerializeField] private EnemyOutpost tutorialOutpost;
 
@@ -78,6 +79,7 @@ namespace Managers
         public bool HasSoldAutomatically => hasSoldAutomatically;
         public bool WeaponsUnlockedInShop => weaponsUnlockedInShop;
         public bool IsAutomaticSaleSubscribed => isAutomaticSaleSubscribed;
+        public bool IsFuelSubscribed => isFuelSubscribed;
         public bool OutpostSetupDone => outpostSetupDone;
         public EnemyOutpost TutorialOutpost => tutorialOutpost;
 
@@ -91,6 +93,12 @@ namespace Managers
         public void MarkAutomaticSaleSubscribed()
         {
             isAutomaticSaleSubscribed = true;
+        }
+
+        /// <summary>Records that the fuel-added hook on the IDT has been wired up.</summary>
+        public void MarkFuelSubscribed()
+        {
+            isFuelSubscribed = true;
         }
     
         private List<GameObject> activeObjectiveObjects = new List<GameObject>();

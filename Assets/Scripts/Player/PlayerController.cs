@@ -74,6 +74,10 @@ public class PlayerController : MonoBehaviour, IHealth
             Instance = this;
         }
 
+        // Seeded in Awake, not Start, so anything polling Health during its own Start()
+        // (UiManager seeding the heart row) reads the real value rather than 0.
+        Health = maxHealth;
+
         StateMachine = gameObject.AddComponent<StateMachine.PlayerStateMachine>();
         StateMachine.Initialize(this);
     }
@@ -547,7 +551,12 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private void OnDestroy()
     {
-        EventManager.Instance?.UnsubscribeFromAllEvents(this);
+        // HasInstance, not Instance: the Instance getter creates a replacement singleton if one
+        // does not exist, which during scene teardown spawns a stray EventManager GameObject.
+        if (EventManager.HasInstance)
+        {
+            EventManager.Instance.UnsubscribeFromAllEvents(this);
+        }
 
         if (Instance == this)
         {

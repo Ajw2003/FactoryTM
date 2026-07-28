@@ -43,6 +43,11 @@ namespace Managers
         
         private bool isDialogueActive = false;
         public bool IsDialogueActive => isDialogueActive;
+
+        // The dialogue the player last dismissed with Space. Objective refreshes fire on every
+        // inventory/currency change (mining an ore, selling an item), and each one calls
+        // DisplayTutorialObjective; without this the box reopens on the next pickup.
+        private DialogueSO dismissedDialogue;
     
         protected override void Awake()
         {
@@ -215,6 +220,9 @@ namespace Managers
             switch (enabled)
             {
                 case false :
+                    // Remember what was on screen when it was dismissed, so a routine objective
+                    // refresh doesn't pop the same dialogue straight back open.
+                    dismissedDialogue = currentDialogue;
                     _canWrite = false;
                     isDialogueActive = false;
                     if (text != null) text.text = null;
@@ -460,6 +468,8 @@ namespace Managers
             if (dialogueSO == null) return;
     
             bool isNewDialogue = (currentDialogue != dialogueSO);
+            if (isNewDialogue) dismissedDialogue = null;
+
             currentDialogue = dialogueSO;
             currentDialogueIndex = 0;
             currentDialogueText = overrideText;
@@ -471,6 +481,10 @@ namespace Managers
     
             if (!isDialogueActive)
             {
+                // Player dismissed this exact objective already - update the text silently rather
+                // than reopening the box. A genuinely new objective clears the flag above.
+                if (dialogueSO == dismissedDialogue) return;
+
                 isDialogueActive = true;
                 if (dialogueBox != null)
                 {

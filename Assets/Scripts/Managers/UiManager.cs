@@ -73,7 +73,12 @@ namespace Managers
 
        protected override void OnDestroy()
        {
-          EventManager.Instance?.UnsubscribeFromAllEvents(this);
+          // HasInstance, not Instance: the Instance getter creates a replacement singleton if one
+          // does not exist, which during scene teardown spawns a stray EventManager GameObject.
+          if (EventManager.HasInstance)
+          {
+             EventManager.Instance.UnsubscribeFromAllEvents(this);
+          }
           base.OnDestroy();
        }
 
@@ -189,9 +194,16 @@ namespace Managers
     
           if (GameOverPanel != null) GameOverPanel.SetActive(false);
           isGameOver = false;
-    
+
+          // Seed the heart row from the player's current health. PlayerHealthChangedEvent keeps it
+          // up to date afterwards, but that event may already have fired before this UI was built
+          // (Unity gives no Start()-to-Start() ordering guarantee), so poll the value once here.
+          if (PlayerController.Instance != null)
+          {
+             UpdateHp(PlayerController.Instance.Health, PlayerController.Instance.MaxHealth);
+          }
        }
-    
+
        private void Update()
        {
           if (isGameOver) return;
