@@ -127,7 +127,6 @@ namespace Managers
              for (int i = oldLength; i < maxHp; i++)
              {
                 Hearts[i] = Instantiate(heartObject, playerHeartsContainer.transform);
-                Hearts[i].transform.localScale = new Vector3(150, 150, 0);
              }
           }
           else if (maxHp < oldLength)
