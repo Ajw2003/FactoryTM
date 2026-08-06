@@ -11,7 +11,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "DialogueSO", menuName = "Scriptable Objects/Dialogue")]
 public class DialogueSO : ScriptableObject
 {
-    public Dialogue[] dialogues;
+    public Dialogue[] unlockedDialogues;
+    public Dialogue lockedDialogue;
 }
 
 [Serializable]
@@ -21,6 +22,9 @@ public struct Dialogue
     public Sprite sprite;
     public Color color;
     public DialogueType type;
+    public StoryMarkerSo lockedMarker;
+    public StoryMarkerSo publishedMarker;
+    public bool HasRequirment => lockedMarker != null;
 }
 
 public enum DialogueType

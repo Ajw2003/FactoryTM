@@ -90,14 +90,14 @@ namespace Managers
     
         private void SetDialogue()
         {
-            if (currentDialogue == null || currentDialogue.dialogues == null || currentDialogue.dialogues.Length == 0) return;
+            if (currentDialogue == null || currentDialogue.unlockedDialogues == null || currentDialogue.unlockedDialogues.Length == 0) return;
             
-            currentDialogueText = currentDialogue.dialogues[currentDialogueIndex].text;
+            currentDialogueText = currentDialogue.unlockedDialogues[currentDialogueIndex].text;
             text.text = null;
     
             if (speakerText != null)
             {
-                var currentType = currentDialogue.dialogues[currentDialogueIndex].type;
+                var currentType = currentDialogue.unlockedDialogues[currentDialogueIndex].type;
                 if (currentType != DialogueType.None)
                 {
                     speakerText.text = currentType.ToString().ToUpper() + " // TRANSMISSION";
@@ -126,7 +126,7 @@ namespace Managers
             {
                 StopCoroutine(_currentCoroutine);
             }
-            if (currentDialogueIndex + 1 >= currentDialogue.dialogues.Length)
+            if (currentDialogueIndex + 1 >= currentDialogue.unlockedDialogues.Length)
             {
                 DialogueSO oldDialogue = currentDialogue;
                 OnDialogueEnded?.Invoke();

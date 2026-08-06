@@ -56,6 +56,8 @@ namespace Managers
         private Dictionary<TileBase, Vector2Int> tileDirectionMap = new Dictionary<TileBase, Vector2Int>();
     
         public List<CartelMember> ActiveEnemies = new List<CartelMember>();
+        
+        public List<StoryNpc> ActiveStoryNpcs = new List<StoryNpc>();
     
         protected override void Awake()
         {
@@ -85,7 +87,7 @@ namespace Managers
                 BuildingTileMap = buildingmap.GetComponent<Tilemap>();
             }
     
-        InitializeData();
+            InitializeData();
     
             // Initialize Roguelike/DayNight cycle and Upgrade systems
             _ = DayNightManager.Instance;

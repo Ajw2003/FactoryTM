@@ -319,6 +319,43 @@ public class PlayerController : MonoBehaviour, IHealth
         
         return inputDirection;
     }
+    
+    public virtual void CheckForCollisions()
+    {
+        float angleRadians = transform.eulerAngles.z * Mathf.Deg2Rad;
+        Rectangle2D bulletBox = TwoDCollision.CreateFromRotated(transform.position.x, transform.position.y, width, height, angleRadians);
+
+        if (GridManager.Instance == null) return;
+        Vector2 tileSize = GridManager.Instance.TileSize;
+        int minX = Mathf.FloorToInt((transform.position.x - width / 2f) / tileSize.x);
+        int maxX = Mathf.FloorToInt((transform.position.x + width / 2f) / tileSize.x);
+        int minY = Mathf.FloorToInt((transform.position.y - height / 2f) / tileSize.y);
+        int maxY = Mathf.FloorToInt((transform.position.y + height / 2f) / tileSize.y);
+        
+        for (int i = GameManager.Instance.ActiveStoryNpcs.Count - 1; i >= 0; i--)
+        {
+            StoryNpc CurrentStoryNpc = GameManager.Instance.ActiveStoryNpcs[i];
+            if (CurrentStoryNpc == null) continue;
+    
+            Rectangle2D npcBox = CurrentStoryNpc.GetBoundingBox();
+    
+            if (Rectangle2D.CheckCollision(bulletBox, npcBox))
+            {
+                if(CurrentStoryNpc.collided) return;
+                CurrentStoryNpc.Collide();
+                return; 
+            }
+        }
+        
+        if (PlayerController.Instance != null && PlayerController.Instance.gameObject.activeInHierarchy)
+        {
+            Rectangle2D playerBox = PlayerController.Instance.GetBoundingBox();
+            if (Rectangle2D.CheckCollision(bulletBox, playerBox))
+            {
+                
+            }
+        }
+    }
 
     private void Update()
     {
@@ -327,6 +364,7 @@ public class PlayerController : MonoBehaviour, IHealth
             ToggleGameMode();
         }
 
+        CheckForCollisions();
         // Regenerate stamina
         if (currentStamina < maxStamina)
         {

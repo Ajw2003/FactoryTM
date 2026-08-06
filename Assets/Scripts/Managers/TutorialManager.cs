@@ -612,9 +612,9 @@ namespace Managers
         private string GetFormattedObjectiveText(TutorialState state, bool isInitial)
         {
             DialogueSO dialogue = LoadDialogueSOForState(state);
-            if (dialogue == null || dialogue.dialogues == null || dialogue.dialogues.Length == 0) return "";
+            if (dialogue == null || dialogue.unlockedDialogues == null || dialogue.unlockedDialogues.Length == 0) return "";
     
-            string template = dialogue.dialogues[0].text;
+            string template = dialogue.unlockedDialogues[0].text;
     
             switch (state)
             {
@@ -684,7 +684,7 @@ namespace Managers
                 lastStateForObjectives = currentState;
     
                 DialogueSO dialogue = LoadDialogueSOForState(currentState);
-                if (dialogue != null && dialogue.dialogues != null && dialogue.dialogues.Length > 0)
+                if (dialogue != null && dialogue.unlockedDialogues != null && dialogue.unlockedDialogues.Length > 0)
                 {
                     string initialDialogueText = GetFormattedObjectiveText(currentState, true);
                     DialogueManager.Instance.DisplayTutorialObjective(dialogue, initialDialogueText);
@@ -696,7 +696,7 @@ namespace Managers
             else
             {
                 DialogueSO dialogue = LoadDialogueSOForState(currentState);
-                if (dialogue != null && dialogue.dialogues != null && dialogue.dialogues.Length > 0)
+                if (dialogue != null && dialogue.unlockedDialogues != null && dialogue.unlockedDialogues.Length > 0)
                 {
                     string updatedDialogueText = GetFormattedObjectiveText(currentState, false);
                     DialogueManager.Instance.DisplayTutorialObjective(dialogue, updatedDialogueText);
