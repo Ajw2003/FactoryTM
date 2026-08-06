@@ -12,49 +12,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87e78062204f4144787f6e049cb80164, type: 3}
   m_Name: Intro
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSO
-  dialogues:
-  - text: Welcome to your new home away from home
+  unlockedDialogues:
+  - text: ggggggg
     sprite: {fileID: 0}
     color: {r: 0, g: 0, b: 0, a: 0}
-  - text: It's a bit barren out here so lets just get straight to the good stuff
-      shall we?
+    type: 0
+    lockedMarker: {fileID: 11400000, guid: 2fea07079c1460b4e9ec94c414b0175e, type: 2}
+    publishedMarker: {fileID: 0}
+  - text: eeeeeeee
     sprite: {fileID: 0}
     color: {r: 0, g: 0, b: 0, a: 0}
-  - text: Press E To open your company device
+    type: 0
+    lockedMarker: {fileID: 0}
+    publishedMarker: {fileID: 0}
+  - text: ffffffffff
     sprite: {fileID: 0}
     color: {r: 0, g: 0, b: 0, a: 0}
-  - text: navigate between pages and get your bearings
+    type: 0
+    lockedMarker: {fileID: 0}
+    publishedMarker: {fileID: 0}
+  lockedDialogue:
+    text: locked
     sprite: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
-  - text: Then when you're ready buy a seller, a miner, and 5 conveyors.
-    sprite: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
-  - text: Now, when you're ready close the company device by pressing escape or E
-    sprite: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
-  - text: Now back in the world you should see 3 items in your hotbar, they can be
-      accessed either through the scroll wheel, number keys or clicking the slot
-      ui
-    sprite: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
-  - text: Now select your miner, once selected press the R key to rotate to your
-      desired orientation. this dictates the direction the ore will be outputted
-    sprite: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
-  - text: Left click to place down a miner and then select your conveyor item
-    sprite: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
-  - text: Once selected place down 1-5 conveyors together in sequence one  after
-      another
-    sprite: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
-  - text: 'Finally select the seller and place it at the end of the conveyors, if
-      done correctly items should flow from the miner to the seller and you should
-      see money apear in your account '
-    sprite: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
-  - text: If you decide that you don't want a given building in a specific position
-      you may right click it while that item is slected in your hotbar to return
-      the item to your inventory.
-    sprite: {fileID: 0}
-    color: {r: 0, g: 0, b: 0, a: 0}
+    color: {r: 1, g: 0, b: 0, a: 1}
+    type: 0
+    lockedMarker: {fileID: 0}
+    publishedMarker: {fileID: 0}

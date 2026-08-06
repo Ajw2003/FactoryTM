@@ -17,7 +17,13 @@ MonoBehaviour:
     sprite: {fileID: 0}
     color: {r: 0, g: 0, b: 0, a: 0}
     type: 0
-    lockedMarker: {fileID: 11400000, guid: f5fc6afe30ecc51428f287c563644618, type: 2}
+    lockedMarker: {fileID: 0}
+    publishedMarker: {fileID: 11400000, guid: 2fea07079c1460b4e9ec94c414b0175e, type: 2}
+  - text: fugma
+    sprite: {fileID: 0}
+    color: {r: 0, g: 0, b: 0, a: 0}
+    type: 0
+    lockedMarker: {fileID: 0}
     publishedMarker: {fileID: 0}
   lockedDialogue:
     text: Fuck yeah ts locked
@@ -25,4 +31,4 @@ MonoBehaviour:
     color: {r: 0, g: 0, b: 0, a: 0}
     type: 0
     lockedMarker: {fileID: 0}
-    publishedMarker: {fileID: 11400000, guid: f5fc6afe30ecc51428f287c563644618, type: 2}
+    publishedMarker: {fileID: 0}
