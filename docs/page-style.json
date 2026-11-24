@@ -1,0 +1,13 @@
+{
+  "name": "FactoryTM terminal",
+  "idea": "A factory console: dark steel panels, amber for what you must act on, cyan for ports and information, pixel-style headings to echo the game's CRT look.",
+  "fonts": {
+    "heading": "'Pixelify Sans', 'Courier New', monospace",
+    "body": "system-ui, -apple-system, 'Segoe UI', sans-serif"
+  },
+  "colors": {
+    "light": { "bg": "#f1efe9", "panel": "#ffffff", "text": "#1d2229", "muted": "#5b6470", "line": "#d4d0c4", "action": "#b45f06", "info": "#0b7285", "good": "#2b8a3e" },
+    "dark":  { "bg": "#12161b", "panel": "#1b2129", "text": "#e6e9ee", "muted": "#9aa5b1", "line": "#2d3640", "action": "#ffb454", "info": "#4cc9e0", "good": "#6fd08c" }
+  },
+  "rule": "Amber means aj acts here. Cyan is information. Green is built and checked. Nothing else uses amber."
+}

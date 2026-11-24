@@ -21,6 +21,16 @@ so links from commit messages and notes still lead somewhere.
 
 **Status.** Standing.
 
+## 2026-11-24 — Destroying the IDT ends the run
+
+**Context.** Old notes say it; the code ends the game only when the player dies (`ShowGameOver` has one caller).
+
+**Decision.** The rule stays and is to be built. It is open work inside milestone M3.
+
+**Why.** Chosen by the project owner when reviewing the roadmap.
+
+**Status.** Standing.
+
 ## 2026-11-24 — Roadmap weights and acceptance criteria drafted, not confirmed
 
 **Context.** Tier 2 needs a definition of done; the repo had a to-do list but no acceptance tests.

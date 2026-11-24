@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="house-rules-page" content="proposal">
+<title>FactoryTM roadmap review</title>
+<style>
+:root{--bg:#f1efe9;--panel:#fff;--text:#1d2229;--muted:#5b6470;--line:#d4d0c4;--action:#b45f06;--info:#0b7285;--good:#2b8a3e}
+@media (prefers-color-scheme:dark){:root{--bg:#12161b;--panel:#1b2129;--text:#e6e9ee;--muted:#9aa5b1;--line:#2d3640;--action:#ffb454;--info:#4cc9e0;--good:#6fd08c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:16px 16px 140px}
+main{max-width:760px;margin:0 auto}
+h1,h2{font-family:'Pixelify Sans','Courier New',monospace;letter-spacing:.02em;margin:0 0 8px}
+h1{font-size:1.7rem}h2{font-size:1.2rem;margin-top:28px}
+.card{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--info);border-radius:6px;padding:12px 14px;margin:12px 0}
+.card.act{border-left-color:var(--action)}
+.muted{color:var(--muted)}
+.row{display:grid;grid-template-columns:2.2rem 1fr auto;gap:8px;align-items:center;margin:6px 0}
+.bar{height:14px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--info)}
+.bar i.ui{background:var(--action)}
+.tag{font-size:.8rem;color:var(--muted)}
+ol,ul.check{padding-left:1.2rem}ul.check{list-style:none;padding:0}
+ul.check li{margin:6px 0}
+.next{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:3px solid var(--action);padding:10px 16px;z-index:5}
+.next div{max-width:760px;margin:0 auto}
+.next b{color:var(--action)}
+table{width:100%;border-collapse:collapse;font-size:.92rem}td,th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left;vertical-align:top}
+</style>
+</head>
+<body>
+<main>
+<h1>Roadmap review</h1>
+<p data-basic="summary"><b>In one sentence:</b> the roadmap splits FactoryTM into nine milestones worth 100%, none is checked yet, and you need to approve the weights and one rule.</p>
+
+<h2>What already exists</h2>
+<div class="card" data-basic="existing">
+<p>The roadmap and state pages are already written and committed on branch <code>AjsAgent/project-docs</code>. This page only asks you to confirm them. Nothing is built on top of an old plan.</p>
+</div>
+
+<h2>The nine milestones and their weight</h2>
+<div data-basic="picture" aria-label="Bar chart of milestone weights">
+<div class="row"><b>M1</b><div class="bar"><i style="width:100%"></i></div><span>15% Core factory loop</span></div>
+<div class="row"><b>M2</b><div class="bar"><i style="width:66%"></i></div><span>10% Slot inventory</span></div>
+<div class="row"><b>M3</b><div class="bar"><i style="width:100%"></i></div><span>15% Combat and raids</span></div>
+<div class="row"><b>M4</b><div class="bar"><i style="width:100%"></i></div><span>15% Upgrades and balance</span></div>
+<div class="row"><b>M5</b><div class="bar"><i style="width:100%"></i></div><span>15% Tutorial and story</span></div>
+<div class="row"><b>M6</b><div class="bar"><i style="width:66%"></i></div><span>10% Code architecture</span></div>
+<div class="row"><b>M7</b><div class="bar"><i class="ui" style="width:66%"></i></div><span>10% UI overhaul (#1)</span></div>
+<div class="row"><b>M8</b><div class="bar"><i style="width:33%"></i></div><span>5% World visuals</span></div>
+<div class="row"><b>M9</b><div class="bar"><i class="ui" style="width:33%"></i></div><span>5% Mobile edition (#2)</span></div>
+</div>
+<p class="muted">Amber bars are the two open issues you set as direction. Their finish tests are not defined yet.</p>
+
+<h2>Where each one stands</h2>
+<div class="card">
+<table>
+<tr><th>Milestone</th><th>Code</th><th>Checked</th></tr>
+<tr><td>M1, M2, M3</td><td>Built</td><td>No</td></tr>
+<tr><td>M4, M5, M8</td><td>Partly</td><td>No</td></tr>
+<tr><td>M6</td><td>In progress</td><td>No</td></tr>
+<tr><td>M7, M9</td><td>Not started</td><td>No</td></tr>
+</table>
+<p class="muted">A milestone counts only after its finish test has been played and passed, so the headline is 0%.</p>
+</div>
+
+<h2>Decided so far</h2>
+<div class="card" data-basic="decision">
+<p><b>Destroying the IDT ends the run.</b> You chose to build it. The code only ends the game when the player dies, so this is open work inside M3.</p>
+</div>
+
+<h2>Needs you</h2>
+<div class="card act">
+<p><b>Are these weights right?</b> The draft favours the core loop, combat, upgrades and tutorial. If the UI overhaul and mobile edition matter more, they should weigh more, and M4 and M5 weigh less.</p>
+</div>
+
+<h2>Steps</h2>
+<ol data-basic="steps">
+<li>Read the bars above and decide whether the weights stay.</li>
+<li>Reply with "keep" or with your own numbers for M1 to M9 adding to 100.</li>
+<li>I record the answer in the decision log and update the roadmap.</li>
+<li>Then you define the finish tests for M7 and M9.</li>
+</ol>
+
+<h2>Checklist for you</h2>
+<ul class="check" data-basic="checklist">
+<li><label><input type="checkbox"> Weights approved or replaced</label></li>
+<li><label><input type="checkbox"> Finish test for the UI overhaul (#1) described</label></li>
+<li><label><input type="checkbox"> Phone model and frame rate for the mobile edition (#2) named</label></li>
+<li><label><input type="checkbox"> Pull request opened from <code>AjsAgent/project-docs</code></label></li>
+</ul>
+</main>
+<div class="next" data-basic="next-step"><div><b>Next step:</b> tell me "keep the weights" or give nine numbers that add to 100.</div></div>
+</body>
+</html>
