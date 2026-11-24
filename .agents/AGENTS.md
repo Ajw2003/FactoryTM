@@ -39,6 +39,6 @@
 - **Clean Code:** Retain file headers, keep methods small, and write explanatory comments for complex game logic.
 
 ## Project Memory & Context Retrieval
-- **Read Context First:** At the start of any conversation or task, you MUST read the master summary file: [project_summary.md](file:///c:/Users/aj/Desktop/GameDev/Projects/FactoryTM/docs/decisions/project_summary.md) and the phase task list: [project_phases.md](file:///c:/Users/aj/Desktop/GameDev/Projects/FactoryTM/docs/decisions/project_phases.md).
-- **Update Documentation on Task Completion:** Each time a task is finished, you MUST check that `project_summary.md` and `project_phases.md` are correctly updated with the changes made in the given session.
-- **Consult Decision History:** Refer to the session logs under [docs/decisions/](file:///c:/Users/aj/Desktop/GameDev/Projects/FactoryTM/docs/decisions/) to understand past design choices, feature updates, and historical implementations.
+- **Read Context First:** At the start of any conversation or task, you MUST read [docs/1-landing/README.md](../docs/1-landing/README.md), the entry point to the six-tier documentation (roadmap, project state, system docs, today's plan, decision log).
+- **Update Documentation on Task Completion:** Each time a task is finished, update the tier that changed (usually `docs/3-state/ProjectState.md`, and the matching file in `docs/4-systems/` if a system changed) and add a line to `CHANGELOG.md`.
+- **Consult Decision History:** Past design choices are in [docs/6-decisions/Decisions.md](../docs/6-decisions/Decisions.md). Older session logs are in `docs/archive/` and do not describe current behaviour.
