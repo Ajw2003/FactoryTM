@@ -21,6 +21,19 @@ so links from commit messages and notes still lead somewhere.
 
 **Status.** Standing.
 
+## 2026-11-24 — Roadmap weights approved; M8 becomes the visual overhaul at 10%
+
+**Context.** The owner reviewed the draft weights and approved them, then asked for a visual overhaul: connected
+textures and layers working on everything, and sprites at a similar level of detail.
+
+**Decision.** Fold the overhaul into M8 (now "Visual overhaul and feedback") at 10%, taking 3 points from M4 (12%)
+and 2 from M5 (13%). All other weights stand. "Similarly detailed" still needs a style sheet from the owner.
+
+**Why.** Chosen from three options; folding keeps the milestone count at nine and leaves the UI (M7) and
+mobile (M9) weights unchanged.
+
+**Status.** Standing. Supersedes the weights in [2026-11-24 — Roadmap weights and acceptance criteria drafted, not confirmed](#2026-11-24--roadmap-weights-and-acceptance-criteria-drafted-not-confirmed).
+
 ## 2026-11-24 — Destroying the IDT ends the run
 
 **Context.** Old notes say it; the code ends the game only when the player dies (`ShowGameOver` has one caller).
@@ -41,7 +54,7 @@ owner".
 **Why.** Inventing precise criteria would be guessing. The weights are proposals; changing them is a Tier 2
 change and gets its own entry here.
 
-**Status.** Standing, pending owner confirmation.
+**Status.** Superseded by [2026-11-24 — Roadmap weights approved; M8 becomes the visual overhaul at 10%](#2026-11-24--roadmap-weights-approved-m8-becomes-the-visual-overhaul-at-10) on 2026-11-24.
 
 ## 2026-07-25 — Manager state is encapsulated with `[SerializeField] private` plus getters
 

@@ -18,11 +18,11 @@ tests anywhere in the project (no test assembly under `Assets/`), and no CI.
 | M1 | Core factory loop | 15% | Built | No | One known open bug: placement over loose belt items |
 | M2 | Slot inventory and building I/O | 10% | Built | No | Rewritten 2026-07-20 to 07-22; store Inventory tab is read-only in practice |
 | M3 | Combat, raids, day cycle | 15% | Built, one gap | No | IDT-destroyed game over not in code |
-| M4 | Upgrades, store, balance | 15% | Partly | No | Upgrades and shop exist; balance, difficulty, day-length scaling, starting store rules not done |
-| M5 | Tutorial and story | 15% | Partly | No | Eleven-step machine exists; narrator, story, itemised objectives not started |
+| M4 | Upgrades, store, balance | 12% | Partly | No | Upgrades and shop exist; balance, difficulty, day-length scaling, starting store rules not done |
+| M5 | Tutorial and story | 13% | Partly | No | Eleven-step machine exists; narrator, story, itemised objectives not started |
 | M6 | Code architecture | 10% | In progress | No | See below |
 | M7 | UI / UX overhaul | 10% | Not started | No | Issue #1 open, acceptance not defined |
-| M8 | World visuals and feedback | 5% | Partly | No | Blend tiles done on 2026-07-23; vegetation loss, particles, sounds not done |
+| M8 | Visual overhaul and feedback | 10% | Partly | No | Blend tiles done on 2026-07-23; connected textures on everything else, layer order audit, sprite style sheet, vegetation loss, particles, sounds not done |
 | M9 | Mobile edition | 5% | Not started | No | Issue #2 open, no device target |
 
 ## Per milestone

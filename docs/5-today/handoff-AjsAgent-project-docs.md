@@ -13,7 +13,7 @@ the new docs resolve (checked with a script).
 
 ## The next step
 
-Approve or replace the roadmap weights (page: `docs/generated/roadmap-review.html`). The IDT rule is decided:
+Weights are approved (M8 visual overhaul now 10%). Define "similarly detailed" for sprites, or ask for a draft style sheet (page: `docs/generated/roadmap-review.html`). The IDT rule is decided:
 destroying it ends the run, and it still has to be built. Then merge by pull request; do not commit to `main`.
 
 ## What is unverified

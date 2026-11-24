@@ -19,11 +19,11 @@ finished milestones.
 | M1 | Core factory loop | 15% |
 | M2 | Slot-based inventory and building I/O | 10% |
 | M3 | Combat, raids and day cycle | 15% |
-| M4 | Upgrades, store and balance | 15% |
-| M5 | Tutorial and story | 15% |
+| M4 | Upgrades, store and balance | 12% |
+| M5 | Tutorial and story | 13% |
 | M6 | Code architecture | 10% |
 | M7 | UI / UX overhaul (issue #1) | 10% |
-| M8 | World visuals and feedback | 5% |
+| M8 | Visual overhaul and feedback | 10% |
 | M9 | Beginner-friendly mobile edition (issue #2) | 5% |
 | | **Total** | **100%** |
 
@@ -68,7 +68,7 @@ both state it as design. The code has no path for it (`ShowGameOver` has one cal
 it is part of this milestone's open work, not something already built. If the owner has dropped that rule,
 remove the sentence and record the decision in [Decisions](../6-decisions/Decisions.md).
 
-## M4 — Upgrades, store and balance (15%)
+## M4 — Upgrades, store and balance (12%)
 
 Spending money has meaningful choices, and the curve from day 1 to day 10 is playable.
 
@@ -80,7 +80,7 @@ price, yield and damage tuning; difficulty settings.
 visible effect; no upgrade is purchasable before its prerequisites; a written balance sheet of prices, yields,
 enemy counts and day lengths exists and was playtested against.
 
-## M5 — Tutorial and story (15%)
+## M5 — Tutorial and story (13%)
 
 A new player is taught the loop without help and has a reason to keep going.
 
@@ -112,13 +112,28 @@ text outside post-processing; contrast pass; hotbar names on hover.
 **Acceptance:** *not yet defined by the owner.* Placeholder until the design is approved: every screen passes
 a 375px-wide and a 1920px-wide check, text is legible with the CRT filter on, and no panel overlaps another.
 
-## M8 — World visuals and feedback (5%)
+## M8 — Visual overhaul and feedback (10%)
 
-**Contains:** grass/dirt blend tiles; vegetation disappearing as the planet is stripped; particles and
-animation for buildings and processed ore; damage flash; sound for every action.
+*Changed 2026-11-24:* was "World visuals and feedback", 5%. The owner asked for a visual overhaul that makes
+connected textures and layers work on everything and brings all sprites to a similar level of detail, and chose
+to fold it into M8 at 10%, taking 3 points from M4 (now 12%) and 2 from M5 (now 13%).
 
-**Acceptance:** the blend overlay is correct on a regenerated map (no unrotated or missing edge pieces); each
-building action has one effect and one sound; the world visibly changes as ore is removed.
+**Contains:**
+- Connected textures: grass/dirt blend tiles, ore, conveyors and any other auto-tiled surface join correctly in
+  all four rotations.
+- Layers: sorting layers and tilemap order are consistent, so nothing draws in the wrong order.
+- Sprite consistency: one art style sheet (pixel size, palette, outline and shading rules) and every sprite
+  redrawn or adjusted to match it.
+- Feedback: vegetation disappearing as the planet is stripped; particles and animation for buildings and
+  processed ore; damage flash; sound for every action.
+
+**Acceptance:**
+1. On a regenerated map, a screenshot sweep of every auto-tiled surface shows no missing, unrotated or
+   mismatched piece.
+2. A ten-minute play session shows no object drawing in the wrong order.
+3. A side-by-side sheet of every sprite passes against the style sheet. *The exact detail rule is a draft: the
+   owner has not yet said what "similarly detailed" measures, so the style sheet must be approved first.*
+4. Each building action has one effect and one sound, and the world visibly changes as ore is removed.
 
 ## M9 — Beginner-friendly mobile edition (5%) — issue #2
 

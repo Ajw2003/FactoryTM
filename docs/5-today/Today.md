@@ -12,6 +12,7 @@ place before the next piece of work starts.
 - Moved `history/` and `docs/decisions/` into `docs/archive/` with a note on why; pointed `.agents/AGENTS.md`
   at the new entry point.
 
+- Owner approved the roadmap weights and asked for a visual overhaul; M8 is now 10% (M4 12%, M5 13%).
 - Owner decided: destroying the IDT ends the run (logged in Decisions.md; open work in M3).
 - Built `docs/generated/roadmap-review.html` and `docs/page-style.json` so the roadmap weights can be approved.
 - Unity check: a batch compile gave 0 `error CS`; a scripted play-mode run showed 0 errors, 2 engine warnings.

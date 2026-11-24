@@ -32,7 +32,7 @@ table{width:100%;border-collapse:collapse;font-size:.92rem}td,th{border-bottom:1
 <body>
 <main>
 <h1>Roadmap review</h1>
-<p data-basic="summary"><b>In one sentence:</b> the roadmap splits FactoryTM into nine milestones worth 100%, none is checked yet, and you need to approve the weights and one rule.</p>
+<p data-basic="summary"><b>In one sentence:</b> the roadmap splits FactoryTM into nine milestones worth 100%, none is checked yet, and the weights are now approved with a larger visual overhaul.</p>
 
 <h2>What already exists</h2>
 <div class="card" data-basic="existing">
@@ -44,11 +44,11 @@ table{width:100%;border-collapse:collapse;font-size:.92rem}td,th{border-bottom:1
 <div class="row"><b>M1</b><div class="bar"><i style="width:100%"></i></div><span>15% Core factory loop</span></div>
 <div class="row"><b>M2</b><div class="bar"><i style="width:66%"></i></div><span>10% Slot inventory</span></div>
 <div class="row"><b>M3</b><div class="bar"><i style="width:100%"></i></div><span>15% Combat and raids</span></div>
-<div class="row"><b>M4</b><div class="bar"><i style="width:100%"></i></div><span>15% Upgrades and balance</span></div>
-<div class="row"><b>M5</b><div class="bar"><i style="width:100%"></i></div><span>15% Tutorial and story</span></div>
+<div class="row"><b>M4</b><div class="bar"><i style="width:80%"></i></div><span>12% Upgrades and balance</span></div>
+<div class="row"><b>M5</b><div class="bar"><i style="width:87%"></i></div><span>13% Tutorial and story</span></div>
 <div class="row"><b>M6</b><div class="bar"><i style="width:66%"></i></div><span>10% Code architecture</span></div>
 <div class="row"><b>M7</b><div class="bar"><i class="ui" style="width:66%"></i></div><span>10% UI overhaul (#1)</span></div>
-<div class="row"><b>M8</b><div class="bar"><i style="width:33%"></i></div><span>5% World visuals</span></div>
+<div class="row"><b>M8</b><div class="bar"><i style="width:66%"></i></div><span>10% Visual overhaul</span></div>
 <div class="row"><b>M9</b><div class="bar"><i class="ui" style="width:33%"></i></div><span>5% Mobile edition (#2)</span></div>
 </div>
 <p class="muted">Amber bars are the two open issues you set as direction. Their finish tests are not defined yet.</p>
@@ -72,25 +72,25 @@ table{width:100%;border-collapse:collapse;font-size:.92rem}td,th{border-bottom:1
 
 <h2>Needs you</h2>
 <div class="card act">
-<p><b>Are these weights right?</b> The draft favours the core loop, combat, upgrades and tutorial. If the UI overhaul and mobile edition matter more, they should weigh more, and M4 and M5 weigh less.</p>
+<p><b>Define "similarly detailed".</b> The visual overhaul (M8) needs a sprite style sheet: pixel size, palette, outline and shading rules. Until you approve one, that part of its finish test is a draft.</p>
 </div>
 
 <h2>Steps</h2>
 <ol data-basic="steps">
-<li>Read the bars above and decide whether the weights stay.</li>
-<li>Reply with "keep" or with your own numbers for M1 to M9 adding to 100.</li>
-<li>I record the answer in the decision log and update the roadmap.</li>
+<li>Decide what "similarly detailed" means, or ask me to draft a sprite style sheet.</li>
+<li>I record it in the decision log and tighten the M8 finish test.</li>
 <li>Then you define the finish tests for M7 and M9.</li>
 </ol>
 
 <h2>Checklist for you</h2>
 <ul class="check" data-basic="checklist">
-<li><label><input type="checkbox"> Weights approved or replaced</label></li>
+<li><label><input type="checkbox" checked disabled> Weights approved (M8 raised to 10%)</label></li>
+<li><label><input type="checkbox"> Sprite style sheet approved</label></li>
 <li><label><input type="checkbox"> Finish test for the UI overhaul (#1) described</label></li>
 <li><label><input type="checkbox"> Phone model and frame rate for the mobile edition (#2) named</label></li>
 <li><label><input type="checkbox"> Pull request opened from <code>AjsAgent/project-docs</code></label></li>
 </ul>
 </main>
-<div class="next" data-basic="next-step"><div><b>Next step:</b> tell me "keep the weights" or give nine numbers that add to 100.</div></div>
+<div class="next" data-basic="next-step"><div><b>Next step:</b> tell me the sprite detail rules, or ask me to propose a style sheet.</div></div>
 </body>
 </html>
