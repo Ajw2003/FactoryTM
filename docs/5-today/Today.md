@@ -12,11 +12,15 @@ place before the next piece of work starts.
 - Moved `history/` and `docs/decisions/` into `docs/archive/` with a note on why; pointed `.agents/AGENTS.md`
   at the new entry point.
 
+- Owner decided: destroying the IDT ends the run (logged in Decisions.md; open work in M3).
+- Built `docs/generated/roadmap-review.html` and `docs/page-style.json` so the roadmap weights can be approved.
+- Unity check: a batch compile gave 0 `error CS`; a scripted play-mode run showed 0 errors, 2 engine warnings.
+
 ## What was deliberately not done
 
 - No source code was changed.
-- Nothing was run in Unity; Unity MCP was not connected. All behaviour claims come from reading code, and
-  anything not confirmed by reading is marked "not yet verified".
+- No playthrough was done; the acceptance checks need a person at the controls. Behaviour claims come from
+  reading code, and anything not confirmed by reading is marked "not yet verified".
 - Roadmap weights and the M7/M9 acceptance criteria were not invented; they are flagged for the owner.
 - `docs/plain/` was not created (a later pass, `house-rules:plain-docs`).
 

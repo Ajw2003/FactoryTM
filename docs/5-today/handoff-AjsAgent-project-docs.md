@@ -13,14 +13,14 @@ the new docs resolve (checked with a script).
 
 ## The next step
 
-Review the roadmap: confirm or change the milestone weights, and decide whether "destroying the IDT ends the
-run" is still a rule (the code does not do it). Then merge by pull request; do not commit to `main`.
+Approve or replace the roadmap weights (page: `docs/generated/roadmap-review.html`). The IDT rule is decided:
+destroying it ends the run, and it still has to be built. Then merge by pull request; do not commit to `main`.
 
 ## What is unverified
 
-Nothing was run in Unity. The Editor was not open (only Unity Hub), the Unity MCP connection was refused,
-and the `unity` CLI exists but a batch compile was not run. Behaviour claims come from reading code. Each
-roadmap acceptance check is unrun, so the state page shows 0% verified.
+A Unity batch compile gave 0 `error CS`, and a scripted play-mode run showed 0 errors and 2 engine warnings.
+No playthrough was done, so each roadmap acceptance check is unrun and the state page shows 0% verified.
+The review page was not checked at 375px or in dark mode.
 
 ## Issue numbers
 

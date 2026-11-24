@@ -6,6 +6,7 @@ No releases or tags exist yet; history before 2026-11-24 is summarised from `git
 ## Unreleased
 
 - Adds the six-tier documentation structure and moves the old session logs to `docs/archive/` (`docs/1-landing` to `docs/6-decisions`, 7 system docs).
+- Adds a roadmap review page and a repo page style (`docs/generated/roadmap-review.html`, `docs/page-style.json`) and records that destroying the IDT must end the run (`Decisions.md`).
 - Points `.agents/AGENTS.md` at `docs/1-landing/README.md` instead of the archived summary files.
 
 ## History
