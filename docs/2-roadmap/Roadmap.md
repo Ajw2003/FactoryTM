@@ -131,8 +131,10 @@ to fold it into M8 at 10%, taking 3 points from M4 (now 12%) and 2 from M5 (now 
 1. On a regenerated map, a screenshot sweep of every auto-tiled surface shows no missing, unrotated or
    mismatched piece.
 2. A ten-minute play session shows no object drawing in the wrong order.
-3. A side-by-side sheet of every sprite passes against the style sheet. *The exact detail rule is a draft: the
-   owner has not yet said what "similarly detailed" measures, so the style sheet must be approved first.*
+3. A side-by-side sheet of every sprite passes against the style sheet. *Draft measurable part, from the
+   assets on 2026-11-24:* of 218 PNGs under `Assets/Art`, 147 are 32x32 and 92 of the sampled import settings use
+   32 pixels per unit, so a tile sprite is 32x32 at 32 PPU. Palette, outline and shading rules are not defined
+   anywhere in the repo and still need the owner's style sheet.
 4. Each building action has one effect and one sound, and the world visibly changes as ore is removed.
 
 ## M9 — Beginner-friendly mobile edition (5%) — issue #2
